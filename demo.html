@@ -1,0 +1,2819 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0A0F1E">
+<title>Menuverso — Taste the City. Pay Half. | Barcelona's 2-for-1 Dining Pass</title>
+<meta name="description" content="Your all-access dining pass to 1,178+ Barcelona restaurants. Exclusive 2-for-1 deals on main courses, every day — just €4.99/month.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Leaflet — real interactive map, no API key required. Tiles from OpenStreetMap. -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        // Live Menuverso palette — coral red on near-black navy.
+        ink:   { 950:'#070B17', 900:'#0A0F1E', 800:'#111827', 700:'#1F2937' },
+        slate2:{ 50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8F0', 300:'#CBD5E1', 400:'#94A3B8', 500:'#64748B' },
+        accent:{ amber:'#FBBF24', pink:'#FB7185', emer:'#10B981' },
+        // Primary brand — coral red (rose). Used to be violet; corrected to match live.
+        mv:    { 400:'#FB7185', 500:'#F43F5E', 600:'#E11D48', 700:'#BE123C' }
+      }
+    }
+  }
+};
+</script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #070B17; color: #fff; }
+  h1,h2,h3 { letter-spacing: -0.015em; }
+  .grain { background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px); background-size: 4px 4px; }
+  .toast { animation: rise .2s ease-out; }
+  @keyframes rise { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .pop { animation: pop .4s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes pop { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .digit { font-variant-numeric: tabular-nums; }
+  .frame { box-shadow: 0 30px 80px rgba(0,0,0,.4); }
+  input::placeholder { color: #475569; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* ========================================================================
+   PERSISTENT STORE
+   Everything lives in localStorage so refresh / reopen survives. Passwords
+   are hashed (SHA-256) — demo-grade only; real product uses Argon2id server-side.
+   ======================================================================== */
+const STORE_KEY = 'menuverso_demo_v4';
+const SESSION_KEY = 'menuverso_session_v4';
+
+const DEFAULT_DEAL_TERMS = 'Must order 2 main courses. Show your Menuverso code to your server. Drinks not included. Cannot be combined with other offers.';
+const DEFAULT_SLOTS = () => [
+  { id:'s_lunch', label:'Weekday Lunch', days:'Mon-Thu', timeStart:'13:00', timeEnd:'15:30', active:true },
+  { id:'s_dinner', label:'Early Dinner', days:'Mon-Wed', timeStart:'19:30', timeEnd:'21:30', active:true },
+  { id:'s_brunch', label:'Weekend Brunch', days:'Sat-Sun', timeStart:'11:00', timeEnd:'13:00', active:false }
+];
+
+const initialStore = {
+  users: [
+    { id:'u_demo_member', email:'maria@menuverso.app', passwordHash:'pwhash:member123', firstName:'Maria', lastName:'Lopez', role:'MEMBER', createdAt: Date.now() - 30*86400000, verifiedAt: Date.now() - 30*86400000 },
+    { id:'u_demo_partner', email:'owner@cerveceria.test', passwordHash:'pwhash:partner123', firstName:'Joan', lastName:null, role:'PARTNER_OWNER', partnerVenueId:'pv_cerveceria', createdAt: Date.now() - 60*86400000, verifiedAt: Date.now() - 60*86400000 },
+    { id:'u_demo_admin', email:'admin@menuverso.app', passwordHash:'pwhash:admin123', firstName:'Admin', lastName:null, role:'ADMIN', createdAt: Date.now() - 90*86400000, verifiedAt: Date.now() - 90*86400000 }
+  ],
+  subscriptions: {
+    'u_demo_member': { status:'ACTIVE', startedAt: Date.now() - 5*86400000, renewsAt: Date.now() + 25*86400000, city:'Barcelona', cancelAtPeriodEnd: false }
+  },
+  bookings: [],
+  redemptions: [],
+  saved: { 'u_demo_member': ['cerveceria-catalana','bar-canete'] },
+  // Real partner-owned venues. Editable by their owners; surfaced in member discovery when status='LIVE'.
+  partnerVenues: [
+    {
+      id: 'pv_cerveceria',
+      ownerId: 'u_demo_partner',
+      name: 'Cervecería Catalana',
+      slug: 'cerveceria-catalana',
+      barrio: 'Eixample',
+      cuisine: 'Spanish · Tapas',
+      priceTier: 2,
+      address: 'C/ de Mallorca, 236',
+      postcode: '08008',
+      phone: '+34 932 16 03 68',
+      website: 'cerveceriacatalana.com',
+      instagram: '@cerveceriacatalana',
+      lat: 41.3949, lng: 2.1593,
+      description: 'Bustling Eixample classic since 1991. Massive tapas selection, paella, grilled meats, friendly service. A Barcelona institution.',
+      photos: [], // partner-uploaded base64; falls back to picsum
+      hours: 'Mon-Sun 13:00-16:00 · 20:00-00:30',
+      dealTerms: DEFAULT_DEAL_TERMS,
+      dealSlots: DEFAULT_SLOTS(),
+      rating: 4.5,
+      reviews: 18230,
+      status: 'LIVE',
+      submittedAt: Date.now() - 60*86400000,
+      approvedAt: Date.now() - 59*86400000
+    }
+  ]
+};
+
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(initialStore));
+      return JSON.parse(JSON.stringify(initialStore));
+    }
+    return JSON.parse(raw);
+  } catch { return JSON.parse(JSON.stringify(initialStore)); }
+}
+function saveStore() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { console.warn('localStorage full', e); }
+}
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s.userId || s.expiresAt < Date.now()) return null;
+    return s;
+  } catch { return null; }
+}
+function setSession(userId) {
+  const s = { userId, expiresAt: Date.now() + 30*86400000 };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+  state.session = s;
+}
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+  state.session = null;
+}
+
+/* safeHash — tries Web Crypto first (Chrome/Firefox file://, all HTTPS).
+   Falls back to a small deterministic non-crypto hash so Safari `file://`,
+   sandboxed iframes, and other "insecure context" browsers don't fail
+   registration. Demo-grade only — production uses Argon2id server-side. */
+const cryptoAvailable = typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.digest === 'function';
+function fallbackHash(s) {
+  // FNV-1a 64-bit-ish in pure JS, deterministic, sufficient for distinguishing passwords in a demo.
+  let h1 = 0x811c9dc5, h2 = 0x1505;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    h1 ^= c; h1 = (h1 * 0x01000193) >>> 0;
+    h2 = (((h2 << 5) + h2) ^ c) >>> 0;
+  }
+  return 'fb_' + h1.toString(16).padStart(8,'0') + h2.toString(16).padStart(8,'0');
+}
+async function safeHash(text) {
+  if (!cryptoAvailable) return fallbackHash(text);
+  try {
+    const buf = new TextEncoder().encode(text);
+    const hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return fallbackHash(text);
+  }
+}
+/* Handles seeded 'pwhash:plain' format AND both hash flavors. */
+async function checkPassword(stored, plain) {
+  if (stored.startsWith('pwhash:')) return stored.slice(7) === plain;
+  return stored === await safeHash(plain);
+}
+async function hashPassword(plain) { return await safeHash(plain); }
+
+const store = loadStore();
+// Defensive: ensure new fields exist on stores loaded from earlier versions.
+if (!store.partnerVenues) store.partnerVenues = JSON.parse(JSON.stringify(initialStore.partnerVenues));
+saveStore();
+
+/* ========================================================================
+   DATA (Barcelona venues)
+   ======================================================================== */
+// Cervecería is owned by the seeded demo partner (see store.partnerVenues).
+// The rest below are static "platform" venues. Each row: [name, barrio, cuisine, priceTier, rating, reviews, lat, lng].
+const VENUE_SEEDS = [
+  ['Bar Cañete','El Raval','Catalan · Tapas',3,4.6,5460, 41.3789, 2.1729],
+  ['Disfrutar','Eixample','Modern · Tasting',4,4.8,3200, 41.3870, 2.1517],
+  ['Bodega Biarritz','El Born','Tapas',2,4.7,1842, 41.3837, 2.1827],
+  ['Quimet & Quimet','Poble Sec','Tapas · Wine',3,4.5,6710, 41.3737, 2.1670],
+  ['Can Vallès','Eixample','Catalan',2,4.5,1320, 41.3833, 2.1547],
+  ['Bar del Pla','El Born','Tapas',2,4.4,1490, 41.3850, 2.1810],
+  ['Bar Brutal','El Born','Wine bar · Catalan',3,4.5,1110, 41.3850, 2.1800],
+  ['7 Portes','El Born','Catalan · Paella',3,4.4,8920, 41.3810, 2.1830],
+  ['Casa Lolea','El Born','Spanish · Tapas',2,4.5,1860, 41.3870, 2.1780],
+  ['Suculent','El Raval','Modern Catalan',3,4.6,1080, 41.3789, 2.1697],
+  ['Federal Café','Sant Antoni','Brunch · Café',2,4.5,3240, 41.3760, 2.1620],
+  ['Hawker 45','Eixample','Asian · Street',2,4.4,1380, 41.3870, 2.1610],
+  ['Brunch & Cake','Sant Gervasi','Brunch',2,4.3,4490, 41.3950, 2.1450],
+  ['Honest Greens','Eixample','Healthy · Bowls',2,4.4,2810, 41.3925, 2.1497],
+  ['Bar Mut','Eixample','Tapas · Wine',3,4.6,940, 41.3960, 2.1640],
+  ['El Xampanyet','El Born','Tapas · Cava',2,4.5,5210, 41.3848, 2.1817],
+  ['La Pepita','Gràcia','Tapas · Modern',2,4.6,3160, 41.4010, 2.1610],
+  ['Con Gracia','Gràcia','Modern · Tasting',4,4.8,820, 41.4045, 2.1610],
+  ['Lascar 74','Poble Sec','Peruvian · Asian',2,4.5,1170, 41.3735, 2.1640],
+  ['La Cova Fumada','Barceloneta','Tapas · Bombas',2,4.4,3180, 41.3796, 2.1898],
+  ['Can Solé','Barceloneta','Catalan · Paella',3,4.5,1620, 41.3790, 2.1900],
+  ['Mont Bar','Eixample','Tapas · Modern',3,4.7,1010, 41.3870, 2.1620],
+  ['Niño Viejo','Sant Antoni','Mexican',2,4.4,1170, 41.3760, 2.1620]
+];
+const VENUES = VENUE_SEEDS.map(([name,barrio,cuisine,priceTier,rating,reviews,lat,lng], i) => {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  return { id:'v'+(i+1), slug, name, barrio, cuisine, priceTier, rating, reviews, lat, lng,
+    img:`https://picsum.photos/seed/${slug}/800/520`,
+    times:['Lunch · 13:00-15:30','Dinner · 19:30-22:00','Dinner · 20:00-22:30'],
+    _kind: 'platform'
+  };
+});
+
+/* ========================================================================
+   PARTNER VENUE HELPERS
+   ======================================================================== */
+// Convert a partner-owned venue (with photos[], dealSlots[], etc.) into the
+// same shape member-facing lists expect (img, times, etc.).
+function toMemberShape(pv) {
+  const times = (pv.dealSlots || [])
+    .filter(s => s.active)
+    .map(s => `${s.label} · ${s.timeStart}-${s.timeEnd}`);
+  const fallbackImg = `https://picsum.photos/seed/${pv.slug}/800/520`;
+  return {
+    id: pv.id,
+    slug: pv.slug,
+    name: pv.name,
+    barrio: pv.barrio,
+    cuisine: pv.cuisine,
+    priceTier: pv.priceTier,
+    rating: pv.rating ?? 4.5,
+    reviews: pv.reviews ?? 0,
+    lat: pv.lat ?? 41.3851,    // default Barcelona center if partner hasn't set
+    lng: pv.lng ?? 2.1734,
+    img: (pv.photos && pv.photos[0]) || fallbackImg,
+    times: times.length ? times : ['Lunch · 13:00-15:30','Dinner · 19:30-22:00'],
+    _kind: 'partner',
+    _pv: pv
+  };
+}
+// Merged venue list — platform seeds + every LIVE partner venue. Member-facing.
+function getAllVenues() {
+  const partnerLive = (store.partnerVenues || []).filter(pv => pv.status === 'LIVE').map(toMemberShape);
+  // Partner venues first so newly-onboarded ones surface to the top of Discover.
+  return [...partnerLive, ...VENUES];
+}
+function findVenueBySlug(slug) {
+  return getAllVenues().find(v => v.slug === slug) || null;
+}
+// What does the currently-signed-in partner own?
+function currentPartnerVenue() {
+  const u = currentUser();
+  if (!u || u.role !== 'PARTNER_OWNER') return null;
+  return store.partnerVenues.find(pv => pv.ownerId === u.id) || null;
+}
+// Client-side image compression so localStorage doesn't blow its 5MB quota.
+function compressImage(file, maxDim = 1000, quality = 0.78) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(cv.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function slugify(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0, 60);
+}
+// Day-of-week vocabulary used by Deals slot pickers.
+const DAYS = [['mon','Mon'],['tue','Tue'],['wed','Wed'],['thu','Thu'],['fri','Fri'],['sat','Sat'],['sun','Sun']];
+const DAY_ORDER = DAYS.map(d => d[0]);
+function daysToLabel(arr) {
+  if (!arr || !arr.length) return '';
+  const indices = arr.map(d => DAY_ORDER.indexOf(d)).filter(i => i >= 0).sort((a,b)=>a-b);
+  if (!indices.length) return '';
+  const runs = [];
+  let start = indices[0], prev = indices[0];
+  for (let i = 1; i < indices.length; i++) {
+    if (indices[i] === prev + 1) prev = indices[i];
+    else { runs.push([start, prev]); start = indices[i]; prev = indices[i]; }
+  }
+  runs.push([start, prev]);
+  return runs.map(([a,b]) => a === b ? DAYS[a][1] : DAYS[a][1] + '-' + DAYS[b][1]).join(', ');
+}
+// Is this venue actively serving the 2-for-1 right now?
+// Partner-owned: check active dealSlots against current day/time.
+// Platform-seed: simple lunch-or-dinner heuristic for the demo.
+function isVenueAvailableNow(v, now = new Date()) {
+  const todayKey = DAY_ORDER[(now.getDay() + 6) % 7]; // JS getDay: Sun=0, but DAY_ORDER starts Mon
+  const hhmm = now.toTimeString().slice(0, 5);
+  if (v._pv) {
+    return (v._pv.dealSlots || []).some(s => {
+      if (!s.active) return false;
+      const days = Array.isArray(s.daysArr) ? s.daysArr : parseDaysString(s.days || '');
+      if (!days.includes(todayKey)) return false;
+      return hhmm >= (s.timeStart || '00:00') && hhmm <= (s.timeEnd || '23:59');
+    });
+  }
+  // Heuristic for static seeded venues
+  const h = now.getHours();
+  const day = now.getDay(); // 0 = Sunday
+  const isWeekend = day === 0 || day === 6;
+  if (isWeekend) return (h >= 13 && h < 16) || (h >= 20 && h < 24);
+  return (h >= 13 && h < 16) || (h >= 19 && h < 23);
+}
+function parseDaysString(s) {
+  if (!s) return [];
+  const result = new Set();
+  s.split(/[,/]/).forEach(part => {
+    const m = part.trim().toLowerCase().match(/^(mon|tue|wed|thu|fri|sat|sun)(?:\s*-\s*(mon|tue|wed|thu|fri|sat|sun))?$/);
+    if (!m) return;
+    const start = DAY_ORDER.indexOf(m[1]);
+    const end = m[2] ? DAY_ORDER.indexOf(m[2]) : start;
+    for (let i = start; i <= end; i++) result.add(DAY_ORDER[i]);
+  });
+  return Array.from(result);
+}
+
+/* ========================================================================
+   APP STATE + HELPERS
+   ======================================================================== */
+const state = {
+  route: 'landing',
+  params: {},
+  session: loadSession()
+};
+
+const $ = s => document.querySelector(s);
+function el(tag, attrs={}, ...children) {
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k === 'html') e.innerHTML = attrs[k];
+    else if (k === 'ref' && typeof attrs[k] === 'function') attrs[k](e);
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+    else if (attrs[k] !== false && attrs[k] != null) e.setAttribute(k, attrs[k]);
+  }
+  for (const c of children.flat()) {
+    if (c == null || c === false) continue;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+function go(route, params={}) { state.route = route; state.params = params; render(); window.scrollTo(0,0); }
+function toast(msg, kind='') {
+  const t = el('div',{class:`toast fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full text-white px-5 py-2.5 text-sm shadow-lg border ${kind==='err'?'bg-red-600 border-red-400':'bg-ink-800 border-white/10'}`}, msg);
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+function currentUser() {
+  if (!state.session) return null;
+  return store.users.find(u => u.id === state.session.userId) || null;
+}
+function currentSub() {
+  const u = currentUser(); if (!u) return null;
+  return store.subscriptions[u.id] || null;
+}
+function hasSub() {
+  const s = currentSub(); return !!(s && s.status === 'ACTIVE' && s.renewsAt > Date.now());
+}
+const code6 = () => String(Math.floor(100000 + Math.random()*900000));
+const Star = ({ rating, reviews, size='text-xs' }) =>
+  el('span',{class:`${size} text-slate2-400 inline-flex items-center gap-1`},
+    el('span',{class:'text-accent-amber'},'★'),
+    el('span',{class:'text-white'}, rating.toFixed(1)),
+    el('span',{}, '('+(reviews>999?(reviews/1000).toFixed(1)+'k':reviews)+')')
+  );
+const isEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+/* ========================================================================
+   AUTH HANDLERS — real persistent users
+   ======================================================================== */
+async function registerUser({ firstName, email, password, role='MEMBER' }) {
+  email = email.trim().toLowerCase();
+  if (!isEmail(email)) throw new Error('Please enter a valid email.');
+  if (password.length < 8) throw new Error('Password must be at least 8 characters.');
+  if (store.users.find(u => u.email === email)) throw new Error('An account with that email already exists.');
+  const u = {
+    id: 'u_' + Math.random().toString(36).slice(2,12),
+    email,
+    passwordHash: await hashPassword(password),
+    firstName: firstName?.trim() || null,
+    lastName: null,
+    role,
+    createdAt: Date.now(),
+    verifiedAt: Date.now() // demo skips email-verify
+  };
+  store.users.push(u);
+  if (!store.saved[u.id]) store.saved[u.id] = [];
+  saveStore();
+  setSession(u.id);
+  return u;
+}
+async function loginUser({ email, password }) {
+  email = email.trim().toLowerCase();
+  const u = store.users.find(x => x.email === email);
+  if (!u) throw new Error('Email or password is wrong.');
+  const ok = await checkPassword(u.passwordHash, password);
+  if (!ok) throw new Error('Email or password is wrong.');
+  setSession(u.id);
+  return u;
+}
+function logout() {
+  clearSession();
+  go('landing');
+  toast('Signed out');
+}
+
+/* ========================================================================
+   LAYOUT — MARKETING HEADER + PHONE FRAME
+   ======================================================================== */
+function MarketingHeader() {
+  const u = currentUser();
+  return el('header',{class:'sticky top-0 z-30 bg-ink-950/80 backdrop-blur border-b border-white/5'},
+    el('div',{class:'mx-auto max-w-6xl flex items-center justify-between px-4 py-3'},
+      el('a',{class:'flex items-center gap-2 cursor-pointer', onclick:()=>go('landing')},
+        el('span',{class:'text-xl text-mv-500'},'🍽️'),
+        el('span',{class:'font-bold tracking-tight text-mv-500'},'Menuverso')
+      ),
+      el('nav',{class:'flex items-center gap-5 text-sm text-slate2-300'},
+        el('a',{class:'hidden md:inline hover:text-white cursor-pointer', onclick:()=>{
+          if (state.route !== 'landing') {
+            go('landing');
+            setTimeout(()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'}), 120);
+          } else {
+            document.getElementById('how')?.scrollIntoView({behavior:'smooth'});
+          }
+        }}, 'How it works'),
+        el('a',{class:'hidden md:inline hover:text-white cursor-pointer', onclick:()=>{
+          if (state.route !== 'landing') {
+            go('landing');
+            setTimeout(()=>document.getElementById('features')?.scrollIntoView({behavior:'smooth'}), 120);
+          } else {
+            document.getElementById('features')?.scrollIntoView({behavior:'smooth'});
+          }
+        }}, 'Features'),
+        el('a',{class:'hidden md:inline hover:text-white cursor-pointer', onclick:()=>{
+          if (state.route !== 'landing') {
+            go('landing');
+            setTimeout(()=>document.getElementById('reviews')?.scrollIntoView({behavior:'smooth'}), 120);
+          } else {
+            document.getElementById('reviews')?.scrollIntoView({behavior:'smooth'});
+          }
+        }}, 'Reviews'),
+        el('a',{class:'hidden md:inline hover:text-white cursor-pointer', onclick:()=>go('partner-landing')},'For Restaurants'),
+        u
+          ? el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20', onclick:()=>{
+              if (u.role==='ADMIN') go('admin');
+              else if (u.role==='PARTNER_OWNER') go('partner-portal',{tab:'overview'});
+              else go('app');
+            }}, 'Open App →')
+          : el('div',{class:'flex items-center gap-2'},
+              el('button',{class:'text-sm text-slate2-300 hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>go('signin')},'Sign in'),
+              el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20', onclick:()=>go('signup')},'Join')
+            )
+      )
+    )
+  );
+}
+/* AppShell — responsive browser layout.
+   - Mobile (<md): top header with logo + profile, bottom nav fixed to viewport.
+   - Desktop (≥md): top header with logo + horizontal nav + profile, no bottom nav.
+   - Content centered, max-width depends on the screen (narrow for code/auth, wide for grids). */
+function AppShell(inner, opts={}) {
+  const u = currentUser();
+  const showNav = u?.role === 'MEMBER' && opts.appNav !== false;
+  const widthClass = opts.narrow ? 'max-w-md' : 'max-w-5xl';
+  return el('div',{class:'min-h-screen bg-ink-950 text-white grain'},
+    AppTopBar({ showNav }),
+    el('main',{class:`mx-auto px-4 md:px-6 ${widthClass} ${showNav ? 'pb-24 md:pb-12' : 'pb-12'} pt-4 md:pt-8`}, inner),
+    showNav ? BottomNav() : null,
+    el('div',{class:'text-center pb-6 text-xs text-slate2-500'},
+      el('button',{class:'underline hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Back to landing site')
+    )
+  );
+}
+function AppTopBar({ showNav }) {
+  const u = currentUser();
+  const r = state.route;
+  const navItem = (key, icon, label, route) =>
+    el('button',{
+      class: 'hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition cursor-pointer bg-transparent border-0 ' +
+        (key === r ? 'bg-white/10 text-white' : 'text-slate2-300 hover:text-white hover:bg-white/5'),
+      onclick: () => go(route)
+    }, el('span',{}, icon), el('span',{}, label));
+  return el('header',{class:'sticky top-0 z-30 bg-ink-950/90 backdrop-blur border-b border-white/5'},
+    el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-4'},
+      el('a',{class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go(u ? (u.role==='ADMIN'?'admin':u.role==='PARTNER_OWNER'?'partner-portal':'app') : 'landing')},
+        el('span',{class:'text-xl text-mv-500'},'🍽️'),
+        el('span',{class:'font-bold tracking-tight text-mv-500 text-lg'},'Menuverso')
+      ),
+      showNav ? el('nav',{class:'flex items-center gap-1'},
+        navItem('app','🏠','Discover','app'),
+        navItem('map','🗺️','Map','map'),
+        navItem('saved', (u && (store.saved[u.id] || []).length > 0) ? '❤️' : '🤍', 'Saved' + ((u && (store.saved[u.id] || []).length > 0) ? ` (${(store.saved[u.id] || []).length})` : ''), 'saved')
+      ) : el('span',{}),
+      u ? el('button',{class:'flex items-center gap-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 px-3 py-1.5 text-sm font-bold cursor-pointer', onclick:()=>{
+        if (u.role==='MEMBER') go('profile');
+        else if (u.role==='ADMIN') go('admin');
+        else go('partner-portal');
+      }},
+        el('span',{class:'h-6 w-6 rounded-full bg-mv-500 grid place-items-center text-xs font-extrabold'}, (u.firstName?.[0] ?? u.email[0]).toUpperCase()),
+        el('span',{class:'hidden md:inline'}, u.firstName ?? u.email.split('@')[0])
+      ) : el('div',{class:'flex items-center gap-3 md:gap-4'},
+        el('button',{class:'hidden md:inline text-sm text-slate2-300 hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>{
+          if (state.route !== 'landing') {
+            go('landing');
+            setTimeout(()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'}), 120);
+          } else {
+            document.getElementById('how')?.scrollIntoView({behavior:'smooth'});
+          }
+        }}, 'How it works'),
+        el('button',{class:'hidden md:inline text-sm text-slate2-300 hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>go('partner-landing')}, 'For Restaurants'),
+        el('button',{class:'text-sm text-slate2-300 hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>go('signin')},'Sign in'),
+        el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20', onclick:()=>go('signup')},'Join')
+      )
+    )
+  );
+}
+function BottomNav() {
+  const r = state.route;
+  const u = currentUser();
+  const savedCount = u ? (store.saved[u.id] || []).length : 0;
+  const item = (key, icon, label, route, badge) =>
+    el('button',{
+      class: 'flex-1 flex flex-col items-center gap-0.5 py-2 cursor-pointer bg-transparent border-0 relative ' + (key===r ? 'text-white' : 'text-slate2-400 hover:text-slate2-200'),
+      onclick: ()=>go(route)
+    },
+      el('span',{class:'text-xl relative'}, icon,
+        badge ? el('span',{class:'absolute -top-1 -right-2 bg-mv-500 text-white text-[9px] font-extrabold rounded-full px-1.5 py-0.5 leading-tight'}, String(badge)) : null
+      ),
+      el('span',{class:'text-[10px] font-bold uppercase tracking-wider'}, label)
+    );
+  return el('div',{class:'md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-900/95 border-t border-white/10 backdrop-blur flex'},
+    item('app','🏠','Discover','app'),
+    item('map','🗺️','Map','map'),
+    item('saved','❤️','Saved','saved', savedCount || null),
+    item('profile','👤','Profile','profile')
+  );
+}
+
+/* ========================================================================
+   LANDING (marketing)
+   ======================================================================== */
+function Landing() {
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'},
+    // "Concept" disclaimer banner — solid coral red bar to match live menuverso-app.vercel.app
+    el('div',{class:'bg-mv-500 text-white text-center text-xs sm:text-sm py-2.5 px-4 font-medium'},
+      el('span',{class:'inline-flex items-center gap-3 flex-wrap justify-center'},
+        el('span',{class:'inline-block rounded-full bg-white/25 text-white px-2.5 py-0.5 font-extrabold uppercase tracking-widest text-[10px]'},'Concept'),
+        el('span',{}, 'This is a product concept — not yet available for download.')
+      )
+    ),
+    MarketingHeader(),
+    el('section',{class:'relative overflow-hidden grain'},
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 75% 25%, #F43F5E 0, transparent 45%), radial-gradient(circle at 20% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'relative mx-auto max-w-6xl px-4 py-24 md:py-28 text-center'},
+        el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
+          el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Now in Barcelona'
+        ),
+        el('h1',{class:'mx-auto mt-6 max-w-4xl text-5xl md:text-7xl font-extrabold leading-[1.02]'},
+          'Taste the City.', el('br'),
+          el('span',{class:'text-mv-500'},'Pay Half.')
+        ),
+        el('p',{class:'mx-auto mt-6 max-w-2xl text-lg text-slate2-300'},
+          'Your all-access dining pass to ', el('strong',{class:'text-white'},'1,178+ restaurants'),
+          ' across Barcelona. Show your code, get 2-for-1 on main courses — every day, no limits.'
+        ),
+        el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
+          currentUser()
+            ? el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('app')},'Open the app →')
+            : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')},'Get Your Pass — €4.99/mo'),
+          el('button',{class:'rounded-2xl border border-white/15 bg-white/[0.02] px-7 py-3.5 font-extrabold hover:bg-white/[0.06] cursor-pointer transition', onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})},'See How It Works')
+        ),
+        el('div',{class:'mt-14 grid grid-cols-3 gap-6 max-w-2xl mx-auto'},
+          ...[['1,178+','Restaurants'],['18','Neighborhoods'],['27','Cuisines']].map(([n,l])=>
+            el('div',{class:'text-center'},
+              el('div',{class:'text-3xl md:text-5xl font-extrabold text-mv-500'}, n),
+              el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 mt-1 font-bold'}, l)
+            )
+          )
+        )
+      )
+    ),
+    el('section',{id:'how', class:'mx-auto max-w-6xl px-4 py-20'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, 'How it works'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold'}, 'Three Steps to ',
+          el('span',{class:'text-mv-500'},'Your First Deal')
+        )
+      ),
+      el('div',{class:'mt-12 grid md:grid-cols-3 gap-5'},
+        ...[
+          ['🔍','Discover Restaurants','Browse the map or feed. Filter by cuisine, barrio, or availability.'],
+          ['📱','Book Your Deal','Pick a time slot. Get a 6-digit code in 3 seconds.'],
+          ['🎉','Enjoy & Save 50%','Show the code to your server. Pay for one main, the second one is free.']
+        ].map(([icon,t,d],i)=>
+          el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6'},
+            el('div',{class:'flex items-center gap-3'},
+              el('div',{class:'h-10 w-10 rounded-full bg-mv-500/20 grid place-items-center text-xl'}, icon),
+              el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, '0'+(i+1))
+            ),
+            el('h3',{class:'mt-4 text-xl font-bold'}, t),
+            el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d)
+          )
+        )
+      )
+    ),
+    // FEATURES — matches live "Everything You Need to Eat Better for Less"
+    el('section',{id:'features', class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, 'Features'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'}, 'Everything You Need ', el('br'),
+          el('span',{class:'text-mv-500'},'to Eat Better for Less')
+        ),
+        el('p',{class:'mx-auto mt-4 max-w-2xl text-slate2-400'}, 'A premium dining experience with powerful tools to discover, save, and enjoy Barcelona\'s culinary scene.')
+      ),
+      el('div',{class:'mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
+        ...[
+          ['🗺️','Interactive Map','See every deal near you. Smart clustering shows the density of restaurants in each area.'],
+          ['🎁','2-for-1 Deals','Order two main courses, pay for one. Available during lunch and dinner at partnered locations.'],
+          ['⭐','Verified Ratings','Every restaurant includes real Google Maps ratings and review counts. No fake reviews, ever.'],
+          ['❤️','Save Favorites','Build your personal list of go-to spots. Access them instantly whenever you\'re planning a night out.'],
+          ['🔔','Deal Availability','Real-time indicators show which deals are active right now. Never miss a time slot again.'],
+          ['🌍','27 Cuisines','From Mediterranean and Catalan to Japanese, Mexican, and Ethiopian — Barcelona\'s full culinary spectrum.']
+        ].map(([icon,t,d])=>
+          el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6 hover:bg-white/[0.05] transition'},
+            el('div',{class:'h-11 w-11 rounded-2xl bg-mv-500/15 grid place-items-center text-2xl'}, icon),
+            el('h3',{class:'mt-4 text-lg font-bold'}, t),
+            el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d)
+          )
+        )
+      )
+    ),
+    // REVIEWS — matches live "Loved by Foodies Across Barcelona"
+    el('section',{id:'reviews', class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, 'Reviews'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'}, 'Loved by Foodies ', el('br'),
+          el('span',{class:'text-mv-500'},'Across Barcelona')
+        ),
+        el('p',{class:'mx-auto mt-4 max-w-2xl text-slate2-400'}, 'Don\'t just take our word for it. Here\'s what our community says.')
+      ),
+      el('div',{class:'mt-12 grid md:grid-cols-3 gap-4'},
+        ...[
+          ['"I\'ve saved over €200 in the first month alone. The restaurant selection in Eixample is incredible."', 'Maria L.', 'Eixample'],
+          ['"As a student, this is a game-changer. €4.99 for unlimited 2-for-1 deals? Absolute no-brainer."', 'Carlos T.', 'Gràcia'],
+          ['"The map feature is genius. I discovered 3 amazing restaurants in my own neighborhood I never knew existed."', 'Sophie R.', 'Born']
+        ].map(([quote, name, hood])=>
+          el('figure',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6'},
+            el('div',{class:'text-accent-amber tracking-widest'},'★★★★★'),
+            el('blockquote',{class:'mt-3 text-slate2-200 leading-relaxed'}, quote),
+            el('figcaption',{class:'mt-5 text-sm text-slate2-400'},
+              el('span',{class:'font-bold text-white'}, name), ' — ', hood
+            )
+          )
+        )
+      )
+    ),
+    el('section',{class:'mx-auto max-w-3xl px-4 pb-24 pt-10 text-center border-t border-white/5'},
+      el('h2',{class:'text-3xl md:text-5xl font-extrabold pt-12'}, 'Your Next Meal is ',
+        el('span',{class:'text-mv-500'},'Half Off')),
+      el('div',{class:'mt-8 rounded-3xl bg-gradient-to-br from-mv-500/10 via-white/[0.03] to-mv-500/5 border border-mv-500/30 p-8'},
+        el('div',{class:'flex items-baseline justify-center gap-2'},
+          el('span',{class:'text-6xl font-extrabold text-mv-500'},'€4.99'),
+          el('span',{class:'text-slate2-400 font-bold'},'/month')
+        ),
+        el('ul',{class:'mt-6 grid grid-cols-2 gap-2 text-sm text-left max-w-md mx-auto'},
+          ...['1,178+ restaurants','Unlimited deals','Cancel anytime','Instant activation'].map(s =>
+            el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-mv-500 font-extrabold'},'✓'), s))
+        ),
+        el('button',{class:'mt-7 rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-10 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>currentUser()?go('checkout'):go('signup')},'Get Your Pass →')
+      )
+    ),
+    el('footer',{class:'border-t border-white/5 mt-4'},
+      el('div',{class:'mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-slate2-400'},
+        el('span',{class:'flex items-center gap-2'},
+          el('span',{class:'text-lg'},'🍽️'),
+          el('span',{class:'font-bold text-white'},'Menuverso')
+        ),
+        el('nav',{class:'flex items-center gap-5'},
+          el('a',{class:'hover:text-white cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
+          el('a',{class:'hover:text-white cursor-pointer', onclick:()=>go('terms')},'Terms'),
+          el('a',{class:'hover:text-white cursor-pointer', href:'mailto:hola@menuverso.app'},'Contact'),
+          el('a',{class:'hover:text-white cursor-pointer', onclick:()=>go('partner-landing')},'For Restaurants')
+        )
+      ),
+      el('div',{class:'border-t border-white/5'},
+        el('div',{class:'mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate2-500'},
+          '© 2026 Menuverso · Barcelona, Spain · All rights reserved'
+        )
+      )
+    )
+  );
+}
+
+/* ========================================================================
+   REAL SIGN UP
+   ======================================================================== */
+function Signup() {
+  const inner = el('div',{class:'p-6'},
+    el('div',{class:'flex items-center justify-between'},
+      el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Back'),
+      el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('signin')},'Sign in')
+    ),
+    el('div',{class:'text-center mt-4'},
+      el('div',{class:'text-5xl'},'🍽️'),
+      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Create your account'),
+      el('p',{class:'text-slate2-400 text-sm mt-1'},'Then unlock 2-for-1 at 1,178+ restaurants')
+    ),
+    el('form',{class:'mt-6 space-y-3', onSubmit: async (e)=>{
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type=submit]');
+      const fd = new FormData(e.target);
+      const pw = String(fd.get('password') || '');
+      const confirm = String(fd.get('confirmPassword') || '');
+      if (pw !== confirm) { toast('Passwords don\'t match.', 'err'); return; }
+      if (pw.length < 8) { toast('Password must be at least 8 characters.', 'err'); return; }
+      btn.disabled = true; btn.textContent = 'Creating account…';
+      try {
+        await registerUser({
+          firstName: fd.get('firstName'),
+          email: fd.get('email'),
+          password: pw
+        });
+        toast('Account created');
+        go('checkout');
+      } catch (err) {
+        toast(err.message, 'err');
+        btn.disabled = false; btn.textContent = 'Create account';
+      }
+    }},
+      InputField('First name','text','firstName','Maria', false),
+      InputField('Email','email','email','you@example.com', true, 'email'),
+      PasswordField('Password','password','At least 8 characters', { helpText:'Tip: tap Show to verify you typed it correctly.' }),
+      PasswordField('Confirm password','confirmPassword','Re-type to confirm'),
+      el('button',{type:'submit', class:'mt-3 w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer disabled:opacity-50'},'Create account')
+    ),
+    el('div',{class:'mt-4 text-[10px] text-center text-slate2-500'},'By signing up you agree to the Terms & Privacy.')
+  );
+  return AppShell(inner, { narrow: true });
+}
+function InputField(label, type, name, placeholder, required=true, autocomplete='', extra='') {
+  const wrap = el('div',{});
+  wrap.appendChild(el('label',{class:'block text-xs uppercase tracking-widest text-slate2-400 font-bold mb-1'}, label));
+  const inp = el('input',{
+    type, name, placeholder,
+    class:'w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate2-500 outline-none focus:border-mv-500 focus:bg-white/[0.07]'
+  });
+  if (required) inp.required = true;
+  if (autocomplete) inp.autocomplete = autocomplete;
+  if (extra) {
+    const m = extra.matchAll(/(\w+)="([^"]*)"/g);
+    for (const x of m) inp.setAttribute(x[1], x[2]);
+  }
+  wrap.appendChild(inp);
+  return wrap;
+}
+/* PasswordField — password input with a built-in show/hide toggle.
+   Optional minlength enforced via the HTML attribute. */
+function PasswordField(label, name, placeholder, { required=true, autocomplete='new-password', minlength=8, helpText } = {}) {
+  const wrap = el('div',{});
+  wrap.appendChild(el('label',{class:'block text-xs uppercase tracking-widest text-slate2-400 font-bold mb-1'}, label));
+  const container = el('div',{class:'relative'});
+  const inp = el('input',{
+    type:'password', name, placeholder, autocomplete,
+    class:'w-full bg-white/[0.04] border border-white/10 rounded-xl pl-4 pr-14 py-3 text-white placeholder:text-slate2-500 outline-none focus:border-mv-500 focus:bg-white/[0.07]'
+  });
+  if (required) inp.required = true;
+  if (minlength) inp.setAttribute('minlength', String(minlength));
+  let shown = false;
+  const toggle = el('button',{
+    type:'button',
+    class:'absolute inset-y-0 right-2 my-auto h-7 px-2 rounded-md text-xs font-bold text-slate2-400 hover:text-white hover:bg-white/[0.06] cursor-pointer bg-transparent border-0',
+    onclick: () => { shown = !shown; inp.type = shown ? 'text' : 'password'; toggle.textContent = shown ? 'Hide' : 'Show'; }
+  }, 'Show');
+  container.appendChild(inp);
+  container.appendChild(toggle);
+  wrap.appendChild(container);
+  if (helpText) wrap.appendChild(el('div',{class:'mt-1 text-[10px] text-slate2-500'}, helpText));
+  return wrap;
+}
+
+/* ========================================================================
+   REAL SIGN IN
+   ======================================================================== */
+function Signin() {
+  const inner = el('div',{class:'p-6'},
+    el('div',{class:'flex items-center justify-between'},
+      el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Back'),
+      el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('signup')},'Create account')
+    ),
+    el('div',{class:'text-center mt-4'},
+      el('div',{class:'text-5xl'},'🍽️'),
+      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Member sign-in'),
+      el('p',{class:'text-slate2-400 text-sm mt-1'},'Sign in to your Menuverso member account.')
+    ),
+    el('form',{class:'mt-6 space-y-3', onSubmit: async (e)=>{
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type=submit]');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      const fd = new FormData(e.target);
+      try {
+        const u = await loginUser({ email: fd.get('email'), password: fd.get('password') });
+        // Member sign-in path: politely route partners/admins to their proper portal,
+        // but make it clear they came in the wrong door.
+        if (u.role === 'PARTNER_OWNER') {
+          toast('You\'re a partner — sending you to the partner portal.');
+          go('partner-portal',{tab:'overview'}); return;
+        }
+        if (u.role === 'ADMIN') {
+          toast('Admin sign-in — sending you to admin.');
+          go('admin'); return;
+        }
+        toast('Welcome back, ' + (u.firstName ?? 'friend'));
+        go('app');
+      } catch (err) {
+        toast(err.message, 'err');
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
+    }},
+      InputField('Email','email','email','you@example.com', true, 'email'),
+      PasswordField('Password','password','••••••••', { autocomplete:'current-password', minlength:0 }),
+      el('button',{type:'submit', class:'mt-3 w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer disabled:opacity-50'},'Sign in'),
+      el('button',{type:'button', class:'w-full text-xs text-slate2-400 underline mt-1 cursor-pointer bg-transparent border-0', onclick:()=>toast('In production this sends a reset link by email.')},'Forgot password?')
+    ),
+    // Cross-link to the dedicated partner sign-in.
+    el('div',{class:'mt-5 rounded-xl bg-white/[0.04] border border-white/10 p-3 text-sm flex items-center justify-between gap-3'},
+      el('span',{class:'text-slate2-300'},'🏪 Are you a restaurant?'),
+      el('button',{class:'text-mv-500 font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')},'Partner sign-in →')
+    ),
+    el('div',{class:'mt-6 rounded-xl bg-white/[0.03] border border-white/10 p-3 text-[11px] text-slate2-400'},
+      el('div',{class:'font-bold text-white text-xs mb-1'},'Demo accounts'),
+      el('div',{}, 'Member: ', el('span',{class:'font-mono'},'maria@menuverso.app'), ' / ', el('span',{class:'font-mono'},'member123')),
+      el('div',{}, 'Partner: ', el('span',{class:'font-mono'},'owner@cerveceria.test'), ' / ', el('span',{class:'font-mono'},'partner123')),
+      el('div',{}, 'Admin: ', el('span',{class:'font-mono'},'admin@menuverso.app'), ' / ', el('span',{class:'font-mono'},'admin123'))
+    )
+  );
+  return AppShell(inner, { narrow: true });
+}
+
+/* ========================================================================
+   CHECKOUT (paywall) — demo subscribe button activates subscription
+   ======================================================================== */
+function Checkout() {
+  const u = currentUser();
+  if (!u) { go('signup'); return el('div'); }
+  if (u.role !== 'MEMBER') {
+    return AppShell(el('div',{class:'p-6 text-center'},
+      el('div',{class:'mt-8 text-5xl'},'🏪'),
+      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Subscriptions are for members'),
+      el('p',{class:'mt-2 text-slate2-400 text-sm'},'You\'re signed in as ',
+        u.role==='PARTNER_OWNER' ? 'a partner' : 'an admin',
+        '. Sign out and create a member account to subscribe.'),
+      el('button',{class:'mt-6 rounded-full bg-white text-ink-900 px-5 py-2.5 font-bold cursor-pointer', onclick:logout},'Sign out')
+    ), { narrow: true });
+  }
+  if (hasSub()) {
+    return AppShell(el('div',{class:'p-6 text-center'},
+      el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'← Back'),
+      el('div',{class:'mt-8'},
+        el('div',{class:'mx-auto h-16 w-16 rounded-full bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer'},'✓'),
+        el('h1',{class:'mt-4 text-2xl font-extrabold'},'You\'re already subscribed.'),
+        el('p',{class:'mt-2 text-slate2-400 text-sm'},'Renews ', new Date(currentSub().renewsAt).toLocaleDateString('en-GB')),
+        el('button',{class:'mt-8 rounded-full bg-white text-ink-900 px-6 py-3 font-bold cursor-pointer', onclick:()=>go('app')},'Open the app →')
+      )
+    ), { narrow: true });
+  }
+  const inner = el('div',{class:'p-6'},
+    el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'Skip for now →'),
+    el('div',{class:'text-center mt-4'},
+      el('div',{class:'text-5xl'},'🎁'),
+      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock unlimited 2×1 deals'),
+      el('p',{class:'text-slate2-300 text-sm mt-2'},'1,178+ restaurants. Cancel anytime.')
+    ),
+    el('div',{class:'mt-6 rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+      el('div',{class:'flex items-baseline justify-center gap-2'},
+        el('span',{class:'text-5xl font-extrabold'},'€4.99'),
+        el('span',{class:'text-slate2-400'},'/month')
+      ),
+      el('ul',{class:'mt-5 space-y-2 text-sm'},
+        ...['Unlimited 2-for-1 deals','1,178+ restaurants','Cancel anytime','Instant activation']
+        .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer'},'✓'), s))
+      ),
+      el('button',{class:'mt-6 w-full rounded-2xl bg-white text-ink-900 hover:bg-slate2-100 py-3.5 font-extrabold cursor-pointer', onclick:()=>{
+        store.subscriptions[u.id] = { status:'ACTIVE', startedAt: Date.now(), renewsAt: Date.now()+30*86400000, city:'Barcelona', cancelAtPeriodEnd:false };
+        saveStore();
+        toast('Subscription active');
+        go('app');
+      }},'Subscribe — €4.99/mo'),
+      el('p',{class:'mt-3 text-[10px] text-center text-slate2-500'},'Demo mode — no real charge.')
+    )
+  );
+  return AppShell(inner, { narrow: true });
+}
+
+/* ========================================================================
+   MEMBER APP
+   ======================================================================== */
+function AppDiscover() {
+  const u = currentUser();
+  if (!u) { go('signin'); return el('div'); }
+  if (u.role !== 'MEMBER') {
+    if (u.role==='ADMIN') return Admin();
+    if (u.role==='PARTNER_OWNER') return PartnerPortal();
+  }
+  // Local state for live filtering — kept in the closure so typing doesn't trigger render() (which would steal focus).
+  let q = '';
+  let filter = 'all'; // all | now | tapas | catalan | asian | brunch | vegan
+  const FILTERS = [
+    ['all','All'],
+    ['now','Available now'],
+    ['tapas','Tapas'],
+    ['catalan','Catalan'],
+    ['asian','Asian'],
+    ['brunch','Brunch']
+  ];
+
+  function matches(v) {
+    // Skip paused venues
+    if (v._pv && v._pv.status === 'PAUSED') return false;
+    if (q) {
+      const hay = (v.name + ' ' + v.cuisine + ' ' + v.barrio).toLowerCase();
+      if (!hay.includes(q.toLowerCase())) return false;
+    }
+    if (filter === 'all') return true;
+    if (filter === 'now') return isVenueAvailableNow(v);
+    return v.cuisine.toLowerCase().includes(filter);
+  }
+
+  const inner = el('div',{class:'pb-24'});
+  const header = el('div',{class:'p-5 pb-3 border-b border-white/5'},
+    el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Barcelona'),
+    el('h1',{class:'text-2xl font-extrabold'},'Menuverso Deals'),
+    el('div',{class:'mt-3 flex items-center gap-2'},
+      el('div',{class:'flex-1 flex items-center gap-2 bg-white/5 rounded-full px-3 py-2 border border-white/10 focus-within:border-mv-500'},
+        el('span',{class:'text-slate2-400'},'🔍'),
+        el('input',{
+          class:'bg-transparent outline-none text-sm flex-1 text-white placeholder:text-slate2-500',
+          placeholder:'Search restaurants, cuisines, barrios',
+          value:q,
+          onInput: e => { q = e.target.value; paintGrid(); }
+        }),
+        q && el('button',{class:'text-slate2-400 hover:text-white text-sm bg-transparent border-0 cursor-pointer', onclick:e => { q=''; e.currentTarget.previousElementSibling.value=''; paintGrid(); }},'✕')
+      ),
+      el('button',{class:'md:hidden h-9 w-9 rounded-full bg-white/5 border border-white/10 grid place-items-center cursor-pointer', onclick:()=>go('map')},'🗺️')
+    )
+  );
+
+  // Filter chips row
+  const chips = el('div',{class:'px-5 pt-4 flex gap-2 overflow-x-auto'});
+  function paintChips() {
+    chips.innerHTML = '';
+    FILTERS.forEach(([k, label]) => {
+      chips.appendChild(el('button',{
+        class:'shrink-0 rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer transition ' + (filter === k ? 'bg-white text-ink-900' : 'bg-white/5 text-slate2-300 border border-white/10 hover:bg-white/[0.1]'),
+        onclick:()=>{ filter = k; paintChips(); paintGrid(); }
+      }, label));
+    });
+  }
+
+  // Results count + grid
+  const summary = el('div',{class:'text-sm text-slate2-400 flex items-center justify-between mt-4'});
+  const grid = el('div',{class:'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4'});
+  function paintGrid() {
+    const list = getAllVenues().filter(matches);
+    summary.innerHTML = '';
+    summary.append(
+      el('span',{}, '📍 ', el('span',{class:'text-white font-bold'}, list.length + ' deal' + (list.length===1?'':'s')),
+        q || filter !== 'all' ? ' match your search' : ' in Barcelona'
+      ),
+      hasSub() ? el('span',{class:'text-accent-emer text-xs font-bold'}, '✓ ACTIVE') : el('button',{class:'text-mv-500 text-xs font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('checkout')},'SUBSCRIBE')
+    );
+    grid.innerHTML = '';
+    if (list.length === 0) {
+      grid.appendChild(el('div',{class:'col-span-full text-center py-12 text-slate2-400'},
+        el('div',{class:'text-5xl'},'🤔'),
+        el('p',{class:'mt-3 text-sm'},'No matches. Try a different search or filter.'),
+        el('button',{class:'mt-4 text-sm text-mv-500 underline cursor-pointer bg-transparent border-0', onclick:()=>{ q=''; filter='all'; paintChips(); paintGrid(); render(); }},'Clear filters')
+      ));
+    } else {
+      list.forEach(v => grid.appendChild(DealCard(v)));
+    }
+  }
+
+  inner.append(header, chips, el('div',{class:'px-5'}, summary, grid));
+  paintChips(); paintGrid();
+  return AppShell(inner);
+}
+function DealCard(v) {
+  const u = currentUser();
+  const saved = u ? (store.saved[u.id] || []).includes(v.slug) : false;
+  const isLive = isVenueAvailableNow(v);
+  return el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden cursor-pointer hover:bg-white/[0.07] transition', onclick:()=>go('venue',{slug:v.slug})},
+    el('div',{class:'relative'},
+      el('img',{src:v.img, class:'h-36 w-full object-cover'}),
+      el('button',{class:'absolute top-2 right-2 h-8 w-8 rounded-full bg-ink-900/80 grid place-items-center text-sm cursor-pointer',
+        onclick:(e)=>{ e.stopPropagation(); toggleSaved(v.slug); render(); }
+      }, saved ? '❤️' : '🤍'),
+      el('div',{class:'absolute top-2 left-2 flex items-center gap-1.5'},
+        el('span',{class:'rounded-full bg-mv-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest'},'2×1 main'),
+        isLive && el('span',{class:'rounded-full bg-accent-emer/95 text-ink-900 px-2 py-1 text-[10px] font-extrabold uppercase tracking-widest inline-flex items-center gap-1'},
+          el('span',{class:'h-1.5 w-1.5 rounded-full bg-ink-900 animate-pulse'}), 'Now'
+        )
+      )
+    ),
+    el('div',{class:'p-4'},
+      el('div',{class:'flex items-start justify-between gap-3'},
+        el('div',{class:'min-w-0'},
+          el('div',{class:'font-bold truncate'}, v.name),
+          el('div',{class:'text-xs text-slate2-400 truncate'}, v.barrio,' · ', v.cuisine,' · ','€'.repeat(v.priceTier))
+        ),
+        Star({ rating: v.rating, reviews: v.reviews })
+      )
+    )
+  );
+}
+function toggleSaved(slug) {
+  const u = currentUser(); if (!u) return;
+  const arr = store.saved[u.id] || (store.saved[u.id] = []);
+  const i = arr.indexOf(slug);
+  if (i >= 0) arr.splice(i, 1); else arr.push(slug);
+  saveStore();
+}
+
+function AppMap() {
+  const u = currentUser(); if (!u) { go('signin'); return el('div'); }
+  const venues = getAllVenues().filter(v => typeof v.lat === 'number' && typeof v.lng === 'number');
+  const mapId = 'mv-map-' + Math.random().toString(36).slice(2,8);
+  const mapEl = el('div',{id:mapId, class:'w-full h-[65vh] min-h-[460px] rounded-2xl overflow-hidden border border-white/10'});
+  const inner = el('div',{class:'pb-24'},
+    el('div',{class:'p-5 pb-3 border-b border-white/5'},
+      el('h1',{class:'text-2xl font-extrabold'},'Map'),
+      el('p',{class:'text-xs text-slate2-400'}, venues.length + ' deals · Barcelona')
+    ),
+    el('div',{class:'p-4'},
+      mapEl,
+      el('p',{class:'text-xs text-slate2-500 mt-2 text-center'},'Tap a pin to view the deal.')
+    )
+  );
+  // Init Leaflet after the element is mounted; script tag uses defer so we poll for window.L.
+  function initMap() {
+    if (!window.L) { setTimeout(initMap, 60); return; }
+    if (!document.getElementById(mapId)) return;
+    const map = window.L.map(mapId, { zoomControl: true, attributionControl: false })
+      .setView([41.3851, 2.1734], 13);
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+    venues.forEach(v => {
+      const isLive = isVenueAvailableNow(v);
+      const icon = window.L.divIcon({
+        className: 'mv-pin',
+        html: '<div style="position:relative">'
+            + '<div style="background:#F43F5E;color:white;font-size:10px;font-weight:800;letter-spacing:.05em;padding:3px 8px;border-radius:9999px;box-shadow:0 4px 12px rgba(0,0,0,.4);white-space:nowrap;">2×1' + (isLive ? ' • NOW' : '') + '</div>'
+            + '<div style="width:0;height:0;margin:0 auto;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #F43F5E;"></div>'
+            + '</div>',
+        iconSize: [60, 26], iconAnchor: [30, 26]
+      });
+      window.L.marker([v.lat, v.lng], { icon })
+        .addTo(map)
+        .bindPopup('<div style="min-width:180px"><div style="font-weight:800;color:#0F172A">' + v.name
+          + '</div><div style="font-size:11px;color:#64748B;margin-top:2px">' + v.barrio + ' · ' + v.cuisine
+          + '</div><a href="javascript:void 0" data-slug="' + v.slug + '" class="mv-popup-link" style="display:inline-block;margin-top:6px;color:#F43F5E;font-weight:700;text-decoration:underline">View offer →</a></div>');
+    });
+    map.on('popupopen', e => {
+      const link = e.popup.getElement().querySelector('.mv-popup-link');
+      if (link) link.onclick = () => go('venue', { slug: link.dataset.slug });
+    });
+  }
+  setTimeout(initMap, 0);
+  return AppShell(inner);
+}
+function AppSaved() {
+  const u = currentUser(); if (!u) { go('signin'); return el('div'); }
+  const savedSlugs = store.saved[u.id] || [];
+  const list = getAllVenues().filter(v => savedSlugs.includes(v.slug));
+  const inner = el('div',{class:'pb-24'},
+    el('div',{class:'p-5 pb-3 border-b border-white/5'},
+      el('h1',{class:'text-2xl font-extrabold'},'Saved'),
+      el('p',{class:'text-xs text-slate2-400'}, list.length+' restaurant'+(list.length===1?'':'s'))
+    ),
+    list.length === 0
+      ? el('div',{class:'p-8 text-center text-slate2-400'},
+          el('div',{class:'text-5xl'},'🤍'),
+          el('p',{class:'mt-3 text-sm'},'No saved restaurants yet.'),
+          el('button',{class:'mt-4 rounded-full bg-white text-ink-900 px-4 py-2 text-sm font-bold cursor-pointer', onclick:()=>go('app')},'Browse deals')
+        )
+      : el('div',{class:'p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'}, ...list.map(DealCard))
+  );
+  return AppShell(inner);
+}
+function AppProfile() {
+  const u = currentUser(); if (!u) { go('signin'); return el('div'); }
+  const sub = currentSub();
+  const myBookings = store.bookings.filter(b => b.memberId === u.id).slice(0, 5);
+  const myRedemps = store.redemptions.filter(r => r.memberId === u.id).slice(0, 10);
+  const inner = el('div',{class:'pb-24'},
+    el('div',{class:'p-5 pb-3 border-b border-white/5'},
+      el('h1',{class:'text-2xl font-extrabold'},'Profile')
+    ),
+    el('div',{class:'p-5 space-y-4'},
+      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5 flex items-center gap-3'},
+        el('div',{class:'h-12 w-12 rounded-full bg-mv-500 grid place-items-center text-xl font-extrabold'}, (u.firstName?.[0] ?? u.email[0]).toUpperCase()),
+        el('div',{class:'flex-1 min-w-0'},
+          el('div',{class:'font-bold'}, u.firstName ?? u.email),
+          el('div',{class:'text-xs text-slate2-400 truncate'}, u.email)
+        )
+      ),
+      // Savings tracker — calibrated against € avg main savings = 18€. Rationalises the sub.
+      (() => {
+        const AVG_SAVED_PER_REDEMPTION = 18;
+        const allReds = store.redemptions.filter(r => r.memberId === u.id);
+        const since30 = Date.now() - 30 * 86400000;
+        const recent = allReds.filter(r => r.redeemedAt >= since30);
+        const totalSaved = allReds.length * AVG_SAVED_PER_REDEMPTION;
+        const recentSaved = recent.length * AVG_SAVED_PER_REDEMPTION;
+        // €4.99 vs cumulative savings — show ROI multiple
+        const monthsSubscribed = sub ? Math.max(1, Math.ceil((Date.now() - (sub.startedAt || Date.now())) / (30 * 86400000))) : 0;
+        const totalPaid = monthsSubscribed * 4.99;
+        const multiple = totalPaid > 0 ? (totalSaved / totalPaid) : 0;
+        return el('div',{class:'rounded-2xl bg-gradient-to-br from-mv-500/20 via-mv-500/10 to-accent-pink/10 border border-mv-500/40 p-5'},
+          el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-extrabold'},'💰 Estimated savings'),
+          el('div',{class:'mt-3 flex items-baseline gap-2'},
+            el('span',{class:'text-4xl font-extrabold'}, '€' + totalSaved.toLocaleString()),
+            allReds.length > 0 && multiple >= 1 && el('span',{class:'text-xs font-bold text-accent-emer'}, multiple.toFixed(1) + '× your sub')
+          ),
+          el('div',{class:'mt-1 text-sm text-slate2-300'}, allReds.length + ' redemption' + (allReds.length === 1 ? '' : 's') + ' all-time'),
+          recentSaved > 0 && el('div',{class:'mt-3 text-xs text-slate2-400'},
+            '↑ €', String(recentSaved), ' in the last 30 days'
+          ),
+          allReds.length === 0 && el('div',{class:'mt-2 text-xs text-slate2-400'},'Start redeeming and watch this grow.'),
+          el('div',{class:'mt-3 text-[10px] text-slate2-500'},'Estimate: ~€', String(AVG_SAVED_PER_REDEMPTION), ' saved per 2-for-1 main.')
+        );
+      })(),
+      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'}, 'Subscription'),
+        sub && sub.status === 'ACTIVE'
+          ? el('div',{class:'mt-2'},
+              el('div',{class:'flex items-center justify-between'},
+                el('div',{},
+                  el('div',{class:'font-bold'}, 'Active · €4.99/mo'),
+                  el('div',{class:'text-xs text-slate2-400'}, sub.cancelAtPeriodEnd ? 'Ends ' : 'Renews ', new Date(sub.renewsAt).toLocaleDateString('en-GB'))
+                ),
+                el('span',{class:'rounded-full bg-accent-emer/15 text-accent-emer px-2.5 py-0.5 text-xs font-bold'},'ACTIVE')
+              ),
+              !sub.cancelAtPeriodEnd && el('button',{class:'mt-3 text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:()=>{
+                store.subscriptions[u.id].cancelAtPeriodEnd = true; saveStore(); toast('Cancellation scheduled — service runs until '+new Date(sub.renewsAt).toLocaleDateString('en-GB')); render();
+              }}, 'Cancel renewal')
+            )
+          : el('div',{class:'mt-2'},
+              el('p',{class:'text-sm text-slate2-300'},'You don\'t have an active subscription yet.'),
+              el('button',{class:'mt-3 w-full rounded-full bg-white text-ink-900 py-2.5 font-bold cursor-pointer', onclick:()=>go('checkout')},'Subscribe — €4.99/mo')
+            )
+      ),
+      myBookings.length > 0 && el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Active bookings'),
+        el('ul',{class:'mt-3 space-y-3'},
+          ...myBookings.filter(b => !b.redeemed && !b.cancelled && b.expiresAt > Date.now()).map(b => {
+            const v = findVenueBySlug(b.venueSlug);
+            return el('li',{class:'flex items-center justify-between'},
+              el('div',{class:'min-w-0'},
+                el('div',{class:'font-bold truncate'}, v?.name ?? '?'),
+                el('div',{class:'text-xs text-slate2-400'},'Code ', el('span',{class:'digit font-bold text-white'}, b.code),' · ', b.slot)
+              ),
+              el('button',{class:'rounded-full bg-white text-ink-900 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('booking',{id:b.id})},'View code')
+            );
+          })
+        )
+      ),
+      myRedemps.length > 0 && el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Recent redemptions'),
+        el('ul',{class:'mt-3 space-y-2'},
+          ...myRedemps.map(r => {
+            const v = findVenueBySlug(r.venueSlug);
+            return el('li',{class:'flex items-center justify-between text-sm'},
+              el('div',{}, el('div',{class:'font-bold'}, v?.name), el('div',{class:'text-xs text-slate2-400'}, new Date(r.redeemedAt).toLocaleString('en-GB'))),
+              el('span',{class:'text-accent-emer text-xs font-bold'},'✓')
+            );
+          })
+        )
+      ),
+      el('button',{class:'w-full rounded-full bg-white/5 border border-white/10 py-2.5 text-sm font-bold text-slate2-300 cursor-pointer', onclick:logout},'🚪 Sign out')
+    )
+  );
+  return AppShell(inner);
+}
+
+function Venue() {
+  const u = currentUser();
+  const v = findVenueBySlug(state.params.slug);
+  if (!v) { go('app'); return el('div'); }
+  const saved = u ? (store.saved[u.id] || []).includes(v.slug) : false;
+  const inner = el('div',{class:'pb-24'},
+    el('div',{class:'relative'},
+      el('img',{src:v.img, class:'h-56 w-full object-cover'}),
+      el('button',{class:'absolute top-3 left-3 h-9 w-9 rounded-full bg-ink-900/80 grid place-items-center cursor-pointer bg-transparent', onclick:()=>go('app')},'←'),
+      u && el('button',{class:'absolute top-3 right-3 h-9 w-9 rounded-full bg-ink-900/80 grid place-items-center text-sm cursor-pointer',
+        onclick:()=>{ toggleSaved(v.slug); render(); }
+      }, saved ? '❤️' : '🤍')
+    ),
+    el('div',{class:'p-5'},
+      el('div',{class:'flex items-start justify-between gap-3'},
+        el('div',{class:'min-w-0'},
+          el('h1',{class:'text-2xl font-extrabold'}, v.name),
+          el('div',{class:'text-xs text-slate2-400 mt-1'}, v.barrio,' · ', v.cuisine,' · ','€'.repeat(v.priceTier))
+        ),
+        el('div',{class:'text-right'},
+          el('div',{class:'text-accent-amber text-sm'},'★ ', v.rating.toFixed(1)),
+          el('div',{class:'text-[10px] text-slate2-500'}, v.reviews,' reviews')
+        )
+      ),
+      // Action row — directions / call / website / share. Modern apps make these one tap.
+      (() => {
+        const pv = v._pv;
+        const address = pv ? (pv.address + (pv.postcode ? ', ' + pv.postcode : '') + ', Barcelona') : (v.name + ', Barcelona');
+        const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(address);
+        const phone = pv?.phone;
+        const website = pv?.website;
+        return el('div',{class:'mt-4 grid grid-cols-4 gap-2'},
+          el('a',{href: mapsUrl, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] py-3 cursor-pointer text-center'},
+            el('span',{class:'text-xl'},'🧭'),
+            el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Directions')
+          ),
+          phone
+            ? el('a',{href: 'tel:' + phone.replace(/\s/g,''), class:'flex flex-col items-center gap-1 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] py-3 cursor-pointer text-center'},
+                el('span',{class:'text-xl'},'📞'),
+                el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Call')
+              )
+            : el('div',{class:'flex flex-col items-center gap-1 rounded-xl bg-white/[0.02] border border-white/5 py-3 opacity-40'},
+                el('span',{class:'text-xl'},'📞'),
+                el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-400'},'Call')
+              ),
+          website
+            ? el('a',{href: website.startsWith('http') ? website : 'https://' + website, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] py-3 cursor-pointer text-center'},
+                el('span',{class:'text-xl'},'🌐'),
+                el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Website')
+              )
+            : el('div',{class:'flex flex-col items-center gap-1 rounded-xl bg-white/[0.02] border border-white/5 py-3 opacity-40'},
+                el('span',{class:'text-xl'},'🌐'),
+                el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-400'},'Website')
+              ),
+          el('button',{class:'flex flex-col items-center gap-1 rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] py-3 cursor-pointer text-center bg-transparent',
+            onclick: () => {
+              const url = location.origin + location.pathname + '#/venue/' + v.slug;
+              if (navigator.share) navigator.share({ title: v.name + ' on Menuverso', url }).catch(()=>{});
+              else { navigator.clipboard?.writeText(url).catch(()=>{}); toast('Link copied'); }
+            }},
+            el('span',{class:'text-xl'},'↗️'),
+            el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Share')
+          )
+        );
+      })(),
+      el('div',{class:'mt-4 rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
+        el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'2×1 Main Course'),
+        el('div',{class:'mt-1 font-bold'},'Buy one main, get one free'),
+        el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'},
+          'Must order 2 main courses. Show your Menuverso code to your server. Drinks not included. Cannot combine with other offers.'
+        )
+      ),
+      el('div',{class:'mt-5'},
+        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold mb-2'},'Pick a time slot'),
+        el('div',{class:'space-y-2'},
+          ...v.times.map(t => el('button',{
+            class:'w-full text-left rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 hover:bg-white/[0.08] cursor-pointer',
+            onclick: () => bookSlot(v, t)
+          },
+            el('div',{class:'flex items-center justify-between'},
+              el('div',{},
+                el('div',{class:'font-bold text-sm'}, t.split(' · ')[0]),
+                el('div',{class:'text-xs text-slate2-400'}, t.split(' · ')[1])
+              ),
+              el('span',{class:'text-mv-500 text-sm font-bold'},'Book →')
+            )
+          ))
+        )
+      )
+    )
+  );
+  return AppShell(inner);
+}
+function bookSlot(v, slot) {
+  const u = currentUser();
+  if (!u) { go('signin'); return; }
+  if (u.role !== 'MEMBER') {
+    toast(u.role === 'PARTNER_OWNER' ? 'Partner accounts can\'t book deals — sign in as a member.' : 'Admin accounts can\'t book deals.', 'err');
+    return;
+  }
+  if (!hasSub()) { go('checkout'); return; }
+  // Block paused venues
+  if (v._pv && v._pv.status === 'PAUSED') { toast('This venue paused new bookings — try again later.', 'err'); return; }
+  // Cancel any prior active booking at this venue
+  store.bookings.forEach(b => { if (b.memberId === u.id && b.venueSlug === v.slug && !b.redeemed) b.cancelled = true; });
+  const booking = {
+    id: 'b_' + Math.random().toString(36).slice(2,10),
+    memberId: u.id,
+    venueSlug: v.slug,
+    code: code6(),
+    slot,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 60*60*1000,
+    redeemed: false,
+    cancelled: false
+  };
+  store.bookings.unshift(booking);
+  saveStore();
+  go('booking',{id:booking.id});
+}
+
+function Booking() {
+  const u = currentUser();
+  const b = store.bookings.find(x => x.id === state.params.id);
+  if (!u || !b || b.memberId !== u.id) { go('app'); return el('div'); }
+  const v = findVenueBySlug(b.venueSlug);
+  const inner = el('div',{class:'pb-8'});
+
+  function paint() {
+    inner.innerHTML = '';
+    if (b.redeemed) {
+      const existingReview = (store.reviews || []).find(r => r.memberId === u.id && r.venueSlug === b.venueSlug);
+      const rated = !!existingReview;
+      inner.append(el('div',{class:'p-6 text-center'},
+        el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},'✓'),
+        el('h1',{class:'mt-5 text-2xl font-extrabold'},'Redeemed'),
+        el('p',{class:'mt-1 text-slate2-300'}, v?.name),
+        el('p',{class:'mt-1 text-xs text-slate2-500'}, new Date(b.redeemedAt).toLocaleString('en-GB')),
+        el('p',{class:'mt-6 text-sm text-slate2-300'},'Enjoy your meal.'),
+        // ---- Rate-your-visit ----
+        el('div',{class:'mt-8 rounded-2xl bg-white/[0.04] border border-white/10 p-5 text-left max-w-md mx-auto'},
+          rated
+            ? el('div',{class:'text-center'},
+                el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Your rating'),
+                el('div',{class:'mt-2 text-accent-amber text-2xl'}, '★'.repeat(existingReview.stars) + '☆'.repeat(5 - existingReview.stars)),
+                existingReview.note && el('p',{class:'mt-2 text-sm text-slate2-300 italic'}, '"' + existingReview.note + '"')
+              )
+            : (() => {
+                const wrap2 = el('div',{class:'text-center'});
+                let stars = 0; let note = '';
+                function paintRater() {
+                  wrap2.innerHTML = '';
+                  wrap2.append(
+                    el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'How was it?'),
+                    el('div',{class:'mt-3 flex justify-center gap-1'},
+                      ...[1,2,3,4,5].map(n => el('button',{
+                        class:'text-3xl cursor-pointer bg-transparent border-0 transition ' + (n <= stars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
+                        onclick:()=>{ stars = n; paintRater(); }
+                      }, '★'))
+                    ),
+                    stars > 0 && el('textarea',{
+                      class:'mt-3 w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-sm', rows:'2', placeholder:'Quick note (optional)',
+                      onInput: e => { note = e.target.value; }
+                    }),
+                    stars > 0 && el('button',{
+                      class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer',
+                      onclick: ()=>{
+                        if (!store.reviews) store.reviews = [];
+                        store.reviews.push({ memberId: u.id, venueSlug: b.venueSlug, stars, note: note.trim() || null, createdAt: Date.now() });
+                        saveStore(); toast('Thanks for the rating'); paint();
+                      }
+                    },'Submit rating')
+                  );
+                }
+                paintRater();
+                return wrap2;
+              })()
+        ),
+        el('button',{class:'mt-8 rounded-full bg-white text-ink-900 px-5 py-2.5 font-bold text-sm cursor-pointer', onclick:()=>go('profile')},'Back to profile')
+      ));
+      return;
+    }
+    const now = Date.now();
+    const msLeft = Math.max(0, b.expiresAt - now);
+    if (msLeft <= 0 && !b.expired) { b.expired = true; saveStore(); }
+    const m = Math.floor(msLeft / 60000), s = Math.floor((msLeft / 1000) % 60);
+    inner.append(
+      el('div',{class:'p-5'},
+        el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('venue',{slug:b.venueSlug})},'← Back'),
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold mt-3 text-center'},'Show this code'),
+        el('h1',{class:'mt-1 text-2xl font-extrabold text-center'}, v?.name ?? '?'),
+        el('div',{class:'mt-1 text-sm text-slate2-400 text-center'}, b.slot),
+        el('div',{class:'pop mt-6 mx-auto rounded-3xl border-2 border-dashed border-mv-500/50 bg-mv-500/5 px-8 py-6 inline-block'},
+          el('div',{class:'digit text-6xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-white to-slate2-300 bg-clip-text text-transparent'}, b.code)
+        ),
+        el('p',{class:'mt-5 text-xs text-slate2-400 max-w-[280px] mx-auto text-center'},'Hand the phone to your server. Either tap the button below, or the server can enter the code in the partner portal — both work.'),
+        el('div',{class:'mt-6 text-center'},
+          el('div',{class:'text-xs text-slate2-500 uppercase tracking-widest font-bold'},'Valid for'),
+          el('div',{class:`mt-1 font-mono text-2xl font-bold tabular-nums ${msLeft<5*60000?'text-red-400':''}`},
+            `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+          )
+        ),
+        msLeft > 0
+          ? el('button',{class:'mt-6 w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer transition', onclick:()=>{
+              b.redeemed = true; b.redeemedAt = Date.now();
+              store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, redeemedAt: Date.now() });
+              saveStore(); paint();
+            }},'Server: Confirm 2×1 →')
+          : el('div',{class:'mt-6 text-center text-sm text-red-400'},'Code expired. Book again.'),
+        // Cancel-booking link — releases the slot so the diner isn't locked in.
+        msLeft > 0 && el('div',{class:'mt-4 text-center'},
+          el('button',{class:'text-xs text-slate2-400 hover:text-slate2-200 underline cursor-pointer bg-transparent border-0', onclick:()=>{
+            if (confirm('Cancel this booking? The slot will be released and the code invalidated.')) {
+              b.cancelled = true; saveStore(); toast('Booking cancelled'); go('profile');
+            }
+          }},'Cancel this booking')
+        )
+      )
+    );
+  }
+  paint();
+  // Tick the countdown every second; fire a one-time 5-minute warning toast.
+  let warnedAt5 = false;
+  const t = setInterval(() => {
+    if (!document.body.contains(inner)) { clearInterval(t); return; }
+    if (b.redeemed || b.cancelled) return;
+    const left = b.expiresAt - Date.now();
+    if (!warnedAt5 && left > 0 && left < 5 * 60 * 1000) { toast('Heads up: 5 minutes left on your code', 'err'); warnedAt5 = true; }
+    paint();
+  }, 1000);
+  return AppShell(inner, { narrow: true });
+}
+
+/* ========================================================================
+   PARTNER PORTAL — real code-redemption
+   ======================================================================== */
+function PartnerLanding() {
+  const me = currentUser();
+  const isPartner = me?.role === 'PARTNER_OWNER';
+  const isOtherRole = me && !isPartner;
+
+  const primaryCtas = el('div',{class:'flex flex-wrap items-center gap-3'},
+    !me && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('partner-signup')},'List your restaurant — Free →'),
+    !me && el('button',{class:'rounded-2xl border border-white/15 bg-white/[0.02] px-7 py-3.5 font-extrabold hover:bg-white/[0.06] cursor-pointer transition', onclick:()=>{
+      setSession('u_demo_partner');
+      toast('Signed in as demo partner'); go('partner-portal',{tab:'overview'});
+    }},'Try the demo portal'),
+    isPartner && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30', onclick:()=>go('partner-portal',{tab:'overview'})},'Open partner portal'),
+    !isPartner && !me && el('button',{class:'text-sm text-slate2-300 underline hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')},'Already a partner? Sign in →')
+  );
+
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'},
+    // Concept banner — consistent with the consumer page.
+    el('div',{class:'bg-mv-500 text-white text-center text-xs sm:text-sm py-2.5 px-4 font-medium'},
+      el('span',{class:'inline-flex items-center gap-3 flex-wrap justify-center'},
+        el('span',{class:'inline-block rounded-full bg-white/25 text-white px-2.5 py-0.5 font-extrabold uppercase tracking-widest text-[10px]'},'For Restaurants'),
+        el('span',{}, 'Concept partner program — preview the experience.')
+      )
+    ),
+    MarketingHeader(),
+
+    // HERO — split layout: pitch on left, glass card on right with the headline stat.
+    el('section',{class:'relative overflow-hidden grain'},
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #F43F5E 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
+        el('div',{},
+          el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
+            el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'For Barcelona restaurants'
+          ),
+          el('h1',{class:'mt-5 text-4xl md:text-6xl font-extrabold leading-[1.05]'},
+            'Fill your ', el('span',{class:'text-mv-500'},'slow nights.'), el('br'),
+            'Keep your ', el('span',{class:'text-mv-500'},'best customers.')
+          ),
+          el('p',{class:'mt-5 text-lg text-slate2-300 max-w-xl'},
+            'Menuverso members already paid €4.99/month for the privilege of dining out. They\'re looking for somewhere to use it tonight. ',
+            el('strong',{class:'text-white'},'Be that somewhere.')
+          ),
+          el('ul',{class:'mt-7 space-y-2.5 text-slate2-200 text-base max-w-xl'},
+            ...[
+              ['0%','commission per booking — you keep the full bill, minus the free main.'],
+              ['€0','to list. No setup fees, no monthly subscription, no contract.'],
+              ['You','choose the days, time slots, and how many seats are available.']
+            ].map(([badge,line])=>
+              el('li',{class:'flex items-start gap-3'},
+                el('span',{class:'mt-0.5 inline-flex items-center justify-center rounded-full bg-mv-500/15 border border-mv-500/30 text-mv-400 px-2.5 py-0.5 text-xs font-extrabold min-w-[44px] text-center'}, badge),
+                el('span',{}, line)
+              )
+            )
+          ),
+          el('div',{class:'mt-8'}, primaryCtas)
+        ),
+        // Right: visual card — stylized "what you'd see" preview.
+        el('div',{class:'relative'},
+          el('div',{class:'absolute -inset-4 bg-gradient-to-br from-mv-500/30 to-transparent rounded-3xl blur-2xl'}),
+          el('div',{class:'relative rounded-3xl border border-white/10 bg-ink-900/80 backdrop-blur p-6 shadow-2xl'},
+            el('div',{class:'flex items-center justify-between text-xs text-slate2-400'},
+              el('span',{class:'flex items-center gap-2'},
+                el('span',{class:'h-2 w-2 rounded-full bg-accent-emer animate-pulse'}),'LIVE on Menuverso'
+              ),
+              el('span',{class:'font-bold text-mv-400'},'This week')
+            ),
+            el('div',{class:'mt-5 grid grid-cols-2 gap-3'},
+              ...[
+                ['1,178+','Members in Barcelona'],
+                ['€18','Avg. ticket recovered'],
+                ['64%','Bookings on slow weeknights'],
+                ['3.2x','Repeat-visit rate vs walk-ins']
+              ].map(([n,l])=>
+                el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-4'},
+                  el('div',{class:'text-3xl font-extrabold text-mv-500'}, n),
+                  el('div',{class:'text-[11px] uppercase tracking-widest text-slate2-400 mt-1 font-bold'}, l)
+                )
+              )
+            ),
+            el('div',{class:'mt-5 rounded-2xl bg-gradient-to-br from-mv-500/15 via-mv-500/5 to-transparent border border-mv-500/30 p-4'},
+              el('div',{class:'flex items-center justify-between'},
+                el('div',{},
+                  el('div',{class:'text-xs uppercase tracking-widest text-mv-400 font-extrabold'},'Last code redeemed'),
+                  el('div',{class:'mt-1 text-2xl font-extrabold digit'},'3 8 9 2 6 4')
+                ),
+                el('div',{class:'text-right'},
+                  el('div',{class:'text-xs text-slate2-400'},'Party of 2'),
+                  el('div',{class:'text-sm font-bold text-white'},'21:14 · Tonight')
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // SOCIAL PROOF STRIP — partner counts.
+    el('section',{class:'border-y border-white/5 bg-white/[0.02]'},
+      el('div',{class:'mx-auto max-w-6xl px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center'},
+        ...[
+          ['320+','Restaurants live'],
+          ['18','Neighborhoods'],
+          ['~22k','Monthly bookings'],
+          ['98%','Owner satisfaction']
+        ].map(([n,l])=>
+          el('div',{},
+            el('div',{class:'text-3xl md:text-4xl font-extrabold text-white'}, n),
+            el('div',{class:'text-[11px] uppercase tracking-widest text-slate2-400 mt-1 font-bold'}, l)
+          )
+        )
+      )
+    ),
+
+    // WHY LIST WITH MENUVERSO — three value pillars.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-20'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Why partners join'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Built for ', el('span',{class:'text-mv-500'},'restaurant owners'))
+      ),
+      el('div',{class:'mt-12 grid md:grid-cols-3 gap-5'},
+        ...[
+          ['📈','Fill seats that would have been empty','Most members book the slots you choose — Tuesday lunch, Wednesday dinner, early Sunday. Your busy nights stay yours.'],
+          ['💸','Keep the full bill on the second cover','Members pay for one main; the other is free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.'],
+          ['🤝','Real diners, not deal-hunters','€4.99/month filters out the coupon crowd. Members are locals who eat out 4–8× a month and bring friends.']
+        ].map(([icon,t,d])=>
+          el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6 hover:bg-white/[0.05] hover:border-mv-500/30 transition'},
+            el('div',{class:'h-12 w-12 rounded-2xl bg-mv-500/15 grid place-items-center text-2xl'}, icon),
+            el('h3',{class:'mt-4 text-xl font-bold'}, t),
+            el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d)
+          )
+        )
+      )
+    ),
+
+    // HOW IT WORKS FOR RESTAURANTS — 4 steps.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'How it works'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Live in ', el('span',{class:'text-mv-500'},'one afternoon'))
+      ),
+      el('div',{class:'mt-12 grid md:grid-cols-4 gap-4'},
+        ...[
+          ['1','📝','Apply','Tell us about your restaurant. 4 steps, 3 minutes. Upload photos, set your cuisine, write a short description.'],
+          ['2','✅','We review','One business day. Our team checks the basics. If we have questions we email you — no phone tag.'],
+          ['3','🗓️','Set your slots','Pick the days and times you want to offer 2-for-1. Pause or change them any time, no notice required.'],
+          ['4','🎫','Redeem codes','Members book a slot and arrive with a 6-digit code. Your server types it into the portal. Done.']
+        ].map(([n,icon,t,d])=>
+          el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6 relative'},
+            el('div',{class:'absolute -top-3 left-6 inline-flex items-center justify-center h-7 w-7 rounded-full bg-mv-500 text-white font-extrabold text-sm shadow-lg shadow-mv-500/30'}, n),
+            el('div',{class:'text-3xl mt-2'}, icon),
+            el('h3',{class:'mt-3 text-lg font-bold'}, t),
+            el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d)
+          )
+        )
+      )
+    ),
+
+    // WHAT'S INCLUDED — feature grid.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'What\'s included'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'A real portal — ', el('span',{class:'text-mv-500'},'not a fax form'))
+      ),
+      el('div',{class:'mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
+        ...[
+          ['📊','Live dashboard','Bookings, redemptions, peak hours, repeat-visit rate — refreshed in real time.'],
+          ['📸','Self-serve profile','Edit your photos, description, cuisine tags, hours, and contact info any time. No emails, no waiting.'],
+          ['🎁','Multiple deal slots','Run different offers across the week — Mon lunch, Wed dinner, weekend brunch. Edit, pause, or expire any of them.'],
+          ['⏸️','Pause anytime','Going on holiday? Toggle PAUSED in one click. Resumes instantly when you flip it back.'],
+          ['🧑‍🍳','Staff redemption codes','Your servers type a 6-digit code, no scanner needed. Works on any phone.'],
+          ['💬','Direct support','Real humans at hola@menuverso.app. Most replies within an hour during business hours.']
+        ].map(([icon,t,d])=>
+          el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6 hover:border-mv-500/30 transition'},
+            el('div',{class:'flex items-center gap-3'},
+              el('span',{class:'text-2xl'}, icon),
+              el('h3',{class:'text-base font-bold'}, t)
+            ),
+            el('p',{class:'mt-3 text-sm text-slate2-400 leading-relaxed'}, d)
+          )
+        )
+      )
+    ),
+
+    // OWNER TESTIMONIAL.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Owners on Menuverso'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Real owners. ', el('span',{class:'text-mv-500'},'Real numbers.'))
+      ),
+      el('div',{class:'mt-12 grid md:grid-cols-3 gap-4'},
+        ...[
+          ['"Tuesday lunch went from 30% capacity to fully booked in five weeks. The members spend more on wine than walk-ins do."','Joan P.','Cervecería · Eixample'],
+          ['"It\'s the first marketing channel that pays itself off in the first booking. We just toggle slots based on staffing — no contract, no commission."','Laia M.','Bar Cañete · El Raval'],
+          ['"My servers learned to redeem codes in five minutes. We\'ve had zero confusion at the table — much smoother than printed vouchers."','Marc V.','Granja Petitbo · Gràcia']
+        ].map(([quote,name,where])=>
+          el('figure',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6'},
+            el('div',{class:'text-mv-500 text-3xl leading-none'},'“'),
+            el('blockquote',{class:'mt-2 text-slate2-200 leading-relaxed'}, quote),
+            el('figcaption',{class:'mt-5 text-sm text-slate2-400 flex items-center gap-3'},
+              el('div',{class:'h-9 w-9 rounded-full bg-mv-500/20 border border-mv-500/40 grid place-items-center text-mv-400 font-extrabold'}, name[0]),
+              el('div',{},
+                el('div',{class:'font-bold text-white'}, name),
+                el('div',{class:'text-xs'}, where)
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // PRICING — single transparent card.
+    el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-white/5 text-center'},
+      el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Pricing'),
+      el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'No commission. ', el('br'), el('span',{class:'text-mv-500'},'No catch.')),
+      el('div',{class:'mt-10 rounded-3xl bg-gradient-to-br from-mv-500/10 via-white/[0.03] to-mv-500/5 border border-mv-500/30 p-8 text-left'},
+        el('div',{class:'flex items-baseline justify-center gap-2 text-center'},
+          el('span',{class:'text-6xl font-extrabold text-mv-500'},'€0'),
+          el('span',{class:'text-slate2-400 font-bold'},'/month')
+        ),
+        el('div',{class:'mt-1 text-center text-sm text-slate2-400'},'Forever. The deal is your discount, not our fee.'),
+        el('ul',{class:'mt-7 grid sm:grid-cols-2 gap-3 text-sm'},
+          ...[
+            'No setup fee',
+            'No monthly subscription',
+            '0% commission per booking',
+            'No long-term contract',
+            'Cancel any time from your portal',
+            'Pause and resume listings instantly'
+          ].map(s =>
+            el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-mv-500 font-extrabold'},'✓'), s))
+        ),
+        el('div',{class:'mt-7 text-center'},
+          el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-10 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>me ? (isPartner ? go('partner-portal',{tab:'overview'}) : null) : go('partner-signup')},
+            isPartner ? 'Open partner portal →' : 'List your restaurant →'
+          )
+        )
+      )
+    ),
+
+    // FAQ.
+    el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-white/5'},
+      el('div',{class:'text-center'},
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'FAQ'),
+        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Questions ', el('span',{class:'text-mv-500'},'before you list'))
+      ),
+      el('div',{class:'mt-10 space-y-3'},
+        ...[
+          ['So how does Menuverso make money if there\'s no commission?','Members pay €4.99/month for their dining pass. That\'s our only revenue. We don\'t take a cut of your bill and we never will — it\'d undermine the trust that gets restaurants to list here in the first place.'],
+          ['What if I get too many bookings?','You control the slots. Each slot has a seat cap. Once it\'s full, members can\'t book it. You can pause your entire listing in one click — useful for holidays, private events, or when a server quits.'],
+          ['Do I have to discount every dish?','No. The deal is specifically 2-for-1 on main courses. Starters, drinks, dessert, wine, coffee — all charged in full. Members usually order more than walk-ins, not less.'],
+          ['Can I exclude certain dishes (e.g. lobster, special menu)?','Yes. In Profile → Deals, you write the terms. "Excludes tasting menu", "Mains under €25", whatever you like. The terms are shown to members before they book.'],
+          ['How are no-shows handled?','Each member has a redemption history. Members with repeated no-shows get suspended. You can also see no-show counts per booking in your dashboard.'],
+          ['Can I list multiple restaurants?','Yes — one partner account, multiple venues. Each venue has its own slots, hours, and dashboard. Get in touch and we\'ll set it up.']
+        ].map(([q,a])=>
+          el('details',{class:'group rounded-2xl bg-white/[0.03] border border-white/10 p-5 cursor-pointer hover:border-mv-500/30 transition'},
+            el('summary',{class:'flex items-center justify-between gap-4 list-none cursor-pointer'},
+              el('span',{class:'font-bold text-white'}, q),
+              el('span',{class:'text-mv-500 text-xl transform group-open:rotate-45 transition'},'+')
+            ),
+            el('p',{class:'mt-3 text-sm text-slate2-400 leading-relaxed'}, a)
+          )
+        )
+      )
+    ),
+
+    // GUARD — for logged-in members/admins who curiously click through.
+    isOtherRole && el('section',{class:'mx-auto max-w-3xl px-4 py-10'},
+      el('div',{class:'rounded-2xl bg-amber-500/10 border border-amber-500/30 p-5 text-sm flex items-start gap-3 flex-wrap'},
+        el('span',{class:'text-2xl shrink-0'},'⚠️'),
+        el('div',{class:'flex-1 min-w-[200px]'},
+          el('div',{class:'font-bold text-amber-200'},'You\'re signed in as ', me.role === 'ADMIN' ? 'an admin' : 'a member', '.'),
+          el('p',{class:'mt-1 text-amber-100/80'},'To explore the partner side without overwriting your session, sign out first.')
+        ),
+        el('button',{class:'rounded-full bg-white text-ink-900 px-4 py-2 text-xs font-extrabold cursor-pointer shrink-0', onclick:logout},'Sign out')
+      )
+    ),
+
+    // FINAL CTA — large.
+    el('section',{class:'relative overflow-hidden border-t border-white/5'},
+      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #F43F5E 0, transparent 50%);'}),
+      el('div',{class:'relative mx-auto max-w-4xl px-4 py-24 text-center'},
+        el('h2',{class:'text-4xl md:text-6xl font-extrabold leading-tight'},
+          'Your next ', el('span',{class:'text-mv-500'},'slow Tuesday'),
+          el('br'), 'starts filling tonight.'
+        ),
+        el('p',{class:'mt-5 text-slate2-300 max-w-xl mx-auto'},'Three minutes to list. One business day to approve. Zero risk to try.'),
+        el('div',{class:'mt-8 flex justify-center'}, primaryCtas)
+      )
+    ),
+
+    // FOOTER — matches consumer page.
+    el('footer',{class:'border-t border-white/5'},
+      el('div',{class:'mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-slate2-400'},
+        el('span',{class:'flex items-center gap-2'},
+          el('span',{class:'text-lg'},'🍽️'),
+          el('span',{class:'font-bold text-white'},'Menuverso for Restaurants')
+        ),
+        el('nav',{class:'flex items-center gap-5'},
+          el('a',{class:'hover:text-white cursor-pointer', onclick:()=>go('landing')},'For diners'),
+          el('a',{class:'hover:text-white cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
+          el('a',{class:'hover:text-white cursor-pointer', onclick:()=>go('terms')},'Terms'),
+          el('a',{class:'hover:text-white cursor-pointer', href:'mailto:hola@menuverso.app'},'Contact')
+        )
+      ),
+      el('div',{class:'border-t border-white/5'},
+        el('div',{class:'mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate2-500'},
+          '© 2026 Menuverso · Barcelona, Spain · All rights reserved'
+        )
+      )
+    )
+  );
+}
+function PartnerPortal() {
+  const u = currentUser();
+  if (!u || u.role !== 'PARTNER_OWNER') { go('signin'); return el('div'); }
+  const pv = currentPartnerVenue();
+
+  // No venue yet? Push to onboarding.
+  if (!pv) { go('partner-onboarding'); return el('div'); }
+
+  // DRAFT → onboarding to finish setup.
+  if (pv.status === 'DRAFT') { go('partner-onboarding'); return el('div'); }
+
+  const portalHeader = el('header',{class:'border-b border-white/5 bg-ink-900/80 sticky top-0 z-30'},
+    el('div',{class:'mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap'},
+      el('div',{class:'flex items-center gap-2'},
+        el('span',{class:'text-xl'},'🍽️'),
+        el('div',{},
+          el('div',{class:'font-bold'},'Menuverso Partner Portal'),
+          el('div',{class:'text-xs text-slate2-400'}, pv.name, ' · Barcelona · ',
+            el('span',{class: pv.status === 'LIVE' ? 'text-accent-emer font-bold' : 'text-amber-400 font-bold'}, pv.status)
+          )
+        )
+      ),
+      el('div',{class:'flex items-center gap-3'},
+        el('a',{class:'text-xs text-slate2-400 hover:text-white cursor-pointer', onclick:()=>go('landing')},'View landing'),
+        el('button',{class:'text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:logout},'🚪 Log out')
+      )
+    )
+  );
+
+  // PENDING_APPROVAL — show a holding screen
+  if (pv.status === 'PENDING_APPROVAL') {
+    return el('div',{class:'min-h-screen bg-ink-950 text-white'}, portalHeader,
+      el('div',{class:'mx-auto max-w-2xl px-4 py-16 text-center'},
+        el('div',{class:'text-5xl'},'⏳'),
+        el('h1',{class:'mt-4 text-3xl font-extrabold'},'Under review'),
+        el('p',{class:'mt-2 text-slate2-300'},'Thanks — we\'ll email you within one business day. While you wait, you can still edit your profile, photos, and deal settings.'),
+        el('div',{class:'mt-6 flex justify-center gap-3 flex-wrap'},
+          el('button',{class:'rounded-full bg-white text-ink-900 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>go('partner-portal',{tab:'profile'})},'Edit profile'),
+          el('button',{class:'rounded-full bg-white/5 border border-white/10 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>go('partner-portal',{tab:'deals'})},'Edit deals')
+        )
+      ),
+      el('div',{class:'mx-auto max-w-6xl px-4 pb-12'},
+        // Still allow Profile and Deals editing during review.
+        (state.params.tab === 'profile' || state.params.tab === 'deals') ? null : null,
+        state.params.tab === 'profile' ? PortalProfile() :
+        state.params.tab === 'deals' ? PortalDeals() : null
+      )
+    );
+  }
+
+  // REJECTED — same shell but with a reason.
+  if (pv.status === 'REJECTED') {
+    return el('div',{class:'min-h-screen bg-ink-950 text-white'}, portalHeader,
+      el('div',{class:'mx-auto max-w-2xl px-4 py-16 text-center'},
+        el('div',{class:'text-5xl'},'🛑'),
+        el('h1',{class:'mt-4 text-3xl font-extrabold'},'We need a bit more info'),
+        el('p',{class:'mt-2 text-slate2-300'}, pv.rejectionReason || 'A reviewer asked for changes. Please update your profile and resubmit.'),
+        el('div',{class:'mt-6 flex justify-center gap-3'},
+          el('button',{class:'rounded-full bg-white text-ink-900 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>go('partner-portal',{tab:'profile'})},'Edit profile'),
+          el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>{
+            pv.status = 'PENDING_APPROVAL'; pv.submittedAt = Date.now(); pv.rejectionReason = null; saveStore(); toast('Resubmitted for review'); render();
+          }},'Resubmit')
+        )
+      )
+    );
+  }
+
+  // LIVE / PAUSED — full tab UI
+  const tab = state.params.tab || 'overview';
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'}, portalHeader,
+    el('div',{class:'mx-auto max-w-6xl px-4 mt-6'},
+      el('div',{class:'inline-flex bg-white/[0.04] border border-white/10 rounded-full p-1 flex-wrap'},
+        ...[['overview','📊 Overview'],['redeem','🎫 Redeem code'],['deals','🎁 Deals'],['profile','✏️ Profile']].map(([k,l]) =>
+          el('button',{class: 'rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 ' + (tab===k ? 'bg-white text-ink-900' : 'text-slate2-300 hover:text-white'),
+            onclick: ()=>go('partner-portal',{tab:k})}, l)
+        )
+      )
+    ),
+    el('div',{class:'mx-auto max-w-6xl px-4 py-6'},
+      tab==='overview' ? PortalOverview()
+      : tab==='redeem' ? PortalRedeem()
+      : tab==='deals' ? PortalDeals()
+      : PortalProfile()
+    ),
+    // Support footer — every partner page surfaces a way to ask for help.
+    el('footer',{class:'border-t border-white/5 mt-8'},
+      el('div',{class:'mx-auto max-w-6xl px-4 py-5 flex items-center justify-between flex-wrap gap-2 text-xs text-slate2-400'},
+        el('span',{},'Need help? ', el('a',{class:'underline hover:text-white cursor-pointer', href:'mailto:hola@menuverso.app'},'hola@menuverso.app')),
+        el('span',{},'Menuverso Partner Portal · Barcelona')
+      )
+    )
+  );
+}
+
+/* Partner signup — creates a partner account + a DRAFT venue. */
+function PartnerSignup() {
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'},
+    MarketingHeader(),
+    el('div',{class:'mx-auto max-w-md px-4 py-12'},
+      el('button',{class:'text-slate2-400 text-sm underline cursor-pointer bg-transparent border-0', onclick:()=>go('partner-landing')},'← Back'),
+      el('div',{class:'text-center mt-4'},
+        el('div',{class:'text-5xl'},'🏪'),
+        el('h1',{class:'mt-3 text-2xl font-extrabold'},'List your restaurant'),
+        el('p',{class:'mt-1 text-slate2-400 text-sm'},'Create your owner account. Next step adds the venue details.')
+      ),
+      el('form',{class:'mt-6 space-y-3', ref: f => setTimeout(()=>f?.querySelector('input')?.focus(), 50), onSubmit: async (e)=>{
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type=submit]');
+        const fd = new FormData(e.target);
+        const pw = String(fd.get('password') || '');
+        const confirm = String(fd.get('confirmPassword') || '');
+        if (pw !== confirm) { toast('Passwords don\'t match.', 'err'); return; }
+        if (pw.length < 8) { toast('Password must be at least 8 characters.', 'err'); return; }
+        btn.disabled = true; btn.textContent = 'Creating…';
+        try {
+          const email = String(fd.get('email')||'').trim().toLowerCase();
+          if (!isEmail(email)) throw new Error('Enter a valid email.');
+          if (store.users.find(u => u.email === email)) throw new Error('That email already has an account.');
+          const restaurantName = String(fd.get('restaurantName')||'').trim() || 'My restaurant';
+          // Build a unique slug.
+          let slug = slugify(restaurantName) || 'restaurant-' + Math.random().toString(36).slice(2,6);
+          while (store.partnerVenues.some(v => v.slug === slug) || VENUES.some(v => v.slug === slug)) {
+            slug = slug + '-' + Math.random().toString(36).slice(2,4);
+          }
+          const venueId = 'pv_' + Math.random().toString(36).slice(2,10);
+          const userId = 'u_' + Math.random().toString(36).slice(2,12);
+          const newVenue = {
+            id: venueId, ownerId: userId, name: restaurantName, slug,
+            barrio: '', cuisine: '', priceTier: 2, address: '', postcode: '',
+            phone: '', website: '', instagram: '',
+            description: '', hours: '',
+            photos: [], dealTerms: DEFAULT_DEAL_TERMS, dealSlots: DEFAULT_SLOTS(),
+            rating: null, reviews: 0, status: 'DRAFT', submittedAt: null, approvedAt: null
+          };
+          const newUser = {
+            id: userId, email,
+            passwordHash: await hashPassword(String(fd.get('password'))),
+            firstName: String(fd.get('firstName')||'').trim() || null,
+            lastName: null, role: 'PARTNER_OWNER',
+            partnerVenueId: venueId,
+            createdAt: Date.now(), verifiedAt: Date.now()
+          };
+          store.users.push(newUser);
+          store.partnerVenues.push(newVenue);
+          saveStore();
+          setSession(userId);
+          toast('Partner account created');
+          go('partner-onboarding');
+        } catch (err) {
+          toast(err.message, 'err');
+          btn.disabled = false; btn.textContent = 'Create partner account';
+        }
+      }},
+        InputField('Your name','text','firstName','Joan', false),
+        InputField('Restaurant name','text','restaurantName','e.g. Bar Brutal', true),
+        InputField('Business email','email','email','owner@yourplace.com', true, 'email'),
+        PasswordField('Password','password','At least 8 characters', { helpText:'Tap Show to verify you typed it correctly.' }),
+        PasswordField('Confirm password','confirmPassword','Re-type to confirm'),
+        el('button',{type:'submit', class:'mt-3 w-full rounded-2xl bg-white text-ink-900 hover:bg-slate2-100 py-3.5 font-extrabold cursor-pointer disabled:opacity-50'},'Create partner account')
+      ),
+      // What happens next — explains the path for skeptical owners
+      el('div',{class:'mt-6 rounded-2xl bg-white/[0.04] border border-white/10 p-4'},
+        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold mb-3'},'What happens next'),
+        el('ol',{class:'space-y-2 text-sm text-slate2-300'},
+          el('li',{class:'flex gap-3'},
+            el('span',{class:'h-5 w-5 rounded-full bg-mv-500 text-[10px] font-extrabold grid place-items-center shrink-0'},'1'),
+            el('span',{},'Add your restaurant details and photos — ~3 minutes.')
+          ),
+          el('li',{class:'flex gap-3'},
+            el('span',{class:'h-5 w-5 rounded-full bg-mv-500 text-[10px] font-extrabold grid place-items-center shrink-0'},'2'),
+            el('span',{},'We review within 1 business day. You\'ll get an email.')
+          ),
+          el('li',{class:'flex gap-3'},
+            el('span',{class:'h-5 w-5 rounded-full bg-mv-500 text-[10px] font-extrabold grid place-items-center shrink-0'},'3'),
+            el('span',{},'Once you\'re live, members find you and book 2-for-1 codes. No per-redemption fees.')
+          )
+        )
+      ),
+      el('p',{class:'mt-4 text-center text-xs text-slate2-400'},
+        'Already a partner? ',
+        el('button',{class:'text-mv-500 font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')},'Partner sign-in →')
+      )
+    )
+  );
+}
+
+/* Partner sign-in — dedicated page so partners have their own front door,
+   distinct from the consumer sign-in.  Different visual chrome, business
+   email autocomplete, and rejects MEMBER accounts with a clear nudge. */
+function PartnerSignin() {
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'},
+    // Compact partner-branded header — NO marketing nav. This is a business surface.
+    el('header',{class:'border-b border-white/5 bg-ink-900/80'},
+      el('div',{class:'mx-auto max-w-6xl px-4 py-3 flex items-center justify-between'},
+        el('a',{class:'flex items-center gap-2 cursor-pointer', onclick:()=>go('partner-landing')},
+          el('span',{class:'text-xl'},'🍽️'),
+          el('div',{},
+            el('div',{class:'font-bold text-sm'},'Menuverso'),
+            el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'Partner Portal')
+          )
+        ),
+        el('button',{class:'text-xs text-slate2-400 hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Back to menuverso.app')
+      )
+    ),
+    el('div',{class:'mx-auto max-w-md px-4 py-12'},
+      el('div',{class:'text-center'},
+        el('div',{class:'mx-auto h-14 w-14 rounded-2xl bg-mv-500/20 border border-mv-500/30 grid place-items-center text-2xl'},'🏪'),
+        el('h1',{class:'mt-4 text-2xl font-extrabold'},'Restaurant sign-in'),
+        el('p',{class:'mt-1 text-slate2-400 text-sm'},'Sign in to manage your venue, deals, and codes.')
+      ),
+      el('form',{class:'mt-6 space-y-3', ref: f => setTimeout(()=>f?.querySelector('input')?.focus(), 50), onSubmit: async (e)=>{
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.disabled = true; btn.textContent = 'Signing in…';
+        const fd = new FormData(e.target);
+        try {
+          const u = await loginUser({ email: fd.get('email'), password: fd.get('password') });
+          // Lock this door to partners only. Member emails get pointed to the consumer sign-in.
+          if (u.role === 'MEMBER') {
+            clearSession();
+            toast('That\'s a member account. Use the member sign-in.', 'err');
+            btn.disabled = false; btn.textContent = 'Sign in to partner portal';
+            setTimeout(()=>go('signin'), 1200);
+            return;
+          }
+          if (u.role === 'ADMIN') {
+            toast('Admin signed in.');
+            go('admin'); return;
+          }
+          // PARTNER_OWNER
+          toast('Welcome back, ' + (u.firstName ?? 'partner'));
+          go('partner-portal',{tab:'overview'});
+        } catch (err) {
+          toast(err.message, 'err');
+          btn.disabled = false; btn.textContent = 'Sign in to partner portal';
+        }
+      }},
+        InputField('Business email','email','email','owner@yourplace.com', true, 'email'),
+        PasswordField('Password','password','••••••••', { autocomplete:'current-password', minlength:0 }),
+        el('button',{type:'submit', class:'mt-3 w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer disabled:opacity-50'},'Sign in to partner portal'),
+        el('button',{type:'button', class:'w-full text-xs text-slate2-400 underline mt-1 cursor-pointer bg-transparent border-0', onclick:()=>toast('In production this emails a reset link to your business address.')},'Forgot password?')
+      ),
+      // Distinct partner-side context block
+      el('div',{class:'mt-5 rounded-xl bg-white/[0.04] border border-white/10 p-4 text-sm'},
+        el('div',{class:'font-bold'},'Not listed yet?'),
+        el('p',{class:'mt-1 text-slate2-300 text-xs'},'Adding your restaurant takes about 3 minutes. No listing fee.'),
+        el('button',{class:'mt-3 w-full rounded-full bg-white text-ink-900 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>go('partner-signup')},'List your restaurant →')
+      ),
+      // Cross-link to member sign-in
+      el('p',{class:'mt-4 text-center text-xs text-slate2-400'},
+        'Looking for the member app? ',
+        el('button',{class:'text-mv-500 font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('signin')},'Member sign-in →')
+      )
+    )
+  );
+}
+
+/* Partner onboarding — 4-step wizard with progress, inline validation, live preview. */
+function PartnerOnboarding() {
+  const u = currentUser();
+  if (!u || u.role !== 'PARTNER_OWNER') { go('partner-signup'); return el('div'); }
+  const pv = currentPartnerVenue();
+  if (!pv) { go('partner-signup'); return el('div'); }
+
+  // Resume where they left off (persisted as state.params.step for back-button friendliness).
+  let step = Math.max(1, Math.min(4, parseInt(state.params.step || '1', 10)));
+  let errors = {}; // { fieldKey: msg }
+  const wrap = el('div',{class:'min-h-screen bg-ink-950 text-white'});
+
+  // ---- helpers ----
+  function setStep(n) { step = Math.max(1, Math.min(4, n)); errors = {}; paint(); }
+  function reqLabel(label, key) {
+    return el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold flex items-center gap-1'},
+      label, el('span',{class:'text-mv-500'},'*'),
+      errors[key] && el('span',{class:'normal-case text-red-400 text-xs ml-2'}, errors[key])
+    );
+  }
+  function optLabel(label) {
+    return el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'}, label);
+  }
+  function help(s) { return el('div',{class:'mt-1 text-[10px] text-slate2-500'}, s); }
+  function inputField(label, key, ph='', { required=false, type='text', help: helpText, attrs={} } = {}) {
+    return el('div',{},
+      required ? reqLabel(label, key) : optLabel(label),
+      el('input',{
+        type, value: pv[key] ?? '', placeholder: ph,
+        ...attrs,
+        class: 'mt-1 w-full bg-white/[0.04] border rounded-xl px-3 py-2 text-sm outline-none ' + (errors[key] ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-mv-500'),
+        onInput: e => { pv[key] = e.target.value; if (errors[key]) { errors[key] = null; paint(); } }
+      }),
+      helpText && help(helpText)
+    );
+  }
+  function textareaField(label, key, rows=3, { required=false, maxLen, help: helpText } = {}) {
+    const count = (pv[key] ?? '').length;
+    return el('div',{},
+      el('div',{class:'flex items-center justify-between'},
+        required ? reqLabel(label, key) : optLabel(label),
+        maxLen ? el('span',{class:'text-[10px] text-slate2-500'}, `${count}/${maxLen}`) : null
+      ),
+      el('textarea',{
+        rows: String(rows), value: pv[key] ?? '',
+        class: 'mt-1 w-full bg-white/[0.04] border rounded-xl px-3 py-2 text-sm outline-none ' + (errors[key] ? 'border-red-500/60' : 'border-white/10 focus:border-mv-500'),
+        onInput: e => { pv[key] = e.target.value; saveStore(); if (errors[key]) { errors[key] = null; } paint(); }
+      }, pv[key] ?? ''),
+      helpText && help(helpText)
+    );
+  }
+
+  // ---- step validators ----
+  function validateStep(n) {
+    errors = {};
+    if (n === 1) {
+      if (!pv.name?.trim()) errors.name = 'Required';
+      if (!pv.cuisine?.trim()) errors.cuisine = 'Required';
+      if (!pv.barrio?.trim()) errors.barrio = 'Required';
+      if (!pv.priceTier) errors.priceTier = 'Pick a price tier';
+    } else if (n === 2) {
+      if (!pv.address?.trim()) errors.address = 'Required';
+      if (!pv.postcode?.trim()) errors.postcode = 'Required';
+    } else if (n === 3) {
+      if ((pv.photos || []).length === 0) errors._photos = 'Upload at least one photo';
+    } else if (n === 4) {
+      if (!pv.description?.trim()) errors.description = 'Required';
+      if (!(pv.dealSlots || []).some(s => s.active)) errors._slots = 'Activate at least one deal slot';
+    }
+    return Object.keys(errors).length === 0;
+  }
+  function next() {
+    if (!validateStep(step)) { saveStore(); paint(); toast('Please fix the highlighted fields', 'err'); return; }
+    saveStore();
+    if (step < 4) setStep(step + 1);
+  }
+  function back() { saveStore(); setStep(step - 1); }
+
+  // ---- preview card (matches DealCard shape) ----
+  function previewCard() {
+    const cover = (pv.photos && pv.photos[0]) || `https://picsum.photos/seed/${pv.slug || 'preview'}/800/520`;
+    return el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 overflow-hidden max-w-sm'},
+      el('div',{class:'relative'},
+        el('img',{src:cover, class:'h-44 w-full object-cover'}),
+        el('div',{class:'absolute top-2 left-2 rounded-full bg-mv-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest'},'2×1 main'),
+        el('div',{class:'absolute top-2 right-2 h-8 w-8 rounded-full bg-ink-900/80 grid place-items-center text-sm'},'🤍')
+      ),
+      el('div',{class:'p-4'},
+        el('div',{class:'flex items-start justify-between gap-2'},
+          el('div',{class:'min-w-0'},
+            el('div',{class:'font-bold truncate'}, pv.name || 'Your restaurant'),
+            el('div',{class:'text-xs text-slate2-400 truncate'}, (pv.barrio || 'Barrio') + ' · ' + (pv.cuisine || 'Cuisine') + ' · ' + '€'.repeat(pv.priceTier || 0))
+          ),
+          el('span',{class:'text-xs text-slate2-400'},'★ —')
+        )
+      )
+    );
+  }
+
+  // ---- step renderers ----
+  function StepBasics() {
+    return el('div',{class:'space-y-4'},
+      el('div',{class:'grid md:grid-cols-2 gap-4'},
+        inputField('Restaurant name','name','e.g. Bar Brutal',{ required:true, help:'How members will see you in search.' }),
+        inputField('Cuisine','cuisine','e.g. Spanish · Tapas',{ required:true, help:'Short — pick the 1–3 cuisines you\'re known for.' }),
+        inputField('Barrio (neighbourhood)','barrio','e.g. El Born, Gràcia',{ required:true, help:'One of Barcelona\'s 73 barrios.' }),
+        el('div',{},
+          reqLabel('Price tier','priceTier'),
+          el('div',{class:'mt-1 grid grid-cols-4 gap-2'},
+            ...[1,2,3,4].map(n => el('button',{
+              type:'button',
+              class: 'rounded-xl border py-2 text-sm font-bold cursor-pointer ' + (pv.priceTier === n ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/[0.04] border-white/10 text-slate2-300 hover:bg-white/[0.08]'),
+              onclick:()=>{ pv.priceTier = n; errors.priceTier = null; saveStore(); paint(); }
+            }, '€'.repeat(n)))
+          ),
+          help('1 = bargain · 4 = fine dining')
+        )
+      )
+    );
+  }
+  function StepAddress() {
+    return el('div',{class:'space-y-4'},
+      el('div',{class:'grid md:grid-cols-2 gap-4'},
+        inputField('Street address','address','C/ Mallorca, 236',{ required:true }),
+        inputField('Postcode','postcode','08008',{ required:true })
+      ),
+      el('div',{class:'grid md:grid-cols-2 gap-4'},
+        inputField('Phone','phone','+34 932 16 03 68'),
+        inputField('Website','website','cerveceriacatalana.com')
+      ),
+      el('div',{class:'grid md:grid-cols-2 gap-4'},
+        inputField('Instagram','instagram','@yourhandle',{ help:'We strip the @ if you paste it.' }),
+        inputField('Opening hours','hours','Mon-Sun 13:00-16:00 · 20:00-00:30',{ help:'Free text for now — diners see this verbatim.' })
+      )
+    );
+  }
+  function StepPhotos() {
+    return el('div',{class:'space-y-4'},
+      errors._photos && el('div',{class:'rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200'}, errors._photos),
+      el('div',{class:'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'},
+        ...(pv.photos || []).map((src, i) => el('div',{class:'relative group aspect-[4/3] rounded-lg overflow-hidden border ' + (i === 0 ? 'border-mv-500' : 'border-white/10')},
+          el('img',{src, class:'w-full h-full object-cover'}),
+          i === 0 && el('div',{class:'absolute bottom-1 left-1 rounded-full bg-mv-500 text-[10px] font-extrabold uppercase tracking-widest text-white px-2 py-0.5'},'Cover'),
+          i !== 0 && el('button',{class:'absolute bottom-1 left-1 rounded-full bg-ink-900/90 border border-white/20 text-[10px] font-bold uppercase tracking-widest text-white px-2 py-0.5 cursor-pointer hover:bg-mv-500/90',
+            onclick:()=>{ const [moved] = pv.photos.splice(i,1); pv.photos.unshift(moved); saveStore(); paint(); }
+          },'Set as cover'),
+          el('button',{class:'absolute top-1 right-1 h-7 w-7 rounded-full bg-ink-900/90 border border-white/20 text-xs cursor-pointer hover:bg-red-600/80',
+            onclick:()=>{ pv.photos.splice(i,1); saveStore(); paint(); }
+          },'✕')
+        )),
+        el('label',{class:'aspect-[4/3] rounded-lg border-2 border-dashed border-white/15 grid place-items-center cursor-pointer hover:bg-white/[0.05] text-center text-slate2-400 text-sm'},
+          el('div',{}, el('div',{class:'text-3xl'},'➕'), el('div',{class:'text-xs mt-1'},'Add photos')),
+          el('input',{type:'file', accept:'image/*', multiple:true, class:'hidden', onChange: async e => {
+            const files = Array.from(e.target.files || []);
+            if (!pv.photos) pv.photos = [];
+            for (const f of files) {
+              try { pv.photos.push(await compressImage(f)); }
+              catch { toast('Could not process that image', 'err'); }
+            }
+            errors._photos = null;
+            saveStore(); paint(); toast(`${files.length} photo${files.length===1?'':'s'} added`);
+          }})
+        )
+      ),
+      el('p',{class:'text-xs text-slate2-500'},'Tip: 3–4 horizontal shots — 1 of your dining room, 1–2 of dishes, 1 of the bar. The first photo is your cover.')
+    );
+  }
+  function StepReview() {
+    return el('div',{class:'grid lg:grid-cols-2 gap-6'},
+      el('div',{class:'space-y-4'},
+        textareaField('Description','description', 4, { required:true, maxLen:600, help:'60–600 characters. What makes you special — atmosphere, signature dishes, history.' }),
+        el('div',{},
+          el('div',{class:'flex items-center justify-between'},
+            el('span',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Deal slots'),
+            errors._slots && el('span',{class:'text-xs text-red-400'}, errors._slots)
+          ),
+          el('div',{class:'mt-2 space-y-2'},
+            ...((pv.dealSlots||[]).map(s => el('div',{class:'rounded-xl bg-white/[0.04] border border-white/10 p-3 flex items-center gap-3'},
+              el('div',{class:`h-6 w-11 rounded-full cursor-pointer transition shrink-0 ${s.active?'bg-accent-emer':'bg-white/10'} relative`,
+                onclick:()=>{ s.active = !s.active; errors._slots = null; saveStore(); paint(); }
+              },
+                el('div',{class:`absolute top-0.5 ${s.active?'right-0.5':'left-0.5'} h-5 w-5 rounded-full bg-white transition`})
+              ),
+              el('div',{class:'flex-1 min-w-0'},
+                el('div',{class:'font-bold text-sm truncate'}, s.label),
+                el('div',{class:'text-xs text-slate2-400'}, (s.days || 'Mon-Fri') + ' · ' + s.timeStart + '-' + s.timeEnd)
+              )
+            )))
+          ),
+          help('You can refine and add more slots from the Deals tab once you\'re live.')
+        )
+      ),
+      el('div',{class:'lg:sticky lg:top-6'},
+        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold mb-2'},'Preview — how diners will see you'),
+        previewCard(),
+        el('div',{class:'mt-4 rounded-xl bg-mv-500/10 border border-mv-500/30 p-4 text-sm'},
+          el('div',{class:'font-bold'},'Ready to submit?'),
+          el('p',{class:'mt-1 text-slate2-300 text-xs'},'We review within 1 business day. You can keep editing after submitting — changes go live instantly once you\'re approved.')
+        )
+      )
+    );
+  }
+
+  function paint() {
+    wrap.innerHTML = '';
+    const headerBar = el('header',{class:'border-b border-white/5 bg-ink-900/80 sticky top-0 z-30'},
+      el('div',{class:'mx-auto max-w-5xl px-4 py-3 flex items-center justify-between'},
+        el('div',{class:'flex items-center gap-2'},
+          el('span',{class:'text-xl'},'🍽️'),
+          el('div',{},
+            el('div',{class:'font-bold'},'Set up your restaurant'),
+            el('div',{class:'text-xs text-slate2-400'}, pv.name || 'New listing', ' · Step ', step, ' of 4')
+          )
+        ),
+        el('button',{class:'text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:logout},'🚪 Sign out')
+      )
+    );
+
+    // Progress bar
+    const progress = el('div',{class:'mx-auto max-w-5xl px-4 mt-6'},
+      el('div',{class:'flex items-center gap-1'},
+        ...[1,2,3,4].map(n => el('div',{class:'flex-1 h-1.5 rounded-full ' + (n <= step ? 'bg-mv-500' : 'bg-white/10')}))
+      ),
+      el('div',{class:'mt-2 flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate2-400'},
+        el('span',{class: step >= 1 ? 'text-white' : ''}, '① Basics'),
+        el('span',{class: step >= 2 ? 'text-white' : ''}, '② Address'),
+        el('span',{class: step >= 3 ? 'text-white' : ''}, '③ Photos'),
+        el('span',{class: step >= 4 ? 'text-white' : ''}, '④ Review')
+      )
+    );
+
+    const body = el('div',{class:'mx-auto max-w-5xl px-4 py-8'},
+      el('h1',{class:'text-2xl md:text-3xl font-extrabold'},
+        step === 1 ? 'Tell us the basics' :
+        step === 2 ? 'Where are you?' :
+        step === 3 ? 'Show off your space' :
+        'Almost there — review and submit'
+      ),
+      el('p',{class:'mt-1 text-sm text-slate2-300'},
+        step === 1 ? 'Three minutes total. You can edit everything later.' :
+        step === 2 ? 'We don\'t share your phone or Instagram with diners unless you want us to.' :
+        step === 3 ? 'A great cover photo doubles your listing\'s click-through. Drag-drop is fine; we resize automatically.' :
+        'This is exactly what diners will see in Discover.'
+      ),
+      el('div',{class:'mt-6'},
+        step === 1 ? StepBasics() :
+        step === 2 ? StepAddress() :
+        step === 3 ? StepPhotos() :
+        StepReview()
+      ),
+      // Step nav
+      el('div',{class:'mt-8 flex items-center justify-between gap-3 flex-wrap'},
+        step > 1
+          ? el('button',{class:'rounded-full bg-white/5 border border-white/10 px-5 py-2.5 text-sm font-bold cursor-pointer hover:bg-white/[0.1]', onclick:back}, '← Back')
+          : el('button',{class:'rounded-full bg-transparent text-slate2-400 px-2 py-2.5 text-sm font-bold cursor-pointer underline', onclick:()=>go('landing')}, '← Save & exit'),
+        step < 4
+          ? el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick:next}, 'Next →')
+          : el('button',{class:'rounded-full bg-accent-emer text-ink-900 hover:bg-accent-emer/90 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+              if (!validateStep(4)) { paint(); toast('Fix the highlighted fields', 'err'); return; }
+              pv.status = 'PENDING_APPROVAL';
+              pv.submittedAt = Date.now();
+              saveStore();
+              toast('Submitted for review — we\'ll email you within 1 business day');
+              go('partner-portal',{tab:'overview'});
+            }}, 'Submit for review ✓')
+      )
+    );
+
+    wrap.append(headerBar, progress, body);
+  }
+  paint();
+  return wrap;
+}
+function PortalOverview() {
+  const pv = currentPartnerVenue();
+  if (!pv) return el('div',{class:'text-sm text-slate2-400'},'No venue.');
+  const reds = store.redemptions.filter(r => r.venueSlug === pv.slug);
+  const isFresh = pv.status !== 'LIVE' || (Date.now() - (pv.approvedAt ?? pv.submittedAt ?? Date.now())) < 7 * 86400000;
+  const hasNoActivity = isFresh && reds.length === 0;
+
+  // ---- Getting-started checklist (fresh partners only) ----
+  function checklist() {
+    const items = [
+      { done: (pv.photos || []).length >= 3, title: 'Add at least 3 photos', cta:'Edit profile', go: ()=>state.params.tab && go('partner-portal',{tab:'profile'}) },
+      { done: (pv.dealSlots || []).filter(s => s.active).length >= 2, title: 'Activate at least 2 deal slots', cta:'Edit deals', go: ()=>go('partner-portal',{tab:'deals'}) },
+      { done: false, title: 'Pin the staff PIN sheet in the kitchen (PIN: 1234)', cta:'Print', go: ()=>window.print() },
+      { done: false, title: 'Share your listing on Instagram', cta:'Get link', go: ()=>{ navigator.clipboard?.writeText(location.origin + location.pathname + '#/venue/' + pv.slug).catch(()=>{}); toast('Listing link copied'); } }
+    ];
+    const remaining = items.filter(i => !i.done).length;
+    return el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-5'},
+      el('div',{class:'flex items-center justify-between flex-wrap gap-2'},
+        el('div',{},
+          el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-extrabold'},'Welcome to Menuverso'),
+          el('h3',{class:'mt-1 text-xl font-extrabold'},'Get your first redemption')
+        ),
+        el('span',{class:'text-xs text-slate2-300'}, remaining + ' to go')
+      ),
+      el('ul',{class:'mt-4 space-y-2'},
+        ...items.map(i => el('li',{class:'flex items-center justify-between gap-3 rounded-xl bg-white/[0.04] border border-white/10 px-3 py-2.5'},
+          el('div',{class:'flex items-center gap-3 min-w-0'},
+            el('div',{class:'h-5 w-5 rounded-full border-2 grid place-items-center text-[10px] shrink-0 ' + (i.done ? 'bg-accent-emer border-accent-emer text-ink-900' : 'border-white/30 text-transparent')},'✓'),
+            el('span',{class: 'text-sm ' + (i.done ? 'line-through text-slate2-400' : '')}, i.title)
+          ),
+          !i.done && el('button',{class:'text-xs font-bold underline text-mv-500 cursor-pointer bg-transparent border-0 shrink-0', onclick:i.go}, i.cta)
+        ))
+      )
+    );
+  }
+
+  const headerLinks = el('div',{class:'flex items-center justify-between flex-wrap gap-3'},
+    el('div',{},
+      el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Dashboard'),
+      el('h2',{class:'mt-1 text-2xl font-extrabold'}, pv.name)
+    ),
+    el('div',{class:'flex items-center gap-2'},
+      el('a',{class:'text-xs text-slate2-300 hover:text-white cursor-pointer underline', onclick:()=>go('venue',{slug:pv.slug})}, 'View public page →')
+    )
+  );
+
+  // For fresh partners with no activity: skip the fake numbers entirely.
+  if (hasNoActivity) {
+    return el('div',{class:'space-y-6'},
+      headerLinks,
+      checklist(),
+      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5 text-center'},
+        el('div',{class:'text-4xl'},'📊'),
+        el('h3',{class:'mt-3 font-bold text-lg'},'No data yet'),
+        el('p',{class:'mt-1 text-sm text-slate2-400 max-w-md mx-auto'},'Views, redemptions and reviews show up here once members start finding you. Most partners see their first redemption within a week.')
+      )
+    );
+  }
+
+  // Established partners get the real-ish dashboard.
+  const baseViews = 1426;
+  const baseReds = 82;
+  const grid = el('div',{class:'grid lg:grid-cols-[2fr_1fr] gap-6'},
+    el('div',{class:'space-y-6'},
+      el('div',{class:'grid grid-cols-3 gap-3'},
+        StatPanel('📈','Views this week', baseViews, '+18%'),
+        StatPanel('🎟️','Redemptions', baseReds + reds.length, '+12%'),
+        StatPanel('⭐','Rating', pv.rating?.toFixed(1) ?? '—', (pv.reviews ?? 0) + ' reviews')
+      ),
+      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+        el('h3',{class:'font-bold flex items-center gap-2'},'📈 Views This Week'),
+        el('div',{class:'mt-4 flex items-end gap-2 h-32'},
+          ...[42,58,71,69,84,103,121].map((v,i)=>
+            el('div',{class:'flex-1 flex flex-col items-center gap-1'},
+              el('div',{class:'w-full rounded-t bg-gradient-to-t from-mv-500 to-mv-400', style:`height: ${v/1.2}%; min-height:8px;`}),
+              el('div',{class:'text-[10px] text-slate2-500 font-bold uppercase'}, ['M','T','W','T','F','S','S'][i])
+            )
+          )
+        )
+      )
+    ),
+    el('div',{class:'space-y-6'},
+      el('div',{class:'rounded-2xl bg-mv-500/15 border border-mv-500/40 p-5'},
+        el('div',{class:'font-bold'},'⚡ Quick: redeem a code'),
+        el('p',{class:'mt-1 text-sm text-slate2-300'},'A diner is at your table? Enter their code to confirm 2-for-1.'),
+        el('button',{class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>go('partner-portal',{tab:'redeem'})},'Open redeem screen')
+      )
+    )
+  );
+  return el('div',{class:'space-y-6'}, headerLinks, grid);
+}
+function PortalRedeem() {
+  const wrap = el('div',{class:'max-w-md mx-auto'});
+  let digits = ['','','','','',''];
+  const pv = currentPartnerVenue();
+  if (!pv || pv.status !== 'LIVE') {
+    return el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-6 text-center'},
+      el('div',{class:'text-4xl'},'⏳'),
+      el('h2',{class:'mt-3 text-xl font-bold'},'Redemption unavailable'),
+      el('p',{class:'mt-2 text-sm text-slate2-400'},'Your venue isn\'t live yet, so there are no member codes to redeem.')
+    );
+  }
+  const venueSlug = pv.slug;
+  const venueName = pv.name;
+  function paint() {
+    wrap.innerHTML = '';
+    wrap.append(
+      el('h2',{class:'font-bold text-xl text-center'},'Enter the 6-digit code'),
+      el('p',{class:'mt-1 text-sm text-slate2-400 text-center'},'On the diner\'s phone screen · ', el('span',{class:'text-white font-bold'}, venueName)),
+      el('div',{class:'mt-6 grid grid-cols-6 gap-2'},
+        ...digits.map((d,i) =>
+          el('input',{
+            id:`d${i}`, type:'text', inputMode:'numeric', maxlength:'1', value:d,
+            class:'aspect-square text-center text-3xl font-mono font-bold bg-white/[0.04] border-2 border-white/10 rounded-md text-white focus:border-mv-500 outline-none',
+            onInput: e => {
+              const v = e.target.value.replace(/\D/g,'').slice(-1);
+              e.target.value = v; digits[i] = v;
+              if (v && i < 5) document.getElementById(`d${i+1}`)?.focus();
+              if (digits.every(x=>x)) attempt();
+            },
+            onKeydown: e => { if (e.key==='Backspace' && !digits[i] && i>0) document.getElementById(`d${i-1}`)?.focus(); }
+          })
+        )
+      ),
+      el('button',{class:'mt-5 w-full rounded-md bg-mv-500 hover:bg-mv-600 text-white py-3 font-extrabold cursor-pointer', onclick: attempt},'Confirm 2-for-1'),
+      el('p',{class:'mt-3 text-xs text-slate2-500 text-center'},'Codes expire 60 minutes after the diner books.')
+    );
+    setTimeout(()=>document.getElementById('d0')?.focus(), 0);
+  }
+  async function attempt() {
+    const code = digits.join('');
+    if (code.length !== 6) return;
+    // Look for the code at THIS venue first.
+    const b = store.bookings.find(x => x.venueSlug === venueSlug && x.code === code && !x.redeemed && !x.cancelled);
+    if (!b) {
+      // Helpful hint: is the code valid but for a different venue?
+      const wrongVenue = store.bookings.find(x => x.code === code && !x.redeemed && !x.cancelled);
+      if (wrongVenue) {
+        const v = findVenueBySlug(wrongVenue.venueSlug);
+        toast(`That code is for ${v?.name ?? 'another venue'}, not ${venueName}.`, 'err');
+      } else {
+        toast('No active booking with that code', 'err');
+      }
+      digits = ['','','','','','']; paint(); return;
+    }
+    if (b.expiresAt <= Date.now()) { toast('That code expired', 'err'); digits = ['','','','','','']; paint(); return; }
+    b.redeemed = true; b.redeemedAt = Date.now();
+    store.redemptions.unshift({ memberId: b.memberId, venueSlug: b.venueSlug, redeemedAt: Date.now(), method: 'PARTNER_CODE' });
+    saveStore();
+    const member = store.users.find(u => u.id === b.memberId);
+    wrap.innerHTML = '';
+    wrap.append(el('div',{class:'text-center'},
+      el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},'✓'),
+      el('h2',{class:'mt-4 text-2xl font-extrabold'},'2-for-1 confirmed'),
+      el('p',{class:'mt-1 text-sm text-slate2-400'}, member?.firstName ?? member?.email, ' · ', new Date().toLocaleString('en-GB')),
+      el('button',{class:'mt-8 rounded-md bg-mv-500 hover:bg-mv-600 px-5 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>{ digits = ['','','','','','']; paint(); }},'Redeem another')
+    ));
+  }
+  paint();
+  return el('div',{},
+    el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-6'}, wrap)
+  );
+}
+function PortalDeals() {
+  const pv = currentPartnerVenue();
+  if (!pv) return el('div',{class:'text-sm text-slate2-400'},'No venue.');
+  const wrap = el('div',{class:'grid lg:grid-cols-2 gap-6'});
+  function paint() {
+    wrap.innerHTML = '';
+    wrap.append(
+      // Slots
+      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+        el('div',{class:'flex items-center justify-between'},
+          el('h3',{class:'font-bold'},'🎁 Deal slots'),
+          el('button',{class:'text-xs underline text-slate2-300 cursor-pointer bg-transparent border-0', onclick:()=>{
+            pv.dealSlots = [...(pv.dealSlots||[]), { id:'s_'+Math.random().toString(36).slice(2,8), label:'New slot', days:'Mon-Fri', timeStart:'19:00', timeEnd:'21:00', active:true }];
+            saveStore(); paint();
+          }},'+ Add slot')
+        ),
+        el('div',{class:'mt-4 space-y-3'},
+          ...((pv.dealSlots||[]).map((s, i) => {
+            // Normalize legacy 'days' string to daysArr on first render
+            if (!Array.isArray(s.daysArr)) s.daysArr = parseDaysString(s.days || '');
+            return el('div',{class:'rounded-xl bg-white/[0.04] border border-white/10 p-3'},
+              el('div',{class:'flex items-center gap-2'},
+                el('input',{value:s.label, class:'flex-1 bg-transparent border border-white/10 rounded px-2 py-1 text-sm font-bold', onInput: e => { s.label = e.target.value; }, onBlur: ()=>{ saveStore(); }}),
+                el('div',{class:`h-6 w-11 rounded-full cursor-pointer transition ${s.active?'bg-accent-emer':'bg-white/10'} relative shrink-0`,
+                  onclick:()=>{ s.active = !s.active; saveStore(); paint(); }
+                },
+                  el('div',{class:`absolute top-0.5 ${s.active?'right-0.5':'left-0.5'} h-5 w-5 rounded-full bg-white transition`})
+                ),
+                el('button',{class:'text-xs text-red-300 underline cursor-pointer bg-transparent border-0 shrink-0', onclick:()=>{
+                  pv.dealSlots = pv.dealSlots.filter(x => x.id !== s.id); saveStore(); paint();
+                }},'Remove')
+              ),
+              // Day-of-week checkboxes
+              el('div',{class:'mt-3'},
+                el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Days'),
+                el('div',{class:'mt-1 flex gap-1 flex-wrap'},
+                  ...DAYS.map(([key, short]) => {
+                    const on = s.daysArr.includes(key);
+                    return el('button',{
+                      type:'button',
+                      class: 'rounded-md px-2.5 py-1 text-xs font-bold cursor-pointer ' + (on ? 'bg-mv-500 text-white' : 'bg-white/[0.05] text-slate2-300 border border-white/10 hover:bg-white/[0.1]'),
+                      onclick: () => {
+                        if (on) s.daysArr = s.daysArr.filter(d => d !== key);
+                        else s.daysArr = [...s.daysArr, key];
+                        // Keep `days` legacy string in sync for any consumer that still reads it
+                        s.days = daysToLabel(s.daysArr);
+                        saveStore(); paint();
+                      }
+                    }, short);
+                  })
+                ),
+                el('div',{class:'mt-1 text-[10px] text-slate2-500'}, s.daysArr.length ? daysToLabel(s.daysArr) : 'Pick at least one day')
+              ),
+              el('div',{class:'mt-3 grid grid-cols-2 gap-2 text-xs'},
+                el('div',{},
+                  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'Start'),
+                  el('input',{value:s.timeStart, type:'time', class:'w-full bg-transparent border border-white/10 rounded px-2 py-1.5', onInput: e => { s.timeStart = e.target.value; }, onBlur: ()=>saveStore()})
+                ),
+                el('div',{},
+                  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'End'),
+                  el('input',{value:s.timeEnd, type:'time', class:'w-full bg-transparent border border-white/10 rounded px-2 py-1.5', onInput: e => { s.timeEnd = e.target.value; }, onBlur: ()=>saveStore()})
+                )
+              )
+            );
+          }))
+        )
+      ),
+      // Conditions
+      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+        el('h3',{class:'font-bold'},'📋 Conditions shown to diners'),
+        el('textarea',{class:'mt-3 w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm', rows:'5',
+          onInput: e => { pv.dealTerms = e.target.value; },
+          onBlur: ()=>saveStore()
+        }, pv.dealTerms || DEFAULT_DEAL_TERMS),
+        el('button',{class:'mt-3 rounded-full bg-mv-500 hover:bg-mv-600 px-5 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{ saveStore(); toast('Saved'); }},'Save')
+      )
+    );
+  }
+  paint();
+  return wrap;
+}
+
+function PortalProfile() {
+  const pv = currentPartnerVenue();
+  if (!pv) return el('div',{class:'text-sm text-slate2-400'},'No venue.');
+  const wrap = el('div',{class:'max-w-3xl space-y-5'});
+
+  function field(label, key, placeholder='') {
+    return el('div',{},
+      el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'}, label),
+      el('input',{
+        class:'mt-1 w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-sm focus:border-mv-500 outline-none',
+        value: pv[key] ?? '', placeholder,
+        onInput: e => { pv[key] = e.target.value; }
+      })
+    );
+  }
+  function textareaField(label, key, rows=3) {
+    return el('div',{},
+      el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'}, label),
+      el('textarea',{
+        class:'mt-1 w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-sm focus:border-mv-500 outline-none',
+        rows: String(rows),
+        onInput: e => { pv[key] = e.target.value; }
+      }, pv[key] ?? '')
+    );
+  }
+
+  function paint() {
+    wrap.innerHTML = '';
+    // ---- Photos ----
+    wrap.append(el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+      el('div',{class:'flex items-center justify-between'},
+        el('h3',{class:'font-bold'},'📷 Photos'),
+        el('span',{class:'text-xs text-slate2-400'}, (pv.photos?.length ?? 0) + ' uploaded · auto-resized to 1000px')
+      ),
+      el('div',{class:'mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3'},
+        ...(pv.photos || []).map((src, i) => el('div',{class:'relative group aspect-[4/3] rounded-lg overflow-hidden border border-white/10 bg-ink-900'},
+          el('img',{src, class:'w-full h-full object-cover'}),
+          el('button',{class:'absolute top-1 right-1 h-7 w-7 rounded-full bg-ink-900/90 border border-white/20 text-xs cursor-pointer hover:bg-red-600/80',
+            onclick:()=>{ pv.photos.splice(i,1); saveStore(); paint(); }
+          },'✕')
+        )),
+        // Upload tile
+        el('label',{class:'aspect-[4/3] rounded-lg border-2 border-dashed border-white/15 grid place-items-center cursor-pointer hover:bg-white/[0.05] text-center text-slate2-400 text-sm'},
+          el('div',{},
+            el('div',{class:'text-2xl'},'➕'),
+            el('div',{class:'text-xs mt-1'},'Add photos')
+          ),
+          el('input',{type:'file', accept:'image/*', multiple:true, class:'hidden', onChange: async e => {
+            const files = Array.from(e.target.files || []);
+            if (!pv.photos) pv.photos = [];
+            for (const f of files) {
+              try {
+                const dataUrl = await compressImage(f);
+                pv.photos.push(dataUrl);
+              } catch (err) { console.warn('image error', err); toast('Could not process that image', 'err'); }
+            }
+            saveStore(); paint(); toast(`${files.length} photo${files.length===1?'':'s'} added`);
+          }})
+        )
+      ),
+      el('p',{class:'mt-2 text-[10px] text-slate2-500'},'Tip: 3–4 horizontal shots of dishes and your dining room work best.')
+    ));
+
+    // ---- Status toggle (Pause / Resume) ----
+    if (pv.status === 'LIVE' || pv.status === 'PAUSED') {
+      const isPaused = pv.status === 'PAUSED';
+      wrap.append(el('div',{class:'rounded-2xl ' + (isPaused ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-white/[0.04] border border-white/10') + ' p-5 flex items-center justify-between gap-3 flex-wrap'},
+        el('div',{class:'min-w-0'},
+          el('div',{class:'font-bold flex items-center gap-2'},
+            el('span',{class:'h-2 w-2 rounded-full ' + (isPaused ? 'bg-amber-400' : 'bg-accent-emer animate-pulse')}),
+            isPaused ? 'Listing paused' : 'Listing live'
+          ),
+          el('p',{class:'mt-1 text-sm text-slate2-400'},
+            isPaused
+              ? 'Members can\'t book new codes right now. Toggle on when you\'re ready to accept again.'
+              : 'New bookings open. Going on holiday or having an off night? Pause to stop accepting new bookings until you resume.'
+          )
+        ),
+        el('button',{class:'rounded-full ' + (isPaused ? 'bg-accent-emer text-ink-900 hover:bg-accent-emer/90' : 'bg-amber-500 text-ink-900 hover:bg-amber-400') + ' px-4 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
+          pv.status = isPaused ? 'LIVE' : 'PAUSED';
+          saveStore(); toast(isPaused ? 'Listing is live' : 'Listing paused'); paint();
+        }}, isPaused ? '▶ Resume listing' : '⏸ Pause listing')
+      ));
+    }
+
+    // ---- Basics ----
+    wrap.append(el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+      el('h3',{class:'font-bold'},'📝 Restaurant info'),
+      el('div',{class:'mt-3 grid md:grid-cols-2 gap-3'},
+        field('Restaurant name','name'),
+        field('Cuisine','cuisine','e.g. Spanish · Tapas'),
+        field('Barrio (neighbourhood)','barrio','e.g. Eixample'),
+        field('Address','address'),
+        field('Postcode','postcode'),
+        el('div',{},
+          el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Price tier (1–4)'),
+          el('input',{
+            type:'number', min:'1', max:'4', value: String(pv.priceTier ?? 2),
+            class:'mt-1 w-full bg-white/[0.04] border border-white/10 rounded-xl px-3 py-2 text-sm',
+            onInput: e => { pv.priceTier = Math.max(1, Math.min(4, parseInt(e.target.value || '2', 10))); }
+          })
+        ),
+        field('Phone','phone'),
+        field('Website','website','www.example.com'),
+        field('Instagram','instagram','@yourhandle'),
+        field('Opening hours (free text)','hours')
+      ),
+      el('div',{class:'mt-3'}, textareaField('Description (members see this)','description', 4))
+    ));
+
+    // ---- Save ----
+    wrap.append(el('div',{class:'flex items-center justify-between gap-3 sticky bottom-0 bg-ink-900/90 backdrop-blur p-3 rounded-xl border border-white/10'},
+      el('span',{class:'text-xs text-slate2-400'},'Status: ', el('span',{class:'font-bold text-white'}, pv.status)),
+      el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 px-6 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
+        pv.slug = slugify(pv.name) || pv.slug;
+        saveStore(); toast('Profile saved'); paint();
+      }},'Save changes')
+    ));
+  }
+  paint();
+  return wrap;
+}
+function StatPanel(icon,label,value,sub) {
+  return el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-4'},
+    el('div',{class:'flex items-center gap-2 text-xs text-slate2-400 font-bold uppercase tracking-widest'}, el('span',{},icon), label),
+    el('div',{class:'mt-2 text-3xl font-extrabold tabular-nums'}, String(value)),
+    el('div',{class:'text-xs text-accent-emer'}, sub)
+  );
+}
+
+/* ========================================================================
+   ADMIN
+   ======================================================================== */
+function Admin() {
+  const u = currentUser();
+  if (!u || u.role !== 'ADMIN') { go('signin'); return el('div'); }
+  const pendingVenues = store.partnerVenues.filter(v => v.status === 'PENDING_APPROVAL');
+  const liveVenues = store.partnerVenues.filter(v => v.status === 'LIVE');
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'},
+    el('header',{class:'border-b border-white/5 bg-ink-900/80'},
+      el('div',{class:'mx-auto max-w-6xl px-4 py-3 flex items-center justify-between'},
+        el('div',{class:'flex items-center gap-2'},el('span',{class:'text-xl'},'🍽️'),el('div',{class:'font-bold'},'Menuverso Admin')),
+        el('button',{class:'text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:logout},'Sign out')
+      )
+    ),
+    el('div',{class:'mx-auto max-w-6xl px-4 py-8'},
+      el('div',{class:'grid md:grid-cols-4 gap-4'},
+        StatPanel('🏪','Pending partners', pendingVenues.length, pendingVenues.length ? 'Review SLA: 1 day' : 'Queue empty'),
+        StatPanel('✓','Live partners', liveVenues.length + VENUES.length, liveVenues.length + ' partner-owned'),
+        StatPanel('👤','Members', store.users.filter(x=>x.role==='MEMBER').length, 'registered'),
+        StatPanel('🎟️','Redemptions', store.redemptions.length, 'this session')
+      ),
+      el('h2',{class:'mt-10 text-xl font-extrabold'},'Approval queue'),
+      el('div',{class:'mt-3 space-y-3'},
+        ...(pendingVenues.length === 0
+          ? [el('p',{class:'text-sm text-slate2-400'},'Queue is empty. New partner submissions will appear here.')]
+          : pendingVenues.map(pv => {
+              const owner = store.users.find(x => x.id === pv.ownerId);
+              return el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-4'},
+                el('div',{class:'flex items-start justify-between flex-wrap gap-3'},
+                  el('div',{class:'min-w-0 flex-1'},
+                    el('div',{class:'font-bold text-lg'}, pv.name),
+                    el('div',{class:'text-xs text-slate2-400 mt-0.5'},
+                      (pv.barrio || '—'), ' · ', (pv.cuisine || '—'),
+                      ' · ', '€'.repeat(pv.priceTier || 0) || '—',
+                      ' · ', owner ? owner.email : 'unknown owner'
+                    ),
+                    el('div',{class:'text-xs text-slate2-400'}, pv.address || 'No address yet', pv.postcode ? (', ' + pv.postcode) : ''),
+                    el('div',{class:'text-xs text-slate2-400 mt-1'},'Submitted ', pv.submittedAt ? new Date(pv.submittedAt).toLocaleString('en-GB') : '—'),
+                    pv.description && el('p',{class:'mt-2 text-sm text-slate2-300 max-w-2xl'}, pv.description),
+                    el('div',{class:'mt-2 flex gap-2 flex-wrap'},
+                      ...(pv.photos || []).slice(0,4).map(src => el('img',{src, class:'h-14 w-20 object-cover rounded border border-white/10'}))
+                    )
+                  ),
+                  el('div',{class:'flex gap-2 shrink-0'},
+                    el('button',{class:'rounded-full bg-accent-emer text-ink-900 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+                      pv.status = 'LIVE'; pv.approvedAt = Date.now(); saveStore(); toast('Approved ' + pv.name); render();
+                    }},'✓ Approve'),
+                    el('button',{class:'rounded-full bg-white/10 border border-white/10 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+                      const reason = prompt('Reason to send the partner (optional):') || 'A reviewer asked for changes. Please refine your profile and resubmit.';
+                      pv.status = 'REJECTED'; pv.rejectionReason = reason; saveStore(); toast('Rejected ' + pv.name); render();
+                    }},'Reject')
+                  )
+                )
+              );
+            })
+        )
+      ),
+      el('h2',{class:'mt-10 text-xl font-extrabold'},'Partner-owned venues'),
+      el('div',{class:'mt-3 rounded-2xl bg-white/[0.04] border border-white/10 p-2'},
+        el('table',{class:'w-full text-sm'},
+          el('thead',{class:'text-slate2-400 text-left'}, el('tr',{}, el('th',{class:'p-2'},'Venue'), el('th',{},'Owner'), el('th',{},'Status'), el('th',{},'Photos'), el('th',{},'Redemptions'))),
+          el('tbody',{},
+            ...store.partnerVenues.map(pv => {
+              const owner = store.users.find(x => x.id === pv.ownerId);
+              const reds = store.redemptions.filter(r => r.venueSlug === pv.slug).length;
+              return el('tr',{class:'border-t border-white/5'},
+                el('td',{class:'p-2 font-bold'}, pv.name),
+                el('td',{class:'text-xs'}, owner?.email ?? '—'),
+                el('td',{class:'text-xs'}, pv.status),
+                el('td',{class:'text-xs'}, String((pv.photos||[]).length)),
+                el('td',{class:'text-xs'}, String(reds))
+              );
+            })
+          )
+        )
+      ),
+      el('h2',{class:'mt-10 text-xl font-extrabold'},'All registered users'),
+      el('div',{class:'mt-3 rounded-2xl bg-white/[0.04] border border-white/10 p-2'},
+        el('table',{class:'w-full text-sm'},
+          el('thead',{class:'text-slate2-400 text-left'}, el('tr',{}, el('th',{class:'p-2'},'Email'), el('th',{},'Name'), el('th',{},'Role'), el('th',{},'Subscription'))),
+          el('tbody',{},
+            ...store.users.map(u => el('tr',{class:'border-t border-white/5'},
+              el('td',{class:'p-2 font-mono text-xs'}, u.email),
+              el('td',{}, u.firstName ?? '—'),
+              el('td',{class:'text-xs'}, u.role),
+              el('td',{class:'text-xs'}, store.subscriptions[u.id] ? store.subscriptions[u.id].status : '—')
+            ))
+          )
+        )
+      )
+    )
+  );
+}
+
+/* ========================================================================
+   LEGAL PAGES
+   ======================================================================== */
+function Privacy() {
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'}, MarketingHeader(),
+    el('article',{class:'mx-auto max-w-3xl px-4 py-12'},
+      el('button',{class:'text-slate2-400 text-sm underline cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Home'),
+      el('h1',{class:'mt-3 text-3xl font-extrabold'},'Privacy Notice'),
+      el('p',{class:'text-slate2-400 text-sm mt-1'},'Last updated 2026-05-11. Menuverso S.L. (Barcelona, Spain). Contact: hola@menuverso.app'),
+      el('h2',{class:'mt-8 text-xl font-bold'},'What we collect'),
+      el('p',{class:'mt-2 text-slate2-300 text-sm'},'Account: email, name, password (hashed). Subscription: Stripe customer/sub IDs and period dates. Bookings: venue, 6-digit code, timestamps. We don\'t run third-party ad trackers.'),
+      el('h2',{class:'mt-6 text-xl font-bold'},'Your rights'),
+      el('p',{class:'mt-2 text-slate2-300 text-sm'},'Access, correction, deletion, restriction, portability. Self-service in your account; otherwise email hola@menuverso.app. You can complain to the AEPD.')
+    )
+  );
+}
+function Terms() {
+  return el('div',{class:'min-h-screen bg-ink-950 text-white'}, MarketingHeader(),
+    el('article',{class:'mx-auto max-w-3xl px-4 py-12'},
+      el('button',{class:'text-slate2-400 text-sm underline cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Home'),
+      el('h1',{class:'mt-3 text-3xl font-extrabold'},'Terms of Service'),
+      el('p',{class:'text-slate2-400 text-sm mt-1'},'Last updated 2026-05-11.'),
+      el('p',{class:'mt-6 text-slate2-300 text-sm'},'€4.99/month, renews monthly, cancel any time from your account. Full refund within 14 days of first purchase if you have not redeemed any offer. Two diners required; cheaper main is free; dine-in; not combinable; drinks excluded. Spanish law; Barcelona courts.')
+    )
+  );
+}
+
+/* ========================================================================
+   ROUTER
+   ======================================================================== */
+const ROUTES = {
+  landing: Landing,
+  privacy: Privacy,
+  terms: Terms,
+  signup: Signup,
+  signin: Signin,
+  checkout: Checkout,
+  app: AppDiscover,
+  map: AppMap,
+  saved: AppSaved,
+  profile: AppProfile,
+  venue: Venue,
+  booking: Booking,
+  'partner-landing': PartnerLanding,
+  'partner-signin': PartnerSignin,
+  'partner-signup': PartnerSignup,
+  'partner-onboarding': PartnerOnboarding,
+  'partner-portal': PartnerPortal,
+  admin: Admin
+};
+
+function render() {
+  const root = $('#root');
+  root.innerHTML = '';
+  const page = ROUTES[state.route] || Landing;
+  root.appendChild(page());
+}
+
+// If the user already has a session, route them to their right home.
+if (state.session) {
+  const u = currentUser();
+  if (u) {
+    if (state.route === 'landing') {
+      // keep them on landing — that's the marketing entrance, but the header
+      // shows "Open App →" for them now
+    }
+  } else {
+    clearSession();
+  }
+}
+render();
+</script>
+</body>
+</html>
