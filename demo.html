@@ -8,6 +8,10 @@
 <meta name="description" content="Your all-access dining pass to a curated set of Barcelona restaurants. 2-for-1 deals on main courses, every day. €4.99/month. Launching summer 2026.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Fraunces — editorial serif for headlines, paired with Inter sans for everything else. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900&display=swap" rel="stylesheet">
 <!-- Leaflet — real interactive map, no API key required. Tiles from OpenStreetMap. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
@@ -43,6 +47,14 @@ tailwind.config = {
   /* Firefox equivalent */
   html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.10) transparent; }
   h1,h2,h3 { letter-spacing: -0.015em; }
+  /* Editorial display serif — pairs with sans body to give a culinary-magazine feel.
+     Used on hero H1, section H2s, venue name, member name. Inter stays everywhere else. */
+  .font-serif-display { font-family: 'Fraunces', 'Source Serif Pro', 'Georgia', serif; font-optical-sizing: auto; letter-spacing: -0.022em; font-feature-settings: 'ss01'; }
+  /* Gentle hue drift on the member avatar tile — makes the profile feel alive. */
+  @keyframes hue-drift { 0%, 100% { filter: hue-rotate(-6deg); } 50% { filter: hue-rotate(8deg); } }
+  .avatar-drift { animation: hue-drift 9s ease-in-out infinite; }
+  /* Page-transition cross-fade — applied on route change via go(). */
+  #root { transition: opacity 180ms ease-out; }
   .grain { background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px); background-size: 4px 4px; }
   .toast { animation: rise .2s ease-out; }
   @keyframes rise { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -75,8 +87,8 @@ const DEFAULT_SLOTS = () => [
 const initialStore = {
   users: [
     { id:'u_demo_member', email:'maria@menuverso.app', passwordHash:'pwhash:member123', firstName:'Maria', lastName:'Lopez', role:'MEMBER', createdAt: Date.now() - 30*86400000, verifiedAt: Date.now() - 30*86400000 },
-    { id:'u_demo_partner', email:'owner@cerveceria.test', passwordHash:'pwhash:partner123', firstName:'Joan', lastName:null, role:'PARTNER_OWNER', partnerVenueId:'pv_cerveceria', createdAt: Date.now() - 60*86400000, verifiedAt: Date.now() - 60*86400000 },
-    { id:'u_demo_admin', email:'admin@menuverso.app', passwordHash:'pwhash:admin123', firstName:'Admin', lastName:null, role:'ADMIN', createdAt: Date.now() - 90*86400000, verifiedAt: Date.now() - 90*86400000 }
+    { id:'u_demo_partner', email:'owner@cerveceria.test', passwordHash:'pwhash:partner123', firstName:'Joan', lastName:'Puig', role:'PARTNER_OWNER', partnerVenueId:'pv_cerveceria', createdAt: Date.now() - 60*86400000, verifiedAt: Date.now() - 60*86400000 },
+    { id:'u_demo_admin', email:'admin@menuverso.app', passwordHash:'pwhash:admin123', firstName:'Admin', lastName:'User', role:'ADMIN', createdAt: Date.now() - 90*86400000, verifiedAt: Date.now() - 90*86400000 }
   ],
   subscriptions: {
     'u_demo_member': { status:'ACTIVE', startedAt: Date.now() - 5*86400000, renewsAt: Date.now() + 25*86400000, city:'Barcelona', cancelAtPeriodEnd: false }
@@ -388,7 +400,23 @@ function el(tag, attrs={}, ...children) {
   }
   return e;
 }
-function go(route, params={}) { state.route = route; state.params = params; render(); window.scrollTo(0,0); }
+function go(route, params={}) {
+  state.route = route; state.params = params;
+  render();
+  // Cross-fade transition on route change — makes the app feel like a real
+  // SPA instead of an HTML page-reload. Render synchronously (so existing
+  // tests + flows still work), then fade the new content in from 0 → 1.
+  const root = $('#root');
+  if (root) {
+    root.style.transition = 'none';
+    root.style.opacity = '0';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      root.style.transition = 'opacity 200ms ease-out';
+      root.style.opacity = '1';
+    }));
+  }
+  window.scrollTo(0,0);
+}
 function toast(msg, kind='') {
   const t = el('div',{class:`toast fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full text-white px-5 py-2.5 text-sm shadow-lg border ${kind==='err'?'bg-red-600 border-red-400':'bg-ink-800 border-white/10'}`}, msg);
   document.body.appendChild(t);
@@ -397,6 +425,16 @@ function toast(msg, kind='') {
 function currentUser() {
   if (!state.session) return null;
   return store.users.find(u => u.id === state.session.userId) || null;
+}
+// Composed display name: "First Last", falling back to "First" or to the email
+// local-part. Used wherever a user's full name should appear.
+function fullName(u) {
+  if (!u) return '';
+  const first = (u.firstName || '').trim();
+  const last = (u.lastName || '').trim();
+  if (first && last) return first + ' ' + last;
+  if (first) return first;
+  return (u.email || '').split('@')[0];
 }
 function currentSub() {
   const u = currentUser(); if (!u) return null;
@@ -737,7 +775,7 @@ const isEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 /* ========================================================================
    AUTH HANDLERS — real persistent users
    ======================================================================== */
-async function registerUser({ firstName, email, password, role='MEMBER' }) {
+async function registerUser({ firstName, lastName, email, password, role='MEMBER' }) {
   email = email.trim().toLowerCase();
   if (!isEmail(email)) throw new Error('Please enter a valid email.');
   if (password.length < 8) throw new Error('Password must be at least 8 characters.');
@@ -747,7 +785,7 @@ async function registerUser({ firstName, email, password, role='MEMBER' }) {
     email,
     passwordHash: await hashPassword(password),
     firstName: firstName?.trim() || null,
-    lastName: null,
+    lastName: lastName?.trim() || null,
     role,
     createdAt: Date.now(),
     verifiedAt: Date.now() // demo skips email-verify
@@ -1164,9 +1202,9 @@ function Landing() {
         el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
           el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Launching in Barcelona · Summer 2026'
         ),
-        el('h1',{class:'mx-auto mt-6 max-w-4xl text-5xl md:text-7xl font-extrabold leading-[1.02]'},
+        el('h1',{class:'font-serif-display mx-auto mt-6 max-w-4xl text-6xl md:text-8xl font-extrabold leading-[0.98]'},
           'Taste the City.', el('br'),
-          el('span',{class:'text-mv-500'},'Pay Half.')
+          el('span',{class:'text-mv-500 italic'},'Pay Half.')
         ),
         el('p',{class:'mx-auto mt-6 max-w-2xl text-lg text-slate2-300'},
           'Your all-access dining pass to a ', el('strong',{class:'text-white'},'curated set of Barcelona restaurants'),
@@ -1255,7 +1293,7 @@ function Landing() {
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20'},
         el('div',{class:'text-center'},
           el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, 'How it works'),
-          el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold'}, 'Three Steps to ',
+          el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold'}, 'Three Steps to ',
             el('span',{class:'text-mv-500'},'Your First Deal')
           )
         ),
@@ -1439,7 +1477,7 @@ function Landing() {
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20'},
         el('div',{class:'text-center'},
           el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, 'Features'),
-          el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'}, 'Everything You Need ', el('br'),
+          el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'}, 'Everything You Need ', el('br'),
             el('span',{class:'text-mv-500'},'to Eat Better for Less')
           ),
           el('p',{class:'mx-auto mt-4 max-w-2xl text-slate2-400'}, 'A premium dining experience with powerful tools to discover, save, and enjoy Barcelona\'s culinary scene.')
@@ -1512,20 +1550,63 @@ function Landing() {
       el('div',{class:'relative mx-auto max-w-3xl px-4 pb-24 pt-10 text-center'},
       // Thin Catalan-tile motif divider — section breath, brand-coherent.
       el('div',{class:'pt-12'}, ILLUS.tileStrip('h-2.5 w-40 mx-auto text-mv-500/30')),
-      el('h2',{class:'text-3xl md:text-5xl font-extrabold pt-8'}, 'Your Next Meal is ',
-        el('span',{class:'text-mv-500'},'Half Off')),
-      el('div',{class:'mt-8 rounded-3xl bg-gradient-to-br from-mv-500/10 via-white/[0.03] to-mv-500/5 border border-mv-500/30 p-8'},
-        el('div',{class:'flex items-baseline justify-center gap-2'},
-          el('span',{class:'text-6xl font-extrabold text-mv-500'},'€4.99'),
-          el('span',{class:'text-slate2-400 font-bold'},'/month')
+      el('h2',{class:'font-serif-display text-4xl md:text-6xl font-extrabold pt-8'}, 'Your Next Meal is ',
+        el('span',{class:'text-mv-500 italic'},'Half Off')),
+      // Membership card — tactile, distinctive. Slight tilt + foil-coral price
+      // + member-since + serial number + magnetic-strip illusion. Hovers
+      // straighten as if you picked it up.
+      el('div',{class:'mt-10 relative mx-auto max-w-sm group [perspective:1000px]'},
+        // Outer glow shadow behind the card
+        el('div',{class:'absolute -inset-3 bg-gradient-to-br from-mv-500/50 via-accent-pink/40 to-mv-500/30 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-700'}),
+        // The card itself
+        el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
+          style:'background: linear-gradient(135deg, #BE123C 0%, #E11D48 38%, #F43F5E 72%, #FB7185 100%); transform-style: preserve-3d;'},
+          // Subtle tile pattern overlay
+          el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 25% 0%, rgba(255,255,255,0.4) 0, transparent 40%), repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);'}),
+          // Card body
+          el('div',{class:'relative p-7 pt-6 text-white text-left'},
+            el('div',{class:'flex items-start justify-between'},
+              el('div',{},
+                el('div',{class:'text-[10px] uppercase tracking-[0.32em] font-extrabold opacity-90'},'Dining Pass'),
+                el('div',{class:'mt-0.5 text-[10px] uppercase tracking-[0.25em] font-bold opacity-65'},'Menuverso · Barcelona')
+              ),
+              el('div',{class:'text-right'},
+                el('span',{class:'text-2xl font-extrabold leading-none'},'🍽️'),
+                el('div',{class:'mt-1 text-[9px] uppercase tracking-[0.25em] font-bold opacity-65'},'2×1')
+              )
+            ),
+            // Price as foil-stamp display serif
+            el('div',{class:'mt-7 flex items-baseline gap-1'},
+              el('span',{class:'font-serif-display text-7xl font-extrabold drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]'},'€4.99'),
+              el('span',{class:'text-sm font-bold opacity-80'},'/month')
+            ),
+            // Inclusions
+            el('ul',{class:'mt-5 space-y-1.5 text-sm text-white/95'},
+              ...['Curated Barcelona restaurants','2×1 on mains, any open slot','Cancel any time'].map(s =>
+                el('li',{class:'flex items-center gap-2'},
+                  el('span',{class:'inline-flex h-4 w-4 rounded-full bg-white/25 items-center justify-center text-[10px] font-extrabold'},'✓'),
+                  el('span',{}, s)
+                ))
+            ),
+            // Member meta-line — like the bottom of a real card
+            el('div',{class:'mt-7 pt-5 border-t border-white/25 flex items-end justify-between text-xs'},
+              el('div',{},
+                el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold opacity-65'},'Member from'),
+                el('div',{class:'mt-0.5 font-serif-display text-lg font-extrabold'},'Summer 2026')
+              ),
+              el('div',{class:'text-right'},
+                el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold opacity-65'},'Serial'),
+                el('div',{class:'mt-0.5 font-mono font-bold text-sm tracking-wider'},'MV·000142')
+              )
+            )
+          ),
+          // Magnetic-strip illusion (a thin dark band at the very bottom)
+          el('div',{class:'absolute bottom-0 left-0 right-0 h-5 bg-black/35'})
         ),
-        el('ul',{class:'mt-6 grid grid-cols-2 gap-2 text-sm text-left max-w-md mx-auto'},
-          ...['Curated Barcelona restaurants','Unlimited 2×1 deals','Cancel any time','Instant activation'].map(s =>
-            el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-mv-500 font-extrabold'},'✓'), s))
-        ),
-        el('button',{class:'mt-7 rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-10 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>currentUser()?go('checkout'):go('signup')},'Get Your Pass →')
-      ) // close pricing card
-      ) // close .relative wrapper
+        // CTA — sits below the card, not inside it.
+        el('button',{class:'relative mt-8 mx-auto block rounded-2xl bg-white text-ink-900 px-10 py-3.5 font-extrabold cursor-pointer hover:bg-slate2-100 transition shadow-xl shadow-mv-500/20', onclick:()=>currentUser()?go('checkout'):go('signup')},'Get Your Pass →')
+      ) // close membership-card outer div
+      ) // close the .relative mx-auto max-w-3xl wrapper
     ), // close section
     el('footer',{class:'border-t border-white/5 mt-4'},
       el('div',{class:'mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-slate2-400'},
@@ -1575,6 +1656,7 @@ function Signup() {
       try {
         await registerUser({
           firstName: fd.get('firstName'),
+          lastName: fd.get('lastName'),
           email: fd.get('email'),
           password: pw
         });
@@ -1587,7 +1669,10 @@ function Signup() {
         btn.disabled = false; btn.textContent = 'Create account';
       }
     }},
-      InputField('First name','text','firstName','Maria', false),
+      el('div',{class:'grid grid-cols-2 gap-3'},
+        InputField('First name','text','firstName','Maria', true),
+        InputField('Last name','text','lastName','Lopez', true)
+      ),
       InputField('Email','email','email','you@example.com', true, 'email'),
       PasswordField('Password','password','At least 8 characters', { helpText:'Tip: tap Show to verify you typed it correctly.' }),
       PasswordField('Confirm password','confirmPassword','Re-type to confirm'),
@@ -1727,7 +1812,7 @@ function Checkout() {
     el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'Skip for now →'),
     el('div',{class:'text-center mt-4'},
       el('div',{class:'text-5xl'},'🎁'),
-      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock unlimited 2×1 deals'),
+      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock 2×1 mains across Barcelona'),
       el('p',{class:'text-slate2-300 text-sm mt-2'},'Curated Barcelona restaurants. Cancel anytime.')
     ),
     el('div',{class:'mt-6 rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
@@ -1736,7 +1821,7 @@ function Checkout() {
         el('span',{class:'text-slate2-400'},'/month')
       ),
       el('ul',{class:'mt-5 space-y-2 text-sm'},
-        ...['Unlimited 2-for-1 deals','Curated Barcelona restaurants','Cancel anytime','Instant activation']
+        ...['2-for-1 on mains, any open slot','Curated Barcelona restaurants','Cancel anytime','Instant activation']
         .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer'},'✓'), s))
       ),
       el('button',{class:'mt-6 w-full rounded-2xl bg-white text-ink-900 hover:bg-slate2-100 py-3.5 font-extrabold cursor-pointer', onclick:()=>{
@@ -2228,12 +2313,12 @@ function AppProfile() {
       el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #F43F5E 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
       el('div',{class:'relative px-5 pt-6 pb-8'},
         el('div',{class:'flex items-start gap-4 flex-wrap'},
-          el('div',{class:'h-20 w-20 rounded-2xl bg-gradient-to-br from-mv-500 to-accent-pink grid place-items-center text-4xl font-extrabold shrink-0 shadow-xl shadow-mv-500/30 border-2 border-white/20'},
+          el('div',{class:'avatar-drift h-20 w-20 rounded-2xl bg-gradient-to-br from-mv-500 to-accent-pink grid place-items-center text-4xl font-extrabold shrink-0 shadow-xl shadow-mv-500/30 border-2 border-white/20'},
             (u.firstName?.[0] ?? u.email[0]).toUpperCase()
           ),
           el('div',{class:'flex-1 min-w-0'},
             el('div',{class:'text-[10px] uppercase tracking-widest text-mv-300 font-extrabold'},'Member since ' + memberSinceLabel),
-            el('h1',{class:'mt-0.5 text-3xl md:text-4xl font-extrabold truncate'}, u.firstName ?? u.email.split('@')[0]),
+            el('h1',{class:'font-serif-display mt-0.5 text-4xl md:text-5xl font-extrabold truncate'}, fullName(u)),
             el('div',{class:'mt-2 flex items-center gap-2 flex-wrap'},
               el('span',{class:'inline-flex items-center gap-1.5 rounded-full ' + tier.bg + ' px-3 py-1 text-xs font-extrabold uppercase tracking-widest ' + tier.color},
                 el('span',{}, tier.emoji), tier.label
@@ -2420,10 +2505,13 @@ function Venue() {
         onclick:()=>{ toggleSaved(v.slug); render(); }
       }, saved ? '❤️' : '🤍')
     ),
-    el('div',{class:'p-5'},
-      el('div',{class:'flex items-start justify-between gap-3'},
+    // Desktop 2-col layout: main column scrolls (title + action + reviews),
+    // right column holds offer + slot picker sticky so booking is always
+    // one click away. Mobile keeps everything stacked in source order.
+    el('div',{class:'p-5 md:grid md:grid-cols-[minmax(0,1fr)_360px] md:gap-8 md:items-start'},
+      el('div',{class:'md:col-start-1 md:row-start-1 flex items-start justify-between gap-3'},
         el('div',{class:'min-w-0'},
-          el('h1',{class:'text-2xl font-extrabold'}, v.name),
+          el('h1',{class:'font-serif-display text-3xl md:text-4xl font-extrabold'}, v.name),
           el('div',{class:'text-xs text-slate2-400 mt-1'}, v.barrio,' · ', v.cuisine,' · ','€'.repeat(v.priceTier))
         ),
         el('div',{class:'text-right'},
@@ -2461,8 +2549,12 @@ function Venue() {
           el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Share')
         ));
         const cols = tiles.length === 2 ? 'grid-cols-2' : tiles.length === 3 ? 'grid-cols-3' : 'grid-cols-4';
-        return el('div',{class:'mt-4 grid ' + cols + ' gap-2'}, ...tiles);
+        return el('div',{class:'mt-4 md:col-start-1 md:row-start-2 grid ' + cols + ' gap-2'}, ...tiles);
       })(),
+      // ===== Right-column booking module (sticky on desktop) =====
+      // Wraps the offer + slot picker so they stay visible while the diner
+      // scrolls through reviews on the left. On mobile, falls back to normal flow.
+      el('aside',{class:'mt-4 md:mt-0 md:col-start-2 md:row-start-1 md:row-span-3 md:sticky md:top-20 space-y-4'},
       // Conditions block — uses partner's actual saved terms now. If every
       // slot shares the same terms, render once. If slots differ, render the
       // shared terms here and show per-slot variations inline with the picker.
@@ -2472,7 +2564,7 @@ function Venue() {
         const slotTerms = (pvDeals?.dealSlots || []).filter(s => s.active).map(s => (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault);
         const allSame = slotTerms.length === 0 || slotTerms.every(t => t === slotTerms[0]);
         const sharedTerms = allSame && slotTerms.length > 0 ? slotTerms[0] : venueDefault;
-        return el('div',{class:'mt-4 rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
+        return el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
           el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'2×1 Main Course'),
           el('div',{class:'mt-1 font-bold'},'Buy one main, get one free'),
           el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'}, sharedTerms),
@@ -2482,7 +2574,7 @@ function Venue() {
       // Slot picker — when this is a partner-owned venue with per-slot terms
       // that differ from the venue default, show each slot's specific terms
       // inline so the diner sees exactly what applies to the time they pick.
-      el('div',{class:'mt-5'},
+      el('div',{},
         el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold mb-2'},'Pick a time slot'),
         el('div',{class:'space-y-2'},
           ...((() => {
@@ -2529,14 +2621,15 @@ function Venue() {
             ));
           })())
         )
-      ),
-      // ---- Aggregated member reviews ----
+      ) // close the slot-picker div
+      ), // close the <aside> (sticky right column), comma to next sibling
+      // ---- Aggregated member reviews (left column row 3) ----
       // We already collect star ratings after redemption; surface them so a
       // diner browsing this venue can see what other members thought.
       (() => {
         const reviews = venueReviews(v.slug).slice().sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
         if (reviews.length === 0) {
-          return el('div',{class:'mt-6 rounded-2xl bg-white/[0.03] border border-white/10 p-5 text-center'},
+          return el('div',{class:'mt-6 md:col-start-1 md:row-start-3 rounded-2xl bg-white/[0.03] border border-white/10 p-5 text-center'},
             el('div',{class:'text-2xl'},'⭐'),
             el('h3',{class:'mt-1 font-bold'},'No member reviews yet'),
             el('p',{class:'mt-1 text-xs text-slate2-400 max-w-xs mx-auto'},'Members rate the experience after they redeem. Be one of the first.')
@@ -2544,7 +2637,7 @@ function Venue() {
         }
         const avg = reviews.reduce((s,r)=>s+r.stars, 0) / reviews.length;
         const withNotes = reviews.filter(r => r.note && r.note.trim()).slice(0, 4);
-        return el('div',{class:'mt-6'},
+        return el('div',{class:'mt-6 md:col-start-1 md:row-start-3'},
           el('div',{class:'flex items-baseline justify-between'},
             el('h3',{class:'font-bold text-base'},'Member reviews'),
             el('span',{class:'text-xs text-slate2-400'}, reviews.length + ' rating' + (reviews.length===1?'':'s'))
@@ -2881,7 +2974,7 @@ function PartnerLanding() {
     el('section',{class:'mx-auto max-w-6xl px-4 py-20'},
       el('div',{class:'text-center'},
         el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Why partners join'),
-        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Built for ', el('span',{class:'text-mv-500'},'restaurant owners'))
+        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Built for ', el('span',{class:'text-mv-500'},'restaurant owners'))
       ),
       el('div',{class:'mt-12 grid md:grid-cols-3 gap-5'},
         ...[
@@ -2902,7 +2995,7 @@ function PartnerLanding() {
     el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
       el('div',{class:'text-center'},
         el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'How it works'),
-        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Live in ', el('span',{class:'text-mv-500'},'one afternoon'))
+        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Live in ', el('span',{class:'text-mv-500'},'one afternoon'))
       ),
       el('div',{class:'mt-12 grid md:grid-cols-4 gap-4'},
         ...[
@@ -2925,7 +3018,7 @@ function PartnerLanding() {
     el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-white/5'},
       el('div',{class:'text-center'},
         el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'What\'s included'),
-        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'A real portal — ', el('span',{class:'text-mv-500'},'not a fax form'))
+        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'A real portal — ', el('span',{class:'text-mv-500'},'not a fax form'))
       ),
       el('div',{class:'mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
         ...[
@@ -2952,7 +3045,7 @@ function PartnerLanding() {
     el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-white/5'},
       el('div',{class:'text-center'},
         el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'A note to restaurant owners'),
-        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Why we\'re building ', el('span',{class:'text-mv-500'},'Menuverso'))
+        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Why we\'re building ', el('span',{class:'text-mv-500'},'Menuverso'))
       ),
       el('div',{class:'mt-10 rounded-3xl bg-white/[0.03] border border-white/10 p-8 leading-relaxed text-slate2-200'},
         el('p',{},'Most "deals platforms" pitch you on volume: pay a cut of every cover, get a flood of price-sensitive diners, and hope to break even on drinks. We\'re building the opposite.'),
@@ -2968,7 +3061,7 @@ function PartnerLanding() {
     // PRICING — single transparent card.
     el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-white/5 text-center'},
       el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Pricing'),
-      el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'No commission. ', el('br'), el('span',{class:'text-mv-500'},'No catch.')),
+      el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'No commission. ', el('br'), el('span',{class:'text-mv-500'},'No catch.')),
       el('div',{class:'mt-10 rounded-3xl bg-gradient-to-br from-mv-500/10 via-white/[0.03] to-mv-500/5 border border-mv-500/30 p-8 text-left'},
         el('div',{class:'flex items-baseline justify-center gap-2 text-center'},
           el('span',{class:'text-6xl font-extrabold text-mv-500'},'€0'),
@@ -3002,7 +3095,7 @@ function PartnerLanding() {
     el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-white/5'},
       el('div',{class:'text-center'},
         el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'FAQ'),
-        el('h2',{class:'mt-2 text-3xl md:text-5xl font-extrabold leading-tight'},'Questions ', el('span',{class:'text-mv-500'},'before you list'))
+        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Questions ', el('span',{class:'text-mv-500'},'before you list'))
       ),
       el('div',{class:'mt-10 space-y-3'},
         ...[
@@ -3083,22 +3176,33 @@ function PartnerPortal() {
   if (pv.status === 'DRAFT') { go('partner-onboarding'); return el('div'); }
 
   const portalHeader = el('header',{class:'border-b border-white/5 bg-ink-900/80 sticky top-0 z-30'},
-    el('div',{class:'mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap'},
-      el('div',{class:'flex items-center gap-2'},
-        el('span',{class:'text-xl text-mv-500'},'🍽️'),
-        el('div',{},
-          el('div',{class:'font-bold'},'Menuverso Partner Portal'),
-          // Dropped "· Barcelona ·" filler between venue name and status.
-          el('div',{class:'text-xs text-slate2-400'}, pv.name, ' · ',
+    // Mobile: header is a single row with title left and a compact actions
+    // group right (icons only) — no wrapping. Desktop: same row with full text.
+    el('div',{class:'mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3'},
+      el('div',{class:'flex items-center gap-2 min-w-0 flex-1'},
+        el('span',{class:'text-xl text-mv-500 shrink-0'},'🍽️'),
+        el('div',{class:'min-w-0 flex-1'},
+          el('div',{class:'font-bold text-sm sm:text-base truncate'},'Menuverso Partner Portal'),
+          el('div',{class:'text-xs text-slate2-400 truncate'}, pv.name, ' · ',
             el('span',{class: pv.status === 'LIVE' ? 'text-accent-emer font-bold' : 'text-amber-400 font-bold'}, pv.status)
           )
         )
       ),
-      // Single canonical link to the diner-facing page; replaces the now-removed
-      // duplicates on the Overview and Profile tabs.
-      el('div',{class:'flex items-center gap-4'},
-        pv.status === 'LIVE' && el('a',{class:'text-xs text-slate2-300 hover:text-white cursor-pointer underline', onclick:()=>go('venue',{slug:pv.slug})},'View public page →'),
-        el('button',{class:'text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:logout},'Log out')
+      // Actions: full text on md+, icon-only on small screens to keep one row.
+      el('div',{class:'flex items-center gap-3 shrink-0'},
+        pv.status === 'LIVE' && el('a',{
+          class:'text-xs text-slate2-300 hover:text-white cursor-pointer underline whitespace-nowrap',
+          onclick:()=>go('venue',{slug:pv.slug}),
+          title:'View public page'
+        },
+          el('span',{class:'hidden sm:inline'},'View public page →'),
+          el('span',{class:'sm:hidden'},'View →')
+        ),
+        el('button',{
+          class:'text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0 whitespace-nowrap',
+          onclick:logout,
+          title:'Log out'
+        },'Log out')
       )
     )
   );
@@ -3147,12 +3251,16 @@ function PartnerPortal() {
   if (tab === 'redeem') markPartnerRedemptionsSeen(pv);
   const unread = partnerUnreadBookings(pv);
   return el('div',{class:'min-h-screen bg-ink-950 text-white'}, portalHeader,
-    el('div',{class:'mx-auto max-w-6xl px-4 mt-6'},
-      el('div',{class:'inline-flex bg-white/[0.04] border border-white/10 rounded-full p-1 flex-wrap'},
-        ...[['overview','Overview', 0],['redeem','Redeem code', unread],['deals','Deals', 0],['profile','Profile', 0]].map(([k,l,n]) =>
-          el('button',{class: 'rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 relative ' + (tab===k ? 'bg-white text-ink-900' : 'text-slate2-300 hover:text-white'),
+    el('div',{class:'mx-auto max-w-6xl px-4 mt-6 overflow-x-auto -mx-4 px-4'},
+      // No flex-wrap — let the tab pill row scroll horizontally on narrow
+      // screens instead of breaking onto a second row. Tab labels also
+      // shorten on small screens so they fit more often without scrolling.
+      el('div',{class:'inline-flex bg-white/[0.04] border border-white/10 rounded-full p-1 whitespace-nowrap'},
+        ...[['overview','Overview','Overview', 0],['redeem','Redeem code','Redeem', unread],['deals','Deals','Deals', 0],['profile','Profile','Profile', 0]].map(([k,fullLabel,shortLabel,n]) =>
+          el('button',{class: 'rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 relative shrink-0 ' + (tab===k ? 'bg-white text-ink-900' : 'text-slate2-300 hover:text-white'),
             onclick: ()=>go('partner-portal',{tab:k})},
-            l,
+            el('span',{class:'hidden sm:inline'}, fullLabel),
+            el('span',{class:'sm:hidden'}, shortLabel),
             n > 0 ? el('span',{class:'ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-mv-500 text-white text-[10px] font-extrabold animate-pulse'}, String(n)) : null
           )
         )
@@ -3218,7 +3326,8 @@ function PartnerSignup() {
             id: userId, email,
             passwordHash: await hashPassword(String(fd.get('password'))),
             firstName: String(fd.get('firstName')||'').trim() || null,
-            lastName: null, role: 'PARTNER_OWNER',
+            lastName: String(fd.get('lastName')||'').trim() || null,
+            role: 'PARTNER_OWNER',
             partnerVenueId: venueId,
             createdAt: Date.now(), verifiedAt: Date.now()
           };
@@ -3233,7 +3342,10 @@ function PartnerSignup() {
           btn.disabled = false; btn.textContent = 'Create partner account';
         }
       }},
-        InputField('Your name','text','firstName','Joan', false),
+        el('div',{class:'grid grid-cols-2 gap-3'},
+          InputField('First name','text','firstName','Joan', true),
+          InputField('Last name','text','lastName','Puig', true)
+        ),
         InputField('Restaurant name','text','restaurantName','e.g. Bar Brutal', true),
         InputField('Business email','email','email','owner@yourplace.com', true, 'email'),
         PasswordField('Password','password','At least 8 characters', { helpText:'Tap Show to verify you typed it correctly.' }),
@@ -3844,7 +3956,7 @@ function PortalRedeem() {
     wrap.append(el('div',{class:'text-center'},
       el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},'✓'),
       el('h2',{class:'mt-4 text-2xl font-extrabold'},'2-for-1 confirmed'),
-      el('p',{class:'mt-1 text-sm text-slate2-400'}, member?.firstName ?? member?.email, ' · ', new Date().toLocaleString('en-GB')),
+      el('p',{class:'mt-1 text-sm text-slate2-400'}, member ? fullName(member) : '—', ' · ', new Date().toLocaleString('en-GB')),
       el('button',{class:'mt-8 rounded-md bg-mv-500 hover:bg-mv-600 px-5 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>{ digits = ['','','','','','']; paint(); }},'Redeem another')
     ));
   }
@@ -4184,10 +4296,11 @@ function Admin() {
     ['activity','🎫 Activity', 0],
     ['system','⚙️ System', 0]
   ];
-  const tabBar = el('div',{class:'mx-auto max-w-6xl px-4 mt-6'},
-    el('div',{class:'inline-flex bg-white/[0.04] border border-white/10 rounded-full p-1 flex-wrap'},
+  const tabBar = el('div',{class:'mx-auto max-w-6xl mt-6 overflow-x-auto px-4'},
+    // Horizontal scroll instead of wrap on narrow screens.
+    el('div',{class:'inline-flex bg-white/[0.04] border border-white/10 rounded-full p-1 whitespace-nowrap'},
       ...tabs.map(([k,l,n]) => el('button',{
-        class: 'rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 relative ' + (tab===k ? 'bg-white text-ink-900' : 'text-slate2-300 hover:text-white'),
+        class: 'rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 relative shrink-0 ' + (tab===k ? 'bg-white text-ink-900' : 'text-slate2-300 hover:text-white'),
         onclick: ()=>go('admin',{tab:k})
       }, l, n > 0 ? el('span',{class:'ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-mv-500 text-white text-[10px] font-extrabold animate-pulse'}, String(n)) : null))
     )
@@ -4389,7 +4502,7 @@ function Admin() {
             el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
               el('div',{class:'flex-1 min-w-[200px]'},
                 el('div',{class:'flex items-center gap-2 flex-wrap'},
-                  el('span',{class:'font-bold'}, usr.firstName ?? usr.email.split('@')[0]),
+                  el('span',{class:'font-bold'}, fullName(usr)),
                   el('span',{class:'text-xs text-slate2-400 font-mono'}, usr.email),
                   el('span',{class:'rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, usr.role)
                 ),
@@ -4402,8 +4515,13 @@ function Admin() {
               ),
               el('div',{class:'flex gap-2 flex-wrap shrink-0'},
                 el('button',{class:'rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
-                  const next = window.prompt('Edit display name:', usr.firstName ?? '');
-                  if (next !== null) { usr.firstName = next.trim() || null; saveStore(); toast('Name updated'); render(); }
+                  const f = window.prompt('First name:', usr.firstName ?? '');
+                  if (f === null) return;
+                  const l = window.prompt('Last name:', usr.lastName ?? '');
+                  if (l === null) return;
+                  usr.firstName = f.trim() || null;
+                  usr.lastName = l.trim() || null;
+                  saveStore(); toast('Name updated'); render();
                 }},'Edit name'),
                 el('button',{class:'rounded-full bg-white/5 border border-white/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
                   const r = window.prompt('Change role (MEMBER / PARTNER_OWNER / ADMIN):', usr.role);
