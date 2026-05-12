@@ -70,6 +70,10 @@ tailwind.config = {
   /* Editorial display serif — pairs with sans body to give a culinary-magazine feel.
      Used on hero H1, section H2s, venue name, member name. Inter stays everywhere else. */
   .font-serif-display { font-family: 'Fraunces', 'Source Serif Pro', 'Georgia', serif; font-optical-sizing: auto; letter-spacing: -0.022em; font-feature-settings: 'ss01'; }
+  /* Hero text sits on the video and stays legible regardless of frame content —
+     light cream foreground with a soft dark halo. */
+  .hero-on-video { color: #FAF6EF; text-shadow: 0 2px 18px rgba(28,15,6,0.55), 0 1px 3px rgba(28,15,6,0.4); }
+  .hero-on-video strong { color: #FFFFFF; }
   /* Gentle hue drift on the member avatar tile — makes the profile feel alive. */
   @keyframes hue-drift { 0%, 100% { filter: hue-rotate(-6deg); } 50% { filter: hue-rotate(8deg); } }
   .avatar-drift { animation: hue-drift 9s ease-in-out infinite; }
@@ -1473,8 +1477,13 @@ function Landing() {
       // the vertical gradient is FULLY opaque ink-950 (RGB matches the
       // next section's bg) so the seam between hero and the next section
       // is invisible — no horizontal cut line.
-      el('div',{class:'absolute inset-0 pointer-events-none', style:'background: linear-gradient(180deg, rgba(250,246,239,0.86) 0%, rgba(250,246,239,0.62) 28%, rgba(250,246,239,0.62) 65%, rgba(250,246,239,0.94) 88%, rgba(250,246,239,1) 100%);'}),
-      el('div',{class:'absolute inset-0 pointer-events-none', style:'background: radial-gradient(ellipse 80% 65% at 50% 50%, transparent 0%, rgba(250,246,239,0.32) 70%, rgba(250,246,239,0.62) 100%);'}),
+      // Vertical wash: heavier at top (the H1 needs a clean reading layer),
+      // very light in the middle (so the video is clearly visible — diners eating,
+      // pinchos clinking, etc.), then ramps back up to fully opaque cream at the
+      // bottom so the seam with the next section is invisible.
+      el('div',{class:'absolute inset-0 pointer-events-none', style:'background: linear-gradient(180deg, rgba(250,246,239,0.55) 0%, rgba(250,246,239,0.18) 30%, rgba(250,246,239,0.18) 60%, rgba(250,246,239,0.85) 88%, rgba(250,246,239,1) 100%);'}),
+      // Subtle radial vignette — pulls focus to the centre copy without darkening too much.
+      el('div',{class:'absolute inset-0 pointer-events-none', style:'background: radial-gradient(ellipse 80% 65% at 50% 50%, transparent 0%, rgba(250,246,239,0.14) 70%, rgba(250,246,239,0.32) 100%);'}),
       // Warm coral atmospheric wash — kept ONLY on the top-right so it
       // doesn't fight the cream paper bg. Lower opacity now since the
       // page is already light.
@@ -1647,12 +1656,12 @@ function Landing() {
         el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
           el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Launching in Barcelona · Summer 2026'
         ),
-        el('h1',{class:'font-serif-display mx-auto mt-6 max-w-4xl text-6xl md:text-8xl font-extrabold leading-[0.98]'},
+        el('h1',{class:'hero-on-video font-serif-display mx-auto mt-6 max-w-4xl text-6xl md:text-8xl font-extrabold leading-[0.98]'},
           'Taste the City.', el('br'),
           el('span',{class:'text-mv-500 italic'},'Pay Half.')
         ),
-        el('p',{class:'mx-auto mt-6 max-w-2xl text-lg text-slate2-300'},
-          'Your all-access dining pass to a ', el('strong',{class:'text-slate2-50'},'curated set of Barcelona restaurants'),
+        el('p',{class:'hero-on-video mx-auto mt-6 max-w-2xl text-lg'},
+          'Your all-access dining pass to a ', el('strong',{},'curated set of Barcelona restaurants'),
           '. The launch list is forming now — new venues join every week. Show your code, get 2-for-1 on mains.'
         ),
         el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
@@ -2012,12 +2021,14 @@ function Landing() {
                 '</g>'+
                 '<text x="85" y="262" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1" fill="#82765E" text-anchor="middle">VALID FOR 15 MIN</text>'+
               '</g>'+
-              // "−€24" floating receipt-ribbon
-              '<g transform="translate(330 280)">'+
-                '<rect x="0" y="0" width="106" height="36" rx="18" fill="#10B981"/>'+
-                '<circle cx="20" cy="18" r="8" fill="white" fill-opacity="0.25"/>'+
-                '<path d="M 16 18 L 19 21 L 25 14" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
-                '<text x="36" y="22" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="15" fill="white">Saved €24</text>'+
+              // "Saved €24" floating receipt-ribbon. Sized + positioned so the
+              // pill ends well inside the viewBox (was getting clipped at narrow
+              // viewport widths where the SVG meets the container vertically).
+              '<g transform="translate(282 282)">'+
+                '<rect x="0" y="0" width="132" height="34" rx="17" fill="#10B981"/>'+
+                '<circle cx="18" cy="17" r="7.5" fill="white" fill-opacity="0.25"/>'+
+                '<path d="M 14 17 L 17 20 L 23 13" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
+                '<text x="34" y="22" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="white">Saved €24</text>'+
               '</g>'+
               // Confetti
               '<g>'+
