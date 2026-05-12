@@ -2554,59 +2554,65 @@ function Landing() {
       el('div',{class:'pt-12'}, ILLUS.tileStrip('h-2.5 w-40 mx-auto text-mv-500/30')),
       el('h2',{class:'font-serif-display text-4xl md:text-6xl font-extrabold pt-8'}, 'Your Next Meal is ',
         el('span',{class:'text-mv-500 italic'},'Half Off')),
-      // Membership card — tactile, distinctive. Slight tilt + foil-coral price
-      // + member-since + serial number + magnetic-strip illusion. Hovers
-      // straighten as if you picked it up.
-      el('div',{class:'mt-10 relative mx-auto max-w-sm group [perspective:1000px]'},
-        // Outer glow shadow behind the card
-        el('div',{class:'absolute -inset-3 bg-gradient-to-br from-mv-500/50 via-accent-pink/40 to-mv-500/30 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-700'}),
-        // The card itself
-        el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
-          style:'background: linear-gradient(135deg, #BE123C 0%, #E11D48 38%, #DC4A26 72%, #FB7185 100%); transform-style: preserve-3d;'},
-          // Subtle tile pattern overlay
-          el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 25% 0%, rgba(255,255,255,0.4) 0, transparent 40%), repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);'}),
+      // Membership card — re-skinned for the pastel palette. Was a saturated
+      // red-coral gradient that felt heavy against cream paper; now it's a
+      // tactile cream "club card" with a terracotta side-stripe, a foil-stamp
+      // italic price, and a terracotta "m" emblem in place of the cutlery emoji.
+      el('div',{class:'mt-12 relative mx-auto max-w-sm group [perspective:1200px]'},
+        // Outer warm bloom — cream + terracotta halo (replaces pink coral glow)
+        el('div',{class:'absolute -inset-4 bg-gradient-to-br from-mv-500/25 via-cream-100/50 to-mv-500/20 rounded-[2rem] blur-2xl opacity-70 group-hover:opacity-95 transition-opacity duration-700'}),
+        // The card itself — cream cardstock with warm gradient
+        el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl shadow-mv-500/[0.12] ring-1 ring-mv-500/15 transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
+          style:'background: linear-gradient(135deg, #FAF6EF 0%, #F4ECDD 50%, #EDDFC4 100%); transform-style: preserve-3d;'},
+          // Subtle paper-grain pattern — soft terracotta wash + diagonal hairlines
+          el('div',{class:'absolute inset-0 opacity-60 pointer-events-none', style:'background-image: radial-gradient(circle at 22% 0%, rgba(220,74,38,0.10) 0, transparent 45%), repeating-linear-gradient(45deg, rgba(28,15,6,0.025) 0 6px, transparent 6px 12px);'}),
+          // Left-edge terracotta accent stripe — like a real club card bookmark
+          el('div',{class:'absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-mv-400 via-mv-500 to-mv-600 pointer-events-none'}),
           // Card body
-          el('div',{class:'relative p-7 pt-6 text-slate2-50 text-left'},
+          el('div',{class:'relative p-7 pt-6 pl-9 text-slate2-100 text-left'},
             el('div',{class:'flex items-start justify-between'},
               el('div',{},
-                el('div',{class:'text-[10px] uppercase tracking-[0.32em] font-extrabold opacity-90'},'Dining Pass'),
-                el('div',{class:'mt-0.5 text-[10px] uppercase tracking-[0.25em] font-bold opacity-65'},'Menuverso · Barcelona')
+                el('div',{class:'text-[10px] uppercase tracking-[0.32em] font-extrabold text-mv-500'},'Dining Pass'),
+                el('div',{class:'mt-0.5 text-[10px] uppercase tracking-[0.25em] font-bold text-slate2-400'},'Menuverso · Barcelona')
               ),
+              // Refined emblem: terracotta disc with italic serif "m"
               el('div',{class:'text-right'},
-                el('span',{class:'text-2xl font-extrabold leading-none'},'🍽️'),
-                el('div',{class:'mt-1 text-[9px] uppercase tracking-[0.25em] font-bold opacity-65'},'2×1')
+                el('div',{class:'inline-flex h-9 w-9 rounded-full bg-mv-500 items-center justify-center shadow-md shadow-mv-500/30'},
+                  el('span',{class:'font-serif-display italic font-extrabold text-white text-xl leading-none'},'m')
+                ),
+                el('div',{class:'mt-1.5 text-[9px] uppercase tracking-[0.25em] font-bold text-mv-500'},'2×1')
               )
             ),
-            // Price as foil-stamp display serif
+            // Price as foil-stamp display serif — italic terracotta
             el('div',{class:'mt-7 flex items-baseline gap-1'},
-              el('span',{class:'font-serif-display text-7xl font-extrabold drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)]'},'€4.99'),
-              el('span',{class:'text-sm font-bold opacity-80'},'/month')
+              el('span',{class:'font-serif-display italic text-7xl font-extrabold text-mv-500 drop-shadow-[0_2px_6px_rgba(220,74,38,0.18)]'},'€4.99'),
+              el('span',{class:'text-sm font-bold text-slate2-400'},'/month')
             ),
-            // Inclusions
-            el('ul',{class:'mt-5 space-y-1.5 text-sm text-slate2-50/95'},
+            // Inclusions — slate text with solid terracotta check pills
+            el('ul',{class:'mt-5 space-y-2 text-sm text-slate2-100'},
               ...['Curated Barcelona restaurants','2×1 on mains, any open slot','Cancel any time'].map(s =>
-                el('li',{class:'flex items-center gap-2'},
-                  el('span',{class:'inline-flex h-4 w-4 rounded-full bg-slate2-50/25 items-center justify-center text-[10px] font-extrabold'},'✓'),
-                  el('span',{}, s)
+                el('li',{class:'flex items-center gap-2.5'},
+                  el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},'✓'),
+                  el('span',{class:'font-medium'}, s)
                 ))
             ),
-            // Member meta-line — like the bottom of a real card
-            el('div',{class:'mt-7 pt-5 border-t border-slate2-50/25 flex items-end justify-between text-xs'},
+            // Member meta-line — terracotta hairline divider above
+            el('div',{class:'mt-7 pt-5 border-t border-mv-500/25 flex items-end justify-between text-xs'},
               el('div',{},
-                el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold opacity-65'},'Member from'),
-                el('div',{class:'mt-0.5 font-serif-display text-lg font-extrabold'},'Summer 2026')
+                el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold text-slate2-400'},'Member from'),
+                el('div',{class:'mt-0.5 font-serif-display italic text-lg font-extrabold text-slate2-100'},'Summer 2026')
               ),
               el('div',{class:'text-right'},
-                el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold opacity-65'},'Serial'),
-                el('div',{class:'mt-0.5 font-mono font-bold text-sm tracking-wider'},'MV·000142')
+                el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold text-slate2-400'},'Serial'),
+                el('div',{class:'mt-0.5 font-mono font-bold text-sm tracking-wider text-mv-600'},'MV·000142')
               )
             )
           ),
-          // Magnetic-strip illusion (a thin dark band at the very bottom)
-          el('div',{class:'absolute bottom-0 left-0 right-0 h-5 bg-black/35'})
+          // Bottom: thin warm terracotta strip (replaces the black magnetic strip)
+          el('div',{class:'absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-mv-400 via-mv-500 to-mv-400 opacity-85'})
         ),
-        // CTA — sits below the card, not inside it.
-        el('button',{class:'relative mt-8 mx-auto block rounded-2xl bg-slate2-50 text-ink-900 px-10 py-3.5 font-extrabold cursor-pointer hover:bg-slate2-200 transition shadow-xl shadow-mv-500/20', onclick:()=>currentUser()?go('checkout'):go('signup')},'Get Your Pass →')
+        // CTA — terracotta to match the rest of the page (replaces black pill)
+        el('button',{class:'relative mt-10 mx-auto block rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-10 py-4 text-lg font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>currentUser()?go('checkout'):go('signup')},'Get Your Pass →')
       ) // close membership-card outer div
       ) // close the .relative mx-auto max-w-3xl wrapper
     ), // close section
