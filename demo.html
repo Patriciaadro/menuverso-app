@@ -4457,8 +4457,8 @@ function PartnerLanding() {
       el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #DC4A26 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
         el('div',{},
-          el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
-            el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'For Barcelona restaurants'
+          el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
+            el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}),'For Barcelona restaurants'
           ),
           el('h1',{class:'mt-5 text-4xl md:text-6xl font-extrabold leading-[1.05]'},
             'Fill your ', el('span',{class:'text-mv-500'},'slow nights.'), el('br'),
@@ -4570,71 +4570,140 @@ function PartnerLanding() {
       )
     ),
 
-    // WHY LIST WITH MENUVERSO — three value pillars.
-    el('section',{class:'mx-auto max-w-6xl px-4 py-20'},
-      el('div',{class:'text-center'},
-        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Why partners join'),
-        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Built for ', el('span',{class:'text-mv-500'},'restaurant owners'))
-      ),
-      el('div',{class:'mt-12 grid md:grid-cols-3 gap-5'},
-        ...[
-          ['📈','Fill seats that would have been empty','Most members book the slots you choose — Tuesday lunch, Wednesday dinner, early Sunday. Your busy nights stay yours.'],
-          ['💸','Keep the full bill on the second cover','Members pay for one main; the other is free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.'],
-          ['🤝','Real diners, not deal-hunters','€4.99/month filters out the coupon crowd. Members are locals who eat out 4–8× a month and bring friends.']
-        ].map(([icon,t,d])=>
-          el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-6 hover:bg-slate2-50/[0.05] hover:border-mv-500/30 transition'},
-            el('div',{class:'h-12 w-12 rounded-2xl bg-mv-500/15 grid place-items-center text-2xl'}, icon),
-            el('h3',{class:'mt-4 text-xl font-bold'}, t),
-            el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d)
-          )
-        )
-      )
-    ),
+    // ====== Partner-page glyph library — clean Lucide-style line icons ======
+    // Inherits color from `text-mv-500` via currentColor so every glyph picks
+    // up the brand terracotta automatically. 24x24 viewBox, scales fluidly.
+    (() => { if (!window.__partnerGlyphs) window.__partnerGlyphs = {
+      users:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/><circle cx="17" cy="8" r="2.5" opacity="0.5"/><path d="M19.5 20v-1a3.5 3.5 0 0 0-2.5-3.4" opacity="0.5"/></svg>',
+      receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="2.5" opacity="0.9"/></svg>',
+      heart:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 6 5.5 6c1.7 0 3.2 1 4 2.5C10.3 7 11.8 6 13.5 6c3 0 4.5 3 3 6-2.5 4.5-9.5 9-9.5 9z" fill="currentColor" fill-opacity="0.18"/></svg>',
+      document:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="14" y2="18"/></svg>',
+      check:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><polyline points="7.5 12.5 10.5 15.5 16 9.5"/></svg>',
+      calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/><circle cx="16" cy="14.5" r="1.1" fill="currentColor" fill-opacity="0.4"/></svg>',
+      keypad:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="currentColor" fill-opacity="0.22"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity="0.5"/></svg>',
+      barChart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="13" width="3" height="7" fill="currentColor" fill-opacity="0.22"/><rect x="11" y="9" width="3" height="11"/><rect x="16" y="5" width="3" height="15" fill="currentColor" fill-opacity="0.22"/></svg>',
+      profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="11" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 11-3"/><path d="M17 13l5 5-2 1-2 1 1-2 1-2-3-3z" fill="currentColor" fill-opacity="0.22"/></svg>',
+      layers:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polygon points="12 3 21 8 12 13 3 8" fill="currentColor" fill-opacity="0.22"/><polyline points="3 13 12 18 21 13"/><polyline points="3 17 12 22 21 17" opacity="0.5"/></svg>',
+      pause:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><line x1="10" y1="8.5" x2="10" y2="15.5" stroke-width="2"/><line x1="14" y1="8.5" x2="14" y2="15.5" stroke-width="2"/></svg>',
+      phone:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="6" y="2" width="12" height="20" rx="2.5"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><text x="12" y="13" font-family="Courier, monospace" font-size="5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">842</text></svg>',
+      chat:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M21 11.5a8.5 8.5 0 0 1-13 7.2L3 20.5l1.8-4.7A8.5 8.5 0 1 1 21 11.5z" fill="currentColor" fill-opacity="0.15"/><circle cx="8.5" cy="11.5" r="0.9" fill="currentColor"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor"/><circle cx="15.5" cy="11.5" r="0.9" fill="currentColor"/></svg>'
+    }; })(),
 
-    // HOW IT WORKS FOR RESTAURANTS — 4 steps.
-    el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-slate2-50/5'},
-      el('div',{class:'text-center'},
-        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'How it works'),
-        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Live in ', el('span',{class:'text-mv-500'},'one afternoon'))
-      ),
-      el('div',{class:'mt-12 grid md:grid-cols-4 gap-4'},
-        ...[
-          ['1','📝','Apply','Tell us about your restaurant. 4 steps, 3 minutes. Upload photos, set your cuisine, write a short description.'],
-          ['2','✅','We review','One business day. Our team checks the basics. If we have questions we email you — no phone tag.'],
-          ['3','🗓️','Set your slots','Pick the days and times you want to offer 2-for-1. Pause or change them any time, no notice required.'],
-          ['4','🎫','Redeem codes','Members book a slot and arrive with a 6-digit code. Your server types it into the portal. Done.']
-        ].map(([n,icon,t,d])=>
-          el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-6 relative'},
-            el('div',{class:'absolute -top-3 left-6 inline-flex items-center justify-center h-7 w-7 rounded-full bg-mv-500 text-white font-extrabold text-sm shadow-lg shadow-mv-500/30'}, n),
-            el('div',{class:'text-3xl mt-2'}, icon),
-            el('h3',{class:'mt-3 text-lg font-bold'}, t),
-            el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d)
-          )
+    // ====== "Why partners join" — three editorial value pillars ======
+    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28'},
+      el('div',{class:'text-center max-w-3xl mx-auto'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'Why partners join',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-6xl font-extrabold leading-[0.98]'},
+          'Built for ', el('span',{class:'italic text-mv-500'},'restaurant owners,'), el('br'), 'not deal-hunters.'
+        ),
+        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
+          'Three reasons restaurants list with us — each one a different way our model isn\'t the same as the other guys\'.'
         )
-      )
-    ),
-
-    // WHAT'S INCLUDED — feature grid.
-    el('section',{class:'mx-auto max-w-6xl px-4 py-20 border-t border-slate2-50/5'},
-      el('div',{class:'text-center'},
-        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'What\'s included'),
-        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'A real portal — ', el('span',{class:'text-mv-500'},'not a fax form'))
       ),
-      el('div',{class:'mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-4'},
+      el('div',{class:'mt-16 md:mt-20 grid md:grid-cols-3 gap-6'},
         ...[
-          ['📊','Live dashboard','Bookings, redemptions, peak hours, repeat-visit rate — refreshed in real time.'],
-          ['📸','Self-serve profile','Edit your photos, description, cuisine tags, hours, and contact info any time. No emails, no waiting.'],
-          ['🎁','Multiple deal slots','Run different offers across the week — Mon lunch, Wed dinner, weekend brunch. Edit, pause, or expire any of them.'],
-          ['⏸️','Pause anytime','Going on holiday? Toggle PAUSED in one click. Resumes instantly when you flip it back.'],
-          ['🧑‍🍳','Staff redemption codes','Your servers type a 6-digit code, no scanner needed. Works on any phone.'],
-          ['💬','Direct support','Real humans at hola@menuverso.com. Most replies within an hour during business hours.']
-        ].map(([icon,t,d])=>
-          el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-6 hover:border-mv-500/30 transition'},
-            el('div',{class:'flex items-center gap-3'},
-              el('span',{class:'text-2xl'}, icon),
-              el('h3',{class:'text-base font-bold'}, t)
+          { glyph:'users',   stat:'Tuesday lunch',   eyebrow:'Fill the quiet shifts', title:'Quiet shifts, not your prime time.', body:'Members book the slots you choose — Tuesday lunch, Wednesday dinner, early Sunday. Your busy nights stay yours.' },
+          { glyph:'receipt', stat:'Full bill',       eyebrow:'Keep the full bill',   title:'One main free. Everything else, yours.', body:'Members pay for one main; the other\'s free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.' },
+          { glyph:'heart',   stat:'4–8× a month',    eyebrow:'Real locals',          title:'Regulars, not coupon-clippers.', body:'€4.99/month filters out the deal-hunter crowd. Members are locals who eat out 4–8× a month and bring friends.' }
+        ].map(p =>
+          el('div',{class:'group relative rounded-2xl bg-ink-900/70 border border-mv-500/15 p-7 md:p-8 hover:border-mv-500/40 hover:shadow-xl hover:shadow-mv-500/[0.08] hover:-translate-y-0.5 transition-all duration-300'},
+            // Glyph tile + a small stat chip on the right
+            el('div',{class:'flex items-start justify-between'},
+              el('div',{class:'h-14 w-14 rounded-2xl bg-mv-500/10 ring-1 ring-mv-500/25 grid place-items-center text-mv-500 p-3', html: window.__partnerGlyphs[p.glyph]}),
+              el('div',{class:'text-right'},
+                el('div',{class:'text-[10px] uppercase tracking-[0.22em] font-bold text-slate2-400'}, p.eyebrow),
+                el('div',{class:'mt-1 font-serif-display italic text-lg text-mv-500 font-extrabold'}, p.stat)
+              )
             ),
-            el('p',{class:'mt-3 text-sm text-slate2-400 leading-relaxed'}, d)
+            el('h3',{class:'mt-7 font-serif-display text-2xl md:text-3xl font-extrabold leading-[1.1] text-slate2-50'}, p.title),
+            el('p',{class:'mt-3 text-[15px] text-slate2-300 leading-relaxed'}, p.body)
+          )
+        )
+      )
+    ),
+
+    // ====== "How it works" — magazine-style 4-step storyboard ======
+    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
+      el('div',{class:'text-center max-w-3xl mx-auto'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'How it works',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
+          'Live in ', el('span',{class:'italic text-mv-500'},'one afternoon.')
+        ),
+        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
+          'Apply this morning. Approved by tomorrow. Bookings the day after. No phone tag, no sales call, no contract.'
+        )
+      ),
+      // 4-step storyboard — italic Fraunces numbers, SVG glyphs, editorial copy.
+      // Vertical hairline connects the four cards on desktop.
+      el('div',{class:'mt-20 md:mt-24 relative'},
+        // Connecting thread under the numerals
+        el('div',{class:'hidden md:block absolute left-4 right-4 top-[3.25rem] h-px bg-gradient-to-r from-transparent via-mv-500/30 to-transparent pointer-events-none', 'aria-hidden':'true'}),
+        el('div',{class:'relative grid md:grid-cols-4 gap-6'},
+          ...[
+            { num:'01', glyph:'document', title:'Apply',         body:'Tell us about your restaurant. Four steps, three minutes. Upload photos, set your cuisine, write a short description.' },
+            { num:'02', glyph:'check',    title:'We review',     body:'One business day. Our team checks the basics. If we have questions, we email — no phone tag.' },
+            { num:'03', glyph:'calendar', title:'Set your slots',body:'Pick the days and times you\'ll offer 2-for-1. Pause or change them any time, no notice required.' },
+            { num:'04', glyph:'keypad',   title:'Redeem codes',  body:'Members arrive with a 6-digit code. Your server types it into the portal. Done.' }
+          ].map(s =>
+            el('div',{class:'relative'},
+              // Big italic Fraunces numeral
+              el('div',{class:'flex items-center justify-center'},
+                el('div',{class:'relative h-[5.5rem] w-[5.5rem] rounded-full bg-ink-900 ring-2 ring-mv-500/30 grid place-items-center shadow-lg shadow-mv-500/[0.10]'},
+                  el('span',{class:'font-serif-display italic text-3xl font-extrabold text-mv-500'}, s.num)
+                )
+              ),
+              // Card
+              el('div',{class:'mt-5 rounded-2xl bg-ink-900/60 border border-mv-500/15 p-6 hover:border-mv-500/35 transition'},
+                el('div',{class:'flex items-center gap-3'},
+                  el('div',{class:'h-10 w-10 rounded-xl bg-mv-500/10 ring-1 ring-mv-500/20 grid place-items-center text-mv-500 p-2', html: window.__partnerGlyphs[s.glyph]}),
+                  el('h3',{class:'font-serif-display text-xl md:text-2xl font-extrabold text-slate2-50'}, s.title)
+                ),
+                el('p',{class:'mt-3 text-sm text-slate2-300 leading-relaxed'}, s.body)
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // ====== "What's included" — bento-leaning feature grid ======
+    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
+      el('div',{class:'text-center max-w-3xl mx-auto'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'What\'s included',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
+          'A real portal — ', el('span',{class:'italic text-mv-500'},'not a fax form.')
+        ),
+        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
+          'Six tools that mean you actually run the listing — instead of emailing support every time something changes.'
+        )
+      ),
+      el('div',{class:'mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-5'},
+        ...[
+          { glyph:'barChart', title:'Live dashboard',         body:'Bookings, redemptions, peak hours, repeat-visit rate — refreshed in real time.' },
+          { glyph:'profile',  title:'Self-serve profile',     body:'Edit your photos, description, cuisine tags, hours, and contact info any time. No emails, no waiting.' },
+          { glyph:'layers',   title:'Multiple deal slots',    body:'Run different offers across the week — Mon lunch, Wed dinner, weekend brunch. Edit, pause, or expire any of them.' },
+          { glyph:'pause',    title:'Pause anytime',          body:'Going on holiday? Toggle PAUSED in one click. Resumes instantly when you flip it back.' },
+          { glyph:'phone',    title:'Staff redemption codes', body:'Your servers type a 6-digit code, no scanner needed. Works on any phone.' },
+          { glyph:'chat',     title:'Direct support',         body:'Real humans at hola@menuverso.com. Most replies within an hour during business hours.' }
+        ].map(f =>
+          el('div',{class:'group relative rounded-2xl bg-ink-900/60 border border-mv-500/15 p-6 hover:border-mv-500/35 hover:shadow-lg hover:shadow-mv-500/[0.06] hover:-translate-y-0.5 transition-all duration-300'},
+            el('div',{class:'flex items-center gap-3.5'},
+              el('div',{class:'h-12 w-12 rounded-xl bg-mv-500/10 ring-1 ring-mv-500/25 grid place-items-center text-mv-500 p-2.5', html: window.__partnerGlyphs[f.glyph]}),
+              el('h3',{class:'font-serif-display text-xl font-extrabold text-slate2-50 leading-tight'}, f.title)
+            ),
+            el('p',{class:'mt-4 text-sm text-slate2-300 leading-relaxed'}, f.body)
           )
         )
       )
