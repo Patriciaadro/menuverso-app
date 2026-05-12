@@ -84,6 +84,38 @@ const DEFAULT_SLOTS = () => [
   { id:'s_brunch', label:'Weekend Brunch', days:'Sat-Sun', timeStart:'11:00', timeEnd:'13:00', active:false }
 ];
 
+// Default redemption-credit cap: how many times a single member may redeem an
+// offer at one restaurant in a calendar month. Partners can request a different
+// number via the edit-approval flow (subject to admin approval, like any other
+// change to the deal itself).
+const DEFAULT_CREDITS_PER_USER = 3;
+
+// 30-day minimum live commitment from when an offer is first approved LIVE.
+// Inside this window: partner cannot pause, cannot remove the offer
+// unilaterally. Admin can still soft-remove on request (flagged "early").
+const OFFER_MIN_DAYS = 30;
+const OFFER_MIN_MS = OFFER_MIN_DAYS * 86400000;
+
+// Partner Terms & Conditions, v1.0 (Menuverso SL).
+// Plain-text bullets — rendered with line breaks and bold headers inside
+// the onboarding step. New partners must scroll + tick before they can
+// proceed. We keep the file embedded so the demo works fully offline.
+const TNC_VERSION = 'v1.0';
+const TNC_BODY = [
+  ['Parties', 'These terms govern the relationship between Menuverso SL (a Spanish Sociedad Limitada, registered in Barcelona) and your restaurant ("the Partner"). By ticking the box at the end of this screen you confirm you have the authority to bind your business to these terms.'],
+  ['What you publish', 'Your offer on Menuverso is the 2-for-1 deal you configure in the partner portal: the conditions text and the time slots you choose. The offer goes live only after Menuverso has reviewed and approved it.'],
+  ['30-day live commitment', 'Once your offer is first approved by Menuverso, it stays live and bookable for a minimum of 30 consecutive days. During this window you cannot pause new bookings and you cannot remove the offer without a written removal request approved by Menuverso. The intent is to give diners predictability — the menu they joined for has to be there when they show up.'],
+  ['Editing the offer', 'You may edit the offer at any time, but changes to the deal itself (the conditions text, the slot schedule, or the per-member credit cap) require Menuverso approval before they go live. Profile metadata — your photos, name, address, hours, contact details, and description — can be edited freely without review.'],
+  ['Removing the offer', 'After the 30-day commitment has elapsed, you may submit a removal request explaining why. Menuverso aims to approve all bona-fide requests within 3 business days. Early removal requests (inside the 30-day window) may be approved at our discretion if there are exceptional circumstances; doing so is a breach of the commitment above and will be noted on your account.'],
+  ['Per-member credit cap', 'Each Menuverso member can redeem your offer at your restaurant up to N times per calendar month, where N is the number you configure (default 3). The cap refreshes on the first day of every month. You cannot configure a cap of zero.'],
+  ['Honouring redemption codes', 'You agree to honour every valid (unexpired, unredeemed) 6-digit code presented by a Menuverso member. Refusing a valid code without a documented reason is grounds for offer suspension by Menuverso.'],
+  ['Fees', 'Listing on Menuverso is free during our launch period. We will give you 30 days notice before any pricing change.'],
+  ['Liability', 'Menuverso provides the booking platform and the membership relationship; we are not party to the actual meal you serve. Disputes over food quality or service are between you and the diner. Menuverso may mediate but is not financially liable for restaurant-side outcomes.'],
+  ['Termination', 'Menuverso may terminate your listing at any time for repeated breaches of these terms, persistent member complaints, or activity that risks our brand or other partners. We will give you reasonable notice and the opportunity to respond before termination.'],
+  ['Governing law', 'These terms are governed by Spanish law. Disputes will be resolved by the competent courts of Barcelona, Catalonia, Spain.'],
+  ['Contact', 'For any questions about these terms, contact hola@menuverso.com. To request an exception or escalate a decision, mark the email subject "Partner T&C".']
+];
+
 const initialStore = {
   users: [
     { id:'u_demo_member', email:'maria@menuverso.com', passwordHash:'pwhash:member123', firstName:'Maria', lastName:'Lopez', role:'MEMBER', createdAt: Date.now() - 30*86400000, verifiedAt: Date.now() - 30*86400000 },
@@ -136,9 +168,20 @@ const initialStore = {
       reviews: 18230,
       status: 'LIVE',
       submittedAt: Date.now() - 60*86400000,
-      approvedAt: Date.now() - 59*86400000
+      approvedAt: Date.now() - 59*86400000,
+      // Governance fields (Sprint G1)
+      offerPublishedAt: Date.now() - 59*86400000,  // 30-day commitment expired long ago
+      offerVersion: 1,
+      creditsPerUser: DEFAULT_CREDITS_PER_USER,
+      // Seed partner is grandfathered — no T&C acceptance required.
+      tncAcceptedAt: null,
+      tncVersion: null
     }
-  ]
+  ],
+  // Pending partner change requests (edits + removals). Sprint G2/G3.
+  changeRequests: [],
+  // Published T&C versions. Sprint G1.
+  tncVersions: []  // populated by migration on first load
 };
 
 function loadStore() {
@@ -264,6 +307,41 @@ let _emailMigrated = 0;
   if (u.id === 'u_demo_admin' && !u.lastName) u.lastName = 'User';
 });
 if (_emailMigrated > 0) console.log('Migrated', _emailMigrated, 'legacy emails to .com');
+
+// ------------------------------------------------------------------------
+// Governance fields migration (Sprint G1)
+// Adds the offer-governance + per-user-credits fields onto every existing
+// partner venue. Grandfathered partners get tncAcceptedAt=null (no prompt;
+// they're bound by the prior implicit terms). offerPublishedAt for LIVE
+// venues is back-dated to their approvedAt so the 30-day commitment has
+// already passed and they can pause/request-remove normally.
+// ------------------------------------------------------------------------
+(store.partnerVenues || []).forEach(pv => {
+  if (typeof pv.creditsPerUser !== 'number') pv.creditsPerUser = DEFAULT_CREDITS_PER_USER;
+  if (typeof pv.offerVersion !== 'number') pv.offerVersion = (pv.status === 'LIVE' || pv.status === 'PAUSED') ? 1 : 0;
+  if (!('offerPublishedAt' in pv)) {
+    pv.offerPublishedAt = (pv.status === 'LIVE' || pv.status === 'PAUSED')
+      ? (pv.approvedAt || pv.createdAt || (Date.now() - 60*86400000))
+      : null;
+  }
+  if (!('tncAcceptedAt' in pv)) pv.tncAcceptedAt = null;
+  if (!('tncVersion' in pv)) pv.tncVersion = null;
+  // G2: liveDeal — what members see. Frozen at the last admin approval.
+  // Partner edits to pv.dealTerms/dealSlots/creditsPerUser update the draft
+  // but liveDeal stays put until a new EDIT changeRequest is approved.
+  if (!pv.liveDeal && (pv.status === 'LIVE' || pv.status === 'PAUSED')) {
+    pv.liveDeal = {
+      dealTerms: pv.dealTerms,
+      dealSlots: JSON.parse(JSON.stringify(pv.dealSlots || [])),
+      creditsPerUser: pv.creditsPerUser
+    };
+  }
+});
+if (!Array.isArray(store.changeRequests)) store.changeRequests = [];
+if (!Array.isArray(store.tncVersions) || store.tncVersions.length === 0) {
+  store.tncVersions = [{ version: TNC_VERSION, publishedAt: Date.now(), body: TNC_BODY }];
+}
+
 saveStore();
 
 /* ========================================================================
@@ -314,7 +392,12 @@ const VENUES = VENUE_SEEDS.map(([name,barrio,cuisine,priceTier,rating,reviews,la
 // Convert a partner-owned venue (with photos[], dealSlots[], etc.) into the
 // same shape member-facing lists expect (img, times, etc.).
 function toMemberShape(pv) {
-  const times = (pv.dealSlots || [])
+  // G2: members see the LIVE deal (frozen at last approval), not the
+  // partner's editor draft. liveDeal exists for LIVE/PAUSED venues thanks
+  // to the migration; for venues that pre-date governance the fallback is
+  // the current pv values (back-compat with old states).
+  const liveSlots = (pv.liveDeal && pv.liveDeal.dealSlots) || pv.dealSlots || [];
+  const times = liveSlots
     .filter(s => s.active)
     .map(s => `${s.label} · ${s.timeStart}-${s.timeEnd}`);
   return {
@@ -338,20 +421,64 @@ function toMemberShape(pv) {
 }
 // Merged venue list — platform seeds + every LIVE partner venue. Member-facing.
 function getAllVenues() {
+  // G3: REMOVED venues never surface to members. PAUSED also stays out of
+  // Discover/Map; they resolve through findVenueBySlug only (for saved
+  // venues + direct links).
   const partnerLive = (store.partnerVenues || []).filter(pv => pv.status === 'LIVE').map(toMemberShape);
-  // Partner venues first so newly-onboarded ones surface to the top of Discover.
   return [...partnerLive, ...VENUES];
 }
 function findVenueBySlug(slug) {
   // Direct-link path: a member who has a saved venue, an active booking, or
   // a URL that paused-after-they-bookmarked still needs the venue resolvable
-  // so Venue() can render the M-2 "Currently paused" banner instead of
-  // bouncing them out with no explanation. Discover/Map use getAllVenues()
-  // (LIVE-only) — single venue lookup should be permissive.
+  // so Venue() can render the "Currently paused" banner instead of bouncing
+  // them out. Discover/Map use getAllVenues() (LIVE-only) — single venue
+  // lookup should be permissive for LIVE and PAUSED, but NOT for REMOVED.
   const live = getAllVenues().find(v => v.slug === slug);
   if (live) return live;
   const paused = (store.partnerVenues || []).find(pv => pv.slug === slug && (pv.status === 'PAUSED' || pv.status === 'LIVE'));
   return paused ? toMemberShape(paused) : null;
+}
+
+// G2: dual-state deal model.
+// liveDeal = what MEMBERS see (frozen at last approval).
+// pv.dealTerms / pv.dealSlots / pv.creditsPerUser = what the PARTNER is
+// currently editing in their portal. Until an EDIT change request is
+// approved by admin, partner edits don't reach members.
+function getLiveDeal(pv) {
+  if (!pv) return null;
+  if (pv.liveDeal) return pv.liveDeal;
+  // DRAFT/PENDING_APPROVAL/REJECTED venues never had a liveDeal yet — fall
+  // through to the draft so the preview cards in onboarding still render.
+  return {
+    dealTerms: pv.dealTerms || DEFAULT_DEAL_TERMS,
+    dealSlots: pv.dealSlots || [],
+    creditsPerUser: pv.creditsPerUser ?? DEFAULT_CREDITS_PER_USER
+  };
+}
+// Has this partner submitted an EDIT request that's still awaiting review?
+function pendingEditFor(pv) {
+  if (!pv) return null;
+  return (store.changeRequests || []).find(cr =>
+    cr.venueId === pv.id && cr.type === 'EDIT' && cr.status === 'PENDING'
+  );
+}
+// Does the partner's editor state differ from the live deal members see?
+function dealIsDirty(pv) {
+  if (!pv) return false;
+  const live = pv.liveDeal;
+  if (!live) return false; // no live yet (DRAFT etc.) — every change is fine
+  if (live.dealTerms !== pv.dealTerms) return true;
+  if ((live.creditsPerUser ?? DEFAULT_CREDITS_PER_USER) !== (pv.creditsPerUser ?? DEFAULT_CREDITS_PER_USER)) return true;
+  return JSON.stringify(live.dealSlots || []) !== JSON.stringify(pv.dealSlots || []);
+}
+// Reset the partner's editor draft back to the live deal (used for "revert"
+// and after an admin rejection that they want to clear out).
+function revertDraftToLive(pv) {
+  if (!pv || !pv.liveDeal) return;
+  pv.dealTerms = pv.liveDeal.dealTerms;
+  pv.dealSlots = JSON.parse(JSON.stringify(pv.liveDeal.dealSlots || []));
+  pv.creditsPerUser = pv.liveDeal.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
+  saveStore();
 }
 // What does the currently-signed-in partner own?
 function currentPartnerVenue() {
@@ -427,7 +554,9 @@ function isVenueAvailableNow(v, now = new Date()) {
   const todayKey = DAY_ORDER[(now.getDay() + 6) % 7]; // JS getDay: Sun=0, but DAY_ORDER starts Mon
   const hhmm = now.toTimeString().slice(0, 5);
   if (v._pv) {
-    return (v._pv.dealSlots || []).some(s => {
+    // G2: members see liveDeal, not the editor draft.
+    const liveSlots = getLiveDeal(v._pv).dealSlots;
+    return (liveSlots || []).some(s => {
       if (!s.active) return false;
       const days = Array.isArray(s.daysArr) ? s.daysArr : parseDaysString(s.days || '');
       if (!days.includes(todayKey)) return false;
@@ -2859,15 +2988,35 @@ function Venue() {
       // shared terms here and show per-slot variations inline with the picker.
       (() => {
         const pvDeals = v._pv;
-        const venueDefault = pvDeals?.dealTerms || DEFAULT_DEAL_TERMS;
-        const slotTerms = (pvDeals?.dealSlots || []).filter(s => s.active).map(s => (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault);
+        // G2: read the LIVE deal — partner draft edits don't reach members until admin approves.
+        const liveDeal = pvDeals ? getLiveDeal(pvDeals) : null;
+        const venueDefault = liveDeal?.dealTerms || pvDeals?.dealTerms || DEFAULT_DEAL_TERMS;
+        const slots = liveDeal?.dealSlots || pvDeals?.dealSlots || [];
+        const slotTerms = slots.filter(s => s.active).map(s => (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault);
         const allSame = slotTerms.length === 0 || slotTerms.every(t => t === slotTerms[0]);
         const sharedTerms = allSame && slotTerms.length > 0 ? slotTerms[0] : venueDefault;
+        // G4: credit indicator — how many monthly credits the signed-in user
+        // has left at this restaurant. Shown only to MEMBER role with an
+        // active sub (otherwise the cap is moot for now).
+        const u = currentUser();
+        const cap = liveDeal?.creditsPerUser ?? pvDeals?.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
+        const showCredits = u && u.role === 'MEMBER' && hasSub();
+        const remaining = showCredits ? userCreditsRemaining(u.id, v.slug, cap) : cap;
+        const used = cap - remaining;
         return el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
           el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'2×1 Main Course'),
           el('div',{class:'mt-1 font-bold'},'Buy one main, get one free'),
           el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'}, sharedTerms),
-          !allSame && el('p',{class:'mt-2 text-[10px] text-slate2-400 italic'},'Some time slots have different conditions — see each slot below.')
+          !allSame && el('p',{class:'mt-2 text-[10px] text-slate2-400 italic'},'Some time slots have different conditions — see each slot below.'),
+          // Credits row — friendly remainder + refresh date.
+          showCredits && el('div',{class:'mt-3 pt-3 border-t border-mv-500/20 flex items-center justify-between gap-2'},
+            el('div',{class:'text-xs'},
+              remaining > 0
+                ? el('span',{class:'text-slate2-300'}, el('span',{class:'text-white font-bold'}, remaining), ' of ', cap, ' credit', cap===1?'':'s', ' left this month')
+                : el('span',{class:'text-amber-300 font-bold'}, 'No credits left here this month')
+            ),
+            el('span',{class:'text-[10px] text-slate2-500'}, 'Refreshes ', creditsRefreshLabel())
+          )
         );
       })(),
       // Slot picker — when this is a partner-owned venue with per-slot terms
@@ -2882,9 +3031,22 @@ function Venue() {
           ...((() => {
             const pvForSlots = v._pv;
             const venuePaused = pvForSlots && pvForSlots.status === 'PAUSED';
-            const venueDefault = pvForSlots?.dealTerms || DEFAULT_DEAL_TERMS;
-            if (pvForSlots && Array.isArray(pvForSlots.dealSlots) && pvForSlots.dealSlots.length > 0) {
-              return pvForSlots.dealSlots.filter(s => s.active).map(s => {
+            // G2: render the LIVE deal's slots, not whatever the partner is
+            // currently editing in their draft.
+            const liveDeal = pvForSlots ? getLiveDeal(pvForSlots) : null;
+            const venueDefault = liveDeal?.dealTerms || pvForSlots?.dealTerms || DEFAULT_DEAL_TERMS;
+            const liveSlots = liveDeal?.dealSlots || pvForSlots?.dealSlots || [];
+            // G4: also check whether the signed-in member has any monthly
+            // credit left at this venue. If not, every slot button is
+            // disabled with a credits-exhausted message.
+            const _u = currentUser();
+            const venueCreditCap = liveDeal?.creditsPerUser ?? pvForSlots?.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
+            const venueCreditsLeft = (_u && _u.role === 'MEMBER' && hasSub())
+              ? userCreditsRemaining(_u.id, v.slug, venueCreditCap)
+              : venueCreditCap; // not signed in / not subscribed → don't block UI here, bookSlot will redirect
+            const creditsExhausted = (_u && _u.role === 'MEMBER' && hasSub()) && venueCreditsLeft <= 0;
+            if (pvForSlots && Array.isArray(liveSlots) && liveSlots.length > 0) {
+              return liveSlots.filter(s => s.active).map(s => {
                 const slotLabel = s.label || 'Slot';
                 const slotTime = `${s.timeStart}-${s.timeEnd}`;
                 const slotTerms = (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault;
@@ -2894,7 +3056,7 @@ function Venue() {
                 const used = activeSlotCount(v.slug, `${slotLabel} · ${slotTime}`);
                 const remaining = Math.max(0, cap - used);
                 const isFull = remaining === 0;
-                const isDisabled = venuePaused || !bookableNow || isFull;
+                const isDisabled = venuePaused || !bookableNow || isFull || creditsExhausted;
                 // Status: icon + label so colorblind users have a non-color cue.
                 let statusIcon = '→';
                 let statusLabel = 'Book';
@@ -2903,6 +3065,9 @@ function Venue() {
                 if (venuePaused) {
                   statusIcon = '⏸'; statusLabel = 'Paused'; statusClass = 'text-amber-300';
                   ariaLabel = `${slotLabel} at ${slotTime} — venue paused, not bookable`;
+                } else if (creditsExhausted) {
+                  statusIcon = '✓'; statusLabel = 'No credits'; statusClass = 'text-slate2-500';
+                  ariaLabel = `${slotLabel} at ${slotTime} — you have no monthly credits left here`;
                 } else if (isFull) {
                   statusIcon = '●'; statusLabel = 'Full'; statusClass = 'text-slate2-500';
                   ariaLabel = `${slotLabel} at ${slotTime} — fully booked`;
@@ -3030,13 +3195,19 @@ function Venue() {
 // ---- Slot booking eligibility helpers (B-1, B-2) ----
 // Maps a slot label like "Lunch · 13:00-15:30" back to its dealSlots entry.
 function resolveSlotFromLabel(pv, label) {
-  if (!pv || !Array.isArray(pv.dealSlots)) return null;
+  if (!pv) return null;
+  // G2: resolve against the LIVE deal (members) not the editor draft.
+  // If liveDeal isn't set (DRAFT/PENDING venue), fall back to pv.dealSlots.
+  const slots = (pv.liveDeal && Array.isArray(pv.liveDeal.dealSlots))
+    ? pv.liveDeal.dealSlots
+    : pv.dealSlots;
+  if (!Array.isArray(slots)) return null;
   // Strict match by "{label} · {timeStart}-{timeEnd}" — the exact format
   // bookSlot writes into `booking.slot`. Two slots named "Lunch" and "Late
   // Lunch" used to collide via substring match; the timeStart-timeEnd
   // discriminator removes the ambiguity. Fall back to exact label match
   // for legacy bookings that predate the time-suffix format.
-  return pv.dealSlots.find(s => {
+  return slots.find(s => {
     if (!s.active) return false;
     const canonical = (s.label || '') + ' · ' + s.timeStart + '-' + s.timeEnd;
     return label === canonical || label === s.label;
@@ -3100,6 +3271,56 @@ function tooManyRecentBookings(memberId) {
   return store.bookings.filter(b => b.memberId === memberId && b.createdAt >= since).length >= 3;
 }
 
+// ------------------------------------------------------------------------
+// G4: Per-user, per-restaurant, per-month redemption credits.
+// Each member can redeem one restaurant's offer up to N times per calendar
+// month, where N is venue.creditsPerUser (default 3). The cap counts both
+// already-redeemed bookings AND currently-active unexpired bookings so the
+// user can't pre-stack codes beyond their cap. Cancelled bookings DON'T
+// count toward the cap (those credits return).
+// Cap refreshes naturally on the 1st of every month because the count is
+// scoped to the current YYYY-MM.
+// ------------------------------------------------------------------------
+function yearMonthOf(ts) {
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+function currentYearMonth() { return yearMonthOf(Date.now()); }
+// How many credits has this member already committed at this restaurant
+// during the current calendar month? = past redemptions this month + any
+// active (unredeemed/uncancelled/unexpired) bookings created this month.
+function userCreditsForVenueThisMonth(userId, venueSlug) {
+  const ym = currentYearMonth();
+  const now = Date.now();
+  const redeemedThisMonth = (store.redemptions || []).filter(r =>
+    r.memberId === userId &&
+    r.venueSlug === venueSlug &&
+    yearMonthOf(r.redeemedAt) === ym
+  ).length;
+  const activeBookings = (store.bookings || []).filter(b =>
+    b.memberId === userId &&
+    b.venueSlug === venueSlug &&
+    !b.redeemed && !b.cancelled &&
+    b.expiresAt > now
+  ).length;
+  return redeemedThisMonth + activeBookings;
+}
+// Remaining credits this month. capOverride lets a UI override pull from
+// the partner venue without needing the full venue lookup.
+function userCreditsRemaining(userId, venueSlug, capOverride) {
+  const v = findVenueBySlug(venueSlug);
+  const cap = capOverride
+    ?? v?._pv?.creditsPerUser
+    ?? DEFAULT_CREDITS_PER_USER;
+  return Math.max(0, cap - userCreditsForVenueThisMonth(userId, venueSlug));
+}
+// User-friendly label for when credits next refresh. Always the 1st of next month.
+function creditsRefreshLabel() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return next.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+}
+
 function bookSlot(v, slot) {
   const u = currentUser();
   if (!u) { go('signin'); return; }
@@ -3108,6 +3329,18 @@ function bookSlot(v, slot) {
     return;
   }
   if (!hasSub()) { go('checkout'); return; }
+  // G4: enforce per-user, per-restaurant, per-month credit cap. Counts both
+  // redemptions this month AND active unexpired bookings so the user can't
+  // pre-stack codes. The cap refreshes on the 1st of every month.
+  {
+    // G2: read the LIVE cap (admin-approved), not the partner's editor draft.
+    const cap = (v._pv?.liveDeal?.creditsPerUser) ?? v._pv?.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
+    const remaining = userCreditsRemaining(u.id, v.slug, cap);
+    if (remaining <= 0) {
+      toast(`You've used your ${cap} credit${cap===1?'':'s'} at ${v.name || 'this restaurant'} this month. Come back ${creditsRefreshLabel()}.`, 'err');
+      return;
+    }
+  }
   // Block paused venues.
   if (v._pv && v._pv.status === 'PAUSED') { toast('This venue paused new bookings — try again later.', 'err'); return; }
   // Rate-limit defense (E-5).
@@ -3919,12 +4152,13 @@ function PartnerOnboarding() {
   }
 
   // Resume where they left off (persisted as state.params.step for back-button friendliness).
-  let step = Math.max(1, Math.min(4, parseInt(state.params.step || '1', 10)));
+  // Wizard is now 5 steps (Sprint G1 added Terms): basics, address, photos, deal review, terms.
+  let step = Math.max(1, Math.min(5, parseInt(state.params.step || '1', 10)));
   let errors = {}; // { fieldKey: msg }
   const wrap = el('div',{class:'min-h-screen bg-ink-950 text-white'});
 
   // ---- helpers ----
-  function setStep(n) { step = Math.max(1, Math.min(4, n)); errors = {}; paint(); }
+  function setStep(n) { step = Math.max(1, Math.min(5, n)); errors = {}; paint(); }
   function reqLabel(label, key) {
     return el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold flex items-center gap-1'},
       label, el('span',{class:'text-mv-500'},'*'),
@@ -3979,6 +4213,9 @@ function PartnerOnboarding() {
     } else if (n === 4) {
       if (!pv.description?.trim()) errors.description = 'Required';
       if (!(pv.dealSlots || []).some(s => s.active)) errors._slots = 'Activate at least one deal slot';
+    } else if (n === 5) {
+      // Sprint G1: must accept the current T&C version explicitly.
+      if (!pv.tncAcceptedAt || pv.tncVersion !== TNC_VERSION) errors._tnc = 'Please read and accept the partner terms';
     }
     return Object.keys(errors).length === 0;
   }
@@ -4110,10 +4347,48 @@ function PartnerOnboarding() {
         el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold mb-2'},'Preview — how diners will see you'),
         previewCard(),
         el('div',{class:'mt-4 rounded-xl bg-mv-500/10 border border-mv-500/30 p-4 text-sm'},
-          el('div',{class:'font-bold'},'Ready to submit?'),
-          el('p',{class:'mt-1 text-slate2-300 text-xs'},'We review within 1 business day. You can keep editing after submitting — changes go live instantly once you\'re approved.')
+          el('div',{class:'font-bold'},'Almost there'),
+          el('p',{class:'mt-1 text-slate2-300 text-xs'},'One more step — the partner terms — then you submit for review. We approve within 1 business day.')
         )
       )
+    );
+  }
+
+  // Sprint G1: T&C acceptance step. Required for new partners; the seeded
+  // partner (and any other grandfathered partner) skips this entirely
+  // because they never enter the onboarding wizard for an existing venue.
+  function StepTerms() {
+    const accepted = !!pv.tncAcceptedAt && pv.tncVersion === TNC_VERSION;
+    return el('div',{class:'max-w-3xl'},
+      el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-5 max-h-[55vh] overflow-y-auto'},
+        el('div',{class:'flex items-center justify-between flex-wrap gap-2'},
+          el('h3',{class:'font-bold'},'Menuverso partner terms · ', el('span',{class:'text-mv-500'}, TNC_VERSION)),
+          el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-500 font-bold'},'Menuverso SL · Barcelona')
+        ),
+        el('div',{class:'mt-4 space-y-4'},
+          ...TNC_BODY.map(([heading, body]) => el('div',{},
+            el('div',{class:'text-xs uppercase tracking-widest text-mv-400 font-extrabold'}, heading),
+            el('p',{class:'mt-1 text-sm text-slate2-300 leading-relaxed'}, body)
+          ))
+        )
+      ),
+      el('label',{class:'mt-5 flex items-start gap-3 cursor-pointer select-none rounded-xl bg-white/[0.04] border ' + (errors._tnc ? 'border-red-500/60' : (accepted ? 'border-accent-emer/40 bg-accent-emer/5' : 'border-white/10')) + ' p-4'},
+        el('input',{
+          type:'checkbox', checked: accepted, class:'mt-1 h-4 w-4 accent-mv-500 cursor-pointer',
+          onchange: e => {
+            if (e.target.checked) { pv.tncAcceptedAt = Date.now(); pv.tncVersion = TNC_VERSION; }
+            else { pv.tncAcceptedAt = null; pv.tncVersion = null; }
+            errors._tnc = null;
+            saveStore(); paint();
+          }
+        }),
+        el('div',{class:'text-sm'},
+          el('div',{class:'font-bold'}, accepted ? 'You\'ve accepted the partner terms' : 'I have read and agree to the Menuverso partner terms'),
+          el('div',{class:'mt-1 text-xs text-slate2-400'},'In particular: the 30-day live commitment, edit-approval requirement, and per-member credit cap.'),
+          accepted && el('div',{class:'mt-2 text-[10px] text-slate2-500'},'Accepted ' + new Date(pv.tncAcceptedAt).toLocaleString('en-GB') + ' · ' + TNC_VERSION)
+        )
+      ),
+      errors._tnc && el('div',{class:'mt-2 text-xs text-red-400'}, errors._tnc)
     );
   }
 
@@ -4125,7 +4400,7 @@ function PartnerOnboarding() {
           el('span',{class:'text-xl'},'🍽️'),
           el('div',{},
             el('div',{class:'font-bold'},'Set up your restaurant'),
-            el('div',{class:'text-xs text-slate2-400'}, pv.name || 'New listing', ' · Step ', step, ' of 4')
+            el('div',{class:'text-xs text-slate2-400'}, pv.name || 'New listing', ' · Step ', step, ' of 5')
           )
         ),
         el('button',{class:'text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:logout},'🚪 Sign out')
@@ -4135,13 +4410,14 @@ function PartnerOnboarding() {
     // Progress bar
     const progress = el('div',{class:'mx-auto max-w-5xl px-4 mt-6'},
       el('div',{class:'flex items-center gap-1'},
-        ...[1,2,3,4].map(n => el('div',{class:'flex-1 h-1.5 rounded-full ' + (n <= step ? 'bg-mv-500' : 'bg-white/10')}))
+        ...[1,2,3,4,5].map(n => el('div',{class:'flex-1 h-1.5 rounded-full ' + (n <= step ? 'bg-mv-500' : 'bg-white/10')}))
       ),
-      el('div',{class:'mt-2 flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate2-400'},
+      el('div',{class:'mt-2 flex justify-between text-[10px] uppercase tracking-widest font-bold text-slate2-400 gap-1'},
         el('span',{class: step >= 1 ? 'text-white' : ''}, '① Basics'),
         el('span',{class: step >= 2 ? 'text-white' : ''}, '② Address'),
         el('span',{class: step >= 3 ? 'text-white' : ''}, '③ Photos'),
-        el('span',{class: step >= 4 ? 'text-white' : ''}, '④ Review')
+        el('span',{class: step >= 4 ? 'text-white' : ''}, '④ Review'),
+        el('span',{class: step >= 5 ? 'text-white' : ''}, '⑤ Terms')
       )
     );
 
@@ -4150,35 +4426,38 @@ function PartnerOnboarding() {
         step === 1 ? 'Tell us the basics' :
         step === 2 ? 'Where are you?' :
         step === 3 ? 'Show off your space' :
-        'Almost there — review and submit'
+        step === 4 ? 'Almost there — review your offer' :
+        'Partner terms · please read & accept'
       ),
       el('p',{class:'mt-1 text-sm text-slate2-300'},
         step === 1 ? 'Three minutes total. You can edit everything later.' :
         step === 2 ? 'We don\'t share your phone or Instagram with diners unless you want us to.' :
         step === 3 ? 'A great cover photo doubles your listing\'s click-through. Drag-drop is fine; we resize automatically.' :
-        'This is exactly what diners will see in Discover.'
+        step === 4 ? 'This is exactly what diners will see in Discover.' :
+        'A short, plain-English summary of our agreement. You\'ll get a copy by email after submitting.'
       ),
       el('div',{class:'mt-6'},
         step === 1 ? StepBasics() :
         step === 2 ? StepAddress() :
         step === 3 ? StepPhotos() :
-        StepReview()
+        step === 4 ? StepReview() :
+        StepTerms()
       ),
       // Step nav
       el('div',{class:'mt-8 flex items-center justify-between gap-3 flex-wrap'},
         step > 1
           ? el('button',{class:'rounded-full bg-white/5 border border-white/10 px-5 py-2.5 text-sm font-bold cursor-pointer hover:bg-white/[0.1]', onclick:back}, '← Back')
           : el('button',{class:'rounded-full bg-transparent text-slate2-400 px-2 py-2.5 text-sm font-bold cursor-pointer underline', onclick:()=>go('landing')}, '← Save & exit'),
-        step < 4
+        step < 5
           ? el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick:next}, 'Next →')
           : el('button',{class:'rounded-full bg-accent-emer text-ink-900 hover:bg-accent-emer/90 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
-              if (!validateStep(4)) { paint(); toast('Fix the highlighted fields', 'err'); return; }
+              if (!validateStep(5)) { paint(); toast('Please accept the partner terms to continue', 'err'); return; }
               pv.status = 'PENDING_APPROVAL';
               pv.submittedAt = Date.now();
               saveStore();
               toast('Submitted for review — we\'ll email you within 1 business day');
               go('partner-portal',{tab:'overview'});
-            }}, 'Submit for review ✓')
+            }}, 'Accept & Submit for review ✓')
       )
     );
 
@@ -4425,7 +4704,13 @@ function PortalRedeem() {
 function PortalDeals() {
   const pv = currentPartnerVenue();
   if (!pv) return el('div',{class:'text-sm text-slate2-400'},'No venue.');
+  // G2: full layout wraps the existing 2-col grid with a top status banner
+  // and a sticky-bottom submit bar so the partner always knows whether
+  // their edits are draft, pending, or live.
+  const root = el('div',{class:'space-y-4'});
+  const topBanner = el('div',{});
   const wrap = el('div',{class:'grid lg:grid-cols-[2fr_1fr] gap-6 items-start'});
+  const bottomBar = el('div',{});
   // Track which slot has its conditions editor open. One at a time keeps the
   // page compact; each slot's terms are still independent.
   const expandedSlots = new Set();
@@ -4563,24 +4848,134 @@ function PortalDeals() {
           }))
         )
       ),
-      // ===== Default conditions (right, narrower column) =====
-      el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
-        el('h3',{class:'font-bold'},'Default conditions'),
-        el('p',{class:'mt-1 text-xs text-slate2-400 leading-relaxed'},'Pre-fills the conditions on new slots. Editing this here does not change existing slots — use each slot\'s Edit button to update them.'),
-        (() => {
-          const ta = el('textarea',{class:'mt-3 w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-mv-500', rows:'5',
-            onInput: e => { pv.dealTerms = e.target.value; }
-          });
-          ta.value = pv.dealTerms || DEFAULT_DEAL_TERMS;
-          const btn = el('button',{type:'button', class:'mt-3 rounded-full bg-mv-500 hover:bg-mv-600 px-5 py-2 text-sm font-extrabold cursor-pointer transition'},'Save default');
-          btn.onclick = () => { saveStore(); flashSaved(btn, 'Save default'); };
-          return el('div',{}, ta, btn);
-        })()
+      // ===== Default conditions + credit cap (right, narrower column) =====
+      el('div',{class:'space-y-4'},
+        el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+          el('h3',{class:'font-bold'},'Default conditions'),
+          el('p',{class:'mt-1 text-xs text-slate2-400 leading-relaxed'},'Pre-fills the conditions on new slots. Editing this here does not change existing slots — use each slot\'s Edit button to update them.'),
+          (() => {
+            const ta = el('textarea',{class:'mt-3 w-full bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-mv-500', rows:'5',
+              onInput: e => { pv.dealTerms = e.target.value; }
+            });
+            ta.value = pv.dealTerms || DEFAULT_DEAL_TERMS;
+            const btn = el('button',{type:'button', class:'mt-3 rounded-full bg-mv-500 hover:bg-mv-600 px-5 py-2 text-sm font-extrabold cursor-pointer transition'},'Save default');
+            btn.onclick = () => { saveStore(); flashSaved(btn, 'Save default'); };
+            return el('div',{}, ta, btn);
+          })()
+        ),
+        // G4: Credits per member, per month — partner-configurable cap.
+        // Default 3. Edits to this field will go through admin approval in
+        // Sprint G2; for now autosave on blur (matches current Deals tab UX).
+        el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-5'},
+          el('h3',{class:'font-bold'},'Credits per member, per month'),
+          el('p',{class:'mt-1 text-xs text-slate2-400 leading-relaxed'},'How many times can one Menuverso member redeem your offer at this restaurant per calendar month? Refreshes on the 1st. Standard is 3.'),
+          (() => {
+            const inp = el('input',{
+              type:'number', min:'1', max:'99',
+              value: Number.isFinite(pv.creditsPerUser) ? pv.creditsPerUser : DEFAULT_CREDITS_PER_USER,
+              'aria-label':'Credits per member per month',
+              class:'mt-3 w-24 bg-transparent border border-white/10 rounded px-3 py-2 text-base font-bold focus:border-mv-500 outline-none',
+              onBlur: e => {
+                const n = parseInt(e.target.value, 10);
+                pv.creditsPerUser = (Number.isFinite(n) && n >= 1) ? Math.min(99, n) : DEFAULT_CREDITS_PER_USER;
+                e.target.value = pv.creditsPerUser;
+                saveStore();
+              }
+            });
+            return el('div',{class:'flex items-center gap-3'},
+              inp,
+              el('span',{class:'text-xs text-slate2-400'},'credits / member / month')
+            );
+          })()
+        )
       )
     );
+    paintStatusBar();
   }
+
+  // G2: top + bottom status bars. Three states:
+  //   1. CLEAN: editor matches liveDeal → quiet hint at the bottom.
+  //   2. PENDING: there's an EDIT request awaiting admin review → top banner
+  //      with a Withdraw button.
+  //   3. DIRTY: partner has unsubmitted edits → coral sticky bottom bar with
+  //      Submit + Revert.
+  // The editor inputs ALWAYS remain editable. Submitting takes a snapshot.
+  function paintStatusBar() {
+    topBanner.innerHTML = '';
+    bottomBar.innerHTML = '';
+    const pending = pendingEditFor(pv);
+    const dirty = dealIsDirty(pv);
+
+    if (pending) {
+      topBanner.append(el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4 flex items-center justify-between gap-3 flex-wrap'},
+        el('div',{class:'min-w-0'},
+          el('div',{class:'flex items-center gap-2 text-mv-300 font-bold text-sm'},
+            el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Changes pending admin review'
+          ),
+          el('p',{class:'mt-1 text-xs text-slate2-300'},'Submitted ' + new Date(pending.submittedAt).toLocaleString('en-GB') + '. Your members are still seeing the previously approved offer. You can keep editing — those edits won\'t enter the queue until you submit again.')
+        ),
+        el('button',{class:'rounded-full bg-white/10 border border-white/15 px-4 py-2 text-xs font-extrabold cursor-pointer hover:bg-white/[0.15]', onclick:()=>{
+          pending.status = 'WITHDRAWN';
+          pending.reviewedAt = Date.now();
+          saveStore();
+          toast('Edit request withdrawn');
+          paint();
+        }},'Withdraw request')
+      ));
+    }
+
+    if (dirty) {
+      // Count what's changed for the submit copy.
+      const live = pv.liveDeal || {};
+      const changes = [];
+      if (live.dealTerms !== pv.dealTerms) changes.push('deal terms');
+      if ((live.creditsPerUser ?? DEFAULT_CREDITS_PER_USER) !== (pv.creditsPerUser ?? DEFAULT_CREDITS_PER_USER)) changes.push('credit cap');
+      if (JSON.stringify(live.dealSlots || []) !== JSON.stringify(pv.dealSlots || [])) changes.push('slots');
+      const summary = changes.length === 1 ? changes[0] : changes.slice(0, -1).join(', ') + ' and ' + changes.slice(-1);
+      bottomBar.append(el('div',{class:'sticky bottom-0 z-20 rounded-2xl bg-mv-500/10 border border-mv-500/40 p-4 flex items-center justify-between gap-3 flex-wrap shadow-lg shadow-mv-500/10 backdrop-blur'},
+        el('div',{class:'min-w-0'},
+          el('div',{class:'text-mv-300 font-bold text-sm'},'You have unsubmitted changes to ' + (summary || 'the deal')),
+          el('p',{class:'mt-1 text-[11px] text-slate2-400'},'Edits to the deal go through admin approval. Live offer doesn\'t change until approved.')
+        ),
+        el('div',{class:'flex items-center gap-2 flex-wrap shrink-0'},
+          el('button',{class:'rounded-full bg-white/5 border border-white/15 px-4 py-2 text-xs font-bold cursor-pointer hover:bg-white/[0.15]', onclick:()=>{
+            if (!window.confirm('Discard your unsubmitted changes and revert to the currently live deal?')) return;
+            revertDraftToLive(pv);
+            toast('Reverted to the live deal');
+            paint();
+          }},'Revert'),
+          el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white px-4 py-2 text-xs font-extrabold cursor-pointer', onclick:()=>{
+            // Submit an EDIT change request. Snapshot the current pv values.
+            const u = currentUser();
+            const cr = {
+              id: 'cr_' + Math.random().toString(36).slice(2, 10),
+              venueId: pv.id,
+              type: 'EDIT',
+              status: 'PENDING',
+              submittedAt: Date.now(),
+              submittedBy: u?.id,
+              proposedDealTerms: pv.dealTerms,
+              proposedDealSlots: JSON.parse(JSON.stringify(pv.dealSlots || [])),
+              proposedCreditsPerUser: pv.creditsPerUser ?? DEFAULT_CREDITS_PER_USER
+            };
+            store.changeRequests = store.changeRequests || [];
+            store.changeRequests.unshift(cr);
+            saveStore();
+            toast('Submitted for review — admin will respond within 1 business day.');
+            paint();
+          }},'Submit for approval →')
+        )
+      ));
+    } else if (!pending && pv.liveDeal) {
+      // CLEAN steady-state hint, kept very subtle.
+      bottomBar.append(el('div',{class:'text-[11px] text-slate2-500 text-center pt-2'},'Edits to the deal go through admin approval. Profile metadata (photos, name, etc.) is free to edit.'));
+    }
+  }
+
+  // Assemble the root container once; paint() repopulates wrap + status bars.
+  root.append(topBanner, wrap, bottomBar);
   paint();
-  return wrap;
+  return root;
 }
 
 function PortalProfile() {
@@ -4649,9 +5044,16 @@ function PortalProfile() {
       el('p',{class:'mt-2 text-[10px] text-slate2-500'},'Tip: 3–4 horizontal shots of dishes and your dining room work best.')
     ));
 
-    // ---- Status toggle (Pause / Resume) ----
+    // ---- Status toggle (Pause / Resume) + removal request (G3) ----
     if (pv.status === 'LIVE' || pv.status === 'PAUSED') {
       const isPaused = pv.status === 'PAUSED';
+      // G3: inside the 30-day commitment, PAUSE is disabled. Resume is
+      // always allowed (if currently paused). The clock starts from
+      // offerPublishedAt set on first LIVE approval.
+      const lockUntil = (pv.offerPublishedAt || 0) + OFFER_MIN_MS;
+      const inLockWindow = !isPaused && Date.now() < lockUntil;
+      const daysLeft = Math.max(0, Math.ceil((lockUntil - Date.now()) / 86400000));
+      const lockLiftDate = new Date(lockUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
       wrap.append(el('div',{class:'rounded-2xl ' + (isPaused ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-white/[0.04] border border-white/10') + ' p-5 flex items-center justify-between gap-3 flex-wrap'},
         el('div',{class:'min-w-0'},
           el('div',{class:'font-bold flex items-center gap-2'},
@@ -4661,41 +5063,117 @@ function PortalProfile() {
           el('p',{class:'mt-1 text-sm text-slate2-400'},
             isPaused
               ? 'Members can\'t book new codes right now. Toggle on when you\'re ready to accept again.'
-              : 'New bookings open. Going on holiday or having an off night? Pause to stop accepting new bookings until you resume.'
+              : (inLockWindow
+                  ? `In your 30-day commitment window — ${daysLeft} day${daysLeft===1?'':'s'} left. You agreed to keep the offer live and bookable until ${lockLiftDate}. After that, pause is available anytime.`
+                  : 'New bookings open. Going on holiday or having an off night? Pause to stop accepting new bookings until you resume.')
           )
         ),
-        el('button',{class:'rounded-full ' + (isPaused ? 'bg-accent-emer text-ink-900 hover:bg-accent-emer/90' : 'bg-amber-500 text-ink-900 hover:bg-amber-400') + ' px-4 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
-          if (!isPaused) {
-            // M-5: count active bookings before pausing. Force a decision so
-            // diners with valid codes for tonight aren't left wondering why
-            // the door is locked. Default action (Cancel/dismiss) is the
-            // SAFE path — keep existing codes honored. OK explicitly opts in
-            // to the destructive option (cancel all pending codes).
-            const now = Date.now();
-            const pending = store.bookings.filter(b => b.venueSlug === pv.slug && !b.redeemed && !b.cancelled && b.expiresAt > now);
-            if (pending.length > 0) {
-              // FP-safe ETA: subtract first, then divide.
-              const latest = pending.reduce((m,b) => b.expiresAt > m ? b.expiresAt : m, 0);
-              const minutes = Math.max(0, Math.ceil((latest - now) / 60000));
-              const summary = pending.length + ' active booking' + (pending.length === 1 ? '' : 's') + ' at ' + (pv.name || 'this venue') + ' still good for ' + minutes + ' min.';
-              const cancelThem = confirm(
-                'Pause new bookings at ' + (pv.name || 'this venue') + '?\n\n' +
-                summary + '\n\n' +
-                'OK = also CANCEL the ' + pending.length + ' pending code' + (pending.length === 1 ? '' : 's') + ' (those diners won\'t be honored)\n' +
-                'Cancel = keep those codes valid, just stop new bookings'
-              );
-              store.partnerActions = store.partnerActions || [];
-              if (cancelThem) {
-                pending.forEach(b => { b.cancelled = true; b.cancelReason = 'PARTNER_PAUSE'; });
-                store.partnerActions.unshift({ id:'pa_'+Math.random().toString(36).slice(2,10), venueSlug:pv.slug, action:'PAUSE_CANCEL_PENDING', count:pending.length, at:now });
-              } else {
-                store.partnerActions.unshift({ id:'pa_'+Math.random().toString(36).slice(2,10), venueSlug:pv.slug, action:'PAUSE_KEEP_PENDING', count:pending.length, at:now });
+        el('button',{
+          class:'rounded-full ' + (inLockWindow ? 'bg-white/5 text-slate2-500 border border-white/10 cursor-not-allowed' : (isPaused ? 'bg-accent-emer text-ink-900 hover:bg-accent-emer/90 cursor-pointer' : 'bg-amber-500 text-ink-900 hover:bg-amber-400 cursor-pointer')) + ' px-4 py-2 text-sm font-extrabold',
+          disabled: inLockWindow || undefined,
+          'aria-disabled': inLockWindow ? 'true' : 'false',
+          title: inLockWindow ? `Pause locked until ${lockLiftDate} (30-day commitment)` : '',
+          onclick: inLockWindow ? null : (()=>{
+            if (!isPaused) {
+              const now = Date.now();
+              const pending = store.bookings.filter(b => b.venueSlug === pv.slug && !b.redeemed && !b.cancelled && b.expiresAt > now);
+              if (pending.length > 0) {
+                const latest = pending.reduce((m,b) => b.expiresAt > m ? b.expiresAt : m, 0);
+                const minutes = Math.max(0, Math.ceil((latest - now) / 60000));
+                const summary = pending.length + ' active booking' + (pending.length === 1 ? '' : 's') + ' at ' + (pv.name || 'this venue') + ' still good for ' + minutes + ' min.';
+                const cancelThem = confirm(
+                  'Pause new bookings at ' + (pv.name || 'this venue') + '?\n\n' +
+                  summary + '\n\n' +
+                  'OK = also CANCEL the ' + pending.length + ' pending code' + (pending.length === 1 ? '' : 's') + ' (those diners won\'t be honored)\n' +
+                  'Cancel = keep those codes valid, just stop new bookings'
+                );
+                store.partnerActions = store.partnerActions || [];
+                if (cancelThem) {
+                  pending.forEach(b => { b.cancelled = true; b.cancelReason = 'PARTNER_PAUSE'; });
+                  store.partnerActions.unshift({ id:'pa_'+Math.random().toString(36).slice(2,10), venueSlug:pv.slug, action:'PAUSE_CANCEL_PENDING', count:pending.length, at:now });
+                } else {
+                  store.partnerActions.unshift({ id:'pa_'+Math.random().toString(36).slice(2,10), venueSlug:pv.slug, action:'PAUSE_KEEP_PENDING', count:pending.length, at:now });
+                }
               }
             }
-          }
-          pv.status = isPaused ? 'LIVE' : 'PAUSED';
-          saveStore(); toast(isPaused ? 'Listing is live' : 'Listing paused'); paint();
-        }}, isPaused ? '▶ Resume listing' : '⏸ Pause listing')
+            pv.status = isPaused ? 'LIVE' : 'PAUSED';
+            saveStore(); toast(isPaused ? 'Listing is live' : 'Listing paused'); paint();
+          })
+        }, inLockWindow ? '⏸ Pause locked' : (isPaused ? '▶ Resume listing' : '⏸ Pause listing'))
+      ));
+
+      // ---- G3: Request removal — replaces partner-side delete entirely.
+      // Inside the 30-day window the request is flagged "earlyRemoval"; the
+      // admin can still approve at their discretion, but it's recorded as
+      // a breach of the commitment.
+      const existingPendingRemoval = (store.changeRequests || []).find(cr =>
+        cr.venueId === pv.id && cr.type === 'REMOVAL' && cr.status === 'PENDING'
+      );
+      wrap.append(el('div',{class:'rounded-2xl border border-white/10 bg-white/[0.02] p-5'},
+        el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+          el('div',{class:'min-w-0'},
+            el('div',{class:'font-bold text-sm flex items-center gap-2'},
+              el('span',{class:'text-slate2-400'},'🗑️'), 'Remove this listing'
+            ),
+            el('p',{class:'mt-1 text-xs text-slate2-400 leading-relaxed'},
+              existingPendingRemoval
+                ? 'Your removal request is pending admin review. You can withdraw it below.'
+                : (inLockWindow
+                    ? `You\'re inside the 30-day commitment. Removal is by request only — flagged as early. Admin may still approve in exceptional circumstances.`
+                    : 'After the 30-day commitment, you can request removal anytime. Admin reviews within 3 business days.')
+            )
+          ),
+          existingPendingRemoval
+            ? el('button',{class:'rounded-full bg-white/10 border border-white/15 px-4 py-2 text-xs font-extrabold cursor-pointer hover:bg-white/[0.15]', onclick:()=>{
+                existingPendingRemoval.status = 'WITHDRAWN';
+                existingPendingRemoval.reviewedAt = Date.now();
+                saveStore(); toast('Removal request withdrawn'); paint();
+              }},'Withdraw request')
+            : el('button',{class:'rounded-full bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25 px-4 py-2 text-xs font-extrabold cursor-pointer', onclick:()=>{
+                const earlyRemoval = inLockWindow;
+                const prompt = earlyRemoval
+                  ? `EARLY REMOVAL REQUEST\n\nYou\'re still inside the 30-day commitment (lifts ${lockLiftDate}, ${daysLeft} day${daysLeft===1?'':'s'} remaining).\n\nIf you submit anyway, the admin team will review your reason and may still approve — but this will be recorded as a breach of your commitment on your partner record.\n\nReason for early removal:`
+                  : 'Why are you requesting removal? (e.g. closing, renovating, switching directions). The admin team reviews within 3 business days:';
+                const reason = window.prompt(prompt) || '';
+                if (!reason.trim()) { toast('A reason is required', 'err'); return; }
+                const cr = {
+                  id: 'cr_' + Math.random().toString(36).slice(2,10),
+                  venueId: pv.id,
+                  type: 'REMOVAL',
+                  status: 'PENDING',
+                  submittedAt: Date.now(),
+                  submittedBy: u.id,
+                  reason: reason.trim(),
+                  earlyRemoval
+                };
+                store.changeRequests.unshift(cr);
+                saveStore();
+                toast(earlyRemoval ? 'Early-removal request submitted — admin will review.' : 'Removal request submitted. We\'ll respond within 3 business days.');
+                paint();
+              }},'Request removal')
+        )
+      ));
+    }
+
+    // ---- G3: REMOVED state — admin approved removal, partner kept access ----
+    if (pv.status === 'REMOVED') {
+      wrap.append(el('div',{class:'rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center'},
+        el('div',{class:'text-2xl'},'🗑️'),
+        el('h3',{class:'mt-2 font-bold'},'Your listing was removed'),
+        el('p',{class:'mt-1 text-sm text-slate2-400 max-w-md mx-auto'},
+          pv.removedAt
+            ? 'On ' + new Date(pv.removedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + (pv.removalReason ? ' · ' + pv.removalReason : '') + '. Your account is still active — you can request reinstatement at any time.'
+            : 'Removed by Menuverso. Your account is still active.'
+        ),
+        el('button',{class:'mt-4 rounded-full bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
+          pv.status = 'PENDING_APPROVAL';
+          pv.submittedAt = Date.now();
+          pv.removedAt = null;
+          pv.removalReason = null;
+          saveStore();
+          toast('Reinstatement submitted — admin will review.');
+          render();
+        }},'Request reinstatement')
       ));
     }
 
@@ -4817,10 +5295,13 @@ function Admin() {
     saveStore();
   }
 
+  // G3: pending change requests (removal + future edit). Tab badge.
+  const pendingRequests = (store.changeRequests || []).filter(cr => cr.status === 'PENDING');
   // ===== Tabs nav =====
   const tabs = [
     ['overview','📊 Overview', pendingVenues.length || 0],
     ['partners','🏪 Partners', 0],
+    ['requests','🛠️ Requests', pendingRequests.length || 0],
     ['users','👤 Users', 0],
     ['activity','🎫 Activity', 0],
     ['system','⚙️ System', 0]
@@ -4867,7 +5348,14 @@ function Admin() {
                 ),
                 el('div',{class:'flex gap-2 shrink-0 flex-wrap'},
                   el('button',{class:'rounded-full bg-accent-emer text-ink-900 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
-                    pv.status = 'LIVE'; pv.approvedAt = Date.now(); saveStore(); toast('Approved ' + pv.name); render();
+                    pv.status = 'LIVE'; pv.approvedAt = Date.now();
+                    // Sprint G1: stamp the 30-day commitment clock on first
+                    // LIVE approval. Subsequent re-approvals (after a removal
+                    // + re-list cycle) reset this, which is the intended
+                    // behaviour — each fresh approval restarts the 30 days.
+                    pv.offerPublishedAt = Date.now();
+                    if (!pv.offerVersion) pv.offerVersion = 1;
+                    saveStore(); toast('Approved ' + pv.name); render();
                   }},'✓ Approve'),
                   el('button',{class:'rounded-full bg-white/10 border border-white/10 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
                     const reason = window.prompt('Reason to send the partner (optional):') || 'A reviewer asked for changes. Please refine your profile and resubmit.';
@@ -4904,6 +5392,238 @@ function Admin() {
             ))
           );
         })()
+      )
+    );
+  }
+
+  // ===== Tab: Requests (G3 + G2) =====
+  // Pending change requests by partners. Two types right now:
+  //   - REMOVAL: partner wants to take their listing down
+  //   - EDIT:    partner wants to change deal terms, slots, or credit cap
+  // G3 ships REMOVAL handling end-to-end. EDIT handling lands in G2.
+  function AdminRequests() {
+    const all = (store.changeRequests || []).slice().sort((a,b) => {
+      // PENDING first, then by submittedAt descending
+      if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+      if (b.status === 'PENDING' && a.status !== 'PENDING') return 1;
+      return (b.submittedAt || 0) - (a.submittedAt || 0);
+    });
+    const pending = all.filter(r => r.status === 'PENDING');
+    const removals = pending.filter(r => r.type === 'REMOVAL');
+    const edits = pending.filter(r => r.type === 'EDIT');
+    const history = all.filter(r => r.status !== 'PENDING').slice(0, 20);
+    function venueLabel(cr) {
+      const v = store.partnerVenues.find(x => x.id === cr.venueId);
+      return v?.name || '(unknown venue)';
+    }
+    function fmtDate(ts) {
+      return new Date(ts).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    }
+    function approveRemovalSoft(cr) {
+      const v = store.partnerVenues.find(x => x.id === cr.venueId);
+      if (!v) { toast('Venue not found', 'err'); return; }
+      v.status = 'REMOVED';
+      v.removedAt = Date.now();
+      v.removalReason = cr.reason;
+      // Cancel any pending bookings at this venue.
+      const now = Date.now();
+      store.bookings.forEach(b => {
+        if (b.venueSlug === v.slug && !b.redeemed && !b.cancelled && b.expiresAt > now) {
+          b.cancelled = true;
+          b.cancelReason = b.cancelReason || 'VENUE_REMOVED';
+        }
+      });
+      cr.status = 'APPROVED';
+      cr.reviewedAt = Date.now();
+      cr.reviewedBy = u.id;
+      saveStore();
+      toast('Listing removed (soft). Partner retains portal access.');
+      render();
+    }
+    function approveRemovalHard(cr) {
+      const v = store.partnerVenues.find(x => x.id === cr.venueId);
+      if (!v) { toast('Venue not found', 'err'); return; }
+      if (!window.confirm(`Hard-delete ${v.name}? This wipes the venue + all its bookings, redemptions, reviews. Use ONLY for spam/banned partners. Cannot be undone.`)) return;
+      cr.status = 'APPROVED';
+      cr.reviewedAt = Date.now();
+      cr.reviewedBy = u.id;
+      cr.method = 'HARD_DELETE';
+      saveStore();
+      deleteVenue(v.id);
+      toast('Hard-deleted ' + v.name);
+      render();
+    }
+    function rejectRequest(cr) {
+      const reason = window.prompt('Why are you rejecting this request? (Shown to the partner)') || '';
+      if (!reason.trim()) { toast('A rejection reason is required', 'err'); return; }
+      cr.status = 'REJECTED';
+      cr.reviewedAt = Date.now();
+      cr.reviewedBy = u.id;
+      cr.rejectionReason = reason.trim();
+      saveStore();
+      toast('Request rejected — partner will see the reason.');
+      render();
+    }
+    function approveEdit(cr) {
+      const v = store.partnerVenues.find(x => x.id === cr.venueId);
+      if (!v) { toast('Venue not found', 'err'); return; }
+      // Apply the proposed snapshot to liveDeal — what members see.
+      v.liveDeal = {
+        dealTerms: cr.proposedDealTerms,
+        dealSlots: JSON.parse(JSON.stringify(cr.proposedDealSlots || [])),
+        creditsPerUser: cr.proposedCreditsPerUser
+      };
+      v.offerVersion = (v.offerVersion || 0) + 1;
+      // Also sync the partner-editor copy so they don't see dirty state after.
+      v.dealTerms = cr.proposedDealTerms;
+      v.dealSlots = JSON.parse(JSON.stringify(cr.proposedDealSlots || []));
+      v.creditsPerUser = cr.proposedCreditsPerUser;
+      cr.status = 'APPROVED';
+      cr.reviewedAt = Date.now();
+      cr.reviewedBy = u.id;
+      saveStore();
+      toast('Edit approved — live for members now (v' + v.offerVersion + ').');
+      render();
+    }
+    function dealDiff(cr) {
+      const v = store.partnerVenues.find(x => x.id === cr.venueId);
+      if (!v) return [];
+      const live = v.liveDeal || { dealTerms: v.dealTerms, dealSlots: v.dealSlots, creditsPerUser: v.creditsPerUser };
+      const out = [];
+      if (live.dealTerms !== cr.proposedDealTerms) {
+        out.push({ field: 'Conditions text', from: live.dealTerms, to: cr.proposedDealTerms });
+      }
+      if ((live.creditsPerUser ?? DEFAULT_CREDITS_PER_USER) !== (cr.proposedCreditsPerUser ?? DEFAULT_CREDITS_PER_USER)) {
+        out.push({ field: 'Credits / member / month', from: live.creditsPerUser, to: cr.proposedCreditsPerUser });
+      }
+      const liveSlotsKey = JSON.stringify((live.dealSlots || []).map(s => ({label:s.label, time:s.timeStart+'-'+s.timeEnd, active:s.active, days:s.daysArr, seatCap:s.seatCap, terms:s.terms})));
+      const propSlotsKey = JSON.stringify((cr.proposedDealSlots || []).map(s => ({label:s.label, time:s.timeStart+'-'+s.timeEnd, active:s.active, days:s.daysArr, seatCap:s.seatCap, terms:s.terms})));
+      if (liveSlotsKey !== propSlotsKey) {
+        const summary = `${(live.dealSlots || []).filter(s => s.active).length} active slot(s) → ${(cr.proposedDealSlots || []).filter(s => s.active).length} active slot(s)`;
+        out.push({ field: 'Deal slots', from: summary, to: '(see slot list below)' });
+      }
+      return out;
+    }
+    function statusBadgeClass(s) {
+      if (s === 'PENDING') return 'bg-mv-500/20 text-mv-300 border-mv-500/40';
+      if (s === 'APPROVED') return 'bg-accent-emer/20 text-accent-emer border-accent-emer/40';
+      if (s === 'REJECTED') return 'bg-red-500/20 text-red-300 border-red-500/40';
+      if (s === 'WITHDRAWN') return 'bg-white/[0.05] text-slate2-400 border-white/10';
+      return 'bg-white/[0.05] text-slate2-400 border-white/10';
+    }
+    return el('div',{class:'space-y-8'},
+      // ----- Pending removals -----
+      el('div',{},
+        el('div',{class:'flex items-center justify-between flex-wrap gap-2'},
+          el('h2',{class:'text-xl font-extrabold'},'Pending removals'),
+          el('span',{class:'text-xs text-slate2-400'}, removals.length + ' awaiting decision')
+        ),
+        removals.length === 0
+          ? el('p',{class:'mt-3 text-sm text-slate2-400 italic'},'No pending removal requests.')
+          : el('div',{class:'mt-3 space-y-3'},
+              ...removals.map(cr => el('div',{class:'rounded-2xl bg-white/[0.04] border ' + (cr.earlyRemoval ? 'border-amber-500/40' : 'border-white/10') + ' p-4'},
+                el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
+                  el('div',{class:'min-w-0'},
+                    el('div',{class:'font-bold'}, venueLabel(cr), cr.earlyRemoval && el('span',{class:'ml-2 text-[10px] uppercase tracking-widest font-extrabold text-amber-300 bg-amber-500/15 border border-amber-500/30 rounded-full px-2 py-0.5'},'⚠ early')),
+                    el('div',{class:'mt-0.5 text-xs text-slate2-400'},'Requested ', fmtDate(cr.submittedAt)),
+                    el('p',{class:'mt-2 text-sm text-slate2-300 leading-relaxed'}, el('span',{class:'font-bold text-white'},'Reason: '), cr.reason)
+                  )
+                ),
+                el('div',{class:'mt-3 flex flex-wrap gap-2'},
+                  el('button',{class:'rounded-full bg-accent-emer text-ink-900 px-4 py-1.5 text-xs font-extrabold cursor-pointer hover:bg-accent-emer/90', onclick:()=>approveRemovalSoft(cr)},'Approve removal'),
+                  el('button',{class:'rounded-full bg-red-500/20 text-red-300 border border-red-500/40 px-4 py-1.5 text-xs font-extrabold cursor-pointer hover:bg-red-500/30', onclick:()=>approveRemovalHard(cr)},'Approve + hard delete'),
+                  el('button',{class:'rounded-full bg-white/10 border border-white/10 px-4 py-1.5 text-xs font-bold cursor-pointer hover:bg-white/[0.15]', onclick:()=>rejectRequest(cr)},'Reject')
+                )
+              ))
+            )
+      ),
+      // ----- Pending edits -----
+      el('div',{},
+        el('div',{class:'flex items-center justify-between flex-wrap gap-2'},
+          el('h2',{class:'text-xl font-extrabold'},'Pending edits'),
+          el('span',{class:'text-xs text-slate2-400'}, edits.length + ' awaiting decision')
+        ),
+        edits.length === 0
+          ? el('p',{class:'mt-3 text-sm text-slate2-400 italic'},'No pending edit requests.')
+          : el('div',{class:'mt-3 space-y-3'},
+              ...edits.map(cr => {
+                const v = store.partnerVenues.find(x => x.id === cr.venueId);
+                const diffs = dealDiff(cr);
+                const slotsDiff = diffs.find(d => d.field === 'Deal slots');
+                const proposedSlots = cr.proposedDealSlots || [];
+                const liveSlots = (v && v.liveDeal && v.liveDeal.dealSlots) || (v && v.dealSlots) || [];
+                return el('div',{class:'rounded-2xl bg-white/[0.04] border border-white/10 p-4 space-y-3'},
+                  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
+                    el('div',{class:'min-w-0'},
+                      el('div',{class:'font-bold'}, venueLabel(cr)),
+                      el('div',{class:'text-xs text-slate2-400'}, 'Requested ', fmtDate(cr.submittedAt), ' · current version v', v?.offerVersion ?? '?')
+                    )
+                  ),
+                  diffs.length === 0
+                    ? el('p',{class:'text-xs text-slate2-400 italic'},'No-op change (proposed matches live). Safe to reject.')
+                    : el('div',{class:'space-y-2'},
+                        ...diffs.filter(d => d.field !== 'Deal slots').map(d => el('div',{class:'rounded-xl bg-white/[0.02] border border-white/10 p-3'},
+                          el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'}, d.field),
+                          el('div',{class:'mt-1 grid sm:grid-cols-2 gap-2 text-xs'},
+                            el('div',{},
+                              el('div',{class:'text-slate2-500 mb-0.5'},'Currently live'),
+                              el('div',{class:'rounded bg-white/[0.02] border border-white/5 p-2 text-slate2-300'}, String(d.from ?? '(empty)'))
+                            ),
+                            el('div',{},
+                              el('div',{class:'text-mv-400 mb-0.5'},'Proposed'),
+                              el('div',{class:'rounded bg-mv-500/10 border border-mv-500/30 p-2 text-white'}, String(d.to ?? '(empty)'))
+                            )
+                          )
+                        ))
+                      ),
+                  // Slot detail if slots changed.
+                  slotsDiff && el('div',{class:'rounded-xl bg-white/[0.02] border border-white/10 p-3'},
+                    el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold mb-2'},'Slot changes (proposed)'),
+                    el('div',{class:'grid sm:grid-cols-2 gap-3 text-xs'},
+                      el('div',{},
+                        el('div',{class:'text-slate2-500 mb-1'},'Currently live'),
+                        ...((liveSlots.length === 0)
+                          ? [el('div',{class:'text-slate2-500 italic'},'(none)')]
+                          : liveSlots.map(s => el('div',{class:'rounded bg-white/[0.02] border border-white/5 p-2 mb-1 text-slate2-300'},
+                              el('div',{class:'font-bold'}, s.label, ' ', s.active ? '' : el('span',{class:'text-slate2-500'},'(inactive)')),
+                              el('div',{class:'text-[10px]'}, s.timeStart, '-', s.timeEnd, ' · cap ', s.seatCap ?? 4, ' · ', (s.daysArr || []).join(','))
+                            ))
+                        )
+                      ),
+                      el('div',{},
+                        el('div',{class:'text-mv-400 mb-1'},'Proposed'),
+                        ...((proposedSlots.length === 0)
+                          ? [el('div',{class:'text-slate2-500 italic'},'(none)')]
+                          : proposedSlots.map(s => el('div',{class:'rounded bg-mv-500/10 border border-mv-500/30 p-2 mb-1 text-white'},
+                              el('div',{class:'font-bold'}, s.label, ' ', s.active ? '' : el('span',{class:'text-slate2-400'},'(inactive)')),
+                              el('div',{class:'text-[10px]'}, s.timeStart, '-', s.timeEnd, ' · cap ', s.seatCap ?? 4, ' · ', (s.daysArr || []).join(','))
+                            ))
+                        )
+                      )
+                    )
+                  ),
+                  el('div',{class:'flex flex-wrap gap-2 pt-1'},
+                    el('button',{class:'rounded-full bg-accent-emer text-ink-900 px-4 py-1.5 text-xs font-extrabold cursor-pointer hover:bg-accent-emer/90', onclick:()=>approveEdit(cr)},'Approve & ship live'),
+                    el('button',{class:'rounded-full bg-white/10 border border-white/10 px-4 py-1.5 text-xs font-bold cursor-pointer hover:bg-white/[0.15]', onclick:()=>rejectRequest(cr)},'Reject')
+                  )
+                );
+              })
+            )
+      ),
+      // ----- Decision history -----
+      history.length > 0 && el('div',{},
+        el('h2',{class:'text-xl font-extrabold'},'Recent decisions'),
+        el('div',{class:'mt-3 rounded-2xl border border-white/10 overflow-hidden'},
+          ...history.map(cr => el('div',{class:'flex items-center justify-between gap-3 px-4 py-2.5 border-b border-white/5 last:border-b-0 flex-wrap'},
+            el('div',{class:'flex items-center gap-3 min-w-0 flex-wrap'},
+              el('span',{class:'rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-widest font-extrabold ' + statusBadgeClass(cr.status)}, cr.status),
+              el('span',{class:'text-sm font-bold'}, venueLabel(cr)),
+              el('span',{class:'text-xs text-slate2-400'}, cr.type),
+              cr.reviewedAt && el('span',{class:'text-xs text-slate2-500'}, fmtDate(cr.reviewedAt))
+            ),
+            cr.rejectionReason && el('span',{class:'text-xs text-slate2-400 italic max-w-md truncate'}, '"' + cr.rejectionReason + '"')
+          ))
+        )
       )
     );
   }
@@ -5267,6 +5987,7 @@ function Admin() {
     el('div',{class:'mx-auto max-w-6xl px-4 py-6'},
       tab === 'overview' ? AdminOverview() :
       tab === 'partners' ? AdminPartners() :
+      tab === 'requests' ? AdminRequests() :
       tab === 'users' ? AdminUsers() :
       tab === 'activity' ? AdminActivity() :
       tab === 'system' ? AdminSystem() :
