@@ -1213,11 +1213,10 @@ function Landing() {
       // is invisible — no horizontal cut line.
       el('div',{class:'absolute inset-0 pointer-events-none', style:'background: linear-gradient(180deg, rgba(2,6,23,0.78) 0%, rgba(2,6,23,0.55) 28%, rgba(2,6,23,0.55) 65%, rgba(2,6,23,0.92) 88%, rgba(2,6,23,1) 100%);'}),
       el('div',{class:'absolute inset-0 pointer-events-none', style:'background: radial-gradient(ellipse 80% 65% at 50% 50%, transparent 0%, rgba(2,6,23,0.28) 70%, rgba(2,6,23,0.55) 100%);'}),
-      // Bottom-edge feather — a dedicated ~120px gradient sitting at the
-      // very bottom of the hero that ramps fully into ink-950. Anchors the
-      // seam so there's no visible band even on tall viewports.
-      el('div',{class:'absolute left-0 right-0 bottom-0 h-32 pointer-events-none', style:'background: linear-gradient(to bottom, rgba(2,6,23,0) 0%, rgba(2,6,23,0.95) 70%, rgba(2,6,23,1) 100%);'}),
-      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 75% 25%, #F43F5E 0, transparent 45%), radial-gradient(circle at 20% 80%, #FB7185 0, transparent 40%);'}),
+      // Coral atmospheric wash — kept ONLY on the top-right of the hero so
+      // the bottom edge stays cleanly black. The old gradient lit up the
+      // bottom-left too which bled coral into the seam with the next section.
+      el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #F43F5E 0, transparent 38%);'}),
       // BARCELONA LANDSCAPE — the visual centerpiece of the page WHEN
       // there's no video. Sagrada Familia rising big in the centre-left,
       // Casa Batlló's wavy roof to the right, Park Güell's mosaic bench
@@ -1376,7 +1375,13 @@ function Landing() {
           '</g>'+
         '</svg>'
       }),
-      el('div',{class:'relative mx-auto max-w-6xl px-4 py-24 md:py-28 text-center'},
+      // Bottom-edge feather — moved AFTER the SVG cityscape + coral wash so
+      // it sits visually on top of everything. A ~160px gradient that ramps
+      // from transparent to fully opaque ink-950, killing any pink/coral
+      // leak from the layers beneath and making the seam with the next
+      // section invisible.
+      el('div',{class:'absolute left-0 right-0 bottom-0 h-40 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(2,6,23,0) 0%, rgba(2,6,23,0.85) 60%, rgba(2,6,23,1) 100%);'}),
+      el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-24 md:py-28 text-center'},
         el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
           el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Launching in Barcelona · Summer 2026'
         ),
