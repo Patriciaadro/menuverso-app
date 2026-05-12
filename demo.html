@@ -15,17 +15,34 @@
 <!-- Leaflet — real interactive map, no API key required. Tiles from OpenStreetMap. -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+<!-- Marker clustering plugin — groups overlapping pins (the previous map had pile-ups in Eixample). -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
 <script>
 tailwind.config = {
   theme: {
     extend: {
       colors: {
-        // Live Menuverso palette — coral red on near-black navy.
-        ink:   { 950:'#070B17', 900:'#0A0F1E', 800:'#111827', 700:'#1F2937' },
-        slate2:{ 50:'#F8FAFC', 100:'#F1F5F9', 200:'#E2E8F0', 300:'#CBD5E1', 400:'#94A3B8', 500:'#64748B' },
+        // === WARM-DARK v2 — deeper cocoa, richer terracotta, cream secondary ===
+        // Revert options (cd to project root, copy backup over the live file):
+        //   to cool slate-coral:   cp Menuverso-demo.cool.bak.html Menuverso-demo.html
+        //   to gentle warm v1:     cp Menuverso-demo.warm1.bak.html Menuverso-demo.html
+        // ====================================================================
+        // Warm near-black ("cocoa") backgrounds — pushed more obviously brown
+        // than v1. Still very dark for premium feel, but the brown undertone
+        // now reads at a glance instead of as a subtle tint.
+        ink:   { 950:'#1C0F06', 900:'#2A1A0E', 800:'#3D2818', 700:'#523622' },
+        // Body / text — warmer cream-grays (replaces cool slate). Pushed
+        // slightly brighter so the higher warmth doesn't dim legibility.
+        slate2:{ 50:'#FAF6EF', 100:'#F4ECDD', 200:'#EFE4D2', 300:'#DBCCB1', 400:'#B0A48E', 500:'#82765E' },
+        // Cream — secondary highlight (badges, dividers, low-key CTAs). Gives
+        // the palette tonal variety so it doesn't read "dark + one accent."
+        cream: { 100:'#F5E8D4', 200:'#ECDABE', 300:'#D9C29D', 400:'#B89A6E' },
         accent:{ amber:'#FBBF24', pink:'#FB7185', emer:'#10B981' },
-        // Primary brand — coral red (rose). Used to be violet; corrected to match live.
-        mv:    { 400:'#FB7185', 500:'#F43F5E', 600:'#E11D48', 700:'#BE123C' }
+        // Primary brand — terracotta. Nudged slightly richer than v1 so it
+        // anchors the page against the deeper cocoa background. The colour
+        // family is Catalan tile / paprika / mole, not pink-coral.
+        mv:    { 400:'#F08461', 500:'#DC4A26', 600:'#B73A1A', 700:'#8C2D14' }
       }
     }
   }
@@ -38,14 +55,14 @@ tailwind.config = {
      overlay default which has zero width and causes layout to jump). */
   html { scrollbar-gutter: stable; overflow-y: scroll; }
   html, body { margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #070B17; color: #fff; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #1C0F06; color: #F1ECE2; }
   /* Custom scrollbar — takes real width on macOS so layout stays stable. */
   ::-webkit-scrollbar { width: 12px; height: 12px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 6px; border: 2px solid #070B17; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+  ::-webkit-scrollbar-thumb { background: rgba(255,250,240,0.08); border-radius: 6px; border: 2px solid #1C0F06; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,250,240,0.18); }
   /* Firefox equivalent */
-  html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.10) transparent; }
+  html { scrollbar-width: thin; scrollbar-color: rgba(255,250,240,0.10) transparent; }
   h1,h2,h3 { letter-spacing: -0.015em; }
   /* Editorial display serif — pairs with sans body to give a culinary-magazine feel.
      Used on hero H1, section H2s, venue name, member name. Inter stays everywhere else. */
@@ -63,6 +80,119 @@ tailwind.config = {
   .digit { font-variant-numeric: tabular-nums; }
   .frame { box-shadow: 0 30px 80px rgba(0,0,0,.4); }
   input::placeholder { color: #475569; }
+
+  /* ===== Stellar map styling — brand-coherent overrides ===== */
+  /* Make the Leaflet container blend into our dark UI instead of fighting it. */
+  .leaflet-container { background: #1C0F06; font-family: inherit; outline: none; }
+  /* Default attribution panel is white-on-light — invisible on dark, also ugly. */
+  .leaflet-control-attribution { background: rgba(28,15,6,0.7) !important; color: #786E5E !important; font-size: 9px !important; padding: 2px 6px !important; }
+  .leaflet-control-attribution a { color: #A8A092 !important; }
+  /* Custom zoom controls — pill-shape, brand colours. */
+  .leaflet-bar { box-shadow: 0 8px 24px rgba(0,0,0,.35) !important; border: 0 !important; }
+  .leaflet-bar a { background: rgba(28,19,9,0.92) !important; color: #EAE4DA !important; border-color: rgba(255,250,240,.08) !important; font-weight: 800; }
+  .leaflet-bar a:hover { background: #3D2818 !important; color: #fff !important; }
+
+  /* ----- Pins: simple coral dot with cuisine glyph. Name lives in a tooltip
+     that only shows on hover/active state — keeps the map uncluttered. ----- */
+  .mv-pin-wrap {
+    position: relative; width: 42px; height: 50px;
+    cursor: pointer;
+  }
+  .mv-pin {
+    position: absolute; top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #E84C2A;
+    border: 2.5px solid #FFFFFF;
+    box-shadow: 0 6px 14px rgba(232,76,42,.45), 0 1px 0 rgba(255,255,255,.2) inset;
+    display: grid; place-items: center;
+    font-size: 18px; line-height: 1;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .mv-pin-tail {
+    position: absolute; top: 33px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 11px solid #E84C2A;
+    filter: drop-shadow(0 4px 4px rgba(232,76,42,.35));
+  }
+  .mv-pin-name {
+    position: absolute; bottom: 100%; left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 6px;
+    background: rgba(15,23,42,0.96);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.1);
+    padding: 5px 10px;
+    border-radius: 9999px;
+    font-size: 11px; font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s ease, transform .15s ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,.4);
+  }
+  .mv-pin-wrap:hover .mv-pin-name,
+  .mv-pin-wrap.is-active .mv-pin-name { opacity: 1; transform: translateX(-50%) translateY(-2px); }
+  .mv-pin-wrap:hover .mv-pin { transform: translateX(-50%) scale(1.12); box-shadow: 0 12px 28px rgba(232,76,42,.55); }
+  .mv-pin-wrap.is-active .mv-pin { transform: translateX(-50%) scale(1.18); background: #FFFFFF; color: #E84C2A; border-color: #E84C2A; }
+  .mv-pin-wrap.is-active .mv-pin-tail { border-top-color: #FFFFFF; filter: drop-shadow(0 4px 4px rgba(255,255,255,.2)); }
+  /* Live-now: green pulse ring around the pin head. */
+  .mv-pin-wrap.is-live::before {
+    content: ''; position: absolute;
+    top: -4px; left: 50%; transform: translateX(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid rgba(52,211,153,.7);
+    animation: mvPulse 1.8s ease-out infinite;
+    pointer-events: none;
+  }
+  @keyframes mvPulse {
+    0% { transform: translateX(-50%) scale(.85); opacity: .9; }
+    70% { transform: translateX(-50%) scale(1.4); opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  /* ----- Cluster bubbles — real circles (we don't load MarkerCluster.Default.css
+     so we have to supply our own shape too, not just colour). ----- */
+  .marker-cluster {
+    background: rgba(232,76,42,.18) !important;
+    border-radius: 50% !important;
+    width: 44px !important; height: 44px !important;
+    text-align: center;
+  }
+  .marker-cluster div {
+    width: 32px !important; height: 32px !important;
+    margin: 6px 0 0 6px !important;
+    background: #E84C2A !important;
+    color: #fff !important;
+    border-radius: 50% !important;
+    border: 2px solid #FFFFFF !important;
+    font-weight: 800 !important;
+    box-shadow: 0 6px 16px rgba(232,76,42,.5);
+    display: grid; place-items: center;
+  }
+  .marker-cluster span { line-height: 1 !important; font-size: 13px; }
+  /* Brand-styled popups (instead of Leaflet's stock white). */
+  .leaflet-popup-content-wrapper { background: #2A1A0E !important; color: #E2E8F0 !important; border-radius: 14px !important; box-shadow: 0 20px 50px rgba(0,0,0,.5) !important; padding: 0 !important; overflow: hidden; }
+  .leaflet-popup-content { margin: 0 !important; line-height: 1.4 !important; min-width: 240px; }
+  .leaflet-popup-tip { background: #2A1A0E !important; }
+  .leaflet-popup-close-button { color: #94A3B8 !important; padding: 8px !important; }
+  .mv-popup { padding: 10px 12px 12px; }
+  .mv-popup-img { width: 100%; height: 96px; background: #1E293B center/cover no-repeat; border-radius: 10px; margin-bottom: 8px; }
+  .mv-popup-title { font-weight: 800; font-size: 14px; }
+  .mv-popup-sub { font-size: 11px; color: #94A3B8; margin-top: 1px; }
+  .mv-popup-btn { display: inline-block; margin-top: 8px; background: #E84C2A; color: #fff !important; font-weight: 800; font-size: 11px; padding: 7px 12px; border-radius: 9999px; text-decoration: none; }
+  .mv-popup-btn:hover { background: #E11D48; }
+  /* Map container has a subtle vignette so it doesn't feel like a flat plate. */
+  .mv-map-frame { position: relative; }
+  .mv-map-frame::after {
+    content:''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    box-shadow: inset 0 0 80px rgba(2,6,23,.65), inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  /* List rows — hover highlights matching pin via JS. */
+  .mv-listrow.is-active { background: rgba(232,76,42,.08); border-color: rgba(232,76,42,.4); }
 </style>
 </head>
 <body>
@@ -918,9 +1048,9 @@ function renderIllustratedVenue(venue, opts={}) {
   let h = 0; for (let i=0;i<seed.length;i++) h = (h*31 + seed.charCodeAt(i)) >>> 0;
   // Coral-family palettes only — keep every card brand-consistent. No amber outlier.
   const palettes = [
-    { from:'#1F0A12', via:'#150812', to:'#0A0613', accent:'#F43F5E' }, // wine
+    { from:'#1F0A12', via:'#150812', to:'#0A0613', accent:'#E84C2A' }, // wine
     { from:'#1A0A14', via:'#100612', to:'#070612', accent:'#FB7185' }, // soft coral
-    { from:'#181014', via:'#100C12', to:'#070612', accent:'#F43F5E' }  // espresso w/ coral
+    { from:'#181014', via:'#100C12', to:'#070612', accent:'#E84C2A' }  // espresso w/ coral
   ];
   const p = palettes[h % palettes.length];
   const uid = 'va' + h.toString(36);
@@ -1345,7 +1475,7 @@ function Landing() {
       // Coral atmospheric wash — kept ONLY on the top-right of the hero so
       // the bottom edge stays cleanly black. The old gradient lit up the
       // bottom-left too which bled coral into the seam with the next section.
-      el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #F43F5E 0, transparent 38%);'}),
+      el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #E84C2A 0, transparent 38%);'}),
       // BARCELONA LANDSCAPE — the visual centerpiece of the page WHEN
       // there's no video. Sagrada Familia rising big in the centre-left,
       // Casa Batlló's wavy roof to the right, Park Güell's mosaic bench
@@ -1872,7 +2002,7 @@ function Landing() {
         el('div',{class:'absolute -inset-3 bg-gradient-to-br from-mv-500/50 via-accent-pink/40 to-mv-500/30 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-700'}),
         // The card itself
         el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
-          style:'background: linear-gradient(135deg, #BE123C 0%, #E11D48 38%, #F43F5E 72%, #FB7185 100%); transform-style: preserve-3d;'},
+          style:'background: linear-gradient(135deg, #BE123C 0%, #E11D48 38%, #E84C2A 72%, #FB7185 100%); transform-style: preserve-3d;'},
           // Subtle tile pattern overlay
           el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 25% 0%, rgba(255,255,255,0.4) 0, transparent 40%), repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);'}),
           // Card body
@@ -2360,68 +2490,295 @@ function validSavedSlugs(u) {
 
 function AppMap() {
   const u = currentUser(); if (!u) { go('signin'); return el('div'); }
-  const venues = getAllVenues().filter(v => typeof v.lat === 'number' && typeof v.lng === 'number');
+  const allVenues = getAllVenues().filter(v => typeof v.lat === 'number' && typeof v.lng === 'number');
   const mapId = 'mv-map-' + Math.random().toString(36).slice(2,8);
-  const mapEl = el('div',{id:mapId, class:'w-full h-[65vh] min-h-[460px] rounded-2xl overflow-hidden border border-white/10'});
-  const inner = el('div',{class:'pb-24'},
-    el('div',{class:'p-5 pb-3 border-b border-white/5'},
-      el('h1',{class:'text-2xl font-extrabold'},'Map'),
-      el('p',{class:'text-xs text-slate2-400'}, venues.length + ' deals · Barcelona')
-    ),
-    el('div',{class:'p-4'},
-      mapEl,
-      el('p',{class:'text-xs text-slate2-500 mt-2 text-center'},'Tap a pin to view the deal.')
-    )
-  );
-  // Init Leaflet after the element is mounted; script tag uses defer so we poll for window.L.
-  // P-5: hard 4-second timeout. If the CDN is blocked/slow, swap the empty
-  // div for a list view so the page never sits blank.
+
+  // -----------------------------------------------------------------------
+  // Local state — filters, "active" venue (synced between list & pin).
+  // -----------------------------------------------------------------------
+  const state2 = {
+    barrios: new Set(),
+    cuisines: new Set(),
+    onlyAvailable: false,
+    activeSlug: null
+  };
+  const allBarrios  = Array.from(new Set(allVenues.map(v => v.barrio).filter(Boolean))).sort();
+  // Cuisines are stored as "Spanish · Tapas" — split on " · " so chips are atomic.
+  const allCuisines = Array.from(new Set(allVenues.flatMap(v => (v.cuisine || '').split(/\s*·\s*/)).filter(Boolean))).sort();
+
+  function filteredVenues() {
+    return allVenues.filter(v => {
+      if (state2.barrios.size > 0 && !state2.barrios.has(v.barrio)) return false;
+      if (state2.cuisines.size > 0) {
+        const tags = (v.cuisine || '').split(/\s*·\s*/);
+        if (!tags.some(t => state2.cuisines.has(t))) return false;
+      }
+      if (state2.onlyAvailable && !isVenueAvailableNow(v)) return false;
+      return true;
+    });
+  }
+
+  // Cuisine emoji for the pin glyph (a tiny piece of differentiation per restaurant).
+  function pinGlyph(v) {
+    const c = (v.cuisine || '').toLowerCase();
+    if (c.includes('tapa')) return '🍢';
+    if (c.includes('paella') || c.includes('seafood')) return '🥘';
+    if (c.includes('asian') || c.includes('thai') || c.includes('japan') || c.includes('sushi')) return '🍜';
+    if (c.includes('pizza') || c.includes('italian')) return '🍕';
+    if (c.includes('brunch') || c.includes('café') || c.includes('cafe')) return '🥐';
+    if (c.includes('vegan')) return '🥗';
+    if (c.includes('burger') || c.includes('american')) return '🍔';
+    if (c.includes('mexican') || c.includes('taco')) return '🌮';
+    if (c.includes('mediterranean')) return '🫒';
+    return '🍽️';
+  }
+  function priceTier(v) { return '€'.repeat(Math.max(1, Math.min(4, v.priceTier ?? 2))); }
+
+  // -----------------------------------------------------------------------
+  // Layout: filters on top, split list/map below.
+  // -----------------------------------------------------------------------
+  const mapEl = el('div',{id:mapId, class:'mv-map-frame w-full rounded-2xl overflow-hidden border border-white/10 bg-ink-900', style:'height: min(72vh, 760px); min-height: 480px;'});
+  const listEl = el('div',{class:'space-y-2 overflow-y-auto pr-1', style:'max-height: min(72vh, 760px);'});
+  const filterBarEl = el('div',{});
+  const countEl = el('p',{class:'text-xs text-slate2-400 mt-0.5'});
+
+  // -----------------------------------------------------------------------
+  // Filter bar (re-rendered on chip toggle).
+  // -----------------------------------------------------------------------
+  function paintFilters() {
+    filterBarEl.innerHTML = '';
+    const cuisineRow = el('div',{class:'flex items-center gap-2 flex-wrap'},
+      el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-500 font-bold mr-1'},'Cuisine'),
+      ...allCuisines.map(c => chip(c, state2.cuisines.has(c), () => {
+        state2.cuisines.has(c) ? state2.cuisines.delete(c) : state2.cuisines.add(c);
+        repaint();
+      }))
+    );
+    const barrioRow = el('div',{class:'flex items-center gap-2 flex-wrap'},
+      el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-500 font-bold mr-1'},'Barrio'),
+      ...allBarrios.map(b => chip(b, state2.barrios.has(b), () => {
+        state2.barrios.has(b) ? state2.barrios.delete(b) : state2.barrios.add(b);
+        repaint();
+      }))
+    );
+    const toggleRow = el('div',{class:'flex items-center gap-2 flex-wrap'},
+      chip('🟢 Open right now', state2.onlyAvailable, () => { state2.onlyAvailable = !state2.onlyAvailable; repaint(); }, true),
+      (state2.barrios.size + state2.cuisines.size > 0 || state2.onlyAvailable)
+        ? el('button',{class:'text-xs underline text-slate2-400 hover:text-white cursor-pointer bg-transparent border-0', onclick:()=>{
+            state2.barrios.clear(); state2.cuisines.clear(); state2.onlyAvailable = false; repaint();
+          }},'Clear filters')
+        : null
+    );
+    filterBarEl.appendChild(el('div',{class:'space-y-2'}, toggleRow, cuisineRow, barrioRow));
+  }
+  function chip(label, on, onclick, accent) {
+    const cls = 'rounded-full px-3 py-1 text-xs font-bold cursor-pointer transition border ' + (
+      on
+        ? (accent ? 'bg-accent-emer/15 text-accent-emer border-accent-emer/40' : 'bg-mv-500/15 text-mv-300 border-mv-500/40')
+        : 'bg-white/[0.04] text-slate2-300 border-white/10 hover:bg-white/[0.08]'
+    );
+    return el('button',{class:cls, onclick, type:'button'}, label);
+  }
+
+  // -----------------------------------------------------------------------
+  // List rendering — each row is clickable + hoverable, linked to its pin.
+  // -----------------------------------------------------------------------
+  const rowByslug = new Map();
+  function paintList(vs) {
+    listEl.innerHTML = '';
+    rowByslug.clear();
+    if (vs.length === 0) {
+      listEl.appendChild(el('div',{class:'rounded-2xl bg-white/[0.03] border border-white/10 p-6 text-center'},
+        el('div',{class:'text-3xl'},'🔎'),
+        el('h3',{class:'mt-2 font-bold text-sm'},'No matches'),
+        el('p',{class:'mt-1 text-xs text-slate2-400'},'Try removing a filter.')
+      ));
+      return;
+    }
+    vs.forEach((v, i) => {
+      const live = isVenueAvailableNow(v);
+      const row = el('button',{
+        type:'button',
+        'data-slug': v.slug,
+        class:'mv-listrow w-full text-left rounded-xl bg-white/[0.04] border border-white/10 hover:bg-white/[0.07] cursor-pointer p-3 flex items-center gap-3 transition',
+        onmouseenter: () => setActive(v.slug, false),
+        onmouseleave: () => setActive(null, false),
+        onclick: () => flyTo(v.slug, true)
+      },
+        el('div',{class:'h-12 w-12 rounded-lg bg-mv-500/15 grid place-items-center shrink-0 text-xl border border-mv-500/20'}, pinGlyph(v)),
+        el('div',{class:'min-w-0 flex-1'},
+          el('div',{class:'flex items-center gap-1.5'},
+            el('span',{class:'font-bold text-sm truncate'}, v.name),
+            live ? el('span',{class:'inline-block h-1.5 w-1.5 rounded-full bg-accent-emer animate-pulse shrink-0', title:'Open right now'}) : null
+          ),
+          el('div',{class:'text-[11px] text-slate2-400 truncate'}, v.barrio + ' · ' + v.cuisine),
+          el('div',{class:'text-[10px] text-slate2-500'}, priceTier(v))
+        )
+      );
+      listEl.appendChild(row);
+      rowByslug.set(v.slug, row);
+    });
+  }
+
+  // -----------------------------------------------------------------------
+  // Map machinery
+  // -----------------------------------------------------------------------
+  let map = null;
+  let cluster = null;
+  const markerBySlug = new Map();
   let leafletReady = false;
+
   function fallbackToList() {
     if (leafletReady) return;
     const host = document.getElementById(mapId);
     if (!host) return;
-    host.classList.remove('h-[65vh]', 'min-h-[460px]', 'overflow-hidden');
-    host.style.minHeight = '0';
     host.innerHTML = '';
-    host.appendChild(el('div',{class:'p-6 text-center bg-white/[0.02] border border-white/10 rounded-2xl'},
+    host.style.height = 'auto';
+    host.appendChild(el('div',{class:'p-6 text-center'},
       el('div',{class:'text-3xl'},'🗺️'),
       el('h3',{class:'mt-2 font-bold'},'Map unavailable'),
-      el('p',{class:'mt-1 text-xs text-slate2-400 max-w-sm mx-auto'},'Couldn\'t load the map service. Here are all the deals as a list — tap any to view.')
+      el('p',{class:'mt-1 text-xs text-slate2-400 max-w-sm mx-auto'},'Couldn\'t load the map service. The list on the left is fully usable.')
     ));
-    const listEl = el('div',{class:'mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'},
-      ...venues.map(DealCard)
-    );
-    host.appendChild(listEl);
   }
+
+  function makePinIcon(v) {
+    const live = isVenueAvailableNow(v);
+    const liveCls = live ? ' is-live' : '';
+    // Clean coral circle with the cuisine glyph. Name is a tooltip above
+    // that fades in on hover/active (no more overflowing names off the edge).
+    return window.L.divIcon({
+      className: '',
+      html:
+        '<div class="mv-pin-wrap' + liveCls + '" data-slug="' + v.slug + '">' +
+          '<div class="mv-pin-name">' + escapeHtml(v.name) + '</div>' +
+          '<div class="mv-pin">' + pinGlyph(v) + '</div>' +
+          '<div class="mv-pin-tail"></div>' +
+        '</div>',
+      iconSize: [42, 50],
+      iconAnchor: [21, 50]
+    });
+  }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function popupHtml(v) {
+    const img = (v._pv?.photos && v._pv.photos[0]) || (v.img ?? '');
+    return (
+      '<div class="mv-popup">'
+      + (img ? '<div class="mv-popup-img" style="background-image:url(' + img + ')"></div>' : '')
+      + '<div class="mv-popup-title">' + escapeHtml(v.name) + '</div>'
+      + '<div class="mv-popup-sub">' + escapeHtml(v.barrio || '') + ' · ' + escapeHtml(v.cuisine || '') + ' · ' + priceTier(v) + '</div>'
+      + '<a class="mv-popup-btn" data-slug="' + v.slug + '" href="javascript:void(0)">View restaurant →</a>'
+      + '</div>'
+    );
+  }
+
+  function repopulate() {
+    if (!map || !cluster) return;
+    cluster.clearLayers();
+    markerBySlug.clear();
+    const vs = filteredVenues();
+    countEl.textContent = vs.length + ' of ' + allVenues.length + ' deals shown';
+    paintList(vs);
+    vs.forEach(v => {
+      const m = window.L.marker([v.lat, v.lng], { icon: makePinIcon(v), riseOnHover: true });
+      m.bindPopup(popupHtml(v), { closeButton: true, autoPanPadding: [32, 32] });
+      m.on('click', () => setActive(v.slug, false));
+      markerBySlug.set(v.slug, m);
+      cluster.addLayer(m);
+    });
+    // Auto-fit to whatever's visible. Extra padding keeps the BARCELONA label
+    // and corner pins from crowding. maxZoom 14 keeps a wider view so individual
+    // pins don't dominate.
+    if (vs.length > 0) {
+      const bounds = window.L.featureGroup(vs.map(v => window.L.marker([v.lat, v.lng]))).getBounds();
+      map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14, animate: true });
+    }
+  }
+
+  function setActive(slug, alsoScrollList) {
+    state2.activeSlug = slug;
+    // Sync list-row + pin classes.
+    document.querySelectorAll('.mv-listrow').forEach(r => {
+      r.classList.toggle('is-active', r.dataset.slug === slug);
+    });
+    document.querySelectorAll('.mv-pin-wrap').forEach(p => {
+      p.classList.toggle('is-active', p.dataset.slug === slug);
+    });
+    if (alsoScrollList && slug) {
+      rowByslug.get(slug)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function flyTo(slug, openPopup) {
+    const v = allVenues.find(x => x.slug === slug);
+    const m = markerBySlug.get(slug);
+    if (!v || !m || !map) return;
+    setActive(slug, true);
+    map.flyTo([v.lat, v.lng], Math.max(15, map.getZoom()), { duration: 0.6 });
+    if (openPopup) setTimeout(() => m.openPopup(), 350);
+  }
+
+  function repaint() {
+    paintFilters();
+    repopulate();
+  }
+
   function initMap() {
     if (!window.L) { setTimeout(initMap, 60); return; }
+    if (!window.L.markerClusterGroup) { setTimeout(initMap, 60); return; } // wait for plugin
     if (!document.getElementById(mapId)) return;
     leafletReady = true;
-    const map = window.L.map(mapId, { zoomControl: true, attributionControl: false })
-      .setView([41.3851, 2.1734], 13);
-    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-    venues.forEach(v => {
-      const isLive = isVenueAvailableNow(v);
-      const icon = window.L.divIcon({
-        className: 'mv-pin',
-        html: '<div style="position:relative">'
-            + '<div style="background:#F43F5E;color:white;font-size:10px;font-weight:800;letter-spacing:.05em;padding:3px 8px;border-radius:9999px;box-shadow:0 4px 12px rgba(0,0,0,.4);white-space:nowrap;">2×1' + (isLive ? ' • NOW' : '') + '</div>'
-            + '<div style="width:0;height:0;margin:0 auto;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #F43F5E;"></div>'
-            + '</div>',
-        iconSize: [60, 26], iconAnchor: [30, 26]
-      });
-      window.L.marker([v.lat, v.lng], { icon })
-        .addTo(map)
-        .bindPopup('<div style="min-width:180px"><div style="font-weight:800;color:#0F172A">' + v.name
-          + '</div><div style="font-size:11px;color:#64748B;margin-top:2px">' + v.barrio + ' · ' + v.cuisine
-          + '</div><a href="javascript:void 0" data-slug="' + v.slug + '" class="mv-popup-link" style="display:inline-block;margin-top:6px;color:#F43F5E;font-weight:700;text-decoration:underline">View offer →</a></div>');
+
+    map = window.L.map(mapId, {
+      zoomControl: true,
+      attributionControl: true,
+      preferCanvas: false,
+      worldCopyJump: false,
+      minZoom: 11
+    }).setView([41.3851, 2.1734], 13);
+
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> · <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    cluster = window.L.markerClusterGroup({
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      maxClusterRadius: 38,
+      disableClusteringAtZoom: 16
     });
+    map.addLayer(cluster);
+
     map.on('popupopen', e => {
-      const link = e.popup.getElement().querySelector('.mv-popup-link');
+      const link = e.popup.getElement().querySelector('.mv-popup-btn');
       if (link) link.onclick = () => go('venue', { slug: link.dataset.slug });
     });
+
+    // Initial paint.
+    repopulate();
   }
+
+  // Build the page skeleton.
+  paintFilters();
+  const inner = el('div',{class:'pb-24'},
+    el('div',{class:'px-5 pt-5 pb-3 border-b border-white/5'},
+      el('div',{class:'flex items-baseline justify-between gap-3 flex-wrap'},
+        el('div',{},
+          el('h1',{class:'text-2xl font-extrabold'},'Map'),
+          countEl
+        )
+      ),
+      el('div',{class:'mt-4'}, filterBarEl)
+    ),
+    el('div',{class:'p-4 grid gap-4 lg:grid-cols-[340px_1fr]'},
+      // LEFT: list — collapses below the map on narrow screens via CSS order tricks
+      el('div',{class:'order-2 lg:order-1'}, listEl),
+      // RIGHT: map
+      el('div',{class:'order-1 lg:order-2'}, mapEl)
+    )
+  );
+  countEl.textContent = allVenues.length + ' deals · Barcelona';
+
   setTimeout(initMap, 0);
   setTimeout(fallbackToList, 4000);
   return AppShell(inner);
@@ -2717,7 +3074,7 @@ function AppProfile() {
   const inner = el('div',{class:'pb-24'},
     // ===== HERO HEADER — gradient banner with name, member-since, tier =====
     el('div',{class:'relative overflow-hidden'},
-      el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #F43F5E 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
+      el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #E84C2A 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
       el('div',{class:'relative px-5 pt-6 pb-8'},
         el('div',{class:'flex items-start gap-4 flex-wrap'},
           el('div',{class:'avatar-drift h-20 w-20 rounded-2xl bg-gradient-to-br from-mv-500 to-accent-pink grid place-items-center text-4xl font-extrabold shrink-0 shadow-xl shadow-mv-500/30 border-2 border-white/20'},
@@ -3531,7 +3888,7 @@ function PartnerLanding() {
 
     // HERO — split layout: pitch on left, glass card on right with the headline stat.
     el('section',{class:'relative overflow-hidden grain'},
-      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #F43F5E 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #E84C2A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
         el('div',{},
           el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
@@ -3808,7 +4165,7 @@ function PartnerLanding() {
 
     // FINAL CTA — large.
     el('section',{class:'relative overflow-hidden border-t border-white/5'},
-      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #F43F5E 0, transparent 50%);'}),
+      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #E84C2A 0, transparent 50%);'}),
       el('div',{class:'relative mx-auto max-w-4xl px-4 py-24 text-center'},
         el('h2',{class:'text-4xl md:text-6xl font-extrabold leading-tight'},
           'Your next ', el('span',{class:'text-mv-500'},'slow Tuesday'),
