@@ -89,7 +89,7 @@ tailwind.config = {
   .leaflet-control-attribution a { color: #A8A092 !important; }
   /* Custom zoom controls — pill-shape, brand colours. */
   .leaflet-bar { box-shadow: 0 8px 24px rgba(0,0,0,.35) !important; border: 0 !important; }
-  .leaflet-bar a { background: rgba(28,19,9,0.92) !important; color: #EAE4DA !important; border-color: rgba(255,250,240,.08) !important; font-weight: 800; }
+  .leaflet-bar a { background: rgba(42,26,14,0.92) !important; color: #EAE4DA !important; border-color: rgba(255,250,240,.08) !important; font-weight: 800; }
   .leaflet-bar a:hover { background: #3D2818 !important; color: #fff !important; }
 
   /* ----- Pins: simple coral dot with cuisine glyph. Name lives in a tooltip
@@ -102,9 +102,9 @@ tailwind.config = {
     position: absolute; top: 0; left: 50%;
     transform: translateX(-50%);
     width: 36px; height: 36px; border-radius: 50%;
-    background: #E84C2A;
+    background: #DC4A26;
     border: 2.5px solid #FFFFFF;
-    box-shadow: 0 6px 14px rgba(232,76,42,.45), 0 1px 0 rgba(255,255,255,.2) inset;
+    box-shadow: 0 6px 14px rgba(220,74,38,.45), 0 1px 0 rgba(255,255,255,.2) inset;
     display: grid; place-items: center;
     font-size: 18px; line-height: 1;
     transition: transform .18s ease, box-shadow .18s ease;
@@ -115,8 +115,8 @@ tailwind.config = {
     width: 0; height: 0;
     border-left: 7px solid transparent;
     border-right: 7px solid transparent;
-    border-top: 11px solid #E84C2A;
-    filter: drop-shadow(0 4px 4px rgba(232,76,42,.35));
+    border-top: 11px solid #DC4A26;
+    filter: drop-shadow(0 4px 4px rgba(220,74,38,.35));
   }
   .mv-pin-name {
     position: absolute; bottom: 100%; left: 50%;
@@ -136,8 +136,8 @@ tailwind.config = {
   }
   .mv-pin-wrap:hover .mv-pin-name,
   .mv-pin-wrap.is-active .mv-pin-name { opacity: 1; transform: translateX(-50%) translateY(-2px); }
-  .mv-pin-wrap:hover .mv-pin { transform: translateX(-50%) scale(1.12); box-shadow: 0 12px 28px rgba(232,76,42,.55); }
-  .mv-pin-wrap.is-active .mv-pin { transform: translateX(-50%) scale(1.18); background: #FFFFFF; color: #E84C2A; border-color: #E84C2A; }
+  .mv-pin-wrap:hover .mv-pin { transform: translateX(-50%) scale(1.12); box-shadow: 0 12px 28px rgba(220,74,38,.55); }
+  .mv-pin-wrap.is-active .mv-pin { transform: translateX(-50%) scale(1.18); background: #FFFFFF; color: #DC4A26; border-color: #DC4A26; }
   .mv-pin-wrap.is-active .mv-pin-tail { border-top-color: #FFFFFF; filter: drop-shadow(0 4px 4px rgba(255,255,255,.2)); }
   /* Live-now: green pulse ring around the pin head. */
   .mv-pin-wrap.is-live::before {
@@ -157,7 +157,7 @@ tailwind.config = {
   /* ----- Cluster bubbles — real circles (we don't load MarkerCluster.Default.css
      so we have to supply our own shape too, not just colour). ----- */
   .marker-cluster {
-    background: rgba(232,76,42,.18) !important;
+    background: rgba(220,74,38,.18) !important;
     border-radius: 50% !important;
     width: 44px !important; height: 44px !important;
     text-align: center;
@@ -165,12 +165,12 @@ tailwind.config = {
   .marker-cluster div {
     width: 32px !important; height: 32px !important;
     margin: 6px 0 0 6px !important;
-    background: #E84C2A !important;
+    background: #DC4A26 !important;
     color: #fff !important;
     border-radius: 50% !important;
     border: 2px solid #FFFFFF !important;
     font-weight: 800 !important;
-    box-shadow: 0 6px 16px rgba(232,76,42,.5);
+    box-shadow: 0 6px 16px rgba(220,74,38,.5);
     display: grid; place-items: center;
   }
   .marker-cluster span { line-height: 1 !important; font-size: 13px; }
@@ -183,7 +183,7 @@ tailwind.config = {
   .mv-popup-img { width: 100%; height: 96px; background: #1E293B center/cover no-repeat; border-radius: 10px; margin-bottom: 8px; }
   .mv-popup-title { font-weight: 800; font-size: 14px; }
   .mv-popup-sub { font-size: 11px; color: #94A3B8; margin-top: 1px; }
-  .mv-popup-btn { display: inline-block; margin-top: 8px; background: #E84C2A; color: #fff !important; font-weight: 800; font-size: 11px; padding: 7px 12px; border-radius: 9999px; text-decoration: none; }
+  .mv-popup-btn { display: inline-block; margin-top: 8px; background: #DC4A26; color: #fff !important; font-weight: 800; font-size: 11px; padding: 7px 12px; border-radius: 9999px; text-decoration: none; }
   .mv-popup-btn:hover { background: #E11D48; }
   /* Map container has a subtle vignette so it doesn't feel like a flat plate. */
   .mv-map-frame { position: relative; }
@@ -192,7 +192,7 @@ tailwind.config = {
     box-shadow: inset 0 0 80px rgba(2,6,23,.65), inset 0 0 0 1px rgba(255,255,255,.06);
   }
   /* List rows — hover highlights matching pin via JS. */
-  .mv-listrow.is-active { background: rgba(232,76,42,.08); border-color: rgba(232,76,42,.4); }
+  .mv-listrow.is-active { background: rgba(220,74,38,.08); border-color: rgba(220,74,38,.4); }
 </style>
 </head>
 <body>
@@ -1048,9 +1048,9 @@ function renderIllustratedVenue(venue, opts={}) {
   let h = 0; for (let i=0;i<seed.length;i++) h = (h*31 + seed.charCodeAt(i)) >>> 0;
   // Coral-family palettes only — keep every card brand-consistent. No amber outlier.
   const palettes = [
-    { from:'#1F0A12', via:'#150812', to:'#0A0613', accent:'#E84C2A' }, // wine
+    { from:'#1F0A12', via:'#150812', to:'#0A0613', accent:'#DC4A26' }, // wine
     { from:'#1A0A14', via:'#100612', to:'#070612', accent:'#FB7185' }, // soft coral
-    { from:'#181014', via:'#100C12', to:'#070612', accent:'#E84C2A' }  // espresso w/ coral
+    { from:'#181014', via:'#100C12', to:'#070612', accent:'#DC4A26' }  // espresso w/ coral
   ];
   const p = palettes[h % palettes.length];
   const uid = 'va' + h.toString(36);
@@ -1475,7 +1475,7 @@ function Landing() {
       // Coral atmospheric wash — kept ONLY on the top-right of the hero so
       // the bottom edge stays cleanly black. The old gradient lit up the
       // bottom-left too which bled coral into the seam with the next section.
-      el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #E84C2A 0, transparent 38%);'}),
+      el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #DC4A26 0, transparent 38%);'}),
       // BARCELONA LANDSCAPE — the visual centerpiece of the page WHEN
       // there's no video. Sagrada Familia rising big in the centre-left,
       // Casa Batlló's wavy roof to the right, Park Güell's mosaic bench
@@ -1732,106 +1732,429 @@ function Landing() {
           '</g>'+
         '</svg>'
       }),
-      el('div',{class:'relative mx-auto max-w-6xl px-4 py-20'},
-        el('div',{class:'text-center'},
-          el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'}, 'How it works'),
-          el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold'}, 'Three Steps to ',
-            el('span',{class:'text-mv-500'},'Your First Deal')
+      el('div',{class:'relative mx-auto max-w-6xl px-4 py-24 md:py-32'},
+        // === EDITORIAL HEADER ===
+        el('div',{class:'text-center max-w-3xl mx-auto'},
+          el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+            el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+            'The Menuverso method',
+            el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+          ),
+          el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
+            'Three moves. ', el('span',{class:'italic text-mv-500'},'That’s it.')
+          ),
+          el('p',{class:'mt-6 text-lg md:text-xl text-slate2-300 leading-relaxed'},
+            'No app to download. No tables to book. Just a Thursday-morning email—and a button you tap when you’re hungry.'
           )
         ),
-        // Animated pane-to-pane card row — each step highlights in turn while
-        // the section is visible. IntersectionObserver pauses the cycle when
-        // you've scrolled away so it isn't burning frames in the background.
+
+        // === THREE-ACT STORYBOARD ===
+        // A single helper builds each act: a 2-column row with text on one side
+        // and an illustration on the other. The vertical thread connecting them
+        // is the centre line of the parent grid.
         (() => {
-          const steps = [
-            ['🔍','Discover Restaurants','Browse the map or feed. Filter by cuisine, barrio, or availability.'],
-            ['📱','Book Your Deal','Pick a time slot. Get a 6-digit code in 3 seconds.'],
-            ['🎉','Enjoy & Save 50%','Show the code to your server. Pay for one main, the second one is free.']
-          ];
-          const cardEls = steps.map(([icon,t,d],i) =>
-            el('div',{
-              'data-step': String(i),
-              class:'how-card relative rounded-2xl bg-white/[0.03] border border-white/10 p-6 backdrop-blur-sm transition-all duration-700 ease-out cursor-pointer'
+          // ---- Illustration SVGs (each scales to its container) ----
+          const cardSvg =
+            '<svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
+              '<defs>'+
+                '<radialGradient id="hcg1" cx="50%" cy="55%" r="60%">'+
+                  '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.22"/>'+
+                  '<stop offset="100%" stop-color="#DC4A26" stop-opacity="0"/>'+
+                '</radialGradient>'+
+                '<linearGradient id="hcface" x1="0" y1="0" x2="1" y2="1">'+
+                  '<stop offset="0%" stop-color="#2A1A0E"/>'+
+                  '<stop offset="100%" stop-color="#3D2818"/>'+
+                '</linearGradient>'+
+                '<linearGradient id="hcshine" x1="0" y1="0" x2="1" y2="0">'+
+                  '<stop offset="0%" stop-color="#FBBF24" stop-opacity="0"/>'+
+                  '<stop offset="50%" stop-color="#FBBF24" stop-opacity="0.18"/>'+
+                  '<stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/>'+
+                '</linearGradient>'+
+              '</defs>'+
+              '<ellipse cx="240" cy="200" rx="220" ry="115" fill="url(#hcg1)"/>'+
+              // Membership card (rotated)
+              '<g transform="translate(80 100) rotate(-6 160 95)">'+
+                // Shadow drop
+                '<rect x="6" y="10" width="320" height="190" rx="20" fill="#1C0F06" fill-opacity="0.4"/>'+
+                '<rect x="0" y="0" width="320" height="190" rx="20" fill="url(#hcface)" stroke="#DC4A26" stroke-width="1.5" stroke-opacity="0.5"/>'+
+                '<rect x="0" y="0" width="320" height="190" rx="20" fill="url(#hcshine)"/>'+
+                // Logo emblem
+                '<g transform="translate(32 38)">'+
+                  '<circle cx="0" cy="0" r="18" fill="#DC4A26"/>'+
+                  '<text x="0" y="7" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="22" fill="white" text-anchor="middle">m</text>'+
+                '</g>'+
+                '<text x="60" y="45" font-family="Georgia, serif" font-weight="700" font-size="20" fill="#F5E8D4" letter-spacing="1">MENUVERSO</text>'+
+                '<text x="32" y="75" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2.5" fill="#B0A48E">CARTA · CLUB · BARCELONA</text>'+
+                // Subtle ornament
+                '<g stroke="#82765E" stroke-opacity="0.18" stroke-width="1" fill="none">'+
+                  '<line x1="180" y1="95" x2="290" y2="95"/>'+
+                  '<line x1="180" y1="105" x2="270" y2="105"/>'+
+                  '<line x1="180" y1="115" x2="285" y2="115"/>'+
+                '</g>'+
+                // Name + member since
+                '<text x="32" y="148" font-family="Georgia, serif" font-style="italic" font-size="20" font-weight="700" fill="#F4ECDD">Patricia Adrover</text>'+
+                '<text x="32" y="168" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2" fill="#82765E">MEMBER SINCE 2026</text>'+
+                // Price tag
+                '<g transform="translate(290 158)">'+
+                  '<text x="0" y="0" font-family="Georgia, serif" font-style="italic" font-size="22" font-weight="700" fill="#DC4A26" text-anchor="end">€4.99</text>'+
+                  '<text x="0" y="14" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="1.8" fill="#82765E" text-anchor="end">/ MES</text>'+
+                '</g>'+
+              '</g>'+
+              // Floating "joined" tag
+              '<g transform="translate(345 60)">'+
+                '<rect x="0" y="0" width="100" height="30" rx="15" fill="#2A1A0E" stroke="#10B981" stroke-opacity="0.6" stroke-width="1.5"/>'+
+                '<circle cx="14" cy="15" r="4" fill="#10B981"/>'+
+                '<path d="M 11 15 L 13 17 L 17 13" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>'+
+                '<text x="24" y="19" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#F5E8D4">Welcome</text>'+
+              '</g>'+
+              // Sparkles
+              '<g fill="#FBBF24" fill-opacity="0.55">'+
+                '<circle cx="40" cy="70" r="2.2"/>'+
+                '<circle cx="430" cy="290" r="2"/>'+
+                '<circle cx="65" cy="295" r="1.6"/>'+
+              '</g>'+
+            '</svg>';
+
+          const inboxSvg =
+            '<svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
+              '<defs>'+
+                '<radialGradient id="hcg2" cx="50%" cy="50%" r="55%">'+
+                  '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.18"/>'+
+                  '<stop offset="100%" stop-color="#DC4A26" stop-opacity="0"/>'+
+                '</radialGradient>'+
+              '</defs>'+
+              '<ellipse cx="240" cy="190" rx="210" ry="135" fill="url(#hcg2)"/>'+
+              // Phone
+              '<g transform="translate(140 20)">'+
+                '<rect x="6" y="14" width="200" height="328" rx="28" fill="#1C0F06" fill-opacity="0.5"/>'+
+                '<rect x="0" y="0" width="200" height="328" rx="28" fill="#1C0F06" stroke="#3D2818" stroke-width="2"/>'+
+                '<rect x="8" y="8" width="184" height="312" rx="22" fill="#2A1A0E"/>'+
+                // Status bar
+                '<text x="22" y="28" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#F4ECDD">Thu 8:02</text>'+
+                '<g transform="translate(160 21)">'+
+                  '<circle cx="0" cy="4" r="1.4" fill="#F4ECDD"/>'+
+                  '<circle cx="5" cy="4" r="1.4" fill="#F4ECDD"/>'+
+                  '<circle cx="10" cy="4" r="1.4" fill="#F4ECDD"/>'+
+                  '<rect x="16" y="1" width="12" height="6" rx="1.5" fill="none" stroke="#F4ECDD" stroke-width="0.8"/>'+
+                  '<rect x="17" y="2" width="8" height="4" rx="0.5" fill="#10B981"/>'+
+                '</g>'+
+                // Email header
+                '<g transform="translate(18 52)">'+
+                  '<text x="0" y="0" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1.5" fill="#82765E">FROM</text>'+
+                  '<circle cx="6" cy="20" r="9" fill="#DC4A26"/>'+
+                  '<text x="6" y="24" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="11" fill="white" text-anchor="middle">m</text>'+
+                  '<text x="22" y="18" font-family="Georgia, serif" font-size="13" font-weight="700" fill="#F5E8D4">Menuverso</text>'+
+                  '<text x="22" y="32" font-family="-apple-system, sans-serif" font-size="10" fill="#82765E">noreply@menuverso.com</text>'+
+                  '<text x="0" y="56" font-family="Georgia, serif" font-style="italic" font-size="15" font-weight="700" fill="#F5E8D4">Your Thursday picks</text>'+
+                '</g>'+
+                // Divider
+                '<line x1="18" y1="124" x2="182" y2="124" stroke="#3D2818" stroke-width="1"/>'+
+                // 6 restaurant rows — top one featured/highlighted
+                '<g transform="translate(18 134)">'+
+                  // Featured
+                  '<rect x="0" y="0" width="164" height="38" rx="8" fill="#DC4A26" fill-opacity="0.12" stroke="#DC4A26" stroke-opacity="0.55" stroke-width="1"/>'+
+                  '<circle cx="14" cy="19" r="6" fill="#DC4A26"/>'+
+                  '<text x="28" y="16" font-family="Georgia, serif" font-size="11" font-weight="700" fill="#F5E8D4">Bar Cañete</text>'+
+                  '<text x="28" y="29" font-family="-apple-system, sans-serif" font-size="8" fill="#B0A48E">Raval · Tapas</text>'+
+                  '<text x="155" y="23" font-family="Georgia, serif" font-size="11" font-style="italic" font-weight="700" fill="#DC4A26" text-anchor="end">2×1</text>'+
+                  // Row 2
+                  '<g transform="translate(0 44)">'+
+                    '<rect x="0" y="0" width="164" height="32" rx="8" fill="#2A1A0E" stroke="#3D2818" stroke-width="1"/>'+
+                    '<circle cx="14" cy="16" r="6" fill="#82765E" fill-opacity="0.4"/>'+
+                    '<text x="28" y="14" font-family="Georgia, serif" font-size="10" font-weight="700" fill="#F4ECDD">Disfrutar</text>'+
+                    '<text x="28" y="25" font-family="-apple-system, sans-serif" font-size="8" fill="#82765E">Eixample · Modern</text>'+
+                    '<text x="155" y="20" font-family="Georgia, serif" font-size="9" font-style="italic" fill="#82765E" text-anchor="end">2×1</text>'+
+                  '</g>'+
+                  // Row 3
+                  '<g transform="translate(0 82)">'+
+                    '<rect x="0" y="0" width="164" height="32" rx="8" fill="#2A1A0E" stroke="#3D2818" stroke-width="1"/>'+
+                    '<circle cx="14" cy="16" r="6" fill="#82765E" fill-opacity="0.4"/>'+
+                    '<text x="28" y="14" font-family="Georgia, serif" font-size="10" font-weight="700" fill="#F4ECDD">Suculent</text>'+
+                    '<text x="28" y="25" font-family="-apple-system, sans-serif" font-size="8" fill="#82765E">Raval · Catalan</text>'+
+                    '<text x="155" y="20" font-family="Georgia, serif" font-size="9" font-style="italic" fill="#82765E" text-anchor="end">2×1</text>'+
+                  '</g>'+
+                  // Row 4
+                  '<g transform="translate(0 120)">'+
+                    '<rect x="0" y="0" width="164" height="32" rx="8" fill="#2A1A0E" stroke="#3D2818" stroke-width="1"/>'+
+                    '<circle cx="14" cy="16" r="6" fill="#82765E" fill-opacity="0.4"/>'+
+                    '<text x="28" y="14" font-family="Georgia, serif" font-size="10" font-weight="700" fill="#F4ECDD">Hofmann</text>'+
+                    '<text x="28" y="25" font-family="-apple-system, sans-serif" font-size="8" fill="#82765E">Gràcia · Pastry</text>'+
+                    '<text x="155" y="20" font-family="Georgia, serif" font-size="9" font-style="italic" fill="#82765E" text-anchor="end">2×1</text>'+
+                  '</g>'+
+                  // "+ 2 more"
+                  '<text x="82" y="178" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2" fill="#82765E" text-anchor="middle">+ 2 MORE</text>'+
+                '</g>'+
+              '</g>'+
+              // Floating "Thu 8 AM" tag
+              '<g transform="translate(40 80)">'+
+                '<rect x="0" y="0" width="96" height="34" rx="17" fill="#2A1A0E" stroke="#DC4A26" stroke-opacity="0.6" stroke-width="1.5"/>'+
+                '<circle cx="16" cy="17" r="4" fill="#DC4A26"/>'+
+                '<text x="26" y="21" font-family="Georgia, serif" font-style="italic" font-size="13" font-weight="700" fill="#F5E8D4">Thu 8 AM</text>'+
+              '</g>'+
+              // Sparkles
+              '<g fill="#FBBF24" fill-opacity="0.5">'+
+                '<circle cx="380" cy="80" r="2"/>'+
+                '<circle cx="60" cy="300" r="2"/>'+
+                '<circle cx="410" cy="270" r="1.6"/>'+
+              '</g>'+
+            '</svg>';
+
+          // QR pixel pattern — pseudo-random but deterministic
+          const qrPx = (() => {
+            const out = [];
+            const grid = [
+              '0011010110010110',
+              '0110101001100100',
+              '1010011100110010',
+              '0101100110011010',
+              '1101001011001101',
+              '0010110100110110',
+              '1100101110010011',
+              '0110011001011001',
+              '1011010011100110',
+              '0100110101001101'
+            ];
+            for (let r=0;r<10;r++){
+              for (let c=0;c<16;c++){
+                if (grid[r].charAt(c)==='1') out.push('<rect x="'+(c*5)+'" y="'+(r*5)+'" width="4" height="4" fill="#1C0F06"/>');
+              }
+            }
+            return out.join('');
+          })();
+
+          const tapSvg =
+            '<svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
+              '<defs>'+
+                '<radialGradient id="hcg3" cx="50%" cy="50%" r="55%">'+
+                  '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.22"/>'+
+                  '<stop offset="100%" stop-color="#DC4A26" stop-opacity="0"/>'+
+                '</radialGradient>'+
+              '</defs>'+
+              '<ellipse cx="240" cy="190" rx="230" ry="140" fill="url(#hcg3)"/>'+
+              // BILL (behind, rotated right)
+              '<g transform="translate(250 45) rotate(8 90 140)">'+
+                '<rect x="8" y="12" width="170" height="270" rx="4" fill="#1C0F06" fill-opacity="0.45"/>'+
+                '<rect x="0" y="0" width="170" height="270" rx="4" fill="#F5E8D4"/>'+
+                // ragged top edge
+                '<path d="M 0 0 L 8 5 L 17 0 L 26 5 L 34 0 L 43 5 L 51 0 L 60 5 L 68 0 L 77 5 L 85 0 L 94 5 L 102 0 L 111 5 L 119 0 L 128 5 L 136 0 L 145 5 L 153 0 L 162 5 L 170 0 L 170 -4 L 0 -4 Z" fill="#2A1A0E"/>'+
+                // Header
+                '<text x="85" y="32" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="#2A1A0E" text-anchor="middle">Bar Cañete</text>'+
+                '<text x="85" y="46" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="2" fill="#82765E" text-anchor="middle">EL RAVAL · TAPAS</text>'+
+                '<line x1="18" y1="58" x2="152" y2="58" stroke="#3D2818" stroke-opacity="0.25" stroke-dasharray="2 3"/>'+
+                // Items
+                '<g font-family="-apple-system, sans-serif" font-size="11" fill="#2A1A0E">'+
+                  '<text x="14" y="80">Pan con tomate</text>'+
+                  '<text x="156" y="80" text-anchor="end">€6.50</text>'+
+                  '<text x="14" y="102">Croquetas (6)</text>'+
+                  '<text x="156" y="102" text-anchor="end">€9.00</text>'+
+                  '<text x="14" y="124">Calçots</text>'+
+                  '<text x="156" y="124" text-anchor="end">€11.00</text>'+
+                  // Crossed-out main
+                  '<text x="14" y="146" fill="#82765E">Arròs negre</text>'+
+                  '<text x="156" y="146" text-anchor="end" fill="#82765E">€24.00</text>'+
+                  '<line x1="12" y1="143" x2="160" y2="143" stroke="#DC4A26" stroke-width="2"/>'+
+                  '<text x="156" y="162" font-family="Georgia, serif" font-style="italic" font-weight="700" fill="#DC4A26" text-anchor="end" font-size="11">−€24.00</text>'+
+                '</g>'+
+                '<line x1="18" y1="182" x2="152" y2="182" stroke="#3D2818" stroke-opacity="0.35"/>'+
+                // Total
+                '<text x="14" y="204" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#2A1A0E">TOTAL</text>'+
+                '<text x="156" y="206" font-family="Georgia, serif" font-style="italic" font-size="18" font-weight="700" fill="#DC4A26" text-anchor="end">€26.50</text>'+
+                // Stamp
+                '<g transform="translate(85 232) rotate(-10)">'+
+                  '<rect x="-42" y="-10" width="84" height="20" rx="2" fill="none" stroke="#DC4A26" stroke-width="1.4" stroke-opacity="0.7"/>'+
+                  '<text x="0" y="5" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="2" fill="#DC4A26" text-anchor="middle">MENUVERSO ✓</text>'+
+                '</g>'+
+              '</g>'+
+              // PHONE (front, rotated left) with QR
+              '<g transform="translate(70 50) rotate(-5 85 140)">'+
+                '<rect x="8" y="14" width="170" height="280" rx="24" fill="#1C0F06" fill-opacity="0.5"/>'+
+                '<rect x="0" y="0" width="170" height="280" rx="24" fill="#1C0F06" stroke="#3D2818" stroke-width="2"/>'+
+                '<rect x="6" y="6" width="158" height="268" rx="20" fill="#FAF6EF"/>'+
+                // Title
+                '<text x="85" y="32" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2.5" fill="#82765E" text-anchor="middle">SHOW YOUR SERVER</text>'+
+                '<text x="85" y="52" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="#2A1A0E" text-anchor="middle">Bar Cañete</text>'+
+                // QR frame
+                '<g transform="translate(25 64)">'+
+                  '<rect x="0" y="0" width="120" height="120" fill="white" stroke="#1C0F06" stroke-width="1.5"/>'+
+                  '<g transform="translate(10 10)">'+
+                    // 3 corner markers
+                    '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/>'+
+                    '<rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/>'+
+                    '<rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
+                    '<g transform="translate(78 0)">'+
+                      '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/>'+
+                      '<rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/>'+
+                      '<rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
+                    '</g>'+
+                    '<g transform="translate(0 78)">'+
+                      '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/>'+
+                      '<rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/>'+
+                      '<rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
+                    '</g>'+
+                    // pseudo data pixels
+                    '<g transform="translate(28 28)">'+ qrPx + '</g>'+
+                    // logo dot center
+                    '<rect x="42" y="42" width="16" height="16" fill="#FAF6EF"/>'+
+                    '<circle cx="50" cy="50" r="6" fill="#DC4A26"/>'+
+                    '<text x="50" y="54" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="9" fill="white" text-anchor="middle">m</text>'+
+                  '</g>'+
+                '</g>'+
+                // Six-digit code
+                '<text x="85" y="206" font-family="Courier, monospace" font-weight="700" font-size="22" letter-spacing="5" fill="#DC4A26" text-anchor="middle">8 4 2 7 5 9</text>'+
+                // Timer
+                '<g transform="translate(85 232)">'+
+                  '<circle cx="0" cy="0" r="11" fill="none" stroke="#E5D5B8" stroke-width="2"/>'+
+                  '<circle cx="0" cy="0" r="11" fill="none" stroke="#DC4A26" stroke-width="2" stroke-dasharray="52 69" stroke-linecap="round" transform="rotate(-90)"/>'+
+                  '<text x="0" y="4" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" fill="#2A1A0E" text-anchor="middle">14m</text>'+
+                '</g>'+
+                '<text x="85" y="262" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1" fill="#82765E" text-anchor="middle">VALID FOR 15 MIN</text>'+
+              '</g>'+
+              // "−€24" floating receipt-ribbon
+              '<g transform="translate(330 280)">'+
+                '<rect x="0" y="0" width="106" height="36" rx="18" fill="#10B981"/>'+
+                '<circle cx="20" cy="18" r="8" fill="white" fill-opacity="0.25"/>'+
+                '<path d="M 16 18 L 19 21 L 25 14" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
+                '<text x="36" y="22" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="15" fill="white">Saved €24</text>'+
+              '</g>'+
+              // Confetti
+              '<g>'+
+                '<circle cx="55" cy="50" r="2" fill="#FBBF24"/>'+
+                '<circle cx="430" cy="80" r="2" fill="#FB7185"/>'+
+                '<rect x="30" y="180" width="3" height="6" rx="1" fill="#10B981" transform="rotate(20 31 183)"/>'+
+                '<rect x="438" y="200" width="3" height="6" rx="1" fill="#FBBF24" transform="rotate(-30 439 203)"/>'+
+                '<circle cx="50" cy="320" r="1.6" fill="#FB7185"/>'+
+                '<circle cx="445" cy="160" r="1.8" fill="#FBBF24"/>'+
+              '</g>'+
+            '</svg>';
+
+          // ---- Act builder ----
+          // orient: 'left' = text left, illustration right.  'right' = mirrored.
+          function buildAct({ num, eyebrow, headHtml, body, bullets, svgHtml, orient }) {
+            const textCol = el('div',{class:'relative ' + (orient === 'left' ? 'md:pr-6' : 'md:pl-6 md:order-2')},
+              // Huge italic backdrop numeral
+              el('div',{
+                class:'absolute font-serif-display italic leading-none text-mv-500/[0.07] select-none pointer-events-none text-[9rem] md:text-[14rem] ' +
+                  (orient === 'left' ? '-top-14 -left-2 md:-left-6' : '-top-14 -right-2 md:-right-6 text-right'),
+                'aria-hidden':'true'
+              }, num),
+              el('div',{class:'relative'},
+                el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-mv-500 font-bold'},
+                  el('span',{class:'inline-flex h-7 w-7 rounded-full bg-mv-500/15 border border-mv-500/40 items-center justify-center text-mv-400 font-serif-display italic text-[15px]'}, num),
+                  eyebrow
+                ),
+                el('h3',{class:'font-serif-display mt-5 text-4xl md:text-5xl font-extrabold leading-[1.05]', html: headHtml}),
+                el('p',{class:'mt-5 text-base md:text-lg text-slate2-300 leading-relaxed max-w-md'}, body),
+                el('ul',{class:'mt-6 space-y-2.5'},
+                  ...bullets.map(b =>
+                    el('li',{class:'flex items-start gap-3 text-sm text-slate2-400'},
+                      el('span',{class:'mt-2 h-1.5 w-1.5 rounded-full bg-mv-500 flex-shrink-0'}),
+                      el('span',{},b)
+                    )
+                  )
+                )
+              )
+            );
+            const artCol = el('div',{
+              class:'relative ' + (orient === 'left' ? '' : 'md:order-1')
             },
-              el('div',{class:'flex items-center gap-3'},
-                el('div',{class:'how-icon h-12 w-12 rounded-full bg-mv-500/20 grid place-items-center text-2xl transition-all duration-500'}, icon),
-                el('div',{class:'how-num text-xs uppercase tracking-widest text-mv-500 font-bold transition-colors duration-500'}, '0'+(i+1))
-              ),
-              el('h3',{class:'mt-4 text-xl font-bold'}, t),
-              el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, d),
-              // Coral progress bar at bottom that fills when this card is active
-              el('div',{class:'how-progress absolute left-0 bottom-0 h-1 rounded-b-2xl bg-mv-500 transition-all duration-[2800ms] ease-linear', style:'width:0%'})
-            )
-          );
-          const container = el('div',{class:'mt-12 grid md:grid-cols-3 gap-5 how-section', ref: section => {
-            // Apply active styling to the chosen card index, dim others.
-            function setActive(idx) {
-              cardEls.forEach((card, i) => {
-                const icon = card.querySelector('.how-icon');
-                const num = card.querySelector('.how-num');
-                const prog = card.querySelector('.how-progress');
-                if (i === idx) {
-                  card.classList.add('scale-[1.04]','border-mv-500/60','bg-mv-500/[0.06]','shadow-2xl','shadow-mv-500/20');
-                  card.classList.remove('opacity-60');
-                  icon.classList.add('bg-mv-500','text-white','shadow-lg','shadow-mv-500/40');
-                  icon.classList.remove('bg-mv-500/20');
-                  num.classList.add('text-white');
-                  num.classList.remove('text-mv-500');
-                  prog.style.width = '100%';
-                } else {
-                  card.classList.remove('scale-[1.04]','border-mv-500/60','bg-mv-500/[0.06]','shadow-2xl','shadow-mv-500/20');
-                  card.classList.add('opacity-60');
-                  icon.classList.remove('bg-mv-500','text-white','shadow-lg','shadow-mv-500/40');
-                  icon.classList.add('bg-mv-500/20');
-                  num.classList.remove('text-white');
-                  num.classList.add('text-mv-500');
-                  prog.style.width = '0%';
-                }
-              });
-            }
-            // Click-to-activate so people can manually pick a step.
-            cardEls.forEach((card, i) => card.addEventListener('click', () => {
-              window.__howActive = i; setActive(i);
-              // Restart timing from now so progress fills again
-              if (window.__howInterval) clearInterval(window.__howInterval);
-              window.__howInterval = setInterval(() => {
-                window.__howActive = ((window.__howActive ?? 0) + 1) % steps.length;
-                setActive(window.__howActive);
-              }, 2800);
-            }));
-            // Initial state
-            window.__howActive = 0;
-            setActive(0);
-            // Clean up any previous interval before starting a new one (renders).
-            if (window.__howInterval) clearInterval(window.__howInterval);
-            // IntersectionObserver — only run the cycle when the section is on screen.
-            if (window.__howObserver) try { window.__howObserver.disconnect(); } catch (_) {}
-            if (typeof IntersectionObserver !== 'undefined') {
-              window.__howObserver = new IntersectionObserver(entries => {
-                entries.forEach(entry => {
-                  if (entry.isIntersecting) {
-                    if (!window.__howInterval) {
-                      window.__howInterval = setInterval(() => {
-                        window.__howActive = ((window.__howActive ?? 0) + 1) % steps.length;
-                        setActive(window.__howActive);
-                      }, 2800);
+              // Subtle frame
+              el('div',{class:'relative aspect-[4/3] rounded-3xl bg-gradient-to-br from-ink-900/40 to-ink-950/60 border border-mv-500/15 overflow-hidden', html: svgHtml})
+            );
+
+            return el('div',{
+              class:'how-act grid md:grid-cols-2 gap-12 md:gap-20 items-center',
+              'data-act': num
+            },
+              orient === 'left' ? textCol : artCol,
+              orient === 'left' ? artCol : textCol
+            );
+          }
+
+          const act1 = buildAct({
+            num: '01',
+            eyebrow: 'Sign up',
+            headHtml: 'Pay €4.99 once. <span class="italic text-mv-500">Be a member forever.</span>',
+            body: 'One email, one card, ninety seconds. Less than the cost of a flat white—and you’re on the list. Cancel any month. But you won’t.',
+            bullets: ['Apple Pay, Google Pay, or card', 'Cancel anytime in one tap', 'No commitment, no hidden tier'],
+            svgHtml: cardSvg,
+            orient: 'left'
+          });
+
+          const act2 = buildAct({
+            num: '02',
+            eyebrow: 'Open the email',
+            headHtml: 'Every Thursday at 8 AM, <span class="italic text-mv-500">six tables open up.</span>',
+            body: 'Six hand-picked restaurants land in your inbox—a mix of new openings, hidden barrios, and your usual favourites. Skim it over café con leche.',
+            bullets: ['Personalised by neighbourhood and taste', 'Always six. Never more, never less', 'One email a week. Zero spam'],
+            svgHtml: inboxSvg,
+            orient: 'right'
+          });
+
+          const act3 = buildAct({
+            num: '03',
+            eyebrow: 'Walk in & save',
+            headHtml: 'Tap. Show. <span class="italic text-mv-500">Pay half.</span>',
+            body: 'When you’re hungry, tap a restaurant. A six-digit code appears. Show your server, order what you like—the second main is on us.',
+            bullets: ['Valid for 15 minutes from tap', 'Up to €30 off per visit', 'Works for two, three, or four diners'],
+            svgHtml: tapSvg,
+            orient: 'left'
+          });
+
+          // Container with thread. Acts are always visible by default — the
+          // optional scroll-reveal below merely *enhances* by adding a brief
+          // shimmer/slide as each act enters the viewport.
+          return el('div',{
+            class:'mt-24 md:mt-32 relative space-y-28 md:space-y-40 how-storyboard',
+            ref: container => {
+              if (window.__howRevealObserver) try { window.__howRevealObserver.disconnect(); } catch(_) {}
+              if (typeof IntersectionObserver !== 'undefined') {
+                window.__howRevealObserver = new IntersectionObserver((entries) => {
+                  entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                      entry.target.classList.add('how-act-revealed');
+                      window.__howRevealObserver.unobserve(entry.target);
                     }
-                  } else {
-                    if (window.__howInterval) { clearInterval(window.__howInterval); window.__howInterval = null; }
-                  }
+                  });
+                }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+                container.querySelectorAll('.how-act').forEach((node) => {
+                  window.__howRevealObserver.observe(node);
                 });
-              }, { threshold: 0.2 });
-              window.__howObserver.observe(section);
-            } else {
-              // Fallback: always cycle.
-              window.__howInterval = setInterval(() => {
-                window.__howActive = ((window.__howActive ?? 0) + 1) % steps.length;
-                setActive(window.__howActive);
-              }, 2800);
+              }
             }
-          }}, ...cardEls);
-          return container;
-        })()
+          },
+            // Vertical hairline that threads the three acts together (desktop only)
+            el('div',{class:'hidden md:block absolute left-1/2 top-8 bottom-8 w-px bg-gradient-to-b from-transparent via-mv-500/25 to-transparent -translate-x-px pointer-events-none', 'aria-hidden':'true'}),
+            act1, act2, act3
+          );
+        })(),
+
+        // === OUTRO ===
+        el('div',{class:'mt-28 md:mt-36 text-center max-w-2xl mx-auto'},
+          el('div',{class:'flex items-center justify-center gap-4'},
+            el('span',{class:'inline-block h-px w-12 bg-mv-500/40'}),
+            el('span',{class:'font-serif-display italic text-mv-500 text-sm tracking-widest'}, '· fin ·'),
+            el('span',{class:'inline-block h-px w-12 bg-mv-500/40'})
+          ),
+          el('h3',{class:'font-serif-display mt-8 text-4xl md:text-5xl font-extrabold leading-[1.05]'},
+            'That’s the whole thing. ', el('span',{class:'italic text-mv-500'},'No catches.')
+          ),
+          el('p',{class:'mt-5 text-base md:text-lg text-slate2-300'},
+            'The average member pays ', el('strong',{class:'text-white'},'€4.99'), ' and saves ', el('strong',{class:'text-mv-400'},'€68'), ' in their first month.'
+          ),
+          el('div',{class:'mt-9 flex justify-center gap-3 flex-wrap'},
+            el('button',{
+              class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-8 py-4 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition text-lg',
+              onclick:()=>go(currentUser() ? 'app' : 'signup')
+            }, currentUser() ? 'Open the app →' : 'Start saving — €4.99/mo'),
+            el('button',{
+              class:'rounded-2xl border border-white/15 bg-white/[0.02] px-8 py-4 font-extrabold hover:bg-white/[0.06] cursor-pointer transition text-lg',
+              onclick:()=>document.getElementById('features')?.scrollIntoView({behavior:'smooth'})
+            }, 'See the restaurants')
+          ),
+          el('p',{class:'mt-4 text-xs text-slate2-500'},
+            'Cancel any time in two taps. Yes, even after 24 hours.'
+          )
+        )
       )
     ),
     // FEATURES section with Eixample chamfered street grid + Barceloneta palm
@@ -2002,7 +2325,7 @@ function Landing() {
         el('div',{class:'absolute -inset-3 bg-gradient-to-br from-mv-500/50 via-accent-pink/40 to-mv-500/30 rounded-3xl blur-2xl opacity-60 group-hover:opacity-80 transition-opacity duration-700'}),
         // The card itself
         el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
-          style:'background: linear-gradient(135deg, #BE123C 0%, #E11D48 38%, #E84C2A 72%, #FB7185 100%); transform-style: preserve-3d;'},
+          style:'background: linear-gradient(135deg, #BE123C 0%, #E11D48 38%, #DC4A26 72%, #FB7185 100%); transform-style: preserve-3d;'},
           // Subtle tile pattern overlay
           el('div',{class:'absolute inset-0 opacity-20 pointer-events-none', style:'background-image: radial-gradient(circle at 25% 0%, rgba(255,255,255,0.4) 0, transparent 40%), repeating-linear-gradient(45deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px);'}),
           // Card body
@@ -3074,7 +3397,7 @@ function AppProfile() {
   const inner = el('div',{class:'pb-24'},
     // ===== HERO HEADER — gradient banner with name, member-since, tier =====
     el('div',{class:'relative overflow-hidden'},
-      el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #E84C2A 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
+      el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #DC4A26 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
       el('div',{class:'relative px-5 pt-6 pb-8'},
         el('div',{class:'flex items-start gap-4 flex-wrap'},
           el('div',{class:'avatar-drift h-20 w-20 rounded-2xl bg-gradient-to-br from-mv-500 to-accent-pink grid place-items-center text-4xl font-extrabold shrink-0 shadow-xl shadow-mv-500/30 border-2 border-white/20'},
@@ -3888,7 +4211,7 @@ function PartnerLanding() {
 
     // HERO — split layout: pitch on left, glass card on right with the headline stat.
     el('section',{class:'relative overflow-hidden grain'},
-      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #E84C2A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #DC4A26 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
         el('div',{},
           el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
@@ -4165,7 +4488,7 @@ function PartnerLanding() {
 
     // FINAL CTA — large.
     el('section',{class:'relative overflow-hidden border-t border-white/5'},
-      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #E84C2A 0, transparent 50%);'}),
+      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #DC4A26 0, transparent 50%);'}),
       el('div',{class:'relative mx-auto max-w-4xl px-4 py-24 text-center'},
         el('h2',{class:'text-4xl md:text-6xl font-extrabold leading-tight'},
           'Your next ', el('span',{class:'text-mv-500'},'slow Tuesday'),
