@@ -4626,6 +4626,127 @@ function PartnerLanding() {
       )
     ),
 
+    // ====== "The math" — interactive ROI calculator ======
+    // The high-conversion lever every restaurant owner wants to play with.
+    // Three sliders (avg main, avg extras per cover, free mains per week)
+    // → live recalculation of monthly revenue added. Math is exposed in a
+    // breakdown panel so the number isn't a black box.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
+      el('div',{class:'text-center max-w-3xl mx-auto'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'The math',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
+          'What Menuverso ', el('span',{class:'italic text-mv-500'},'adds'), ' to your bottom line.'
+        ),
+        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
+          'Move the dials. The numbers move live. No fine print, no smoke and mirrors.'
+        )
+      ),
+      // Calculator card with reactive sliders
+      el('div',{
+        class:'mt-14 md:mt-16 max-w-5xl mx-auto rounded-3xl bg-ink-900/70 border border-mv-500/20 overflow-hidden shadow-2xl shadow-mv-500/[0.10]',
+        ref: card => {
+          // Wait one tick so children are in the DOM.
+          queueMicrotask(() => {
+            const mainEl   = card.querySelector('.roi-main');
+            const extrasEl = card.querySelector('.roi-extras');
+            const weekEl   = card.querySelector('.roi-week');
+            const mainOut  = card.querySelector('.roi-main-out');
+            const extrasOut= card.querySelector('.roi-extras-out');
+            const weekOut  = card.querySelector('.roi-week-out');
+            const pairOuts = card.querySelectorAll('.roi-pair');
+            const totalOuts= card.querySelectorAll('.roi-output');
+            if (!mainEl) return;
+            function recalc(){
+              const main = +mainEl.value;
+              const extras = +extrasEl.value;
+              const week = +weekEl.value;
+              const perPair = main + 2*extras;       // 1 main billed + 2 covers worth of extras
+              const monthly = week * 4 * perPair;
+              mainOut.textContent = '€' + main;
+              extrasOut.textContent = '€' + extras;
+              weekOut.textContent = week;
+              pairOuts.forEach(e => e.textContent = '€' + perPair);
+              totalOuts.forEach(e => e.textContent = '€' + monthly.toLocaleString('en-US'));
+            }
+            [mainEl, extrasEl, weekEl].forEach(e => e.addEventListener('input', recalc));
+            recalc();
+          });
+        }
+      },
+        el('div',{class:'grid md:grid-cols-5'},
+          // --- INPUTS column ---
+          el('div',{class:'md:col-span-2 p-7 md:p-9 border-b md:border-b-0 md:border-r border-mv-500/15'},
+            el('div',{class:'text-[10px] uppercase tracking-[0.25em] text-mv-500 font-bold'},'Inputs'),
+            el('h3',{class:'mt-3 font-serif-display text-2xl font-extrabold text-slate2-50'},'Your restaurant'),
+            // Slider 1: avg main
+            el('div',{class:'mt-7'},
+              el('div',{class:'flex items-baseline justify-between'},
+                el('label',{class:'text-sm font-bold text-slate2-100'},'Average main course'),
+                el('span',{class:'roi-main-out font-serif-display italic text-xl font-extrabold text-mv-500'},'€18')
+              ),
+              el('input',{type:'range', min:'10', max:'45', value:'18', step:'1', class:'roi-main mt-2 w-full accent-mv-500'})
+            ),
+            // Slider 2: extras
+            el('div',{class:'mt-6'},
+              el('div',{class:'flex items-baseline justify-between'},
+                el('label',{class:'text-sm font-bold text-slate2-100'},'Avg extras per cover'),
+                el('span',{class:'roi-extras-out font-serif-display italic text-xl font-extrabold text-mv-500'},'€12')
+              ),
+              el('div',{class:'mt-1 text-[11px] text-slate2-400'},'Drinks, starters, dessert — everything that isn\'t the main.'),
+              el('input',{type:'range', min:'3', max:'30', value:'12', step:'1', class:'roi-extras mt-2 w-full accent-mv-500'})
+            ),
+            // Slider 3: free mains per week
+            el('div',{class:'mt-6'},
+              el('div',{class:'flex items-baseline justify-between'},
+                el('label',{class:'text-sm font-bold text-slate2-100'},'Free mains per week'),
+                el('span',{class:'roi-week-out font-serif-display italic text-xl font-extrabold text-mv-500'},'12')
+              ),
+              el('div',{class:'mt-1 text-[11px] text-slate2-400'},'Total 2-for-1 covers you offer across all your slots.'),
+              el('input',{type:'range', min:'4', max:'50', value:'12', step:'2', class:'roi-week mt-2 w-full accent-mv-500'})
+            )
+          ),
+          // --- OUTPUT column ---
+          el('div',{class:'md:col-span-3 p-7 md:p-10 bg-gradient-to-br from-mv-500/[0.10] via-transparent to-mv-500/[0.04] relative'},
+            el('div',{class:'text-[10px] uppercase tracking-[0.25em] text-mv-500 font-bold'},'Added to your monthly revenue'),
+            el('div',{class:'mt-3 flex items-baseline gap-2'},
+              el('span',{class:'font-serif-display italic text-3xl font-extrabold text-slate2-400'},'≈'),
+              el('span',{class:'roi-output font-serif-display italic text-6xl md:text-7xl font-extrabold text-mv-500 leading-none drop-shadow-[0_2px_8px_rgba(220,74,38,0.18)]'},'€2,016')
+            ),
+            el('p',{class:'mt-5 text-base text-slate2-200 leading-relaxed'},
+              'From the slots ', el('strong',{class:'text-slate2-50'},'you choose'), '. ',
+              el('strong',{class:'text-mv-500'},'Zero commission'), ' to Menuverso. Cancel any time.'
+            ),
+            // Breakdown
+            el('div',{class:'mt-7 pt-5 border-t border-mv-500/20'},
+              el('div',{class:'text-[10px] uppercase tracking-[0.22em] text-slate2-400 font-bold'},'How that breaks down'),
+              el('div',{class:'mt-4 space-y-2.5 text-sm'},
+                el('div',{class:'flex items-center justify-between text-slate2-200'},
+                  el('span',{},'A pair orders 2 mains + extras'),
+                  el('span',{class:'roi-pair font-mono font-bold text-mv-500'},'€42')
+                ),
+                el('div',{class:'flex items-center justify-between text-slate2-200'},
+                  el('span',{},'You bill them (one main free)'),
+                  el('span',{class:'roi-pair font-mono font-bold text-mv-500'},'€42')
+                ),
+                el('div',{class:'flex items-center justify-between text-slate2-100 pt-2 border-t border-mv-500/10'},
+                  el('span',{class:'font-bold'},'48 pairs / month →'),
+                  el('span',{class:'roi-output font-mono font-extrabold text-mv-500 text-base'},'€2,016')
+                )
+              )
+            ),
+            // Disclaimer — honest about the assumption
+            el('p',{class:'mt-6 text-[11px] text-slate2-500 leading-relaxed'},
+              '* Assumes the slots you offer fill from new demand. We can\'t guarantee bookings — but when they come in, this is the math.'
+            )
+          )
+        )
+      )
+    ),
+
     // ====== "How it works" — magazine-style 4-step storyboard ======
     el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
       el('div',{class:'text-center max-w-3xl mx-auto'},
@@ -4709,20 +4830,109 @@ function PartnerLanding() {
       )
     ),
 
-    // FOUNDER NOTE — replaces fabricated owner testimonials with an honest
-    // "why we built this" note. No invented quotes, no invented numbers.
-    el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-slate2-50/5'},
-      el('div',{class:'text-center'},
-        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'A note to restaurant owners'),
-        el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Why we\'re building ', el('span',{class:'text-mv-500'},'Menuverso'))
+    // ====== "How it compares" — competitive truth table ======
+    // Plain-spoken row-by-row comparison vs the two platforms most BCN
+    // restaurants already know. Editorial restraint: no checkmark-fest, no
+    // "we win everything" garish chart. Just the levers others pull and we don't.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
+      el('div',{class:'text-center max-w-3xl mx-auto'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'How it compares',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
+          'The plain truth ', el('span',{class:'italic text-mv-500'},'vs. everyone else.')
+        ),
+        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
+          'No charts that flatter us. Just the levers other platforms pull on your bill — and the ones we don\'t.'
+        )
       ),
-      el('div',{class:'mt-10 rounded-3xl bg-slate2-50/[0.03] border border-slate2-50/10 p-8 leading-relaxed text-slate2-200'},
-        el('p',{},'Most "deals platforms" pitch you on volume: pay a cut of every cover, get a flood of price-sensitive diners, and hope to break even on drinks. We\'re building the opposite.'),
-        el('p',{class:'mt-4'},'Members pay €4.99/month for the privilege of dining out at a curated set of Barcelona restaurants. That fee is our entire revenue. Your bill goes straight to you — we take ', el('strong',{class:'text-slate2-50'},'zero commission'), ' on the food they eat.'),
-        el('p',{class:'mt-4'},'In return, you set the rules: which days, which slots, which seats. Pause for holidays in one click. We\'re onboarding the first venues now and we\'d love yours to be one of them.'),
-        el('div',{class:'mt-6 pt-6 border-t border-slate2-50/5 text-sm text-slate2-400'},
-          el('span',{},'— The Menuverso team · '),
-          el('a',{class:'underline hover:text-slate2-50 cursor-pointer', href:'mailto:hola@menuverso.com'},'hola@menuverso.com')
+      // Comparison table — Menuverso column highlighted
+      el('div',{class:'mt-14 md:mt-16 max-w-5xl mx-auto rounded-3xl bg-ink-900/70 border border-mv-500/20 overflow-hidden shadow-xl shadow-mv-500/[0.06]'},
+        el('div',{class:'overflow-x-auto'},
+          el('table',{class:'w-full text-sm md:text-[15px]'},
+            el('thead',{},
+              el('tr',{class:'border-b border-mv-500/20'},
+                el('th',{class:'p-4 md:p-6 text-left'}),
+                el('th',{class:'p-4 md:p-6 text-center bg-mv-500/[0.10] relative'},
+                  el('div',{class:'inline-flex h-8 w-8 mb-2 rounded-full bg-mv-500 items-center justify-center shadow-md shadow-mv-500/30'},
+                    el('span',{class:'font-serif-display italic font-extrabold text-white text-lg leading-none'},'m')
+                  ),
+                  el('div',{class:'font-serif-display italic text-xl md:text-2xl font-extrabold text-mv-500 leading-tight'},'Menuverso')
+                ),
+                el('th',{class:'p-4 md:p-6 text-center'},
+                  el('div',{class:'h-8'}),
+                  el('div',{class:'font-serif-display text-lg md:text-xl font-extrabold text-slate2-300 leading-tight'},'TheFork')
+                ),
+                el('th',{class:'p-4 md:p-6 text-center'},
+                  el('div',{class:'h-8'}),
+                  el('div',{class:'font-serif-display text-lg md:text-xl font-extrabold text-slate2-300 leading-tight'},'Groupon')
+                )
+              )
+            ),
+            el('tbody',{},
+              ...[
+                ['Commission per cover',     '0%',                    '~2 € per booking + ~7% commission', '30–50%'],
+                ['Setup fee',                'None',                  'None',           'Yes'],
+                ['Monthly subscription',     'None',                  'Optional tiers', 'None'],
+                ['You set the slots',        'Always',                'Limited',        'No'],
+                ['Pause the listing',        'One click',             'Email request',  'Contract-bound'],
+                ['Long-term contract',       'No',                    'Yes',            'Yes'],
+                ['Filters out deal-hunters', 'Yes · €4.99 paywall',   'No',             'No · it is deal-hunters'],
+                ['Cancel anytime',           'Yes',                   'Notice period',  'Notice period']
+              ].map((row,i) =>
+                el('tr',{class:'border-t border-mv-500/10 ' + (i%2 ? 'bg-ink-900/[0.4]' : '')},
+                  el('td',{class:'p-4 md:p-5 font-bold text-slate2-100'}, row[0]),
+                  el('td',{class:'p-4 md:p-5 text-center bg-mv-500/[0.06]'},
+                    el('span',{class:'font-serif-display italic text-base md:text-lg font-extrabold text-mv-500'}, row[1])
+                  ),
+                  el('td',{class:'p-4 md:p-5 text-center text-slate2-300'}, row[2]),
+                  el('td',{class:'p-4 md:p-5 text-center text-slate2-300'}, row[3])
+                )
+              )
+            )
+          )
+        )
+      ),
+      // Disclaimer — keeps us honest about source
+      el('p',{class:'mt-5 text-[11px] text-slate2-500 max-w-3xl mx-auto leading-relaxed text-center'},
+        'Numbers reflect publicly listed terms at the time of writing. Both competitors negotiate customised contracts that may differ — we\'ve quoted what their own websites tell prospective restaurants.'
+      )
+    ),
+
+    // FOUNDER NOTE — an honest "why we built this" pull-quote-style block.
+    // No fake testimonials, no invented numbers — but presented with editorial
+    // weight (rule + italic Fraunces opener + body in serif) so it carries.
+    el('section',{class:'mx-auto max-w-3xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
+      el('div',{class:'text-center'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'A note to restaurant owners',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-4xl md:text-6xl font-extrabold leading-[0.95]'},
+          'Why we\'re building ', el('span',{class:'italic text-mv-500'},'Menuverso.')
+        )
+      ),
+      el('div',{class:'mt-10 rounded-3xl bg-ink-900/60 border border-mv-500/15 p-8 md:p-10 leading-relaxed'},
+        // Pull-quote opener in italic Fraunces
+        el('p',{class:'font-serif-display italic text-2xl md:text-3xl font-extrabold text-slate2-50 leading-snug'},
+          '"Most deals platforms pitch you on volume. We\'re building the opposite."'
+        ),
+        el('div',{class:'mt-8 space-y-4 text-[15px] md:text-base text-slate2-200 leading-relaxed'},
+          el('p',{},'Pay a cut of every cover, get a flood of price-sensitive diners, and hope to break even on drinks. That\'s the model. It works for the platform — for the restaurant, the math rarely does.'),
+          el('p',{},'Members pay €4.99/month for the privilege of dining out at a curated set of Barcelona restaurants. That fee is our entire revenue. Your bill goes straight to you — we take ', el('strong',{class:'text-mv-500'},'zero commission'), ' on the food they eat.'),
+          el('p',{},'In return, you set the rules: which days, which slots, which seats. Pause for holidays in one click. We\'re onboarding the first venues now and we\'d love yours to be one of them.')
+        ),
+        el('div',{class:'mt-8 pt-6 border-t border-mv-500/15 text-sm text-slate2-400 flex items-center justify-between flex-wrap gap-3'},
+          el('span',{class:'flex items-center gap-2'},
+            el('span',{class:'inline-flex h-7 w-7 rounded-full bg-mv-500 items-center justify-center'},
+              el('span',{class:'font-serif-display italic font-extrabold text-white text-base leading-none'},'m')
+            ),
+            el('span',{},'The Menuverso team')
+          ),
+          el('a',{class:'underline hover:text-mv-500 transition cursor-pointer', href:'mailto:hola@menuverso.com'},'hola@menuverso.com →')
         )
       )
     ),
