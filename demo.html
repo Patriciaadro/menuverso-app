@@ -4757,6 +4757,38 @@ function PartnerLanding() {
       )
     ),
 
+    // ====== "The redemption, in 30 seconds" — sales animation deck ======
+    // Self-contained 6-scene SVG animation hosted in
+    // /Menuverso-sales-animation.html. Iframed so the deck stays the single
+    // source of truth for the redemption story — if we update the scenes,
+    // this section picks them up automatically.
+    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
+      el('div',{class:'text-center max-w-3xl mx-auto'},
+        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+          'The redemption, in 30 seconds',
+          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+        ),
+        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-6xl font-extrabold leading-[0.98]'},
+          'See how a ', el('span',{class:'italic text-mv-500'},'redemption'), ' actually feels.'
+        ),
+        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
+          'No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves — pick up at any one with the scrubber.'
+        )
+      ),
+      el('div',{class:'mt-12 relative rounded-3xl overflow-hidden border border-slate2-50/10 bg-[#FAF6EF] shadow-2xl shadow-black/40'},
+        // Subtle glow behind, matches the rest of the brand surfaces.
+        el('div',{class:'absolute -inset-6 bg-gradient-to-br from-mv-500/20 to-transparent rounded-3xl blur-2xl pointer-events-none'}),
+        el('iframe',{
+          src:'Menuverso-sales-animation.html',
+          class:'relative block w-full',
+          style:'height: clamp(520px, 70vh, 760px); border: 0;',
+          loading:'lazy',
+          title:'How a Menuverso redemption works — six-scene animation'
+        })
+      )
+    ),
+
     // ====== "The math" — interactive ROI calculator ======
     // The high-conversion lever every restaurant owner wants to play with.
     // Three sliders (avg main, avg extras per cover, free mains per week)
