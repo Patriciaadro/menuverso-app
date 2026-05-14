@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0A0F1E">
 <title>Menuverso — Taste the City. Pay Half. | Barcelona's 2-for-1 Dining Pass</title>
-<meta name="description" content="Your all-access dining pass to a curated set of Barcelona restaurants. 2-for-1 deals on main courses, every day. €4.99/month. Launching summer 2026.">
+<meta name="description" content="Your dining membership for Barcelona. 2-for-1 on whatever the kitchen offers — drinks, mains, desserts, full menu, flash deals. From €3.99/month. Launching summer 2026.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Fraunces — editorial serif for headlines, paired with Inter sans for everything else. -->
@@ -74,6 +74,17 @@ tailwind.config = {
      light cream foreground with a soft dark halo. */
   .hero-on-video { color: #FAF6EF; text-shadow: 0 2px 18px rgba(28,15,6,0.55), 0 1px 3px rgba(28,15,6,0.4); }
   .hero-on-video strong { color: #FFFFFF; }
+  /* Animated shimmer overlay for the redemption verification screen — defeats
+     screenshots because the gradient is constantly moving. */
+  .mv-shimmer-anim {
+    background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 35%, rgba(255,255,255,0) 70%);
+    background-size: 250% 250%;
+    animation: mvShimmerMove 3.2s linear infinite;
+  }
+  @keyframes mvShimmerMove {
+    0%   { background-position:   0% 100%; }
+    100% { background-position: 100%   0%; }
+  }
   /* Gentle hue drift on the member avatar tile — makes the profile feel alive. */
   @keyframes hue-drift { 0%, 100% { filter: hue-rotate(-6deg); } 50% { filter: hue-rotate(8deg); } }
   .avatar-drift { animation: hue-drift 9s ease-in-out infinite; }
@@ -214,7 +225,7 @@ tailwind.config = {
 const STORE_KEY = 'menuverso_demo_v4';
 const SESSION_KEY = 'menuverso_session_v4';
 
-const DEFAULT_DEAL_TERMS = 'Must order 2 main courses. Show your Menuverso code to your server. Drinks not included. Cannot be combined with other offers.';
+const DEFAULT_DEAL_TERMS = 'Tell your server you\'re redeeming with Menuverso before ordering. Slide to confirm in-app at the table and show the animated verification screen. Partner-defined exclusions apply. Cannot be combined with other offers.';
 const DEFAULT_SLOTS = () => [
   { id:'s_lunch', label:'Weekday Lunch', days:'Mon-Thu', timeStart:'13:00', timeEnd:'15:30', active:true },
   { id:'s_dinner', label:'Early Dinner', days:'Mon-Wed', timeStart:'19:30', timeEnd:'21:30', active:true },
@@ -245,7 +256,7 @@ const TNC_BODY = [
   ['Editing the offer', 'You may edit the offer at any time, but changes to the deal itself (the conditions text, the slot schedule, or the per-member credit cap) require Menuverso approval before they go live. Profile metadata — your photos, name, address, hours, contact details, and description — can be edited freely without review.'],
   ['Removing the offer', 'After the 30-day commitment has elapsed, you may submit a removal request explaining why. Menuverso aims to approve all bona-fide requests within 3 business days. Early removal requests (inside the 30-day window) may be approved at our discretion if there are exceptional circumstances; doing so is a breach of the commitment above and will be noted on your account.'],
   ['Per-member credit cap', 'Each Menuverso member can redeem your offer at your restaurant up to N times per calendar month, where N is the number you configure (default 3). The cap refreshes on the first day of every month. You cannot configure a cap of zero.'],
-  ['Honouring redemption codes', 'You agree to honour every valid (unexpired, unredeemed) 6-digit code presented by a Menuverso member. Refusing a valid code without a documented reason is grounds for offer suspension by Menuverso.'],
+  ['Honouring redemptions', 'You agree to honour every valid (unexpired, unredeemed) deal redemption presented in-app by a Menuverso member. Validity is signalled by the member sliding to confirm at the table and showing the animated verification screen; the same redemption appears live on your partner dashboard. Refusing a valid redemption without a documented reason is grounds for offer suspension by Menuverso.'],
   ['Fees', 'Listing on Menuverso is free during our launch period. We will give you 30 days notice before any pricing change.'],
   ['Liability', 'Menuverso provides the booking platform and the membership relationship; we are not party to the actual meal you serve. Disputes over food quality or service are between you and the diner. Menuverso may mediate but is not financially liable for restaurant-side outcomes.'],
   ['Termination', 'Menuverso may terminate your listing at any time for repeated breaches of these terms, persistent member complaints, or activity that risks our brand or other partners. We will give you reasonable notice and the opportunity to respond before termination.'],
@@ -1661,13 +1672,13 @@ function Landing() {
           el('span',{class:'text-mv-500 italic'},'Pay Half.')
         ),
         el('p',{class:'hero-on-video mx-auto mt-6 max-w-2xl text-lg'},
-          'Your all-access dining pass to a ', el('strong',{},'curated set of Barcelona restaurants'),
-          '. The launch list is forming now — new venues join every week. Show your code, get 2-for-1 on mains.'
+          'Your dining membership for ', el('strong',{},'a curated set of Barcelona restaurants'),
+          '. 2-for-1 on whatever the kitchen offers — drinks, mains, desserts, full menu. Walk in, slide to redeem, the staff sees it confirmed in real time.'
         ),
         el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
           currentUser()
             ? el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('app')},'Open the app →')
-            : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')},'Join the waitlist — €4.99/mo'),
+            : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')},'Join — from €3.99/mo'),
           el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})},'See How It Works')
         )
       )
@@ -1753,10 +1764,10 @@ function Landing() {
             el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
           ),
           el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
-            'Three moves. ', el('span',{class:'italic text-mv-500'},'That’s it.')
+            'Three moves. ', el('span',{class:'italic text-mv-500'},'No QR. No code. No catch.')
           ),
           el('p',{class:'mt-6 text-lg md:text-xl text-slate2-300 leading-relaxed'},
-            'No app to download. No tables to book. Just a Thursday-morning email—and a button you tap when you’re hungry.'
+            'Subscribe once. Browse the partners. At your table, slide to redeem — the staff sees it confirmed in real time.'
           )
         ),
 
@@ -1808,8 +1819,8 @@ function Landing() {
                 '<text x="32" y="168" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2" fill="#82765E">MEMBER SINCE 2026</text>'+
                 // Price tag
                 '<g transform="translate(290 158)">'+
-                  '<text x="0" y="0" font-family="Georgia, serif" font-style="italic" font-size="22" font-weight="700" fill="#DC4A26" text-anchor="end">€4.99</text>'+
-                  '<text x="0" y="14" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="1.8" fill="#82765E" text-anchor="end">/ MES</text>'+
+                  '<text x="0" y="0" font-family="Georgia, serif" font-style="italic" font-size="22" font-weight="700" fill="#DC4A26" text-anchor="end">€3.99</text>'+
+                  '<text x="0" y="14" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="1.8" fill="#82765E" text-anchor="end">/ MO · ANNUAL</text>'+
                 '</g>'+
               '</g>'+
               // Floating "joined" tag
@@ -1827,208 +1838,167 @@ function Landing() {
               '</g>'+
             '</svg>';
 
-          const inboxSvg =
+          // === Act 02 — Partner profile with deals (replaces Thursday inbox)
+          // Member opens the partner's profile in the app. Two cards stack:
+          // a Flash deal (terracotta, expires soon) and a Standing deal.
+          // A "Tap to redeem" CTA at the bottom anchors the next action.
+          const profileSvg =
             '<svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
               '<defs>'+
                 '<radialGradient id="hcg2" cx="50%" cy="50%" r="55%">'+
                   '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.18"/>'+
                   '<stop offset="100%" stop-color="#DC4A26" stop-opacity="0"/>'+
                 '</radialGradient>'+
+                '<linearGradient id="bcBanner" x1="0" y1="0" x2="1" y2="1">'+
+                  '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.85"/>'+
+                  '<stop offset="100%" stop-color="#8C2D14" stop-opacity="0.95"/>'+
+                '</linearGradient>'+
               '</defs>'+
               '<ellipse cx="240" cy="190" rx="210" ry="135" fill="url(#hcg2)"/>'+
               // Phone
               '<g transform="translate(140 20)">'+
                 '<rect x="6" y="14" width="200" height="328" rx="28" fill="#1C0F06" fill-opacity="0.5"/>'+
                 '<rect x="0" y="0" width="200" height="328" rx="28" fill="#1C0F06" stroke="#3D2818" stroke-width="2"/>'+
-                '<rect x="8" y="8" width="184" height="312" rx="22" fill="#2A1A0E"/>'+
+                '<rect x="8" y="8" width="184" height="312" rx="22" fill="#FAF6EF"/>'+
                 // Status bar
-                '<text x="22" y="28" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#F4ECDD">Thu 8:02</text>'+
-                '<g transform="translate(160 21)">'+
-                  '<circle cx="0" cy="4" r="1.4" fill="#F4ECDD"/>'+
-                  '<circle cx="5" cy="4" r="1.4" fill="#F4ECDD"/>'+
-                  '<circle cx="10" cy="4" r="1.4" fill="#F4ECDD"/>'+
-                  '<rect x="16" y="1" width="12" height="6" rx="1.5" fill="none" stroke="#F4ECDD" stroke-width="0.8"/>'+
-                  '<rect x="17" y="2" width="8" height="4" rx="0.5" fill="#10B981"/>'+
+                '<text x="22" y="28" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">14:32</text>'+
+                '<g transform="translate(166 24)">'+
+                  '<rect x="0" y="0" width="14" height="7" rx="1.5" fill="none" stroke="#1C0F06" stroke-width="0.8"/>'+
+                  '<rect x="1" y="1" width="11" height="5" rx="0.5" fill="#10B981"/>'+
                 '</g>'+
-                // Email header
-                '<g transform="translate(18 52)">'+
-                  '<text x="0" y="0" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1.5" fill="#82765E">FROM</text>'+
-                  '<circle cx="6" cy="20" r="9" fill="#DC4A26"/>'+
-                  '<text x="6" y="24" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="11" fill="white" text-anchor="middle">m</text>'+
-                  '<text x="22" y="18" font-family="Georgia, serif" font-size="13" font-weight="700" fill="#F5E8D4">Menuverso</text>'+
-                  '<text x="22" y="32" font-family="-apple-system, sans-serif" font-size="10" fill="#82765E">noreply@menuverso.com</text>'+
-                  '<text x="0" y="56" font-family="Georgia, serif" font-style="italic" font-size="15" font-weight="700" fill="#F5E8D4">Your Thursday picks</text>'+
+                // Restaurant banner
+                '<g transform="translate(8 38)">'+
+                  '<rect x="0" y="0" width="184" height="72" fill="url(#bcBanner)"/>'+
+                  // Stylised plate iconography
+                  '<g transform="translate(92 36)">'+
+                    '<circle cx="0" cy="0" r="24" fill="#FAF6EF" fill-opacity="0.18"/>'+
+                    '<circle cx="0" cy="0" r="17" fill="#FAF6EF" fill-opacity="0.28"/>'+
+                    '<circle cx="0" cy="0" r="9" fill="#FAF6EF" fill-opacity="0.45"/>'+
+                  '</g>'+
                 '</g>'+
-                // Divider
-                '<line x1="18" y1="124" x2="182" y2="124" stroke="#3D2818" stroke-width="1"/>'+
-                // 6 restaurant rows — top one featured/highlighted
-                '<g transform="translate(18 134)">'+
-                  // Featured
-                  '<rect x="0" y="0" width="164" height="38" rx="8" fill="#DC4A26" fill-opacity="0.12" stroke="#DC4A26" stroke-opacity="0.55" stroke-width="1"/>'+
-                  '<circle cx="14" cy="19" r="6" fill="#DC4A26"/>'+
-                  '<text x="28" y="16" font-family="Georgia, serif" font-size="11" font-weight="700" fill="#F5E8D4">Bar Cañete</text>'+
-                  '<text x="28" y="29" font-family="-apple-system, sans-serif" font-size="8" fill="#B0A48E">Raval · Tapas</text>'+
-                  '<text x="155" y="23" font-family="Georgia, serif" font-size="11" font-style="italic" font-weight="700" fill="#DC4A26" text-anchor="end">2×1</text>'+
-                  // Row 2
-                  '<g transform="translate(0 44)">'+
-                    '<rect x="0" y="0" width="164" height="32" rx="8" fill="#2A1A0E" stroke="#3D2818" stroke-width="1"/>'+
-                    '<circle cx="14" cy="16" r="6" fill="#82765E" fill-opacity="0.4"/>'+
-                    '<text x="28" y="14" font-family="Georgia, serif" font-size="10" font-weight="700" fill="#F4ECDD">Disfrutar</text>'+
-                    '<text x="28" y="25" font-family="-apple-system, sans-serif" font-size="8" fill="#82765E">Eixample · Modern</text>'+
-                    '<text x="155" y="20" font-family="Georgia, serif" font-size="9" font-style="italic" fill="#82765E" text-anchor="end">2×1</text>'+
+                // Restaurant name
+                '<text x="22" y="132" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="17" fill="#1C0F06">Bar Cañete</text>'+
+                '<text x="22" y="147" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2" fill="#82765E">EL RAVAL · TAPAS</text>'+
+                // Section header
+                '<text x="22" y="174" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2.5" fill="#3D2818" fill-opacity="0.65">TODAY\'S DEALS</text>'+
+                // Flash deal card (highlighted terracotta)
+                '<g transform="translate(16 184)">'+
+                  '<rect x="0" y="0" width="168" height="46" rx="10" fill="#DC4A26"/>'+
+                  // Lightning bolt
+                  '<path d="M 16 14 L 11 26 L 16 26 L 13 36 L 22 22 L 17 22 L 20 14 Z" fill="white"/>'+
+                  '<text x="30" y="22" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="11" fill="white">Flash · 2x1 full menu</text>'+
+                  '<text x="30" y="35" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" fill="white" fill-opacity="0.85">Ends in 2h 18m</text>'+
+                  // "LIVE" pill
+                  '<g transform="translate(122 14)">'+
+                    '<rect x="0" y="0" width="40" height="20" rx="10" fill="white" fill-opacity="0.22"/>'+
+                    '<circle cx="10" cy="10" r="2.5" fill="white"/>'+
+                    '<text x="26" y="14" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" fill="white" text-anchor="middle">LIVE</text>'+
                   '</g>'+
-                  // Row 3
-                  '<g transform="translate(0 82)">'+
-                    '<rect x="0" y="0" width="164" height="32" rx="8" fill="#2A1A0E" stroke="#3D2818" stroke-width="1"/>'+
-                    '<circle cx="14" cy="16" r="6" fill="#82765E" fill-opacity="0.4"/>'+
-                    '<text x="28" y="14" font-family="Georgia, serif" font-size="10" font-weight="700" fill="#F4ECDD">Suculent</text>'+
-                    '<text x="28" y="25" font-family="-apple-system, sans-serif" font-size="8" fill="#82765E">Raval · Catalan</text>'+
-                    '<text x="155" y="20" font-family="Georgia, serif" font-size="9" font-style="italic" fill="#82765E" text-anchor="end">2×1</text>'+
+                '</g>'+
+                // Standing deal card
+                '<g transform="translate(16 240)">'+
+                  '<rect x="0" y="0" width="168" height="40" rx="10" fill="#F4ECDD" stroke="#3D2818" stroke-opacity="0.18"/>'+
+                  '<rect x="0" y="0" width="4" height="40" rx="2" fill="#82765E" fill-opacity="0.6"/>'+
+                  '<text x="14" y="18" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="11" fill="#1C0F06">2x1 on mains</text>'+
+                  '<text x="14" y="31" font-family="-apple-system, sans-serif" font-size="8" font-weight="600" fill="#82765E">Available all week</text>'+
+                  // STANDING badge
+                  '<g transform="translate(118 14)">'+
+                    '<rect x="0" y="0" width="44" height="14" rx="7" fill="#82765E" fill-opacity="0.18"/>'+
+                    '<text x="22" y="10" font-family="-apple-system, sans-serif" font-size="7" font-weight="700" letter-spacing="1" fill="#3D2818" text-anchor="middle">STANDING</text>'+
                   '</g>'+
-                  // Row 4
-                  '<g transform="translate(0 120)">'+
-                    '<rect x="0" y="0" width="164" height="32" rx="8" fill="#2A1A0E" stroke="#3D2818" stroke-width="1"/>'+
-                    '<circle cx="14" cy="16" r="6" fill="#82765E" fill-opacity="0.4"/>'+
-                    '<text x="28" y="14" font-family="Georgia, serif" font-size="10" font-weight="700" fill="#F4ECDD">Hofmann</text>'+
-                    '<text x="28" y="25" font-family="-apple-system, sans-serif" font-size="8" fill="#82765E">Gràcia · Pastry</text>'+
-                    '<text x="155" y="20" font-family="Georgia, serif" font-size="9" font-style="italic" fill="#82765E" text-anchor="end">2×1</text>'+
-                  '</g>'+
-                  // "+ 2 more"
-                  '<text x="82" y="178" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2" fill="#82765E" text-anchor="middle">+ 2 MORE</text>'+
+                '</g>'+
+                // Tap-to-redeem CTA
+                '<g transform="translate(16 290)">'+
+                  '<rect x="0" y="0" width="168" height="22" rx="11" fill="#1C0F06"/>'+
+                  '<text x="84" y="15" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5" fill="#FAF6EF" text-anchor="middle">TAP TO REDEEM →</text>'+
                 '</g>'+
               '</g>'+
-              // Floating "Thu 8 AM" tag
+              // Floating "Flash deal!" external pill
               '<g transform="translate(40 80)">'+
-                '<rect x="0" y="0" width="96" height="34" rx="17" fill="#2A1A0E" stroke="#DC4A26" stroke-opacity="0.6" stroke-width="1.5"/>'+
-                '<circle cx="16" cy="17" r="4" fill="#DC4A26"/>'+
-                '<text x="26" y="21" font-family="Georgia, serif" font-style="italic" font-size="13" font-weight="700" fill="#F5E8D4">Thu 8 AM</text>'+
+                '<rect x="0" y="0" width="116" height="34" rx="17" fill="#1C0F06"/>'+
+                '<path d="M 18 11 L 13 23 L 18 23 L 15 33 L 24 19 L 19 19 L 22 11 Z" fill="#FBBF24"/>'+
+                '<text x="32" y="22" font-family="Georgia, serif" font-style="italic" font-size="13" font-weight="700" fill="#FAF6EF">Flash deal!</text>'+
               '</g>'+
               // Sparkles
-              '<g fill="#FBBF24" fill-opacity="0.5">'+
+              '<g fill="#FBBF24" fill-opacity="0.55">'+
                 '<circle cx="380" cy="80" r="2"/>'+
                 '<circle cx="60" cy="300" r="2"/>'+
                 '<circle cx="410" cy="270" r="1.6"/>'+
               '</g>'+
             '</svg>';
 
-          // QR pixel pattern — pseudo-random but deterministic
-          const qrPx = (() => {
-            const out = [];
-            const grid = [
-              '0011010110010110',
-              '0110101001100100',
-              '1010011100110010',
-              '0101100110011010',
-              '1101001011001101',
-              '0010110100110110',
-              '1100101110010011',
-              '0110011001011001',
-              '1011010011100110',
-              '0100110101001101'
-            ];
-            for (let r=0;r<10;r++){
-              for (let c=0;c<16;c++){
-                if (grid[r].charAt(c)==='1') out.push('<rect x="'+(c*5)+'" y="'+(r*5)+'" width="4" height="4" fill="#1C0F06"/>');
-              }
-            }
-            return out.join('');
-          })();
-
-          const tapSvg =
+          // === Act 03 — Slide-to-redeem + animated verification screen
+          // Member is at the table. Phone shows the redemption screen: a
+          // shimmering terracotta backdrop with a rotating dashed ring, wave
+          // pattern, and a venue-specific token + live timestamp (the parts a
+          // screenshot can't fake). Slide-to-confirm bar at the bottom is
+          // already in its completed state. A green "Validated" pill floats
+          // alongside — the partner's dashboard receiving the redemption push.
+          const redeemSvg =
             '<svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
               '<defs>'+
+                '<linearGradient id="redeemShimmer" x1="0" y1="0" x2="1" y2="1">'+
+                  '<stop offset="0%" stop-color="#DC4A26"/>'+
+                  '<stop offset="50%" stop-color="#F08461"/>'+
+                  '<stop offset="100%" stop-color="#B73A1A"/>'+
+                '</linearGradient>'+
                 '<radialGradient id="hcg3" cx="50%" cy="50%" r="55%">'+
-                  '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.22"/>'+
-                  '<stop offset="100%" stop-color="#DC4A26" stop-opacity="0"/>'+
+                  '<stop offset="0%" stop-color="#10B981" stop-opacity="0.22"/>'+
+                  '<stop offset="100%" stop-color="#10B981" stop-opacity="0"/>'+
                 '</radialGradient>'+
               '</defs>'+
-              '<ellipse cx="240" cy="190" rx="230" ry="140" fill="url(#hcg3)"/>'+
-              // BILL (behind, rotated right)
-              '<g transform="translate(250 45) rotate(8 90 140)">'+
-                '<rect x="8" y="12" width="170" height="270" rx="4" fill="#1C0F06" fill-opacity="0.45"/>'+
-                '<rect x="0" y="0" width="170" height="270" rx="4" fill="#F5E8D4"/>'+
-                // ragged top edge
-                '<path d="M 0 0 L 8 5 L 17 0 L 26 5 L 34 0 L 43 5 L 51 0 L 60 5 L 68 0 L 77 5 L 85 0 L 94 5 L 102 0 L 111 5 L 119 0 L 128 5 L 136 0 L 145 5 L 153 0 L 162 5 L 170 0 L 170 -4 L 0 -4 Z" fill="#2A1A0E"/>'+
+              '<ellipse cx="240" cy="190" rx="220" ry="135" fill="url(#hcg3)"/>'+
+              // Phone
+              '<g transform="translate(140 20)">'+
+                '<rect x="6" y="14" width="200" height="328" rx="28" fill="#1C0F06" fill-opacity="0.5"/>'+
+                '<rect x="0" y="0" width="200" height="328" rx="28" fill="#1C0F06" stroke="#3D2818" stroke-width="2"/>'+
+                '<rect x="8" y="8" width="184" height="312" rx="22" fill="url(#redeemShimmer)"/>'+
+                // Diagonal shimmer overlay (the part that animates in real life)
+                '<g opacity="0.16">'+
+                  '<path d="M 8 220 L 100 8 L 130 8 L 38 220 Z" fill="white"/>'+
+                  '<path d="M 8 280 L 60 200 L 78 200 L 26 280 Z" fill="white"/>'+
+                '</g>'+
                 // Header
-                '<text x="85" y="32" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="#2A1A0E" text-anchor="middle">Bar Cañete</text>'+
-                '<text x="85" y="46" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="2" fill="#82765E" text-anchor="middle">EL RAVAL · TAPAS</text>'+
-                '<line x1="18" y1="58" x2="152" y2="58" stroke="#3D2818" stroke-opacity="0.25" stroke-dasharray="2 3"/>'+
-                // Items
-                '<g font-family="-apple-system, sans-serif" font-size="11" fill="#2A1A0E">'+
-                  '<text x="14" y="80">Pan con tomate</text>'+
-                  '<text x="156" y="80" text-anchor="end">€6.50</text>'+
-                  '<text x="14" y="102">Croquetas (6)</text>'+
-                  '<text x="156" y="102" text-anchor="end">€9.00</text>'+
-                  '<text x="14" y="124">Calçots</text>'+
-                  '<text x="156" y="124" text-anchor="end">€11.00</text>'+
-                  // Crossed-out main
-                  '<text x="14" y="146" fill="#82765E">Arròs negre</text>'+
-                  '<text x="156" y="146" text-anchor="end" fill="#82765E">€24.00</text>'+
-                  '<line x1="12" y1="143" x2="160" y2="143" stroke="#DC4A26" stroke-width="2"/>'+
-                  '<text x="156" y="162" font-family="Georgia, serif" font-style="italic" font-weight="700" fill="#DC4A26" text-anchor="end" font-size="11">−€24.00</text>'+
-                '</g>'+
-                '<line x1="18" y1="182" x2="152" y2="182" stroke="#3D2818" stroke-opacity="0.35"/>'+
-                // Total
-                '<text x="14" y="204" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="#2A1A0E">TOTAL</text>'+
-                '<text x="156" y="206" font-family="Georgia, serif" font-style="italic" font-size="18" font-weight="700" fill="#DC4A26" text-anchor="end">€26.50</text>'+
-                // Stamp
-                '<g transform="translate(85 232) rotate(-10)">'+
-                  '<rect x="-42" y="-10" width="84" height="20" rx="2" fill="none" stroke="#DC4A26" stroke-width="1.4" stroke-opacity="0.7"/>'+
-                  '<text x="0" y="5" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="2" fill="#DC4A26" text-anchor="middle">MENUVERSO ✓</text>'+
-                '</g>'+
-              '</g>'+
-              // PHONE (front, rotated left) with QR
-              '<g transform="translate(70 50) rotate(-5 85 140)">'+
-                '<rect x="8" y="14" width="170" height="280" rx="24" fill="#1C0F06" fill-opacity="0.5"/>'+
-                '<rect x="0" y="0" width="170" height="280" rx="24" fill="#1C0F06" stroke="#3D2818" stroke-width="2"/>'+
-                '<rect x="6" y="6" width="158" height="268" rx="20" fill="#FAF6EF"/>'+
-                // Title
-                '<text x="85" y="32" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2.5" fill="#82765E" text-anchor="middle">SHOW YOUR SERVER</text>'+
-                '<text x="85" y="52" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="#2A1A0E" text-anchor="middle">Bar Cañete</text>'+
-                // QR frame
-                '<g transform="translate(25 64)">'+
-                  '<rect x="0" y="0" width="120" height="120" fill="white" stroke="#1C0F06" stroke-width="1.5"/>'+
-                  '<g transform="translate(10 10)">'+
-                    // 3 corner markers
-                    '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/>'+
-                    '<rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/>'+
-                    '<rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
-                    '<g transform="translate(78 0)">'+
-                      '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/>'+
-                      '<rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/>'+
-                      '<rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
-                    '</g>'+
-                    '<g transform="translate(0 78)">'+
-                      '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/>'+
-                      '<rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/>'+
-                      '<rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
-                    '</g>'+
-                    // pseudo data pixels
-                    '<g transform="translate(28 28)">'+ qrPx + '</g>'+
-                    // logo dot center
-                    '<rect x="42" y="42" width="16" height="16" fill="#FAF6EF"/>'+
-                    '<circle cx="50" cy="50" r="6" fill="#DC4A26"/>'+
-                    '<text x="50" y="54" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="9" fill="white" text-anchor="middle">m</text>'+
+                '<text x="100" y="40" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="2.5" fill="white" fill-opacity="0.85" text-anchor="middle">REDEEMING AT</text>'+
+                '<text x="100" y="64" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="17" fill="white" text-anchor="middle">Bar Cañete</text>'+
+                '<text x="100" y="80" font-family="-apple-system, sans-serif" font-size="9" font-weight="600" fill="white" fill-opacity="0.78" text-anchor="middle">2x1 on the full menu</text>'+
+                // === Animated verification element ===
+                '<g transform="translate(100 162)">'+
+                  // Outer rotating dashed ring (would animate in real product)
+                  '<circle r="56" fill="none" stroke="white" stroke-width="1.5" stroke-opacity="0.35" stroke-dasharray="6 4"/>'+
+                  // Inner solid hairline ring
+                  '<circle r="44" fill="none" stroke="white" stroke-width="1" stroke-opacity="0.55"/>'+
+                  // Wave pattern (the shimmer that defeats screenshots)
+                  '<g stroke="white" stroke-width="1.4" fill="none">'+
+                    '<path d="M -34 -10 Q -17 -18 0 -10 Q 17 -2 34 -10" stroke-opacity="0.55"/>'+
+                    '<path d="M -34 0 Q -17 -8 0 0 Q 17 8 34 0" stroke-opacity="0.65"/>'+
+                    '<path d="M -34 10 Q -17 2 0 10 Q 17 18 34 10" stroke-opacity="0.40"/>'+
                   '</g>'+
+                  // Venue-specific token
+                  '<rect x="-34" y="22" width="68" height="22" rx="11" fill="white" fill-opacity="0.18"/>'+
+                  '<text y="38" font-family="Courier, monospace" font-weight="700" font-size="12" letter-spacing="2" fill="white" text-anchor="middle">T·4F2·B9</text>'+
                 '</g>'+
-                // Six-digit code
-                '<text x="85" y="206" font-family="Courier, monospace" font-weight="700" font-size="20" letter-spacing="3" fill="#DC4A26" text-anchor="middle">842 759</text>'+
-                // Timer
-                '<g transform="translate(85 232)">'+
-                  '<circle cx="0" cy="0" r="11" fill="none" stroke="#E5D5B8" stroke-width="2"/>'+
-                  '<circle cx="0" cy="0" r="11" fill="none" stroke="#DC4A26" stroke-width="2" stroke-dasharray="52 69" stroke-linecap="round" transform="rotate(-90)"/>'+
-                  '<text x="0" y="4" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" fill="#2A1A0E" text-anchor="middle">14m</text>'+
+                // Live timestamp (changes second-by-second in product — proves liveness)
+                '<text x="100" y="232" font-family="Courier, monospace" font-size="10" font-weight="700" fill="white" fill-opacity="0.7" text-anchor="middle">14:32:18 · BCN</text>'+
+                // Instruction
+                '<text x="100" y="256" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1.8" fill="white" fill-opacity="0.85" text-anchor="middle">SHOW TO YOUR SERVER</text>'+
+                // Slide-to-confirm bar (completed state)
+                '<g transform="translate(20 280)">'+
+                  '<rect x="0" y="0" width="160" height="30" rx="15" fill="white" fill-opacity="0.18"/>'+
+                  '<rect x="0" y="0" width="160" height="30" rx="15" fill="white" fill-opacity="0.32"/>'+
+                  '<text x="68" y="20" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" fill="white" text-anchor="middle">Confirmed</text>'+
+                  // Thumb at right (ended state)
+                  '<circle cx="146" cy="15" r="13" fill="white"/>'+
+                  '<path d="M 140 15 L 144 19 L 152 11" stroke="#DC4A26" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
                 '</g>'+
-                '<text x="85" y="262" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1" fill="#82765E" text-anchor="middle">VALID FOR 15 MIN</text>'+
               '</g>'+
-              // "Saved €24" floating receipt-ribbon. Sized + positioned so the
-              // pill ends well inside the viewBox (was getting clipped at narrow
-              // viewport widths where the SVG meets the container vertically).
-              '<g transform="translate(282 282)">'+
-                '<rect x="0" y="0" width="132" height="34" rx="17" fill="#10B981"/>'+
-                '<circle cx="18" cy="17" r="7.5" fill="white" fill-opacity="0.25"/>'+
-                '<path d="M 14 17 L 17 20 L 23 13" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
-                '<text x="34" y="22" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="white">Saved €24</text>'+
+              // Floating "Validated" green pill — represents the partner-side
+              // dashboard receiving the real-time redemption push.
+              '<g transform="translate(326 286)">'+
+                '<rect x="0" y="0" width="128" height="32" rx="16" fill="#10B981"/>'+
+                '<circle cx="18" cy="16" r="8" fill="white" fill-opacity="0.28"/>'+
+                '<path d="M 14 16 L 17 19 L 23 12" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
+                '<text x="32" y="20" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="13" fill="white">Validated</text>'+
               '</g>'+
               // Confetti
               '<g>'+
@@ -2087,30 +2057,30 @@ function Landing() {
           const act1 = buildAct({
             num: '01',
             eyebrow: 'Sign up',
-            headHtml: 'Pay €4.99 once. <span class="italic text-mv-500">Be a member forever.</span>',
-            body: 'One email, one card, ninety seconds. Less than the cost of a flat white—and you’re on the list. Cancel any month. But you won’t.',
-            bullets: ['Apple Pay, Google Pay, or card', 'Cancel anytime in one tap', 'No commitment, no hidden tier'],
+            headHtml: 'From €3.99 a month. <span class="italic text-mv-500">Cancel any month.</span>',
+            body: 'Choose annual (€3.99/mo, billed once up front) or monthly (€6.99/mo, pay as you go). Apple Pay, Google Pay, or card — ninety seconds in.',
+            bullets: ['Annual saves you €36 a year', 'Apple Pay, Google Pay, or card', 'Cancel anytime in two taps'],
             svgHtml: cardSvg,
             orient: 'left'
           });
 
           const act2 = buildAct({
             num: '02',
-            eyebrow: 'Open the email',
-            headHtml: 'Every Thursday at 8 AM, <span class="italic text-mv-500">six tables open up.</span>',
-            body: 'Six hand-picked restaurants land in your inbox—a mix of new openings, hidden barrios, and your usual favourites. Skim it over café con leche.',
-            bullets: ['Personalised by neighbourhood and taste', 'Always six. Never more, never less', 'One email a week. Zero spam'],
-            svgHtml: inboxSvg,
+            eyebrow: 'Find a deal',
+            headHtml: 'Open the app. <span class="italic text-mv-500">Pick a deal.</span>',
+            body: 'Browse partner restaurants in the app. Grab a flash deal before it expires, or take the standing 2x1 — drinks, dessert, mains, the whole menu if the kitchen says so.',
+            bullets: ['Standing 2x1 on whatever the partner offers', 'Flash deals expire same-day or weekly', 'Filter by barrio, cuisine, or live deals'],
+            svgHtml: profileSvg,
             orient: 'right'
           });
 
           const act3 = buildAct({
             num: '03',
-            eyebrow: 'Walk in & save',
-            headHtml: 'Tap. Show. <span class="italic text-mv-500">Pay half.</span>',
-            body: 'When you’re hungry, tap a restaurant. A six-digit code appears. Show your server, order what you like—the second main is on us.',
-            bullets: ['Valid for 15 minutes from tap', 'Up to €30 off per visit', 'Works for two, three, or four diners'],
-            svgHtml: tapSvg,
+            eyebrow: 'Redeem at the table',
+            headHtml: 'Tell the staff. <span class="italic text-mv-500">Slide to confirm.</span>',
+            body: 'At your table, before you order, slide to redeem. An animated verification screen appears — live timestamp, rotating venue token, shimmer pattern. Impossible to screenshot. Your server validates on the spot; the partner dashboard updates instantly.',
+            bullets: ['Animated, screenshot-proof verification', 'Validated at the table, no codes typed', 'Partner dashboard updates in real time'],
+            svgHtml: redeemSvg,
             orient: 'left'
           });
 
@@ -2153,13 +2123,13 @@ function Landing() {
             'That’s the whole thing. ', el('span',{class:'italic text-mv-500'},'No catches.')
           ),
           el('p',{class:'mt-5 text-base md:text-lg text-slate2-300'},
-            'The average member pays ', el('strong',{class:'text-slate2-50'},'€4.99'), ' and saves ', el('strong',{class:'text-mv-400'},'€68'), ' in their first month.'
+            'One main bill at the end. The other one’s on us — whether it was a main, a dessert, a couple of drinks, or the whole table.'
           ),
           el('div',{class:'mt-9 flex justify-center gap-3 flex-wrap'},
             el('button',{
               class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-8 py-4 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition text-lg',
               onclick:()=>go(currentUser() ? 'app' : 'signup')
-            }, currentUser() ? 'Open the app →' : 'Start saving — €4.99/mo'),
+            }, currentUser() ? 'Open the app →' : 'Join — from €3.99/mo'),
             el('button',{
               class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-8 py-4 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition text-lg',
               onclick:()=>document.getElementById('features')?.scrollIntoView({behavior:'smooth'})
@@ -2189,7 +2159,7 @@ function Landing() {
             el('span',{class:'italic text-mv-500'},'showing up'), ' worthwhile.'
           ),
           el('p',{class:'mt-6 text-lg md:text-xl text-slate2-300 leading-relaxed'},
-            'A €4.99 membership buys you more than half-off mains. It buys you a sharper, smaller, better-curated version of Barcelona\'s restaurant scene.'
+            'A membership that starts at €3.99/month buys you more than half-off dinner. It buys you a sharper, smaller, better-curated version of Barcelona\'s restaurant scene.'
           )
         ),
 
@@ -2248,99 +2218,111 @@ function Landing() {
                 '</svg>'
             },
 
-            // ---- TILE: The Thursday email ----
+            // ---- TILE: Browse & redeem (replaces the old Thursday-email tile) ----
+            // Compact partner-profile vignette: a phone showing a restaurant
+            // banner, a highlighted Flash deal card, a Standing deal card,
+            // and a "TAP TO REDEEM" CTA. Communicates the in-venue flow at a
+            // glance without needing an animated demo.
             {
               span: 'md:col-span-2',
-              eyebrow: 'The email',
-              title: 'Six picks. Every Thursday. Eight AM.',
-              body: 'Personalised to your barrio, your tastes, your week. Skim it with your café con leche — tap to walk in.',
+              eyebrow: 'Browse & redeem',
+              title: 'Partner profile, then your table.',
+              body: 'Open a partner\'s page, pick the deal — standing 2x1 or a same-day flash — then redeem at the table. Slide to confirm; your server validates on the spot.',
               svg:
                 '<svg viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
+                  '<defs>'+
+                    '<linearGradient id="bcMini" x1="0" y1="0" x2="1" y2="1">'+
+                      '<stop offset="0%" stop-color="#DC4A26" stop-opacity="0.9"/>'+
+                      '<stop offset="100%" stop-color="#8C2D14" stop-opacity="0.95"/>'+
+                    '</linearGradient>'+
+                  '</defs>'+
                   '<rect x="0" y="0" width="480" height="200" fill="#F4ECDD"/>'+
-                  // Email stack — slightly tilted
-                  '<g transform="translate(60 30) rotate(-2 180 70)">'+
-                    // Back card (shadow)
-                    '<rect x="8" y="14" width="360" height="140" rx="12" fill="#1C0F06" fill-opacity="0.08"/>'+
-                    // Featured email — coloured strip on left
-                    '<rect x="0" y="0" width="360" height="140" rx="12" fill="#FAF6EF" stroke="#DC4A26" stroke-opacity="0.4" stroke-width="1.5"/>'+
-                    '<rect x="0" y="0" width="6" height="140" rx="3" fill="#DC4A26"/>'+
-                    // From
-                    '<g transform="translate(28 28)">'+
-                      '<circle cx="10" cy="10" r="10" fill="#DC4A26"/>'+
-                      '<text x="10" y="14" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="13" fill="white" text-anchor="middle">m</text>'+
-                      '<text x="32" y="9" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1.5" fill="#82765E">FROM</text>'+
-                      '<text x="32" y="23" font-family="Georgia, serif" font-weight="700" font-size="13" fill="#1C0F06">Menuverso</text>'+
+                  // Phone (centred)
+                  '<g transform="translate(160 8)">'+
+                    '<rect x="4" y="8" width="160" height="184" rx="20" fill="#1C0F06" fill-opacity="0.18"/>'+
+                    '<rect x="0" y="0" width="160" height="184" rx="20" fill="#1C0F06" stroke="#3D2818" stroke-width="1.5"/>'+
+                    '<rect x="6" y="6" width="148" height="172" rx="16" fill="#FAF6EF"/>'+
+                    // Banner with plate iconography
+                    '<g transform="translate(6 6)">'+
+                      '<rect x="0" y="0" width="148" height="40" fill="url(#bcMini)"/>'+
+                      '<circle cx="74" cy="20" r="10" fill="#FAF6EF" fill-opacity="0.22"/>'+
+                      '<circle cx="74" cy="20" r="6" fill="#FAF6EF" fill-opacity="0.45"/>'+
                     '</g>'+
-                    // Subject
-                    '<text x="28" y="78" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="18" fill="#1C0F06">Your Thursday picks</text>'+
-                    // Mini preview rows
-                    '<g transform="translate(28 92)">'+
-                      '<rect x="0" y="0" width="6" height="6" rx="1.5" fill="#DC4A26"/>'+
-                      '<text x="14" y="6" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#3D2818">Bar Cañete</text>'+
-                      '<text x="160" y="6" font-family="-apple-system, sans-serif" font-size="10" fill="#82765E">El Raval · Tapas</text>'+
-                      '<rect x="0" y="14" width="6" height="6" rx="1.5" fill="#82765E" fill-opacity="0.5"/>'+
-                      '<text x="14" y="20" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#3D2818">Disfrutar</text>'+
-                      '<text x="160" y="20" font-family="-apple-system, sans-serif" font-size="10" fill="#82765E">Eixample · Modern</text>'+
-                      '<rect x="0" y="28" width="6" height="6" rx="1.5" fill="#82765E" fill-opacity="0.5"/>'+
-                      '<text x="14" y="34" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#3D2818">Suculent</text>'+
-                      '<text x="160" y="34" font-family="-apple-system, sans-serif" font-size="10" fill="#82765E">El Raval · Catalan</text>'+
+                    // Restaurant
+                    '<text x="14" y="62" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="11" fill="#1C0F06">Bar Cañete</text>'+
+                    '<text x="14" y="73" font-family="-apple-system, sans-serif" font-size="7" font-weight="700" letter-spacing="1.5" fill="#82765E">EL RAVAL · TAPAS</text>'+
+                    // Flash deal card
+                    '<g transform="translate(14 82)">'+
+                      '<rect x="0" y="0" width="132" height="30" rx="8" fill="#DC4A26"/>'+
+                      '<path d="M 12 8 L 8 18 L 12 18 L 10 26 L 16 14 L 12 14 L 14 8 Z" fill="white"/>'+
+                      '<text x="24" y="15" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="9" fill="white">Flash · 2x1 full menu</text>'+
+                      '<text x="24" y="25" font-family="-apple-system, sans-serif" font-size="7" font-weight="700" fill="white" fill-opacity="0.85">2h 18m left</text>'+
+                    '</g>'+
+                    // Standing deal card
+                    '<g transform="translate(14 118)">'+
+                      '<rect x="0" y="0" width="132" height="26" rx="8" fill="#F4ECDD" stroke="#3D2818" stroke-opacity="0.2"/>'+
+                      '<rect x="0" y="0" width="3" height="26" rx="1.5" fill="#82765E" fill-opacity="0.5"/>'+
+                      '<text x="10" y="13" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="9" fill="#1C0F06">2x1 on mains</text>'+
+                      '<text x="10" y="23" font-family="-apple-system, sans-serif" font-size="7" font-weight="600" fill="#82765E">Available all week</text>'+
+                    '</g>'+
+                    // CTA
+                    '<g transform="translate(14 152)">'+
+                      '<rect x="0" y="0" width="132" height="18" rx="9" fill="#1C0F06"/>'+
+                      '<text x="66" y="12" font-family="-apple-system, sans-serif" font-size="8" font-weight="700" letter-spacing="1.2" fill="#FAF6EF" text-anchor="middle">TAP TO REDEEM →</text>'+
                     '</g>'+
                   '</g>'+
-                  // Floating "Thu 8 AM" badge
-                  '<g transform="translate(380 30)">'+
-                    '<rect x="0" y="0" width="88" height="30" rx="15" fill="#1C0F06"/>'+
-                    '<circle cx="14" cy="15" r="4" fill="#DC4A26"/>'+
-                    '<text x="24" y="20" font-family="Georgia, serif" font-style="italic" font-size="12" font-weight="700" fill="#FAF6EF">Thu 8 AM</text>'+
+                  // Floating "Browse" pill (left of phone)
+                  '<g transform="translate(28 84)">'+
+                    '<rect x="0" y="0" width="100" height="30" rx="15" fill="#1C0F06"/>'+
+                    '<circle cx="16" cy="15" r="4" fill="#DC4A26"/>'+
+                    '<text x="26" y="20" font-family="Georgia, serif" font-style="italic" font-size="12" font-weight="700" fill="#FAF6EF">Browse</text>'+
+                  '</g>'+
+                  // Floating "Slide ✓" pill (right of phone — represents the redeem)
+                  '<g transform="translate(348 84)">'+
+                    '<rect x="0" y="0" width="100" height="30" rx="15" fill="#10B981"/>'+
+                    '<circle cx="16" cy="15" r="7" fill="white" fill-opacity="0.28"/>'+
+                    '<path d="M 12 15 L 15 18 L 21 11" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
+                    '<text x="32" y="20" font-family="Georgia, serif" font-style="italic" font-size="12" font-weight="700" fill="white">Confirmed</text>'+
                   '</g>'+
                 '</svg>'
             },
 
-            // ---- TILE: The QR ----
+            // ---- TILE: Flash deals (replaces the old QR tile) ----
+            // Single bold time-limited deal card with a giant countdown. The
+            // type can vary (2x1 / freebie / % off) — countdown is the constant.
             {
               span: 'md:col-span-1',
-              eyebrow: 'The code',
-              title: 'Tap. Show. Save.',
-              body: 'A six-digit code with a 15-minute timer — no waiting around at the door.',
+              eyebrow: 'Flash deals',
+              title: 'Limited time. Gone fast.',
+              body: 'Partners drop time-limited offers — 2x1, free dessert, percentage off — with a countdown. Same-day or same-week, then it disappears.',
               svg:
                 '<svg viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
                   '<rect x="0" y="0" width="240" height="200" fill="#F4ECDD"/>'+
-                  // QR frame
-                  '<g transform="translate(60 30)">'+
-                    '<rect x="0" y="0" width="120" height="120" rx="6" fill="#FAF6EF" stroke="#1C0F06" stroke-width="1.5"/>'+
-                    '<g transform="translate(10 10)">'+
-                      // Corner markers
-                      '<rect x="0" y="0" width="22" height="22" fill="#1C0F06"/><rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/><rect x="6" y="6" width="10" height="10" fill="#1C0F06"/>'+
-                      '<g transform="translate(78 0)"><rect x="0" y="0" width="22" height="22" fill="#1C0F06"/><rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/><rect x="6" y="6" width="10" height="10" fill="#1C0F06"/></g>'+
-                      '<g transform="translate(0 78)"><rect x="0" y="0" width="22" height="22" fill="#1C0F06"/><rect x="3" y="3" width="16" height="16" fill="#FAF6EF"/><rect x="6" y="6" width="10" height="10" fill="#1C0F06"/></g>'+
-                      // Center logo
-                      '<rect x="42" y="42" width="16" height="16" fill="#FAF6EF"/>'+
-                      '<circle cx="50" cy="50" r="6" fill="#DC4A26"/>'+
-                      '<text x="50" y="54" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="9" fill="white" text-anchor="middle">m</text>'+
-                      // Scattered pixels (deterministic noise)
-                      '<g fill="#1C0F06">'+
-                        '<rect x="28" y="4" width="4" height="4"/><rect x="36" y="4" width="4" height="4"/><rect x="44" y="4" width="4" height="4"/>'+
-                        '<rect x="56" y="4" width="4" height="4"/><rect x="64" y="4" width="4" height="4"/>'+
-                        '<rect x="28" y="12" width="4" height="4"/><rect x="40" y="12" width="4" height="4"/><rect x="52" y="12" width="4" height="4"/>'+
-                        '<rect x="60" y="12" width="4" height="4"/><rect x="68" y="12" width="4" height="4"/>'+
-                        '<rect x="28" y="28" width="4" height="4"/><rect x="36" y="28" width="4" height="4"/><rect x="44" y="28" width="4" height="4"/>'+
-                        '<rect x="64" y="28" width="4" height="4"/><rect x="72" y="28" width="4" height="4"/><rect x="80" y="28" width="4" height="4"/>'+
-                        '<rect x="4" y="36" width="4" height="4"/><rect x="12" y="36" width="4" height="4"/>'+
-                        '<rect x="76" y="40" width="4" height="4"/><rect x="84" y="40" width="4" height="4"/>'+
-                        '<rect x="4" y="48" width="4" height="4"/><rect x="16" y="48" width="4" height="4"/><rect x="24" y="48" width="4" height="4"/>'+
-                        '<rect x="76" y="56" width="4" height="4"/><rect x="84" y="56" width="4" height="4"/>'+
-                        '<rect x="28" y="84" width="4" height="4"/><rect x="40" y="84" width="4" height="4"/><rect x="52" y="84" width="4" height="4"/>'+
-                        '<rect x="60" y="84" width="4" height="4"/><rect x="72" y="84" width="4" height="4"/>'+
-                        '<rect x="28" y="92" width="4" height="4"/><rect x="36" y="92" width="4" height="4"/>'+
-                      '</g>'+
+                  // Flash deal card
+                  '<g transform="translate(28 32)">'+
+                    '<rect x="6" y="9" width="180" height="108" rx="14" fill="#1C0F06" fill-opacity="0.10"/>'+
+                    '<rect x="0" y="0" width="180" height="108" rx="14" fill="#DC4A26"/>'+
+                    // Lightning bolt at top-left
+                    '<g transform="translate(20 28)">'+
+                      '<path d="M 0 0 L -8 18 L 0 18 L -4 32 L 12 12 L 4 12 L 8 0 Z" fill="#FBBF24"/>'+
                     '</g>'+
+                    // Title
+                    '<text x="44" y="24" font-family="Georgia, serif" font-style="italic" font-weight="700" font-size="14" fill="white">Flash</text>'+
+                    '<text x="44" y="38" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="white" fill-opacity="0.85">2x1 full menu</text>'+
+                    // Countdown big
+                    '<text x="90" y="80" font-family="Courier, monospace" font-weight="700" font-size="26" letter-spacing="2" fill="white" text-anchor="middle">02:18:14</text>'+
+                    '<text x="90" y="96" font-family="-apple-system, sans-serif" font-size="7" font-weight="700" letter-spacing="2" fill="white" fill-opacity="0.7" text-anchor="middle">HRS · MIN · SEC</text>'+
                   '</g>'+
-                  // 6-digit code below QR
-                  '<text x="120" y="172" font-family="Courier, monospace" font-weight="700" font-size="20" letter-spacing="3" fill="#DC4A26" text-anchor="middle">842 759</text>'+
-                  // Timer ring top-right
-                  '<g transform="translate(202 30)">'+
-                    '<circle cx="0" cy="0" r="14" fill="none" stroke="#E5D5B8" stroke-width="2.5"/>'+
-                    '<circle cx="0" cy="0" r="14" fill="none" stroke="#DC4A26" stroke-width="2.5" stroke-dasharray="66 88" stroke-linecap="round" transform="rotate(-90)"/>'+
-                    '<text y="3" font-family="-apple-system, sans-serif" font-size="9" font-weight="700" fill="#1C0F06" text-anchor="middle">14m</text>'+
+                  // "Ends today" floating pill
+                  '<g transform="translate(140 150)">'+
+                    '<rect x="0" y="0" width="80" height="22" rx="11" fill="#1C0F06"/>'+
+                    '<circle cx="14" cy="11" r="3" fill="#FBBF24"/>'+
+                    '<text x="44" y="15" font-family="Georgia, serif" font-style="italic" font-size="10" font-weight="700" fill="#FBBF24" text-anchor="middle">Ends today</text>'+
+                  '</g>'+
+                  // Spark sparkles
+                  '<g fill="#FBBF24" fill-opacity="0.6">'+
+                    '<circle cx="216" cy="40" r="2"/>'+
+                    '<circle cx="20" cy="160" r="1.6"/>'+
                   '</g>'+
                 '</svg>'
             },
@@ -2380,7 +2362,7 @@ function Landing() {
               span: 'md:col-span-2',
               eyebrow: 'Your savings',
               title: 'Every euro you save, tracked.',
-              body: 'A running total of what Menuverso has refunded you in real life. Most members clear €60+ in their first month.',
+              body: 'A running total of what Menuverso has refunded you, updated the moment your server validates the redemption. Pay back your subscription on the first visit.',
               svg:
                 '<svg viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">'+
                   '<rect x="0" y="0" width="480" height="200" fill="#F4ECDD"/>'+
@@ -2554,11 +2536,61 @@ function Landing() {
       el('div',{class:'pt-12'}, ILLUS.tileStrip('h-2.5 w-40 mx-auto text-mv-500/30')),
       el('h2',{class:'font-serif-display text-4xl md:text-6xl font-extrabold pt-8'}, 'Your Next Meal is ',
         el('span',{class:'text-mv-500 italic'},'Half Off')),
+
+      // === Annual / Monthly segmented toggle ===
+      // Lives between the H2 and the membership card. Pick a plan → the
+      // card's foil-stamp price + caption + sub-line update live. Annual is
+      // the default + carries a "save 43%" pill for the comparative cue.
+      el('div',{
+        class:'mt-10 inline-flex items-center p-1 rounded-full bg-ink-900 ring-1 ring-mv-500/15 shadow-inner shadow-mv-500/[0.04]',
+        ref: toggleEl => {
+          queueMicrotask(() => {
+            const section = toggleEl.closest('section');
+            if (!section) return;
+            const btns = toggleEl.querySelectorAll('button[data-plan]');
+            const amount = section.querySelector('.mv-price-amount');
+            const label  = section.querySelector('.mv-price-label');
+            const sub    = section.querySelector('.mv-price-sub');
+            if (!amount || !label || !sub) return;
+            function setPlan(plan) {
+              btns.forEach(b => {
+                const active = b.dataset.plan === plan;
+                b.classList.toggle('bg-mv-500', active);
+                b.classList.toggle('text-white', active);
+                b.classList.toggle('shadow-md', active);
+                b.classList.toggle('shadow-mv-500/30', active);
+                b.classList.toggle('text-slate2-300', !active);
+                b.classList.toggle('hover:text-slate2-100', !active);
+              });
+              if (plan === 'annual') {
+                amount.textContent = '€3.99';
+                label.textContent = '/mo · annual';
+                sub.textContent = 'Billed once a year — €47.88 up front. Save €36 vs monthly.';
+              } else {
+                amount.textContent = '€6.99';
+                label.textContent = '/mo · monthly';
+                sub.textContent = 'Billed each month. Cancel any month.';
+              }
+            }
+            btns.forEach(b => b.addEventListener('click', () => setPlan(b.dataset.plan)));
+            setPlan('annual'); // default
+          });
+        }
+      },
+        el('button',{'data-plan':'annual', class:'rounded-full px-5 py-2 text-sm font-bold transition cursor-pointer flex items-center gap-2 bg-mv-500 text-white shadow-md shadow-mv-500/30'},
+          el('span',{},'Annual'),
+          el('span',{class:'inline-flex items-center justify-center text-[9px] font-extrabold uppercase tracking-wider bg-white/25 px-1.5 py-0.5 rounded-full'},'Save 43%')
+        ),
+        el('button',{'data-plan':'monthly', class:'rounded-full px-5 py-2 text-sm font-bold transition cursor-pointer text-slate2-300 hover:text-slate2-100'},
+          'Monthly'
+        )
+      ),
+
       // Membership card — re-skinned for the pastel palette. Was a saturated
       // red-coral gradient that felt heavy against cream paper; now it's a
       // tactile cream "club card" with a terracotta side-stripe, a foil-stamp
       // italic price, and a terracotta "m" emblem in place of the cutlery emoji.
-      el('div',{class:'mt-12 relative mx-auto max-w-sm group [perspective:1200px]'},
+      el('div',{class:'mt-10 relative mx-auto max-w-sm group [perspective:1200px]'},
         // Outer warm bloom — cream + terracotta halo (replaces pink coral glow)
         el('div',{class:'absolute -inset-4 bg-gradient-to-br from-mv-500/25 via-cream-100/50 to-mv-500/20 rounded-[2rem] blur-2xl opacity-70 group-hover:opacity-95 transition-opacity duration-700'}),
         // The card itself — cream cardstock with warm gradient
@@ -2583,14 +2615,19 @@ function Landing() {
                 el('div',{class:'mt-1.5 text-[9px] uppercase tracking-[0.25em] font-bold text-mv-500'},'2×1')
               )
             ),
-            // Price as foil-stamp display serif — italic terracotta
-            el('div',{class:'mt-7 flex items-baseline gap-1'},
-              el('span',{class:'font-serif-display italic text-7xl font-extrabold text-mv-500 drop-shadow-[0_2px_6px_rgba(220,74,38,0.18)]'},'€4.99'),
-              el('span',{class:'text-sm font-bold text-slate2-400'},'/month')
+            // Price as foil-stamp display serif — italic terracotta.
+            // The Annual/Monthly toggle above the card live-updates these
+            // three text nodes via the class hooks (.mv-price-amount/label/sub).
+            el('div',{class:'mt-7'},
+              el('div',{class:'flex items-baseline gap-1'},
+                el('span',{class:'mv-price-amount font-serif-display italic text-7xl font-extrabold text-mv-500 drop-shadow-[0_2px_6px_rgba(220,74,38,0.18)] transition-colors'},'€3.99'),
+                el('span',{class:'mv-price-label text-sm font-bold text-slate2-400'},'/mo · annual')
+              ),
+              el('div',{class:'mv-price-sub mt-1 text-[11px] text-slate2-400'},'Billed once a year — €47.88 up front. Save €36 vs monthly.')
             ),
             // Inclusions — slate text with solid terracotta check pills
             el('ul',{class:'mt-5 space-y-2 text-sm text-slate2-100'},
-              ...['Curated Barcelona restaurants','2×1 on mains, any open slot','Cancel any time'].map(s =>
+              ...['Curated Barcelona restaurants','2×1 on whatever the kitchen offers','Cancel any time'].map(s =>
                 el('li',{class:'flex items-center gap-2.5'},
                   el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},'✓'),
                   el('span',{class:'font-medium'}, s)
@@ -2877,16 +2914,17 @@ function Checkout() {
     el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'Skip for now →'),
     el('div',{class:'text-center mt-4'},
       el('div',{class:'text-5xl'},'🎁'),
-      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock 2×1 mains across Barcelona'),
+      el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock 2×1 across the menu'),
       el('p',{class:'text-slate2-300 text-sm mt-2'},'Curated Barcelona restaurants. Cancel anytime.')
     ),
     el('div',{class:'mt-6 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
       el('div',{class:'flex items-baseline justify-center gap-2'},
-        el('span',{class:'text-5xl font-extrabold'},'€4.99'),
-        el('span',{class:'text-slate2-400'},'/month')
+        el('span',{class:'text-5xl font-extrabold'},'€3.99'),
+        el('span',{class:'text-slate2-400'},'/mo · annual')
       ),
+      el('p',{class:'text-center text-xs text-slate2-400 mt-1'},'or €6.99/mo billed monthly'),
       el('ul',{class:'mt-5 space-y-2 text-sm'},
-        ...['2-for-1 on mains, any open slot','Curated Barcelona restaurants','Cancel anytime','Instant activation']
+        ...['2-for-1 on whatever each partner offers','Standing deals + flash deals','Cancel anytime','Instant activation']
         .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer'},'✓'), s))
       ),
       el('button',{class:'mt-6 w-full rounded-2xl bg-slate2-50 text-ink-900 hover:bg-slate2-200 py-3.5 font-extrabold cursor-pointer', onclick:()=>{
@@ -2894,7 +2932,7 @@ function Checkout() {
         saveStore();
         toast('Subscription active');
         go('app');
-      }},'Subscribe — €4.99/mo'),
+      }},'Subscribe — from €3.99/mo'),
       el('p',{class:'mt-3 text-[10px] text-center text-slate2-500'},'Demo mode — no real charge.')
     )
   );
@@ -3437,7 +3475,7 @@ function AppBookings() {
       })() : el('div',{class:'rounded-3xl bg-slate2-50/[0.03] border border-slate2-50/10 p-8 text-center'},
         ILLUS.emptyPlate('h-20 w-20 text-mv-500/70'),
         el('h3',{class:'mt-4 font-bold text-lg'},'No active booking'),
-        el('p',{class:'mt-1.5 text-sm text-slate2-400 max-w-xs mx-auto'},'Pick a restaurant and a time slot to get your 6-digit code.'),
+        el('p',{class:'mt-1.5 text-sm text-slate2-400 max-w-xs mx-auto'},'Pick a restaurant, choose a deal, and slide to redeem at the table.'),
         el('button',{class:'mt-5 rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-5 py-2.5 font-extrabold text-sm cursor-pointer', onclick:()=>go('app')},'Browse deals →')
       ),
 
@@ -3800,14 +3838,14 @@ function AppProfile() {
           sub && sub.status === 'ACTIVE'
             ? el('div',{class:'mt-3 flex items-center justify-between gap-3 flex-wrap'},
                 el('div',{},
-                  el('div',{class:'font-bold text-sm'}, 'Active · €4.99/mo'),
+                  el('div',{class:'font-bold text-sm'}, 'Active · €3.99/mo · annual'),
                   el('div',{class:'text-xs text-slate2-400'}, sub.cancelAtPeriodEnd ? 'Ends ' : 'Renews ', new Date(sub.renewsAt).toLocaleDateString('en-GB'))
                 ),
                 el('span',{class:'rounded-full bg-accent-emer/15 text-accent-emer px-2.5 py-0.5 text-xs font-extrabold'},'ACTIVE')
               )
             : el('div',{class:'mt-3'},
                 el('p',{class:'text-sm text-slate2-300'},'You don\'t have an active subscription yet.'),
-                el('button',{class:'mt-3 rounded-full bg-mv-500 hover:bg-mv-600 text-white px-4 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>go('checkout')},'Subscribe — €4.99/mo')
+                el('button',{class:'mt-3 rounded-full bg-mv-500 hover:bg-mv-600 text-white px-4 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>go('checkout')},'Subscribe — from €3.99/mo')
               ),
           sub && sub.status === 'ACTIVE' && !sub.cancelAtPeriodEnd && el('button',{class:'mt-3 text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:()=>{
             store.subscriptions[u.id].cancelAtPeriodEnd = true; saveStore(); toast('Cancellation scheduled — service runs until '+new Date(sub.renewsAt).toLocaleDateString('en-GB')); render();
@@ -4321,6 +4359,48 @@ function Booking() {
 
   function paint() {
     inner.innerHTML = '';
+    // === STAGE B (animated verification) — must precede the redeemed-success
+    // branch below, otherwise commitRedeem (which sets b.redeemed=true) would
+    // skip straight to the success view. While the redemption is still fresh
+    // (< 6 minutes old), show the shimmer-gradient verification screen with
+    // a rotating display token + live timestamp.
+    if (b.redeemed && b.redeemedAt && Date.now() - b.redeemedAt < 6 * 60 * 1000) {
+      const bucket = Math.floor(Date.now() / 2000);
+      let h = 0x811c9dc5 >>> 0;
+      const seed = b.id + ':' + bucket;
+      for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+      const hex = h.toString(16).padStart(8, '0').toUpperCase();
+      const token = `T·${hex.slice(0,3)}·${hex.slice(3,6)}`;
+      const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
+      inner.append(
+        el('div',{class:'p-5'},
+          el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl shadow-mv-500/30 ring-1 ring-mv-500/40 mt-2'},
+            el('div',{class:'absolute inset-0', style:'background: linear-gradient(135deg, #DC4A26 0%, #F08461 50%, #B73A1A 100%);'}),
+            el('div',{class:'absolute inset-0 mv-shimmer-anim opacity-20 pointer-events-none'}),
+            el('div',{class:'relative p-7 text-white text-center'},
+              el('div',{class:'text-[10px] uppercase tracking-[0.28em] font-extrabold opacity-85'},'Redeeming at'),
+              el('h1',{class:'mt-1 font-serif-display italic text-3xl font-extrabold leading-tight'}, v?.name ?? '?'),
+              el('p',{class:'mt-2 text-sm font-bold opacity-85'}, b.slot),
+              el('div',{class:'mt-7 mx-auto h-40 w-40 rounded-full grid place-items-center relative', style:'border: 2px dashed rgba(255,255,255,0.35);'},
+                el('div',{class:'absolute inset-2 rounded-full', style:'border: 1px solid rgba(255,255,255,0.4);'}),
+                el('div',{class:'text-center'},
+                  el('div',{class:'text-[9px] uppercase tracking-[0.25em] font-bold opacity-80'},'Verification'),
+                  el('div',{class:'mt-1 font-mono font-extrabold text-xl tracking-widest'}, token)
+                )
+              ),
+              el('div',{class:'mt-6 font-mono font-bold text-sm opacity-90'}, ts, ' · BCN'),
+              el('div',{class:'text-[10px] uppercase tracking-[0.2em] font-extrabold opacity-85 mt-1'},'Show this to your server'),
+              el('div',{class:'mt-5 inline-flex items-center gap-2 rounded-full bg-accent-emer/95 px-3 py-1.5 text-xs font-bold'},
+                el('span',{html:'<svg viewBox="0 0 24 24" class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l4 4L20 6"/></svg>'}),
+                'Confirmed · partner notified'
+              )
+            )
+          ),
+          el('button',{class:'mt-6 w-full rounded-2xl bg-slate2-50 text-ink-900 hover:bg-slate2-200 py-3 font-extrabold cursor-pointer transition text-sm', onclick:()=>go('profile')},'Done — back to profile')
+        )
+      );
+      return;
+    }
     if (b.redeemed) {
       const existingReview = (store.reviews || []).find(r => r.memberId === u.id && r.venueSlug === b.venueSlug);
       const rated = !!existingReview;
@@ -4373,53 +4453,104 @@ function Booking() {
       ));
       return;
     }
-    const now = Date.now();
-    const msLeft = Math.max(0, b.expiresAt - now);
-    if (msLeft <= 0 && !b.expired) { b.expired = true; saveStore(); }
-    const m = Math.floor(msLeft / 60000), s = Math.floor((msLeft / 1000) % 60);
+    // STAGE A — pre-confirm slide screen.
+    // (STAGE B animated verification is rendered earlier in this function —
+    // see the top branch, which fires while b.redeemed is true and the
+    // redemption is still fresh.)
+    let progress = 0;       // 0..1
+    let dragging = false;
+    let fired = false;
+
+    function commitRedeem() {
+      b.redeemed = true; b.redeemedAt = Date.now();
+      store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
+      saveStore(); paint();
+    }
+
     inner.append(
       el('div',{class:'p-5'},
         el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('venue',{slug:b.venueSlug})},'← Back'),
-        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold mt-3 text-center'},'Show this code'),
+        el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold mt-3 text-center'},'Redeeming at'),
         el('h1',{class:'mt-1 text-2xl font-extrabold text-center'}, v?.name ?? '?'),
         el('div',{class:'mt-1 text-sm text-slate2-400 text-center'}, b.slot),
-        el('div',{class:'pop mt-6 mx-auto rounded-3xl border-2 border-dashed border-mv-500/50 bg-mv-500/5 px-8 py-6 inline-block'},
-          el('div',{class:'digit text-6xl font-extrabold tracking-[0.18em] bg-gradient-to-r from-white to-slate2-300 bg-clip-text text-transparent'}, b.code)
-        ),
-        el('p',{class:'mt-5 text-xs text-slate2-400 max-w-[280px] mx-auto text-center'},'Hand the phone to your server. Either tap the button below, or the server can enter the code in the partner portal — both work.'),
-        el('div',{class:'mt-6 text-center'},
-          el('div',{class:'text-xs text-slate2-500 uppercase tracking-widest font-bold'},'Valid for'),
-          el('div',{class:`mt-1 font-mono text-2xl font-bold tabular-nums ${msLeft<5*60000?'text-red-400':''}`},
-            `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+
+        // Deal terms callout
+        el('div',{class:'mt-6 rounded-2xl border border-mv-500/30 bg-mv-500/5 p-4 text-sm'},
+          el('div',{class:'font-bold text-slate2-50'},'Before you order:'),
+          el('ol',{class:'mt-2 space-y-1.5 list-decimal pl-5 text-slate2-300 text-xs'},
+            el('li',{},'Tell your server you\'re redeeming with Menuverso.'),
+            el('li',{},'Slide to confirm below — the animated screen proves it\'s real.'),
+            el('li',{},'Your server acknowledges at the table. Order as normal.')
           )
         ),
-        msLeft > 0
-          ? el('button',{class:'mt-6 w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer transition', onclick:()=>{
-              b.redeemed = true; b.redeemedAt = Date.now();
-              store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, redeemedAt: Date.now() });
-              saveStore(); paint();
-            }},'Server: Confirm 2×1 →')
-          : el('div',{class:'mt-6 text-center text-sm text-red-400'},'Code expired. Book again.'),
-        // Cancel-booking link — releases the slot so the diner isn't locked in.
-        msLeft > 0 && el('div',{class:'mt-4 text-center'},
-          el('button',{class:'text-xs text-slate2-400 hover:text-slate2-200 underline cursor-pointer bg-transparent border-0', onclick:()=>{
-            if (confirm('Cancel this booking? The slot will be released and the code invalidated.')) {
-              b.cancelled = true; saveStore(); toast('Booking cancelled'); go('profile');
+
+        // Slide-to-confirm bar
+        (() => {
+          const track = el('div',{class:'relative h-14 rounded-full bg-slate2-50/[0.06] ring-1 ring-mv-500/30 overflow-hidden select-none mt-7'});
+          const fill = el('div',{class:'absolute inset-y-0 left-0 bg-gradient-to-r from-mv-500 to-mv-400 transition-[width] duration-150 ease-out', style:'width:0%'});
+          const label = el('div',{class:'absolute inset-0 flex items-center justify-center pointer-events-none text-[12px] font-extrabold uppercase tracking-[0.25em] text-slate2-300'},'Slide to redeem →');
+          const thumb = el('button',{class:'absolute top-1 h-12 w-12 rounded-full bg-white shadow-lg shadow-mv-500/30 flex items-center justify-center cursor-grab', style:'left:4px'},
+            el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5 text-mv-500" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'})
+          );
+          track.append(fill, label, thumb);
+          function setProgress(p) {
+            progress = Math.max(0, Math.min(1, p));
+            fill.style.width = (progress * 100) + '%';
+            const tw = track.getBoundingClientRect().width;
+            thumb.style.left = Math.max(4, Math.min(tw - 52, progress * tw - 24)) + 'px';
+            if (progress >= 0.92 && !fired) {
+              fired = true; dragging = false;
+              fill.style.width = '100%';
+              label.textContent = 'Confirming…';
+              setTimeout(commitRedeem, 280);
             }
-          }},'Cancel this booking')
+          }
+          function onMove(e) {
+            if (!dragging || fired) return;
+            const rect = track.getBoundingClientRect();
+            const x = ('touches' in e ? e.touches[0]?.clientX : e.clientX) ?? rect.left;
+            setProgress((x - rect.left) / rect.width);
+          }
+          function onUp() {
+            if (fired) return;
+            dragging = false;
+            setProgress(0);
+          }
+          thumb.addEventListener('pointerdown', () => { dragging = true; fired = false; });
+          thumb.addEventListener('touchstart', () => { dragging = true; fired = false; });
+          window.addEventListener('pointermove', onMove);
+          window.addEventListener('touchmove', onMove);
+          window.addEventListener('pointerup', onUp);
+          window.addEventListener('touchend', onUp);
+          // Keyboard fallback — Enter or click commits.
+          thumb.addEventListener('click', () => { if (!fired) { fired = true; commitRedeem(); } });
+          return track;
+        })(),
+
+        el('p',{class:'mt-4 text-center text-[11px] text-slate2-500'},
+          'Or ',
+          el('button',{class:'underline hover:text-slate2-200 cursor-pointer bg-transparent border-0', onclick:()=>{ if (!fired) { fired = true; commitRedeem(); } }},'tap to confirm'),
+          ' — both work.'
+        ),
+        // Cancel link
+        el('div',{class:'mt-6 text-center'},
+          el('button',{class:'text-xs text-slate2-400 hover:text-slate2-200 underline cursor-pointer bg-transparent border-0', onclick:()=>{
+            if (confirm('Cancel this redemption? You can come back later.')) {
+              b.cancelled = true; saveStore(); toast('Cancelled'); go('profile');
+            }
+          }},'Cancel')
         )
       )
     );
   }
   paint();
-  // Tick the countdown every second; fire a one-time 5-minute warning toast.
-  let warnedAt5 = false;
+  // Repaint every second while on the animated verification screen — the
+  // rotating token + ticking timestamp depend on it.
   const t = setInterval(() => {
     if (!document.body.contains(inner)) { clearInterval(t); return; }
-    if (b.redeemed || b.cancelled) return;
-    const left = b.expiresAt - Date.now();
-    if (!warnedAt5 && left > 0 && left < 5 * 60 * 1000) { toast('Heads up: 5 minutes left on your code', 'err'); warnedAt5 = true; }
-    paint();
+    if (!b.redeemed || b.cancelled) return;
+    // Only repaint while the animated verification window is fresh (< 6m).
+    if (b.redeemedAt && Date.now() - b.redeemedAt < 6 * 60 * 1000) paint();
   }, 1000);
   return AppShell(inner, { narrow: true });
 }
@@ -4465,7 +4596,7 @@ function PartnerLanding() {
             'Keep your ', el('span',{class:'text-mv-500'},'best customers.')
           ),
           el('p',{class:'mt-5 text-lg text-slate2-300 max-w-xl'},
-            'Menuverso members already paid €4.99/month for the privilege of dining out. They\'re looking for somewhere to use it tonight. ',
+            'Menuverso members already paid from €3.99/month for the privilege of dining out. They\'re looking for somewhere to use it tonight. ',
             el('strong',{class:'text-slate2-50'},'Be that somewhere.')
           ),
           el('ul',{class:'mt-7 space-y-2.5 text-slate2-200 text-base max-w-xl'},
@@ -4608,7 +4739,7 @@ function PartnerLanding() {
         ...[
           { glyph:'users',   stat:'Tuesday lunch',   eyebrow:'Fill the quiet shifts', title:'Quiet shifts, not your prime time.', body:'Members book the slots you choose — Tuesday lunch, Wednesday dinner, early Sunday. Your busy nights stay yours.' },
           { glyph:'receipt', stat:'Full bill',       eyebrow:'Keep the full bill',   title:'One main free. Everything else, yours.', body:'Members pay for one main; the other\'s free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.' },
-          { glyph:'heart',   stat:'4–8× a month',    eyebrow:'Real locals',          title:'Regulars, not coupon-clippers.', body:'€4.99/month filters out the deal-hunter crowd. Members are locals who eat out 4–8× a month and bring friends.' }
+          { glyph:'heart',   stat:'4–8× a month',    eyebrow:'Real locals',          title:'Regulars, not coupon-clippers.', body:'A €3.99-and-up monthly fee filters out the deal-hunter crowd. Members are locals who eat out 4–8× a month and bring friends.' }
         ].map(p =>
           el('div',{class:'group relative rounded-2xl bg-ink-900/70 border border-mv-500/15 p-7 md:p-8 hover:border-mv-500/40 hover:shadow-xl hover:shadow-mv-500/[0.08] hover:-translate-y-0.5 transition-all duration-300'},
             // Glyph tile + a small stat chip on the right
@@ -4699,13 +4830,13 @@ function PartnerLanding() {
               el('div',{class:'mt-1 text-[11px] text-slate2-400'},'Drinks, starters, dessert — everything that isn\'t the main.'),
               el('input',{type:'range', min:'3', max:'30', value:'12', step:'1', class:'roi-extras mt-2 w-full accent-mv-500'})
             ),
-            // Slider 3: free mains per week
+            // Slider 3: free items per week (broader than the old "free mains")
             el('div',{class:'mt-6'},
               el('div',{class:'flex items-baseline justify-between'},
-                el('label',{class:'text-sm font-bold text-slate2-100'},'Free mains per week'),
+                el('label',{class:'text-sm font-bold text-slate2-100'},'Free items per week'),
                 el('span',{class:'roi-week-out font-serif-display italic text-xl font-extrabold text-mv-500'},'12')
               ),
-              el('div',{class:'mt-1 text-[11px] text-slate2-400'},'Total 2-for-1 covers you offer across all your slots.'),
+              el('div',{class:'mt-1 text-[11px] text-slate2-400'},'How many 2x1 redemptions you offer across your slots and flash deals.'),
               el('input',{type:'range', min:'4', max:'50', value:'12', step:'2', class:'roi-week mt-2 w-full accent-mv-500'})
             )
           ),
@@ -4772,7 +4903,7 @@ function PartnerLanding() {
             { num:'01', glyph:'document', title:'Apply',         body:'Tell us about your restaurant. Four steps, three minutes. Upload photos, set your cuisine, write a short description.' },
             { num:'02', glyph:'check',    title:'We review',     body:'One business day. Our team checks the basics. If we have questions, we email — no phone tag.' },
             { num:'03', glyph:'calendar', title:'Set your slots',body:'Pick the days and times you\'ll offer 2-for-1. Pause or change them any time, no notice required.' },
-            { num:'04', glyph:'keypad',   title:'Redeem codes',  body:'Members arrive with a 6-digit code. Your server types it into the portal. Done.' }
+            { num:'04', glyph:'check',    title:'Validate at the table',  body:'Member tells your server they\'re redeeming, slides to confirm in the app. The animated screen + your live dashboard prove it — no codes, no scanners, no typing.' }
           ].map(s =>
             el('div',{class:'relative'},
               // Big italic Fraunces numeral
@@ -4816,7 +4947,7 @@ function PartnerLanding() {
           { glyph:'profile',  title:'Self-serve profile',     body:'Edit your photos, description, cuisine tags, hours, and contact info any time. No emails, no waiting.' },
           { glyph:'layers',   title:'Multiple deal slots',    body:'Run different offers across the week — Mon lunch, Wed dinner, weekend brunch. Edit, pause, or expire any of them.' },
           { glyph:'pause',    title:'Pause anytime',          body:'Going on holiday? Toggle PAUSED in one click. Resumes instantly when you flip it back.' },
-          { glyph:'phone',    title:'Staff redemption codes', body:'Your servers type a 6-digit code, no scanner needed. Works on any phone.' },
+          { glyph:'phone',    title:'Real-time redemption',  body:'The moment the member slides to confirm, the redemption appears on your dashboard with a soft toast. Your server just acknowledges at the table — no codes, no scanner.' },
           { glyph:'chat',     title:'Direct support',         body:'Real humans at hola@menuverso.com. Most replies within an hour during business hours.' }
         ].map(f =>
           el('div',{class:'group relative rounded-2xl bg-ink-900/60 border border-mv-500/15 p-6 hover:border-mv-500/35 hover:shadow-lg hover:shadow-mv-500/[0.06] hover:-translate-y-0.5 transition-all duration-300'},
@@ -4879,7 +5010,7 @@ function PartnerLanding() {
                 ['You set the slots',        'Always',                'Limited',        'No'],
                 ['Pause the listing',        'One click',             'Email request',  'Contract-bound'],
                 ['Long-term contract',       'No',                    'Yes',            'Yes'],
-                ['Filters out deal-hunters', 'Yes · €4.99 paywall',   'No',             'No · it is deal-hunters'],
+                ['Filters out deal-hunters', 'Yes · from €3.99/mo',   'No',             'No · it is deal-hunters'],
                 ['Cancel anytime',           'Yes',                   'Notice period',  'Notice period']
               ].map((row,i) =>
                 el('tr',{class:'border-t border-mv-500/10 ' + (i%2 ? 'bg-ink-900/[0.4]' : '')},
@@ -4922,7 +5053,7 @@ function PartnerLanding() {
         ),
         el('div',{class:'mt-8 space-y-4 text-[15px] md:text-base text-slate2-200 leading-relaxed'},
           el('p',{},'Pay a cut of every cover, get a flood of price-sensitive diners, and hope to break even on drinks. That\'s the model. It works for the platform — for the restaurant, the math rarely does.'),
-          el('p',{},'Members pay €4.99/month for the privilege of dining out at a curated set of Barcelona restaurants. That fee is our entire revenue. Your bill goes straight to you — we take ', el('strong',{class:'text-mv-500'},'zero commission'), ' on the food they eat.'),
+          el('p',{},'Members pay from €3.99/month for the privilege of dining out at a curated set of Barcelona restaurants. That fee is our entire revenue. Your bill goes straight to you — we take ', el('strong',{class:'text-mv-500'},'zero commission'), ' on the food they eat.'),
           el('p',{},'In return, you set the rules: which days, which slots, which seats. Pause for holidays in one click. We\'re onboarding the first venues now and we\'d love yours to be one of them.')
         ),
         el('div',{class:'mt-8 pt-6 border-t border-mv-500/15 text-sm text-slate2-400 flex items-center justify-between flex-wrap gap-3'},
@@ -4978,11 +5109,11 @@ function PartnerLanding() {
       ),
       el('div',{class:'mt-10 space-y-3'},
         ...[
-          ['So how does Menuverso make money if there\'s no commission?','Members pay €4.99/month for their dining pass. That\'s our only revenue. We don\'t take a cut of your bill and we never will — it\'d undermine the trust that gets restaurants to list here in the first place.'],
+          ['So how does Menuverso make money if there\'s no commission?','Members pay €3.99/month (billed annually) or €6.99/month (billed monthly). That subscription is our only revenue. We don\'t take a cut of your bill and we never will — it\'d undermine the trust that gets restaurants to list here in the first place.'],
           ['What if I get too many bookings?','You control the slots. Each slot has a seat cap. Once it\'s full, members can\'t book it. You can pause your entire listing in one click — useful for holidays, private events, or when a server quits.'],
-          ['Do I have to discount every dish?','No. The deal is specifically 2-for-1 on main courses. Starters, drinks, dessert, wine, coffee — all charged in full. Members usually order more than walk-ins, not less.'],
+          ['Do I have to discount every dish?','Not unless you want to. You set the deal — could be 2x1 on mains only, drinks only, full menu, a flash dessert giveaway, percentage off the bill. Members see the terms before they slide to redeem.'],
           ['Can I exclude certain dishes (e.g. lobster, special menu)?','Yes. In Profile → Deals, you write the terms. "Excludes tasting menu", "Mains under €25", whatever you like. The terms are shown to members before they book.'],
-          ['How are no-shows handled?','Each member has a redemption history. Members with repeated no-shows get suspended. You can also see no-show counts per booking in your dashboard.'],
+          ['How does the staff know the redemption is real?','Members slide-to-redeem at the table in front of your server, then show an animated verification screen — rotating venue token, live timestamp, shimmer pattern. Screenshots can\'t fake it. The same redemption pings your dashboard in real time as a secondary confirmation.'],
           ['Can I list multiple restaurants?','Yes — one partner account, multiple venues. Each venue has its own slots, hours, and dashboard. Get in touch and we\'ll set it up.']
         ].map(([q,a])=>
           el('details',{class:'group rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-5 cursor-pointer hover:border-mv-500/30 transition'},
@@ -5815,90 +5946,136 @@ function PortalOverview() {
   );
   return el('div',{class:'space-y-6'}, headerLinks, grid);
 }
+/**
+ * PortalRedeem — partner staff's live redemption feed.
+ *
+ * Pre-brief, this screen showed a 6-digit code entry grid: members handed
+ * the phone over and staff typed in the code. The new model has NO code:
+ * members slide-to-confirm at the table, which creates a redemption row
+ * (in this demo, marks the booking as redeemed). Partner staff sees that
+ * row appear here in near real-time, and acknowledges visually at the table.
+ *
+ * The demo fakes "real time" with a 2-second poll — production uses Supabase
+ * Realtime. The interaction is the same: a redemption arrives → staff
+ * acknowledges. There's nothing to type.
+ */
 function PortalRedeem() {
-  const wrap = el('div',{class:'max-w-md mx-auto'});
-  let digits = ['','','','','',''];
+  const wrap = el('div',{class:'max-w-2xl mx-auto'});
   const pv = currentPartnerVenue();
   if (!pv || pv.status !== 'LIVE') {
     return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-center'},
       el('div',{class:'text-4xl'},'⏳'),
-      el('h2',{class:'mt-3 text-xl font-bold'},'Redemption unavailable'),
-      el('p',{class:'mt-2 text-sm text-slate2-400'},'Your venue isn\'t live yet, so there are no member codes to redeem.')
+      el('h2',{class:'mt-3 text-xl font-bold'},'Live feed unavailable'),
+      el('p',{class:'mt-2 text-sm text-slate2-400'},'Your venue isn\'t live yet, so members can\'t redeem here yet.')
     );
   }
   const venueSlug = pv.slug;
   const venueName = pv.name;
+  // Track which redemption ids we've already "popped a toast" for, so the
+  // page doesn't spam toasts after every repaint.
+  if (!window.__portalRedeemAck) window.__portalRedeemAck = new Set();
+  function todaysRedemptions() {
+    const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
+    const cutoff = startOfDay.getTime();
+    // Pull from store.bookings (where the slide-to-confirm marks redeemed=true).
+    // Falls back to store.redemptions for any rows seeded without a booking.
+    const fromBookings = store.bookings
+      .filter(b => b.venueSlug === venueSlug && b.redeemed && b.redeemedAt >= cutoff && !b.cancelled)
+      .map(b => ({ id: 'b:' + b.id, at: b.redeemedAt, memberId: b.memberId, slot: b.slot }));
+    const fromRedemptions = (store.redemptions || [])
+      .filter(r => r.venueSlug === venueSlug && r.redeemedAt >= cutoff)
+      .map((r,i) => ({ id: 'r:' + r.redeemedAt + ':' + i, at: r.redeemedAt, memberId: r.memberId, slot: null }));
+    // Merge + de-dupe by minute+memberId to avoid showing the same redemption twice.
+    const seen = new Set();
+    const all = [];
+    for (const row of [...fromBookings, ...fromRedemptions]) {
+      const key = row.memberId + ':' + Math.floor(row.at / 60000);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      all.push(row);
+    }
+    return all.sort((a,b) => b.at - a.at);
+  }
+  function memberLabel(memberId) {
+    const m = store.users.find(u => u.id === memberId);
+    return m ? fullName(m) : '(member)';
+  }
   function paint() {
+    const rows = todaysRedemptions();
     wrap.innerHTML = '';
+
+    // Toast on any never-seen-before redemption — simulates the realtime push.
+    rows.forEach(r => {
+      if (!window.__portalRedeemAck.has(r.id) && Date.now() - r.at < 30 * 1000) {
+        window.__portalRedeemAck.add(r.id);
+        toast(`${memberLabel(r.memberId)} just redeemed`);
+      } else {
+        window.__portalRedeemAck.add(r.id);
+      }
+    });
+
     wrap.append(
-      el('h2',{class:'font-bold text-xl text-center'},'Enter the 6-digit code'),
-      el('p',{class:'mt-1 text-sm text-slate2-400 text-center'},'On the diner\'s phone screen · ', el('span',{class:'text-slate2-50 font-bold'}, venueName)),
-      el('div',{class:'mt-6 grid grid-cols-6 gap-2'},
-        ...digits.map((d,i) =>
-          el('input',{
-            id:`d${i}`, type:'text', inputMode:'numeric', maxlength:'1', value:d,
-            class:'aspect-square text-center text-3xl font-mono font-bold bg-slate2-50/[0.04] border-2 border-slate2-50/10 rounded-md text-slate2-50 focus:border-mv-500 outline-none',
-            onInput: e => {
-              const v = e.target.value.replace(/\D/g,'').slice(-1);
-              e.target.value = v; digits[i] = v;
-              if (v && i < 5) document.getElementById(`d${i+1}`)?.focus();
-              if (digits.every(x=>x)) attempt();
-            },
-            onKeydown: e => { if (e.key==='Backspace' && !digits[i] && i>0) document.getElementById(`d${i-1}`)?.focus(); },
-            // Paste handler — let the server paste the whole 6-digit code at once
-            // into any of the boxes. It splits across the 6 inputs automatically.
-            onPaste: e => {
-              const text = (e.clipboardData?.getData('text') || '').replace(/\D/g,'').slice(0,6);
-              if (text.length === 0) return;
-              e.preventDefault();
-              for (let j = 0; j < 6; j++) {
-                const node = document.getElementById('d'+j);
-                const ch = text[j] || '';
-                if (node) node.value = ch;
-                digits[j] = ch;
-              }
-              const lastFilled = Math.min(text.length, 5);
-              document.getElementById('d'+lastFilled)?.focus();
-              if (digits.every(x=>x)) attempt();
-            }
-          })
+      el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+        el('div',{},
+          el('h2',{class:'font-bold text-xl'},'Live redemptions · today'),
+          el('p',{class:'mt-1 text-sm text-slate2-400'},
+            el('span',{class:'font-bold text-slate2-50 tabular-nums'}, String(rows.length)),
+            ' Menuverso redemption', rows.length === 1 ? '' : 's', ' at ',
+            el('span',{class:'font-bold text-slate2-50'}, venueName),
+            ' · ',
+            el('span',{class:'inline-flex items-center gap-1.5 text-accent-emer'},
+              el('span',{class:'inline-block h-2 w-2 rounded-full bg-accent-emer animate-pulse'}),
+              'live'
+            )
+          )
         )
       ),
-      el('button',{class:'mt-5 w-full rounded-md bg-mv-500 hover:bg-mv-600 text-white py-3 font-extrabold cursor-pointer', onclick: attempt},'Confirm 2-for-1'),
-      el('p',{class:'mt-3 text-xs text-slate2-500 text-center'},'Codes expire 60 minutes after the diner books.')
+
+      // Explainer card
+      el('div',{class:'mt-5 rounded-2xl border border-mv-500/25 bg-mv-500/5 p-4 text-xs text-slate2-300 leading-relaxed'},
+        el('span',{class:'font-bold text-slate2-50'},'No code entry. '),
+        'Members slide-to-confirm at the table and show an animated verification screen. The redemption pings here instantly. Acknowledge at the table — nothing to type.'
+      ),
+
+      rows.length === 0
+        ? el('div',{class:'mt-6 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-8 text-center text-sm text-slate2-400'},
+            'No redemptions yet today. They\'ll appear here instantly as members slide-to-confirm at the table.'
+          )
+        : el('ul',{class:'mt-6 divide-y divide-slate2-50/[0.05] rounded-2xl border border-slate2-50/10 bg-slate2-50/[0.04]'},
+            ...rows.map(r => {
+              const ackKey = '__ack:' + r.id;
+              const acked = window.__portalRedeemAck.has(ackKey);
+              return el('li',{class:'flex items-center justify-between gap-3 px-4 py-3 text-sm'},
+                el('div',{class:'min-w-0'},
+                  el('div',{class:'truncate font-bold'}, memberLabel(r.memberId)),
+                  el('div',{class:'text-xs text-slate2-400'},
+                    new Date(r.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+                    r.slot ? ' · ' + r.slot : ''
+                  )
+                ),
+                acked
+                  ? el('span',{class:'shrink-0 inline-flex items-center gap-1 text-xs font-bold text-accent-emer'},
+                      el('span',{html:'<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l4 4L20 6"/></svg>'}),
+                      'Acknowledged'
+                    )
+                  : el('button',{
+                      class:'shrink-0 rounded-full bg-mv-500 hover:bg-mv-600 text-white px-4 py-1.5 text-xs font-extrabold cursor-pointer',
+                      onclick: () => { window.__portalRedeemAck.add(ackKey); paint(); }
+                    },'Acknowledge')
+              );
+            })
+          )
     );
-    setTimeout(()=>document.getElementById('d0')?.focus(), 0);
-  }
-  async function attempt() {
-    const code = digits.join('');
-    if (code.length !== 6) return;
-    // Look for the code at THIS venue first.
-    const b = store.bookings.find(x => x.venueSlug === venueSlug && x.code === code && !x.redeemed && !x.cancelled);
-    if (!b) {
-      // Helpful hint: is the code valid but for a different venue?
-      const wrongVenue = store.bookings.find(x => x.code === code && !x.redeemed && !x.cancelled);
-      if (wrongVenue) {
-        const v = findVenueBySlug(wrongVenue.venueSlug);
-        toast(`That code is for ${v?.name ?? 'another venue'}, not ${venueName}.`, 'err');
-      } else {
-        toast('No active booking with that code', 'err');
-      }
-      digits = ['','','','','','']; paint(); return;
-    }
-    if (b.expiresAt <= Date.now()) { toast('That code expired', 'err'); digits = ['','','','','','']; paint(); return; }
-    b.redeemed = true; b.redeemedAt = Date.now();
-    store.redemptions.unshift({ memberId: b.memberId, venueSlug: b.venueSlug, redeemedAt: Date.now(), method: 'PARTNER_CODE' });
-    saveStore();
-    const member = store.users.find(u => u.id === b.memberId);
-    wrap.innerHTML = '';
-    wrap.append(el('div',{class:'text-center'},
-      el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},'✓'),
-      el('h2',{class:'mt-4 text-2xl font-extrabold'},'2-for-1 confirmed'),
-      el('p',{class:'mt-1 text-sm text-slate2-400'}, member ? fullName(member) : '—', ' · ', new Date().toLocaleString('en-GB')),
-      el('button',{class:'mt-8 rounded-md bg-mv-500 hover:bg-mv-600 px-5 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>{ digits = ['','','','','','']; paint(); }},'Redeem another')
-    ));
   }
   paint();
+  // Lightweight realtime simulation — repaint every 2s so any new
+  // redemption (created by a member sliding to confirm in another tab)
+  // appears here without a refresh.
+  if (window.__portalRedeemTimer) clearInterval(window.__portalRedeemTimer);
+  window.__portalRedeemTimer = setInterval(() => {
+    if (!document.body.contains(wrap)) { clearInterval(window.__portalRedeemTimer); return; }
+    paint();
+  }, 2000);
   return el('div',{},
     el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6'}, wrap)
   );
@@ -7208,7 +7385,7 @@ function Privacy() {
       el('h1',{class:'mt-3 text-3xl font-extrabold'},'Privacy Notice'),
       el('p',{class:'text-slate2-400 text-sm mt-1'},'Last updated 2026-05-11. Menuverso S.L. (Barcelona, Spain). Contact: hola@menuverso.com'),
       el('h2',{class:'mt-8 text-xl font-bold'},'What we collect'),
-      el('p',{class:'mt-2 text-slate2-300 text-sm'},'Account: email, name, password (hashed). Subscription: Stripe customer/sub IDs and period dates. Bookings: venue, 6-digit code, timestamps. We don\'t run third-party ad trackers.'),
+      el('p',{class:'mt-2 text-slate2-300 text-sm'},'Account: email, name, password (hashed). Subscription: Stripe customer/sub IDs and period dates. Redemptions: venue, deal, timestamps, verification token. We don\'t run third-party ad trackers.'),
       el('h2',{class:'mt-6 text-xl font-bold'},'Your rights'),
       el('p',{class:'mt-2 text-slate2-300 text-sm'},'Access, correction, deletion, restriction, portability. Self-service in your account; otherwise email hola@menuverso.com. You can complain to the AEPD.')
     )
@@ -7220,7 +7397,7 @@ function Terms() {
       el('button',{class:'text-slate2-400 text-sm underline cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Home'),
       el('h1',{class:'mt-3 text-3xl font-extrabold'},'Terms of Service'),
       el('p',{class:'text-slate2-400 text-sm mt-1'},'Last updated 2026-05-11.'),
-      el('p',{class:'mt-6 text-slate2-300 text-sm'},'€4.99/month, renews monthly, cancel any time from your account. Full refund within 14 days of first purchase if you have not redeemed any offer. Two diners required; cheaper main is free; dine-in; not combinable; drinks excluded. Spanish law; Barcelona courts.')
+      el('p',{class:'mt-6 text-slate2-300 text-sm'},'€3.99/month billed annually (€47.88 up front) or €6.99/month billed monthly — cancel any time from your account. Full refund within 14 days of first purchase if you have not redeemed any offer. Two diners required; cheaper item is the free one; dine-in; not combinable; partner-defined exclusions apply. Spanish law; Barcelona courts.')
     )
   );
 }
