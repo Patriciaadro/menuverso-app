@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0A0F1E">
-<title>menuverso — Taste your city | Barcelona's curated dining pass</title>
+<title>menuverso — Disfruta de lo mejor, ahorra en el resto | Pase gastronómico curado de Barcelona</title>
 <meta name="description" content="Your dining membership for Barcelona. 2-for-1 on whatever the kitchen offers — drinks, mains, desserts, full menu, flash deals. From €3.99/month. Launching summer 2026.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -1202,11 +1202,236 @@ function logout() {
 }
 
 /* ========================================================================
+   i18n — Castellano default + English fallback.
+   Phase 1 covers the marketing surfaces; the rest of the app uses
+   English keys as fallback until later phases translate them.
+   ======================================================================== */
+var MV_LANG = (function(){
+  try {
+    var s = localStorage.getItem('mv_lang');
+    if (s === 'es' || s === 'en') return s;
+  } catch(e){}
+  return 'es'; // Castellano default — set per Amir on 2026-05-14
+})();
+window.MV_T = {
+  es: {
+    'banner.concept': 'Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso.',
+    'nav.howItWorks': 'Cómo funciona',
+    'nav.forRestaurants': 'Para Restaurantes',
+    'nav.signIn': 'Iniciar sesión',
+    'nav.join': 'Únete',
+    'nav.openApp': 'Abrir la app →',
+    'hero.eyebrow': 'Próximamente en Barcelona · Verano 2026',
+    'hero.line1': 'Disfruta de lo mejor.',
+    'hero.line2': 'Ahorra en el resto.',
+    'hero.subhead.lead': 'Tu ciudad está llena de sabores increíbles y rincones únicos que aún no conoces. ',
+    'hero.subhead.brand': 'menuverso',
+    'hero.subhead.tail': ' es tu guía para descubrir esas joyas culinarias ocultas — con ofertas exclusivas que no encontrarás en ningún otro sitio.',
+    'hero.ctaJoin': 'Únete — desde 3,99 €/mes',
+    'hero.ctaApp': 'Abrir la app →',
+    'hero.ctaHow': 'Cómo funciona',
+    'lang.switchLabel': 'EN'    ,
+    // ===== Phase 2 — full visible-surface translations =====
+    'nav.openApp.short': 'Abrir la app',
+    'how.eyebrow': 'Fácil como 1-2-3',
+    'how.heading': 'Cómo funciona',
+    'how.step1.title': 'Elige restaurante',
+    'how.step1.body': 'Encuentra restaurantes cerca de ti en el mapa o en lista.',
+    'how.step2.title': 'Elige una oferta',
+    'how.step2.body': 'Explora 2×1 fijos y ofertas flash del día. Elige el que quieras.',
+    'how.step3.title': 'Desliza para canjear',
+    'how.step3.body': 'Avisa al camarero, desliza para confirmar. El equipo lo ve en vivo. Pide como siempre.',
+    // Membership card / pricing section on the consumer landing
+    'card.heading.pre': 'Tu próxima comida es ',
+    'card.heading.em': 'al 50%',
+    'card.toggle.annual': 'Anual',
+    'card.toggle.save': 'AHORRA 43%',
+    'card.toggle.monthly': 'Mensual',
+    'card.diningPass': 'PASE GASTRONÓMICO',
+    'card.location': 'MENUVERSO · BARCELONA',
+    'card.annual.priceSuffix': '/mes · anual',
+    'card.annual.billed': 'Se cobra una vez al año — 47,88 €. Ahorras 36 € frente al plan mensual.',
+    'card.monthly.priceSuffix': '/mes',
+    'card.monthly.billed': 'Se cobra cada mes. Cancela cualquier mes.',
+    'card.benefit1': 'Restaurantes de Barcelona seleccionados',
+    'card.benefit2': '2×1 en lo que ofrezca la cocina',
+    'card.benefit3': 'Cancela cuando quieras',
+    'card.memberFrom': 'MIEMBRO DESDE',
+    'card.serial': 'SERIE',
+    'card.season': 'Verano 2026',
+    // Structural facts strip (consumer + partner pages)
+    'facts.commission.value': '0%',
+    'facts.commission.label': 'Comisión',
+    'facts.toList.value': '0 €',
+    'facts.toList.label': 'Para listar',
+    'facts.cancel.value': 'Cuando sea',
+    'facts.cancel.label': 'Cancelar',
+    'facts.approval.value': '1 día',
+    'facts.approval.label': 'Aprobación',
+    // Partner-landing hero
+    'partner.hero.eyebrow': 'Para restaurantes de Barcelona',
+    'partner.hero.line1a': 'Llena tus ',
+    'partner.hero.line1b': 'noches flojas.',
+    'partner.hero.line2a': 'Conserva a tus ',
+    'partner.hero.line2b': 'mejores clientes.',
+    'partner.hero.subhead.lead': 'Los miembros de Menuverso ya han pagado desde 3,99 €/mes por el privilegio de salir a cenar. Están buscando dónde aprovecharlo esta noche. ',
+    'partner.hero.subhead.em': 'Sé ese sitio.',
+    'partner.hero.badge.zero.pct.body': 'de comisión por reserva — te quedas con toda la cuenta, menos el segundo plato gratis.',
+    'partner.hero.badge.zero.euro.body': 'para aparecer en la lista. Sin cuotas de alta, sin suscripción mensual, sin contrato.',
+    'partner.hero.badge.you.body': 'eliges los días, los horarios y cuántas mesas hay disponibles.',
+    'partner.hero.cta.list': 'Lista tu restaurante — Gratis →',
+    'partner.hero.cta.demo': 'Probar el portal demo',
+    'partner.hero.cta.alreadyPartner': '¿Ya eres partner? Inicia sesión →',
+    'partner.hero.cta.openPortal': 'Abrir portal de partner',
+    'partner.hero.cta.signOut': 'Cerrar sesión y listar →',
+    'partner.hero.cta.backAccount': 'Volver a tu cuenta',
+    // Lead-capture form
+    'lead.label': 'Contáctanos',
+    'lead.placeholder': 'tu@restaurante.com',
+    'lead.submit': 'Enviar →',
+    'lead.helper': 'Te respondemos en un día hábil. Sin spam, sin emails automáticos.',
+    'lead.invalid': 'Introduce un email válido.',
+    'lead.success': 'Gracias — te respondemos en un día hábil.',
+    // Diner's-view preview card
+    'preview.dinersView': 'Vista del cliente',
+    'preview.label': 'Vista previa',
+    'preview.serverView': 'VISTA PREVIA · CAMARERO',
+    'preview.partyOf': 'Mesa de ',
+    // Footer (consumer landing)
+    'footer.tagline': 'Tu guía de joyas culinarias ocultas. Por Menuverso SL.',
+    'footer.product': 'Producto',
+    'footer.account': 'Cuenta',
+    'footer.legal': 'Legal',
+    'footer.restaurants': 'Restaurantes',
+    'footer.howItWorks': 'Cómo funciona',
+    'footer.pricing': 'Precios',
+    'footer.manage': 'Gestionar suscripción',
+    'footer.unsubscribe': 'Cancelar emails',
+    'footer.contact': 'Contacto',
+    'footer.terms': 'Términos',
+    'footer.privacy': 'Privacidad',
+    'footer.cookies': 'Cookies',
+    'footer.rights': '© {year} Menuverso SL · Barcelona, España · Todos los derechos reservados'
+  },
+  en: {
+    'banner.concept': 'Demo in progress — the restaurants shown are illustrative and not affiliated with menuverso.',
+    'nav.howItWorks': 'How it works',
+    'nav.forRestaurants': 'For Restaurants',
+    'nav.signIn': 'Sign in',
+    'nav.join': 'Join',
+    'nav.openApp': 'Open the app →',
+    'hero.eyebrow': 'Launching in Barcelona · Summer 2026',
+    'hero.line1': 'Enjoy the Best.',
+    'hero.line2': 'Save the Rest.',
+    'hero.subhead.lead': 'Your city is packed with incredible flavors and unique locations you haven\u0027t even met yet. ',
+    'hero.subhead.brand': 'menuverso',
+    'hero.subhead.tail': ' is your guide to uncovering those hidden culinary gems — complete with exclusive deals you won\u0027t find anywhere else.',
+    'hero.ctaJoin': 'Join — from €3.99/mo',
+    'hero.ctaApp': 'Open the app →',
+    'hero.ctaHow': 'See How It Works',
+    'lang.switchLabel': 'ES'    ,
+    // ===== Phase 2 =====
+    'nav.openApp.short': 'Open the app',
+    'how.eyebrow': 'Easy as 1-2-3',
+    'how.heading': 'How it works',
+    'how.step1.title': 'Choose a restaurant',
+    'how.step1.body': 'Find restaurants near you on the map or in list view.',
+    'how.step2.title': 'Pick a deal',
+    'how.step2.body': 'Browse standing 2×1s and same-day flash deals. Pick the one you want.',
+    'how.step3.title': 'Slide to redeem',
+    'how.step3.body': 'Tell your server, slide to confirm. Staff sees it live. Order as normal.',
+    'card.heading.pre': 'Your Next Meal is ',
+    'card.heading.em': 'Half Off',
+    'card.toggle.annual': 'Annual',
+    'card.toggle.save': 'SAVE 43%',
+    'card.toggle.monthly': 'Monthly',
+    'card.diningPass': 'DINING PASS',
+    'card.location': 'MENUVERSO · BARCELONA',
+    'card.annual.priceSuffix': '/mo · annual',
+    'card.annual.billed': 'Billed once a year — €47.88 up front. Save €36 vs monthly.',
+    'card.monthly.priceSuffix': '/mo',
+    'card.monthly.billed': 'Billed each month. Cancel any month.',
+    'card.benefit1': 'Curated Barcelona restaurants',
+    'card.benefit2': '2×1 on whatever the kitchen offers',
+    'card.benefit3': 'Cancel any time',
+    'card.memberFrom': 'MEMBER FROM',
+    'card.serial': 'SERIAL',
+    'card.season': 'Summer 2026',
+    'facts.commission.value': '0%',
+    'facts.commission.label': 'Commission',
+    'facts.toList.value': '€0',
+    'facts.toList.label': 'To list',
+    'facts.cancel.value': 'Anytime',
+    'facts.cancel.label': 'Cancel',
+    'facts.approval.value': '1 day',
+    'facts.approval.label': 'Approval',
+    'partner.hero.eyebrow': 'For Barcelona restaurants',
+    'partner.hero.line1a': 'Fill your ',
+    'partner.hero.line1b': 'slow nights.',
+    'partner.hero.line2a': 'Keep your ',
+    'partner.hero.line2b': 'best customers.',
+    'partner.hero.subhead.lead': 'Menuverso members already paid from €3.99/month for the privilege of dining out. They\u0027re looking for somewhere to use it tonight. ',
+    'partner.hero.subhead.em': 'Be that somewhere.',
+    'partner.hero.badge.zero.pct.body': 'commission per booking — you keep the full bill, minus the free main.',
+    'partner.hero.badge.zero.euro.body': 'to list. No setup fees, no monthly subscription, no contract.',
+    'partner.hero.badge.you.body': 'choose the days, time slots, and how many seats are available.',
+    'partner.hero.cta.list': 'List your restaurant — Free →',
+    'partner.hero.cta.demo': 'Try the demo portal',
+    'partner.hero.cta.alreadyPartner': 'Already a partner? Sign in →',
+    'partner.hero.cta.openPortal': 'Open partner portal',
+    'partner.hero.cta.signOut': 'Sign out & list a restaurant →',
+    'partner.hero.cta.backAccount': 'Back to your account',
+    'lead.label': 'Get in touch',
+    'lead.placeholder': 'your@restaurant.com',
+    'lead.submit': 'Submit →',
+    'lead.helper': 'We reply within one business day. No spam, no auto-emails.',
+    'lead.invalid': 'Please enter a valid email.',
+    'lead.success': "Thanks — we\u0027ll be in touch within one business day.",
+    'preview.dinersView': "Diner\u0027s view",
+    'preview.label': 'Preview',
+    'preview.serverView': 'PREVIEW · SERVER VIEW',
+    'preview.partyOf': 'Party of ',
+    'footer.tagline': 'Your guide to hidden culinary gems. By Menuverso SL.',
+    'footer.product': 'Product',
+    'footer.account': 'Account',
+    'footer.legal': 'Legal',
+    'footer.restaurants': 'Restaurants',
+    'footer.howItWorks': 'How it works',
+    'footer.pricing': 'Pricing',
+    'footer.manage': 'Manage subscription',
+    'footer.unsubscribe': 'Unsubscribe emails',
+    'footer.contact': 'Contact',
+    'footer.terms': 'Terms',
+    'footer.privacy': 'Privacy',
+    'footer.cookies': 'Cookies',
+    'footer.rights': '© {year} Menuverso SL · Barcelona, Spain · All rights reserved'
+  }
+};
+function t(k){ return (window.MV_T[MV_LANG]&&window.MV_T[MV_LANG][k]) || window.MV_T.en[k] || k; }
+function setLang(l){ try{localStorage.setItem('mv_lang', l);}catch(e){} location.reload(); }
+
+/* ========================================================================
    LAYOUT — MARKETING HEADER + PHONE FRAME
    ======================================================================== */
-// Concept banner removed. Function kept as a no-op so existing call sites
-// stay valid; returning null means el() will skip it as a child.
-function ConceptBanner() { return null; }
+// Concept banner — high-visibility solid-terracotta strip at the very top
+// of every page. Loud on purpose so any restaurant that lands here knows
+// instantly the listings are illustrative and we are NOT claiming real
+// partnerships. Renders in the active language via t().
+function ConceptBanner() {
+  // Bilingual copy: punchy, can't-miss-it. Stronger than the previous
+  // tint-and-whisper version. Keeps the line short so it doesn't wrap
+  // awkwardly on mobile.
+  const txt = (MV_LANG === 'es')
+    ? 'DEMO EN DESARROLLO · los restaurantes mostrados son ilustrativos y no están afiliados con menuverso.'
+    : 'DEMO IN PROGRESS · the restaurants shown are illustrative and not affiliated with menuverso.';
+  return el('div',{class:'bg-mv-500 text-white shadow-sm'},
+    el('div',{class:'mx-auto max-w-6xl px-4 py-2.5 flex items-center justify-center gap-2.5 text-[12px] sm:text-sm font-bold tracking-wide leading-snug text-center'},
+      // Warning glyph — inherits currentColor (white)
+      el('span',{class:'inline-flex shrink-0', style:'width:18px;height:18px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M12 2 L22 20 L2 20 Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17.5" r="0.5" fill="currentColor"/></svg>'}),
+      el('span',{}, txt)
+    )
+  );
+}
 
 /* ========================================================================
    HERO BACKGROUND VIDEO — full-bleed cinematic loop behind the landing copy.
@@ -1284,10 +1509,12 @@ function MarketingHeader() {
           } else {
             document.getElementById('how')?.scrollIntoView({behavior:'smooth'});
           }
-        }}, 'How it works'),
+        }}, t('nav.howItWorks')),
         // 'Features' nav entry removed — the features section it scrolled to
         // was deleted in the brand refresh; the link would scroll to nothing.
-        el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')},'For Restaurants'),
+        el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
+        // Language switcher — always visible, sibling of the auth ternary below.
+        el('button',{class:'inline-flex items-center gap-1.5 rounded-full border-2 border-mv-500/55 text-mv-500 font-extrabold px-3.5 py-1.5 text-sm cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, el('span',{class:'inline-flex shrink-0', style:'width:14px;height:14px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}),el('span',{class:'tracking-wider'}, t('lang.switchLabel'))),
         u
           ? el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20', onclick:()=>{
               if (u.role==='ADMIN') go('admin');
@@ -1438,11 +1665,13 @@ function AppTopBar({ showNav }) {
           } else {
             document.getElementById('how')?.scrollIntoView({behavior:'smooth'});
           }
-        }}, 'How it works'),
+        }}, t('nav.howItWorks')),
         // 'Features' nav entry removed — section it scrolled to was deleted.
-        el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, 'For Restaurants'),
-        el('button',{class:'rounded-full border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')},'Sign in'),
-        el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20 transition', onclick:()=>go('signup')},'Join')
+        el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
+        // Language switcher — small EN/ES toggle. Sits before Sign in / Join.
+        el('button',{class:'inline-flex items-center gap-1.5 rounded-full border-2 border-mv-500/55 text-mv-500 font-extrabold px-3.5 py-1.5 text-sm cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, el('span',{class:'inline-flex shrink-0', style:'width:14px;height:14px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}),el('span',{class:'tracking-wider'}, t('lang.switchLabel'))),
+        el('button',{class:'rounded-full border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')}, t('nav.signIn')),
+        el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20 transition', onclick:()=>go('signup')}, t('nav.join'))
       )
     )
   );
@@ -1675,21 +1904,22 @@ function Landing() {
       el('div',{class:'absolute left-0 right-0 bottom-0 h-48 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.55) 35%, rgba(250,246,239,0.92) 68%, rgba(253,251,247,0.98) 85%, rgba(255,255,255,1) 100%);'}),
       el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-24 md:py-28 text-center'},
         el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
-          el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}),'Launching in Barcelona · Summer 2026'
+          el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('hero.eyebrow')
         ),
         el('h1',{class:'hero-on-video font-serif-display mx-auto mt-6 max-w-4xl text-6xl md:text-8xl font-extrabold leading-[0.98]'},
-          'Taste ', el('span',{class:'text-mv-500 italic'},'your city.')
+          t('hero.line1'), el('br'),
+          el('span',{class:'text-mv-500 italic'}, t('hero.line2'))
         ),
         el('p',{class:'hero-on-video mx-auto mt-6 max-w-2xl text-lg'},
-          'Your city is packed with incredible flavors and unique locations you haven\'t even met yet. ',
-          el('strong',{},'menuverso'),
-          ' is your guide to uncovering those hidden culinary gems — complete with exclusive deals you won\'t find anywhere else.'
+          t('hero.subhead.lead'),
+          el('strong',{}, t('hero.subhead.brand')),
+          t('hero.subhead.tail')
         ),
         el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
           currentUser()
-            ? el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('app')},'Open the app →')
-            : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')},'Join — from €3.99/mo'),
-          el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})},'See How It Works')
+            ? el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('app')}, t('hero.ctaApp'))
+            : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')}, t('hero.ctaJoin')),
+          el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}, t('hero.ctaHow'))
         )
       )
     ),
@@ -1700,8 +1930,8 @@ function Landing() {
     el('section',{id:'how', class:'relative overflow-hidden bg-ink-950'},
       el('div',{class:'mx-auto max-w-6xl px-4 py-24 md:px-6 md:py-28'},
         el('div',{class:'text-center max-w-3xl mx-auto'},
-          el('span',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 ring-1 ring-mv-500/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'},'Easy as 1-2-3'),
-          el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95] text-slate2-50'},'How it works')
+          el('span',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 ring-1 ring-mv-500/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'}, t('how.eyebrow')),
+          el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95] text-slate2-50'}, t('how.heading'))
         ),
         el('div',{class:'mt-16 grid gap-12 md:gap-10 md:grid-cols-3'},
       el('div',{class:'flex flex-col items-center'},
@@ -1709,9 +1939,9 @@ function Landing() {
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'1'),
-            el('h3',{class:'font-extrabold text-lg text-slate2-50'},'Choose a restaurant')
+            el('h3',{class:'font-extrabold text-lg text-slate2-50'}, t('how.step1.title'))
           ),
-          el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'},'Find restaurants near you on the map or in list view.')
+          el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, t('how.step1.body'))
         )
       ),
       el('div',{class:'flex flex-col items-center'},
@@ -1719,9 +1949,9 @@ function Landing() {
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'2'),
-            el('h3',{class:'font-extrabold text-lg text-slate2-50'},'Pick a deal')
+            el('h3',{class:'font-extrabold text-lg text-slate2-50'}, t('how.step2.title'))
           ),
-          el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'},'Browse standing 2×1s and same-day flash deals. Pick the one you want.')
+          el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, t('how.step2.body'))
         )
       ),
       el('div',{class:'flex flex-col items-center'},
@@ -1729,9 +1959,9 @@ function Landing() {
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'3'),
-            el('h3',{class:'font-extrabold text-lg text-slate2-50'},'Slide to redeem')
+            el('h3',{class:'font-extrabold text-lg text-slate2-50'}, t('how.step3.title'))
           ),
-          el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'},'Tell your server, slide to confirm. Staff sees it live. Order as normal.')
+          el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, t('how.step3.body'))
         )
       )
         )
@@ -3814,18 +4044,18 @@ function PartnerLanding() {
   const isOtherRole = me && !isPartner;
 
   const primaryCtas = el('div',{class:'flex flex-wrap items-center gap-3'},
-    !me && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('partner-signup')},'List your restaurant — Free →'),
+    !me && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('partner-signup')}, t('partner.hero.cta.list')),
     !me && el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>{
       setSession('u_demo_partner');
       toast('Signed in as demo partner'); go('partner-portal',{tab:'overview'});
-    }},'Try the demo portal'),
-    isPartner && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30', onclick:()=>go('partner-portal',{tab:'overview'})},'Open partner portal'),
-    !isPartner && !me && el('button',{class:'text-sm text-slate2-300 underline hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')},'Already a partner? Sign in →'),
+    }}, t('partner.hero.cta.demo')),
+    isPartner && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30', onclick:()=>go('partner-portal',{tab:'overview'})}, t('partner.hero.cta.openPortal')),
+    !isPartner && !me && el('button',{class:'text-sm text-slate2-300 underline hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')}, t('partner.hero.cta.alreadyPartner')),
     // Logged-in non-partner (member/admin) — always show a clear next action.
     // No primary button works because their session blocks partner signup;
     // route them to sign out, which is the actual unblocker.
-    isOtherRole && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{ logout(); toast('Signed out — you can register a partner account now.'); go('partner-signup'); }},'Sign out & list a restaurant →'),
-    isOtherRole && el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>go(me.role === 'ADMIN' ? 'admin' : 'app')},'Back to your account')
+    isOtherRole && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{ logout(); toast('Signed out — you can register a partner account now.'); go('partner-signup'); }}, t('partner.hero.cta.signOut')),
+    isOtherRole && el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>go(me.role === 'ADMIN' ? 'admin' : 'app')}, t('partner.hero.cta.backAccount'))
   );
 
   // Inline lead-capture form — the neotaste-style "Get in touch" pattern.
@@ -3837,22 +4067,22 @@ function PartnerLanding() {
     const f = ev.target;
     const email = (f.email && f.email.value || '').trim().toLowerCase();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      toast('Please enter a valid email.');
+      toast(t('lead.invalid'));
       return;
     }
     const leads = JSON.parse(localStorage.getItem('mv_partner_leads') || '[]');
     leads.push({ email, ts: Date.now() });
     localStorage.setItem('mv_partner_leads', JSON.stringify(leads));
     f.reset();
-    toast("Thanks — we'll be in touch within one business day.");
+    toast(t('lead.success'));
   }},
-    el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-slate2-400 mb-2'},'Get in touch'),
+    el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-slate2-400 mb-2'}, t('lead.label')),
     el('div',{class:'flex flex-col sm:flex-row gap-2'},
-      el('input',{ name:'email', type:'email', required: true, placeholder:'your@restaurant.com',
+      el('input',{ name:'email', type:'email', required: true, placeholder: t('lead.placeholder'),
         class:'flex-1 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
-      el('button',{ type:'submit', class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition shrink-0'},'Submit →')
+      el('button',{ type:'submit', class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition shrink-0'}, t('lead.submit'))
     ),
-    el('p',{class:'mt-2 text-xs text-slate2-500'},'We reply within one business day. No spam, no auto-emails.')
+    el('p',{class:'mt-2 text-xs text-slate2-500'}, t('lead.helper'))
   );
 
   return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
@@ -3866,21 +4096,21 @@ function PartnerLanding() {
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
         el('div',{},
           el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
-            el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}),'For Barcelona restaurants'
+            el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('partner.hero.eyebrow')
           ),
           el('h1',{class:'mt-5 text-4xl md:text-6xl font-extrabold leading-[1.05]'},
-            'Fill your ', el('span',{class:'text-mv-500'},'slow nights.'), el('br'),
-            'Keep your ', el('span',{class:'text-mv-500'},'best customers.')
+            t('partner.hero.line1a'), el('span',{class:'text-mv-500'}, t('partner.hero.line1b')), el('br'),
+            t('partner.hero.line2a'), el('span',{class:'text-mv-500'}, t('partner.hero.line2b'))
           ),
           el('p',{class:'mt-5 text-lg text-slate2-300 max-w-xl'},
-            'Menuverso members already paid from €3.99/month for the privilege of dining out. They\'re looking for somewhere to use it tonight. ',
-            el('strong',{class:'text-slate2-50'},'Be that somewhere.')
+            t('partner.hero.subhead.lead'),
+            el('strong',{class:'text-slate2-50'}, t('partner.hero.subhead.em'))
           ),
           el('ul',{class:'mt-7 space-y-2.5 text-slate2-200 text-base max-w-xl'},
             ...[
-              ['0%','commission per booking — you keep the full bill, minus the free main.'],
-              ['€0','to list. No setup fees, no monthly subscription, no contract.'],
-              ['You','choose the days, time slots, and how many seats are available.']
+              [t('facts.commission.value'), t('partner.hero.badge.zero.pct.body')],
+              [t('facts.toList.value'), t('partner.hero.badge.zero.euro.body')],
+              [(MV_LANG === 'es' ? 'Tú' : 'You'), t('partner.hero.badge.you.body')]
             ].map(([badge,line])=>
               el('li',{class:'flex items-start gap-3'},
                 el('span',{class:'mt-0.5 inline-flex items-center justify-center rounded-full bg-mv-500/15 border border-mv-500/30 text-mv-400 px-2.5 py-0.5 text-xs font-extrabold min-w-[44px] text-center'}, badge),
@@ -3906,9 +4136,9 @@ function PartnerLanding() {
             el('div',{class:'relative rounded-3xl border border-slate2-50/10 bg-ink-900/80 backdrop-blur p-5 shadow-2xl'},
               el('div',{class:'flex items-center justify-between text-xs text-slate2-400'},
                 el('span',{class:'flex items-center gap-2'},
-                  el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Diner\'s view'
+                  el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}), t('preview.dinersView')
                 ),
-                el('span',{class:'font-bold text-mv-400'},'Preview')
+                el('span',{class:'font-bold text-mv-400'}, t('preview.label'))
               ),
               // Member-side venue card preview — exactly what diners see.
               previewVenue && el('div',{class:'mt-4 rounded-2xl overflow-hidden bg-slate2-50/[0.04] border border-slate2-50/10'},
@@ -3932,13 +4162,13 @@ function PartnerLanding() {
               el('div',{class:'mt-4 rounded-2xl bg-gradient-to-br from-mv-500/15 via-mv-500/5 to-transparent border border-mv-500/30 p-4'},
                 el('div',{class:'flex items-center justify-between gap-3'},
                   el('div',{},
-                    el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'},'Preview · server view'),
+                    el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'}, t('preview.serverView')),
                     el('div',{class:'mt-1 text-2xl font-extrabold digit'},'3 8 9 2 6 4')
                   ),
                   el('div',{class:'text-right text-xs text-slate2-300'},
                     el('div',{class:'flex items-center justify-end gap-1.5'},
                       ILLUS.cuisineGlyph('wine','h-3.5 w-3.5 text-mv-400'),
-                      el('span',{class:'font-bold text-slate2-50'},'Party of 2')
+                      el('span',{class:'font-bold text-slate2-50'}, t('preview.partyOf'), '2')
                     ),
                     el('div',{class:'mt-0.5 text-slate2-500'},'21:14 · Example')
                   )
@@ -6769,11 +6999,242 @@ const ROUTES = {
   admin: Admin
 };
 
+// ---------- Auto-translator ------------------------------------------
+// Comprehensive EN→ES dictionary. autoTranslate(root) is called after each
+// render(); it walks every text node + common attribute inside root and
+// swaps any English value that exists in the dictionary for its Castellano
+// equivalent. Pages don't need to use t() — putting a literal English string
+// in markup is enough, as long as it's in this map. Add a translation =
+// add one line here.
+window.MV_TR_ES = {
+  "Sign in": "Iniciar sesión",
+  "Sign out": "Cerrar sesión",
+  "Sign up": "Crear cuenta",
+  "Signed out": "Sesión cerrada",
+  "Join": "Únete",
+  "Joined": "Registrado",
+  "Cancel": "Cancelar",
+  "Save": "Guardar",
+  "Saved": "Guardado",
+  "Delete": "Eliminar",
+  "Submit": "Enviar",
+  "Submit →": "Enviar →",
+  "Confirm": "Confirmar",
+  "Confirmed": "Confirmado",
+  "Continue": "Continuar",
+  "Back": "Atrás",
+  "Next": "Siguiente",
+  "Open the app →": "Abrir la app →",
+  "Open App →": "Abrir App →",
+  "Search": "Buscar",
+  "Filter": "Filtrar",
+  "Reset": "Restablecer",
+  "Approve": "Aprobar",
+  "Approved": "Aprobado",
+  "Reject": "Rechazar",
+  "Pause": "Pausar",
+  "Resume": "Reanudar",
+  "Loading…": "Cargando…",
+  "Done": "Hecho",
+  "Done ✓": "Hecho ✓",
+  "Add photos": "Añadir fotos",
+  "Acknowledge": "Aceptar",
+  "Acknowledged": "Aceptado",
+  "Active": "Activo",
+  "ACTIVE": "ACTIVO",
+  "Paused": "Pausado",
+  "PAUSED": "PAUSADO",
+  "Profile": "Perfil",
+  "Discover": "Descubre",
+  "Bookings": "Reservas",
+  "Account": "Cuenta",
+  "Restaurants": "Restaurantes",
+  "Restaurant": "Restaurante",
+  "How it works": "Cómo funciona",
+  "Pricing": "Precios",
+  "Manage subscription": "Gestionar suscripción",
+  "Unsubscribe emails": "Cancelar emails",
+  "Contact": "Contacto",
+  "Terms": "Términos",
+  "Privacy": "Privacidad",
+  "Cookies": "Cookies",
+  "Product": "Producto",
+  "Legal": "Legal",
+  "For Restaurants": "Para Restaurantes",
+  "Features": "Características",
+  "Members": "Miembros",
+  "Member": "Miembro",
+  "Email": "Email",
+  "Password": "Contraseña",
+  "Phone": "Teléfono",
+  "Name": "Nombre",
+  "Address": "Dirección",
+  "City": "Ciudad",
+  "Launching in Barcelona · Summer 2026": "Próximamente en Barcelona · Verano 2026",
+  "Enjoy the Best.": "Disfruta de lo mejor.",
+  "Save the Rest.": "Ahorra en el resto.",
+  "Join — from €3.99/mo": "Únete — desde 3,99 €/mes",
+  "See How It Works": "Cómo funciona",
+  "Easy as 1-2-3": "Fácil como 1-2-3",
+  "Choose a restaurant": "Elige restaurante",
+  "Find restaurants near you on the map or in list view.": "Encuentra restaurantes cerca de ti en el mapa o en lista.",
+  "Pick a deal": "Elige una oferta",
+  "Browse standing 2×1s and same-day flash deals. Pick the one you want.": "Explora 2×1 fijos y ofertas flash del día. Elige el que quieras.",
+  "Slide to redeem": "Desliza para canjear",
+  "Tell your server, slide to confirm. Staff sees it live. Order as normal.": "Avisa al camarero, desliza para confirmar. El equipo lo ve en vivo. Pide como siempre.",
+  "Your Next Meal is": "Tu próxima comida es",
+  "Half Off": "al 50%",
+  "Annual": "Anual",
+  "Monthly": "Mensual",
+  "SAVE 43%": "AHORRA 43%",
+  "Annual · save 43%": "Anual · ahorra 43%",
+  "Monthly · flexible": "Mensual · flexible",
+  "DINING PASS": "PASE GASTRONÓMICO",
+  "Two ways to pay": "Dos formas de pagar",
+  "Same membership, two billing cadences. Pick at checkout.": "Misma suscripción, dos cadencias de cobro. Elige al pagar.",
+  "/mo · annual": "/mes · anual",
+  "/mo": "/mes",
+  "Billed once a year — €47.88 up front. Save €36 vs monthly.": "Se cobra una vez al año — 47,88 €. Ahorras 36 € frente al plan mensual.",
+  "Billed each month. Cancel any month.": "Se cobra cada mes. Cancela cuando quieras.",
+  "Curated Barcelona restaurants": "Restaurantes de Barcelona seleccionados",
+  "2×1 on whatever each partner offers": "2×1 en lo que ofrezca cada partner",
+  "2×1 on whatever the kitchen offers": "2×1 en lo que ofrezca la cocina",
+  "Standing deals + flash deals (same-day, same-week)": "Ofertas fijas + ofertas flash (mismo día, misma semana)",
+  "Up to 3 redemptions per restaurant per month": "Hasta 3 canjes por restaurante al mes",
+  "Cancel anytime, no contract": "Cancela cuando quieras, sin contrato",
+  "Cancel any time": "Cancela cuando quieras",
+  "MEMBER FROM": "MIEMBRO DESDE",
+  "SERIAL": "SERIE",
+  "Summer 2026": "Verano 2026",
+  "Get your pass →": "Consigue tu pase →",
+  "VAT-inclusive. Payments by Stripe.": "IVA incluido. Pagos con Stripe.",
+  "Curated 2x1 dining in Barcelona. From €3.99/mo. By Menuverso SL.": "Cenas 2×1 seleccionadas en Barcelona. Desde 3,99 €/mes. Por Menuverso SL.",
+  "Your guide to hidden culinary gems. By menuverso SL.": "Tu guía a las joyas culinarias ocultas. Por menuverso SL.",
+  "Commission": "Comisión",
+  "To list": "Para listar",
+  "Anytime": "Cuando sea",
+  "Approval": "Aprobación",
+  "Set slots": "Tú eliges horarios",
+  "Set every deal": "Tú decides cada oferta",
+  "For Barcelona restaurants": "Para restaurantes de Barcelona",
+  "Fill your": "Llena tus",
+  "slow nights.": "noches flojas.",
+  "Keep your": "Conserva a tus",
+  "best customers.": "mejores clientes.",
+  "Be that somewhere.": "Sé ese sitio.",
+  "List your restaurant — Free →": "Lista tu restaurante — Gratis →",
+  "List your restaurant — free →": "Lista tu restaurante — gratis →",
+  "Try the demo portal": "Probar el portal demo",
+  "Already a partner? Sign in →": "¿Ya eres partner? Inicia sesión →",
+  "Open partner portal": "Abrir portal de partner",
+  "Sign out & list a restaurant →": "Cerrar sesión y listar →",
+  "Back to your account": "Volver a tu cuenta",
+  "Get in touch": "Contáctanos",
+  "We reply within one business day. No spam, no auto-emails.": "Te respondemos en un día hábil. Sin spam, sin emails automáticos.",
+  "Why partners join": "Por qué se unen los partners",
+  "Built for": "Hecho para",
+  "restaurant owners,": "dueños de restaurante,",
+  "not deal-hunters.": "no para cazadores de chollos.",
+  "Three reasons restaurants list with us — each one a different way our model isn't the same as the other guys'.": "Tres motivos por los que los restaurantes se listan con nosotros — cada uno una forma distinta de demostrar que nuestro modelo no es como los demás.",
+  "Fill the quiet shifts": "Llena los turnos flojos",
+  "Quiet shifts, not your prime time.": "Turnos flojos, no tu hora punta.",
+  "Members book the slots you choose — Tuesday lunch, Wednesday dinner, early Sunday. Your busy nights stay yours.": "Los miembros reservan los turnos que tú eliges — comida del martes, cena del miércoles, domingo temprano. Tus noches ocupadas siguen siendo tuyas.",
+  "Tuesday lunch": "Comida del martes",
+  "Keep the full bill": "Te quedas con toda la cuenta",
+  "One main free. Everything else, yours.": "Un plato principal gratis. Todo lo demás, para ti.",
+  "Members pay for one main; the other's free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.": "Los miembros pagan un plato principal; el otro es gratis. Bebidas, entrantes, postres, vino — todo se cobra completo. Tu ticket medio sube, no baja.",
+  "Full bill": "Cuenta completa",
+  "Real locals": "Locales de verdad",
+  "Regulars, not coupon-clippers.": "Habituales, no recortadores de cupones.",
+  "A €3.99-and-up monthly fee filters out the deal-hunter crowd. Members are locals who eat out 4–8× a month and bring friends.": "Una cuota mensual desde 3,99 € filtra a los cazadores de chollos. Los miembros son locales que salen a cenar de 4 a 8 veces al mes y traen amigos.",
+  "4–8× a month": "4–8 veces al mes",
+  "The math": "Los números",
+  "What Menuverso": "Lo que Menuverso",
+  "adds": "añade",
+  "to your bottom line.": "a tu cuenta de resultados.",
+  "Move the dials. The numbers move live. No fine print, no smoke and mirrors.": "Mueve los controles. Los números se actualizan en vivo. Sin letra pequeña, sin humo.",
+  "Average main course": "Plato principal medio",
+  "Avg extras per cover": "Extras medios por comensal",
+  "Free mains per week": "Platos gratis por semana",
+  "Added to your monthly revenue": "Añadido a tus ingresos mensuales",
+  "48 pairs / month →": "48 parejas / mes →",
+  "A pair orders 2 mains + extras": "Una pareja pide 2 platos + extras",
+  "The redemption, in 30 seconds": "El canje, en 30 segundos",
+  "See how a": "Mira cómo se siente un",
+  "redemption": "canje",
+  "actually feels.": "de verdad.",
+  "No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves — pick up at any one with the scrubber.": "Sin códigos QR, sin códigos de personal, sin exportaciones de fin de día. Seis escenas que se reproducen solas — salta a cualquiera con la barra.",
+  "Catalan tapas · Eixample": "Tapas catalanas · Eixample",
+  "STANDING DEAL": "OFERTA FIJA",
+  "2×1 full menu": "2×1 carta completa",
+  "Tue–Thu · Lunch + dinner · 6 seats": "Mar–Jue · Comida + cena · 6 mesas",
+  "FLASH · TODAY": "FLASH · HOY",
+  "Free dessert with any main": "Postre gratis con cualquier plato",
+  "REDEEMING AT": "CANJE EN",
+  "2×1 on the full menu": "2×1 en la carta completa",
+  "SLIDE TO REDEEM": "DESLIZA PARA CANJEAR",
+  "SLIDE →": "DESLIZA →",
+  "DO THIS AT THE TABLE": "HAZ ESTO EN LA MESA",
+  "1. Tell your server.": "1. Avisa al camarero.",
+  "2. Slide the bar above.": "2. Desliza la barra de arriba.",
+  "3. Show the screen.": "3. Muestra la pantalla.",
+  "3. Show the screen that appears.": "3. Muestra la pantalla que aparece.",
+  "PICK": "ELEGIR",
+  "Open": "Abierto",
+  "Diner's view": "Vista del cliente",
+  "Preview": "Vista previa",
+  "Preview · server view": "VISTA PREVIA · CAMARERO",
+  "Party of 2": "Mesa de 2",
+  "Launching with Barcelona's best": "Lanzamos con los mejores de Barcelona",
+  "Please enter a valid email.": "Introduce un email válido.",
+  "Browse deals →": "Ver ofertas →",
+  "Browse restaurants →": "Ver restaurantes →",
+  "Demo in progress — restaurants shown are illustrative and not affiliated with menuverso": "Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso",
+  "Demo in progress — the restaurants shown are illustrative and not affiliated with menuverso.": "Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso."
+};
+function autoTranslate(root) {
+  if (MV_LANG !== 'es' || !root) return;
+  var TR = window.MV_TR_ES; if (!TR) return;
+  try {
+    // 1) Text nodes (most user-facing copy)
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var n;
+    while ((n = w.nextNode())) {
+      var raw = n.nodeValue;
+      if (!raw) continue;
+      var key = raw.trim();
+      if (key && TR[key]) {
+        // Preserve leading/trailing whitespace from the original node
+        var lead = raw.slice(0, raw.indexOf(key));
+        var tail = raw.slice(raw.indexOf(key) + key.length);
+        n.nodeValue = lead + TR[key] + tail;
+      }
+    }
+    // 2) Common attributes — placeholder, title, aria-label, value (button)
+    var els = root.querySelectorAll('[placeholder],[title],[aria-label]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      ['placeholder','title','aria-label'].forEach(function(a){
+        var v = el.getAttribute(a);
+        if (v && TR[v.trim()]) el.setAttribute(a, TR[v.trim()]);
+      });
+    }
+  } catch(err) { /* no-op: don't let translation break rendering */ }
+}
+// Lock the <html lang> attribute so screen readers + browser features know
+document.documentElement.setAttribute('lang', MV_LANG);
+
 function render() {
   const root = $('#root');
   root.innerHTML = '';
   const page = ROUTES[state.route] || Landing;
   root.appendChild(page());
+  // Translate every English text node / attribute under root in one pass.
+  autoTranslate(root);
+  // Also translate the Concept banner + headers / footers that live
+  // OUTSIDE #root (those render inline via page() but if any sticky
+  // chrome lives on document.body, sweep it too).
+  autoTranslate(document.body);
 }
 
 // If the user already has a session, route them to their right home.
