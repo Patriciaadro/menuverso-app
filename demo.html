@@ -4158,88 +4158,10 @@ function PartnerLanding() {
                   el('span',{class:'text-accent-amber text-xs shrink-0'}, '★ ', (previewVenue.rating ?? 4.6).toFixed(1))
                 )
               ),
-              // Code-redemption preview tile (clearly labelled).
-              el('div',{class:'mt-4 rounded-2xl bg-gradient-to-br from-mv-500/15 via-mv-500/5 to-transparent border border-mv-500/30 p-4'},
-                el('div',{class:'flex items-center justify-between gap-3'},
-                  el('div',{},
-                    el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'}, t('preview.serverView')),
-                    el('div',{class:'mt-1 text-2xl font-extrabold digit'},'3 8 9 2 6 4')
-                  ),
-                  el('div',{class:'text-right text-xs text-slate2-300'},
-                    el('div',{class:'flex items-center justify-end gap-1.5'},
-                      ILLUS.cuisineGlyph('wine','h-3.5 w-3.5 text-mv-400'),
-                      el('span',{class:'font-bold text-slate2-50'}, t('preview.partyOf'), '2')
-                    ),
-                    el('div',{class:'mt-0.5 text-slate2-500'},'21:14 · Example')
-                  )
-                )
-              ),
-              // Below: product facts grid, smaller now since the visual card carries the column.
-              el('div',{class:'mt-4 grid grid-cols-2 gap-2'},
-                ...[
-                  ['0%','Commission'],
-                  ['€0','To list'],
-                  ['1 day','Approval'],
-                  ['You','Set slots']
-                ].map(([n,l])=>
-                  el('div',{class:'rounded-xl bg-slate2-50/[0.03] border border-slate2-50/10 px-3 py-2 text-center'},
-                    el('div',{class:'text-base font-extrabold text-mv-500'}, n),
-                    el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 mt-0.5 font-bold'}, l)
-                  )
-                )
-              )
             )
           );
         })()
       )
-    ),
-
-    // STRUCTURAL FACTS STRIP — product attributes only, no fabricated metrics.
-    el('section',{class:'border-y border-slate2-50/5 bg-slate2-50/[0.02]'},
-      el('div',{class:'mx-auto max-w-6xl px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center'},
-        ...[
-          ['0%','Commission'],
-          ['€0','To list'],
-          ['Anytime','Cancel'],
-          ['1 day','Approval']
-        ].map(([n,l])=>
-          el('div',{},
-            el('div',{class:'text-3xl md:text-4xl font-extrabold text-slate2-50'}, n),
-            el('div',{class:'text-[11px] uppercase tracking-widest text-slate2-400 mt-1 font-bold'}, l)
-          )
-        )
-      )
-    ),
-
-    // ====== Logo wall — partner-restaurants marquee (typographic placeholders) ======
-    // Real partner logos slot in once we onboard them. Until then, each
-    // tile renders the restaurant name in Fraunces italic on a soft card,
-    // matching the cream-on-ink editorial feel of the rest of the page.
-    // The track has TWO copies of the name set so the CSS translateX(-50%)
-    // loop is seamless (see .mv-logo-marquee in the global stylesheet).
-    el('section',{class:'relative overflow-hidden border-b border-slate2-50/5 bg-slate2-50/[0.02] py-12'},
-      el('div',{class:'text-center mb-7'},
-        el('span',{class:'inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.28em] font-bold text-slate2-400'},
-          el('span',{class:'h-1.5 w-1.5 rounded-full bg-mv-500 animate-pulse'}),
-          'Launching with Barcelona\'s best'
-        )
-      ),
-      (() => {
-        // Placeholder partner names. Real logos replace these one-by-one as
-        // we sign restaurants. To swap: replace the corresponding string
-        // with an `<img>` element (or the existing brand-mark renderer).
-        const names = ['Bar Cañete', 'Casa Lolea', 'Bodega Biarritz', 'Tapeo', 'Quimet & Quimet', 'La Pubilla', 'Mont Bar', 'Cinc Sentits'];
-        return el('div',{class:'mv-logo-marquee relative'},
-          el('div',{class:'mv-logo-track flex gap-5 whitespace-nowrap'},
-            // Two copies of the same set, back-to-back, for the loop.
-            ...names.concat(names).map((name, i) =>
-              el('div',{class:'shrink-0 inline-flex items-center justify-center rounded-2xl border border-slate2-50/10 bg-slate2-50/[0.03] px-7 py-4 min-w-[200px]', key: i},
-                el('span',{class:'font-serif-display italic text-xl font-extrabold text-slate2-300 whitespace-nowrap'}, name)
-              )
-            )
-          )
-        );
-      })()
     ),
 
     // ====== Partner-page glyph library — clean Lucide-style line icons ======
@@ -4330,281 +4252,6 @@ function PartnerLanding() {
           loading:'lazy',
           title:'How a Menuverso redemption works — six-scene animation'
         })
-      )
-    ),
-
-    // ====== "The math" — interactive ROI calculator ======
-    // The high-conversion lever every restaurant owner wants to play with.
-    // Three sliders (avg main, avg extras per cover, free mains per week)
-    // → live recalculation of monthly revenue added. Math is exposed in a
-    // breakdown panel so the number isn't a black box.
-    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
-      el('div',{class:'text-center max-w-3xl mx-auto'},
-        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
-          'The math',
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
-        ),
-        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
-          'What Menuverso ', el('span',{class:'italic text-mv-500'},'adds'), ' to your bottom line.'
-        ),
-        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
-          'Move the dials. The numbers move live. No fine print, no smoke and mirrors.'
-        )
-      ),
-      // Calculator card with reactive sliders
-      el('div',{
-        class:'mt-14 md:mt-16 max-w-5xl mx-auto rounded-3xl bg-ink-900/70 border border-mv-500/20 overflow-hidden shadow-2xl shadow-mv-500/[0.10]',
-        ref: card => {
-          // Wait one tick so children are in the DOM.
-          queueMicrotask(() => {
-            const mainEl   = card.querySelector('.roi-main');
-            const extrasEl = card.querySelector('.roi-extras');
-            const weekEl   = card.querySelector('.roi-week');
-            const mainOut  = card.querySelector('.roi-main-out');
-            const extrasOut= card.querySelector('.roi-extras-out');
-            const weekOut  = card.querySelector('.roi-week-out');
-            const pairOuts = card.querySelectorAll('.roi-pair');
-            const totalOuts= card.querySelectorAll('.roi-output');
-            if (!mainEl) return;
-            function recalc(){
-              const main = +mainEl.value;
-              const extras = +extrasEl.value;
-              const week = +weekEl.value;
-              const perPair = main + 2*extras;       // 1 main billed + 2 covers worth of extras
-              const monthly = week * 4 * perPair;
-              mainOut.textContent = '€' + main;
-              extrasOut.textContent = '€' + extras;
-              weekOut.textContent = week;
-              pairOuts.forEach(e => e.textContent = '€' + perPair);
-              totalOuts.forEach(e => e.textContent = '€' + monthly.toLocaleString('en-US'));
-            }
-            [mainEl, extrasEl, weekEl].forEach(e => e.addEventListener('input', recalc));
-            recalc();
-          });
-        }
-      },
-        el('div',{class:'grid md:grid-cols-5'},
-          // --- INPUTS column ---
-          el('div',{class:'md:col-span-2 p-7 md:p-9 border-b md:border-b-0 md:border-r border-mv-500/15'},
-            el('div',{class:'text-[10px] uppercase tracking-[0.25em] text-mv-500 font-bold'},'Inputs'),
-            el('h3',{class:'mt-3 font-serif-display text-2xl font-extrabold text-slate2-50'},'Your restaurant'),
-            // Slider 1: avg main
-            el('div',{class:'mt-7'},
-              el('div',{class:'flex items-baseline justify-between'},
-                el('label',{class:'text-sm font-bold text-slate2-100'},'Average main course'),
-                el('span',{class:'roi-main-out font-serif-display italic text-xl font-extrabold text-mv-500'},'€18')
-              ),
-              el('input',{type:'range', min:'10', max:'45', value:'18', step:'1', class:'roi-main mt-2 w-full accent-mv-500'})
-            ),
-            // Slider 2: extras
-            el('div',{class:'mt-6'},
-              el('div',{class:'flex items-baseline justify-between'},
-                el('label',{class:'text-sm font-bold text-slate2-100'},'Avg extras per cover'),
-                el('span',{class:'roi-extras-out font-serif-display italic text-xl font-extrabold text-mv-500'},'€12')
-              ),
-              el('div',{class:'mt-1 text-[11px] text-slate2-400'},'Drinks, starters, dessert — everything that isn\'t the main.'),
-              el('input',{type:'range', min:'3', max:'30', value:'12', step:'1', class:'roi-extras mt-2 w-full accent-mv-500'})
-            ),
-            // Slider 3: free items per week (broader than the old "free mains")
-            el('div',{class:'mt-6'},
-              el('div',{class:'flex items-baseline justify-between'},
-                el('label',{class:'text-sm font-bold text-slate2-100'},'Free items per week'),
-                el('span',{class:'roi-week-out font-serif-display italic text-xl font-extrabold text-mv-500'},'12')
-              ),
-              el('div',{class:'mt-1 text-[11px] text-slate2-400'},'How many 2x1 redemptions you offer across your slots and flash deals.'),
-              el('input',{type:'range', min:'4', max:'50', value:'12', step:'2', class:'roi-week mt-2 w-full accent-mv-500'})
-            )
-          ),
-          // --- OUTPUT column ---
-          el('div',{class:'md:col-span-3 p-7 md:p-10 bg-gradient-to-br from-mv-500/[0.10] via-transparent to-mv-500/[0.04] relative'},
-            el('div',{class:'text-[10px] uppercase tracking-[0.25em] text-mv-500 font-bold'},'Added to your monthly revenue'),
-            el('div',{class:'mt-3 flex items-baseline gap-2'},
-              el('span',{class:'font-serif-display italic text-3xl font-extrabold text-slate2-400'},'≈'),
-              el('span',{class:'roi-output font-serif-display italic text-6xl md:text-7xl font-extrabold text-mv-500 leading-none drop-shadow-[0_2px_8px_rgba(220,74,38,0.18)]'},'€2,016')
-            ),
-            el('p',{class:'mt-5 text-base text-slate2-200 leading-relaxed'},
-              'From the slots ', el('strong',{class:'text-slate2-50'},'you choose'), '. ',
-              el('strong',{class:'text-mv-500'},'Zero commission'), ' to Menuverso. Cancel any time.'
-            ),
-            // Breakdown
-            el('div',{class:'mt-7 pt-5 border-t border-mv-500/20'},
-              el('div',{class:'text-[10px] uppercase tracking-[0.22em] text-slate2-400 font-bold'},'How that breaks down'),
-              el('div',{class:'mt-4 space-y-2.5 text-sm'},
-                el('div',{class:'flex items-center justify-between text-slate2-200'},
-                  el('span',{},'A pair orders 2 mains + extras'),
-                  el('span',{class:'roi-pair font-mono font-bold text-mv-500'},'€42')
-                ),
-                el('div',{class:'flex items-center justify-between text-slate2-200'},
-                  el('span',{},'You bill them (one main free)'),
-                  el('span',{class:'roi-pair font-mono font-bold text-mv-500'},'€42')
-                ),
-                el('div',{class:'flex items-center justify-between text-slate2-100 pt-2 border-t border-mv-500/10'},
-                  el('span',{class:'font-bold'},'48 pairs / month →'),
-                  el('span',{class:'roi-output font-mono font-extrabold text-mv-500 text-base'},'€2,016')
-                )
-              )
-            ),
-            // Disclaimer — honest about the assumption
-            el('p',{class:'mt-6 text-[11px] text-slate2-500 leading-relaxed'},
-              '* Assumes the slots you offer fill from new demand. We can\'t guarantee bookings — but when they come in, this is the math.'
-            )
-          )
-        )
-      )
-    ),
-
-    // ====== "How it works" — magazine-style 4-step storyboard ======
-    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
-      el('div',{class:'text-center max-w-3xl mx-auto'},
-        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
-          'How it works',
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
-        ),
-        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
-          'Live in ', el('span',{class:'italic text-mv-500'},'one afternoon.')
-        ),
-        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
-          'Apply this morning. Approved by tomorrow. Bookings the day after. No phone tag, no sales call, no contract.'
-        )
-      ),
-      // 4-step storyboard — italic Fraunces numbers, SVG glyphs, editorial copy.
-      // Vertical hairline connects the four cards on desktop.
-      el('div',{class:'mt-20 md:mt-24 relative'},
-        // Connecting thread under the numerals
-        el('div',{class:'hidden md:block absolute left-4 right-4 top-[3.25rem] h-px bg-gradient-to-r from-transparent via-mv-500/30 to-transparent pointer-events-none', 'aria-hidden':'true'}),
-        el('div',{class:'relative grid md:grid-cols-4 gap-6'},
-          ...[
-            { num:'01', glyph:'document', title:'Apply',         body:'Tell us about your restaurant. Four steps, three minutes. Upload photos, set your cuisine, write a short description.' },
-            { num:'02', glyph:'check',    title:'We review',     body:'One business day. Our team checks the basics. If we have questions, we email — no phone tag.' },
-            { num:'03', glyph:'calendar', title:'Set your slots',body:'Pick the days and times you\'ll offer 2-for-1. Pause or change them any time, no notice required.' },
-            { num:'04', glyph:'check',    title:'Validate at the table',  body:'Member tells your server they\'re redeeming, slides to confirm in the app. The animated screen + your live dashboard prove it — no codes, no scanners, no typing.' }
-          ].map(s =>
-            el('div',{class:'relative'},
-              // Big italic Fraunces numeral
-              el('div',{class:'flex items-center justify-center'},
-                el('div',{class:'relative h-[5.5rem] w-[5.5rem] rounded-full bg-ink-900 ring-2 ring-mv-500/30 grid place-items-center shadow-lg shadow-mv-500/[0.10]'},
-                  el('span',{class:'font-serif-display italic text-3xl font-extrabold text-mv-500'}, s.num)
-                )
-              ),
-              // Card
-              el('div',{class:'mt-5 rounded-2xl bg-ink-900/60 border border-mv-500/15 p-6 hover:border-mv-500/35 transition'},
-                el('div',{class:'flex items-center gap-3'},
-                  el('div',{class:'h-10 w-10 rounded-xl bg-mv-500/10 ring-1 ring-mv-500/20 grid place-items-center text-mv-500 p-2', html: window.__partnerGlyphs[s.glyph]}),
-                  el('h3',{class:'font-serif-display text-xl md:text-2xl font-extrabold text-slate2-50'}, s.title)
-                ),
-                el('p',{class:'mt-3 text-sm text-slate2-300 leading-relaxed'}, s.body)
-              )
-            )
-          )
-        )
-      )
-    ),
-
-    // ====== "What's included" — bento-leaning feature grid ======
-    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
-      el('div',{class:'text-center max-w-3xl mx-auto'},
-        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
-          'What\'s included',
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
-        ),
-        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
-          'A real portal — ', el('span',{class:'italic text-mv-500'},'not a fax form.')
-        ),
-        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
-          'Six tools that mean you actually run the listing — instead of emailing support every time something changes.'
-        )
-      ),
-      el('div',{class:'mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-5'},
-        ...[
-          { glyph:'barChart', title:'Live dashboard',         body:'Bookings, redemptions, peak hours, repeat-visit rate — refreshed in real time.' },
-          { glyph:'profile',  title:'Self-serve profile',     body:'Edit your photos, description, cuisine tags, hours, and contact info any time. No emails, no waiting.' },
-          { glyph:'layers',   title:'Multiple deal slots',    body:'Run different offers across the week — Mon lunch, Wed dinner, weekend brunch. Edit, pause, or expire any of them.' },
-          { glyph:'pause',    title:'Pause anytime',          body:'Going on holiday? Toggle PAUSED in one click. Resumes instantly when you flip it back.' },
-          { glyph:'phone',    title:'Real-time redemption',  body:'The moment the member slides to confirm, the redemption appears on your dashboard with a soft toast. Your server just acknowledges at the table — no codes, no scanner.' },
-          { glyph:'chat',     title:'Direct support',         body:'Real humans at hola@menuverso.com. Most replies within an hour during business hours.' }
-        ].map(f =>
-          el('div',{class:'group relative rounded-2xl bg-ink-900/60 border border-mv-500/15 p-6 hover:border-mv-500/35 hover:shadow-lg hover:shadow-mv-500/[0.06] hover:-translate-y-0.5 transition-all duration-300'},
-            el('div',{class:'flex items-center gap-3.5'},
-              el('div',{class:'h-12 w-12 rounded-xl bg-mv-500/10 ring-1 ring-mv-500/25 grid place-items-center text-mv-500 p-2.5', html: window.__partnerGlyphs[f.glyph]}),
-              el('h3',{class:'font-serif-display text-xl font-extrabold text-slate2-50 leading-tight'}, f.title)
-            ),
-            el('p',{class:'mt-4 text-sm text-slate2-300 leading-relaxed'}, f.body)
-          )
-        )
-      )
-    ),
-
-    // ====== "How it compares" — competitive truth table ======
-    // Plain-spoken row-by-row comparison vs the two platforms most BCN
-    // restaurants already know. Editorial restraint: no checkmark-fest, no
-    // "we win everything" garish chart. Just the levers others pull and we don't.
-    el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
-      el('div',{class:'text-center max-w-3xl mx-auto'},
-        el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
-          'How it compares',
-          el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
-        ),
-        el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95]'},
-          'The plain truth ', el('span',{class:'italic text-mv-500'},'vs. everyone else.')
-        ),
-        el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
-          'No charts that flatter us. Just the levers other platforms pull on your bill — and the ones we don\'t.'
-        )
-      ),
-      // Comparison table — Menuverso column highlighted
-      el('div',{class:'mt-14 md:mt-16 max-w-5xl mx-auto rounded-3xl bg-ink-900/70 border border-mv-500/20 overflow-hidden shadow-xl shadow-mv-500/[0.06]'},
-        el('div',{class:'overflow-x-auto'},
-          el('table',{class:'w-full text-sm md:text-[15px]'},
-            el('thead',{},
-              el('tr',{class:'border-b border-mv-500/20'},
-                el('th',{class:'p-4 md:p-6 text-left'}),
-                el('th',{class:'p-4 md:p-6 text-center bg-mv-500/[0.10] relative'},
-                  el('div',{class:'inline-flex h-8 w-8 mb-2 rounded-full bg-mv-500 items-center justify-center shadow-md shadow-mv-500/30'},
-                    el('span',{class:'font-serif-display italic font-extrabold text-white text-lg leading-none'},'m')
-                  ),
-                  el('div',{class:'font-serif-display italic text-xl md:text-2xl font-extrabold text-mv-500 leading-tight'},'Menuverso')
-                ),
-                el('th',{class:'p-4 md:p-6 text-center'},
-                  el('div',{class:'h-8'}),
-                  el('div',{class:'font-serif-display text-lg md:text-xl font-extrabold text-slate2-300 leading-tight'},'TheFork')
-                ),
-                el('th',{class:'p-4 md:p-6 text-center'},
-                  el('div',{class:'h-8'}),
-                  el('div',{class:'font-serif-display text-lg md:text-xl font-extrabold text-slate2-300 leading-tight'},'Groupon')
-                )
-              )
-            ),
-            el('tbody',{},
-              ...[
-                ['Commission per cover',     '0%',                    '~2 € per booking + ~7% commission', '30–50%'],
-                ['Setup fee',                'None',                  'None',           'Yes'],
-                ['Monthly subscription',     'None',                  'Optional tiers', 'None'],
-                ['You set the slots',        'Always',                'Limited',        'No'],
-                ['Pause the listing',        'One click',             'Email request',  'Contract-bound'],
-                ['Long-term contract',       'No',                    'Yes',            'Yes'],
-                ['Filters out deal-hunters', 'Yes · from €3.99/mo',   'No',             'No · it is deal-hunters'],
-                ['Cancel anytime',           'Yes',                   'Notice period',  'Notice period']
-              ].map((row,i) =>
-                el('tr',{class:'border-t border-mv-500/10 ' + (i%2 ? 'bg-ink-900/[0.4]' : '')},
-                  el('td',{class:'p-4 md:p-5 font-bold text-slate2-100'}, row[0]),
-                  el('td',{class:'p-4 md:p-5 text-center bg-mv-500/[0.06]'},
-                    el('span',{class:'font-serif-display italic text-base md:text-lg font-extrabold text-mv-500'}, row[1])
-                  ),
-                  el('td',{class:'p-4 md:p-5 text-center text-slate2-300'}, row[2]),
-                  el('td',{class:'p-4 md:p-5 text-center text-slate2-300'}, row[3])
-                )
-              )
-            )
-          )
-        )
-      ),
-      // Disclaimer — keeps us honest about source
-      el('p',{class:'mt-5 text-[11px] text-slate2-500 max-w-3xl mx-auto leading-relaxed text-center'},
-        'Numbers reflect publicly listed terms at the time of writing. Both competitors negotiate customised contracts that may differ — we\'ve quoted what their own websites tell prospective restaurants.'
       )
     ),
 
@@ -7190,7 +6837,68 @@ window.MV_TR_ES = {
   "Browse deals →": "Ver ofertas →",
   "Browse restaurants →": "Ver restaurantes →",
   "Demo in progress — restaurants shown are illustrative and not affiliated with menuverso": "Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso",
-  "Demo in progress — the restaurants shown are illustrative and not affiliated with menuverso.": "Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso."
+  "Demo in progress — the restaurants shown are illustrative and not affiliated with menuverso.": "Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso.",
+  "A note to restaurant owners": "Una nota para dueños de restaurante",
+  "Why we're building": "Por qué estamos construyendo",
+  "Menuverso.": "Menuverso.",
+  "\"Most deals platforms pitch you on volume. We're building the opposite.\"": "\"La mayoría de plataformas de ofertas te venden volumen. Nosotros construimos lo contrario.\"",
+  "Pay a cut of every cover, get a flood of price-sensitive diners, and hope to break even on drinks. That's the model. It works for the platform — for the restaurant, the math rarely does.": "Paga un porcentaje de cada cubierto, recibe una avalancha de comensales sensibles al precio, y reza por compensar con las bebidas. Ese es el modelo. Funciona para la plataforma — para el restaurante, los números rara vez cuadran.",
+  "Members pay from €3.99/month for the privilege of dining out at a curated set of Barcelona restaurants. That fee is our entire revenue. Your bill goes straight to you — we take": "Los miembros pagan desde 3,99 €/mes por el privilegio de salir a cenar en un grupo seleccionado de restaurantes de Barcelona. Esa cuota es todo nuestro ingreso. Tu cuenta va directa a ti — nos llevamos",
+  "zero commission": "cero comisión",
+  "on the food they eat.": "sobre lo que comen.",
+  "In return, you set the rules: which days, which slots, which seats. Pause for holidays in one click. We're onboarding the first venues now and we'd love yours to be one of them.": "A cambio, tú pones las reglas: qué días, qué turnos, cuántas mesas. Pausa por vacaciones con un clic. Estamos incorporando los primeros locales ahora mismo y nos encantaría que el tuyo fuera uno de ellos.",
+  "The Menuverso team": "El equipo de Menuverso",
+  "hola@menuverso.com →": "hola@menuverso.com →",
+  "Pricing": "Precios",
+  "No commission.": "Sin comisión.",
+  "No catch.": "Sin trampa.",
+  "/month": "/mes",
+  "Forever. The deal is your discount, not our fee.": "Para siempre. La oferta es tu descuento, no nuestra tarifa.",
+  "No setup fee": "Sin cuota de alta",
+  "No monthly subscription": "Sin suscripción mensual",
+  "0% commission per booking": "0% de comisión por reserva",
+  "No long-term contract": "Sin contrato a largo plazo",
+  "Cancel any time from your portal": "Cancela cuando quieras desde tu portal",
+  "Pause and resume listings instantly": "Pausa y reanuda los listados al instante",
+  "List your restaurant →": "Lista tu restaurante →",
+  "Open partner portal →": "Abrir portal de partner →",
+  "Sign out & list a restaurant →": "Cerrar sesión y listar un restaurante →",
+  "FAQ": "Preguntas frecuentes",
+  "Questions": "Preguntas",
+  "before you list": "antes de listar",
+  "So how does Menuverso make money if there's no commission?": "Entonces, ¿cómo gana dinero Menuverso si no hay comisión?",
+  "Members pay €3.99/month (billed annually) or €6.99/month (billed monthly). That subscription is our only revenue. We don't take a cut of your bill and we never will — it'd undermine the trust that gets restaurants to list here in the first place.": "Los miembros pagan 3,99 €/mes (facturación anual) o 6,99 €/mes (facturación mensual). Esa suscripción es nuestro único ingreso. No nos quedamos un porcentaje de tu cuenta y nunca lo haremos — destruiría la confianza que hace que los restaurantes se listen aquí en primer lugar.",
+  "What if I get too many bookings?": "¿Y si me llegan demasiadas reservas?",
+  "You control the slots. Each slot has a seat cap. Once it's full, members can't book it. You can pause your entire listing in one click — useful for holidays, private events, or when a server quits.": "Tú controlas los turnos. Cada turno tiene un límite de mesas. Una vez lleno, los miembros no pueden reservar. Puedes pausar todo tu listado con un clic — útil para vacaciones, eventos privados, o cuando se va un camarero.",
+  "Do I have to discount every dish?": "¿Tengo que descontar todos los platos?",
+  "Not unless you want to. You set the deal — could be 2x1 on mains only, drinks only, full menu, a flash dessert giveaway, percentage off the bill. Members see the terms before they slide to redeem.": "Solo si tú quieres. Tú decides la oferta — puede ser 2×1 solo en principales, solo bebidas, carta completa, un postre flash gratis, un porcentaje sobre la cuenta. Los miembros ven las condiciones antes de deslizar para canjear.",
+  "Can I exclude certain dishes (e.g. lobster, special menu)?": "¿Puedo excluir ciertos platos (p. ej. bogavante, menú degustación)?",
+  "Yes. In Profile → Deals, you write the terms. \"Excludes tasting menu\", \"Mains under €25\", whatever you like. The terms are shown to members before they book.": "Sí. En Perfil → Ofertas, tú escribes las condiciones. \"Excluye menú degustación\", \"Principales hasta 25 €\", lo que prefieras. Las condiciones se muestran a los miembros antes de reservar.",
+  "How does the staff know the redemption is real?": "¿Cómo sabe el personal que el canje es real?",
+  "Members slide-to-redeem at the table in front of your server, then show an animated verification screen — rotating venue token, live timestamp, shimmer pattern. Screenshots can't fake it. The same redemption pings your dashboard in real time as a secondary confirmation.": "Los miembros deslizan para canjear en la mesa delante del camarero, y luego enseñan una pantalla de verificación animada — token rotativo del local, marca de tiempo en vivo, brillo en movimiento. Las capturas de pantalla no lo pueden falsificar. El mismo canje hace ping en tu panel en tiempo real como confirmación secundaria.",
+  "Can I list multiple restaurants?": "¿Puedo listar varios restaurantes?",
+  "Yes — one partner account, multiple venues. Each venue has its own slots, hours, and dashboard. Get in touch and we'll set it up.": "Sí — una cuenta de partner, varios locales. Cada local tiene sus propios turnos, horarios y panel. Contáctanos y lo configuramos.",
+  "You're signed in as": "Has iniciado sesión como",
+  "an admin": "un admin",
+  "a member": "un miembro",
+  "To explore the partner side without overwriting your session, sign out first.": "Para explorar la zona de partners sin sobrescribir tu sesión, cierra sesión primero.",
+  "Your next": "Tu próximo",
+  "slow Tuesday": "martes flojo",
+  "starts filling tonight.": "empieza a llenarse esta noche.",
+  "Three minutes to list. One business day to approve. Zero risk to try.": "Tres minutos para listar. Un día hábil para aprobar. Cero riesgo al probar.",
+  "The redemption, in 30 seconds": "El canje, en 30 segundos",
+  "See how a": "Mira cómo se siente un",
+  "actually feels.": "de verdad.",
+  "redemption": "canje",
+  "No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves — pick up at any one with the scrubber.": "Sin códigos QR, sin códigos de personal, sin exportaciones de fin de día. Seis escenas que se reproducen solas — salta a cualquiera con la barra.",
+  "for restaurants": "para restaurantes",
+  "Sign out": "Cerrar sesión",
+  "Built for": "Hecho para",
+  "restaurant owners,": "dueños de restaurante,",
+  "not deal-hunters.": "no para cazadores de chollos.",
+  "Three reasons restaurants list with us — each one a different way our model isn't the same as the other guys'.": "Tres razones por las que los restaurantes se listan con nosotros — cada una una forma distinta de demostrar que nuestro modelo no es como los demás.",
+  "© 2026 Menuverso · Barcelona, Spain · All rights reserved": "© 2026 Menuverso · Barcelona, España · Todos los derechos reservados",
+  "Why partners join": "Por qué se unen los partners"
 };
 function autoTranslate(root) {
   if (MV_LANG !== 'es' || !root) return;
