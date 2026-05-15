@@ -6378,51 +6378,236 @@ function Admin() {
       );
     }
 
-    // Build an inline edit form for a venue. `isSeed = true` saves to
-    // store.seedOverrides[slug]; otherwise saves directly to the partner
-    // venue in store.partnerVenues. Editable fields differ slightly:
-    // seed venues only expose Name / Cuisine / Barrio / Price tier; partner
-    // venues additionally expose Address / Postcode / Website / Instagram.
+    // Build an inline edit form for a venue.
+    //   isSeed = true → saves to store.seedOverrides[slug] (override layer)
+    //   isSeed = false → saves directly to the partner venue object
+    //
+    // Form covers every admin-editable field across five sections:
+    //   1. Basics — Name / Cuisine / Barrio / Price tier / Rating / Reviews
+    //   2. Location — Address / Postcode / Lat / Lng (seeds get Lat/Lng only)
+    //   3. Contact — Website / Instagram / Phone (partner-only)
+    //   4. Hours & deal — opening hours line + deal terms (partner-only;
+    //      deal terms are normally partner-edited under approval flow but
+    //      admin can short-circuit here when needed)
+    //   5. Photos — full management: upload (compressImage handles size
+    //      guard + JPEG re-encode), reorder via ↑↓, set-as-cover, delete.
+    //      First photo is the cover everywhere a venue card renders.
+    //
+    // Admin direct-edits bypass the partner-side change-request approval
+    // flow — they're treated as authoritative. Use the Re-review button on
+    // the row above this form to send a partner back through the queue.
     function buildEditForm(venue, isSeed) {
       const current = isSeed
         ? { ...venue, ...((store.seedOverrides || {})[venue.slug] || {}) }
         : venue;
+
+      // Working draft — mutated as the user types/uploads, applied on Save.
+      const draft = {
+        name:      current.name      ?? '',
+        cuisine:   current.cuisine   ?? '',
+        barrio:    current.barrio    ?? '',
+        priceTier: current.priceTier ?? 2,
+        rating:    current.rating    ?? 4.5,
+        reviews:   current.reviews   ?? 0,
+        address:   current.address   ?? '',
+        postcode:  current.postcode  ?? '',
+        lat:       current.lat       ?? '',
+        lng:       current.lng       ?? '',
+        website:   current.website   ?? '',
+        instagram: current.instagram ?? '',
+        phone:     current.phone     ?? '',
+        hours:     current.hours     ?? '',
+        dealTerms: current.dealTerms ?? '',
+        photos:    [...(current.photos || [])]
+      };
+
       const form = document.createElement('div');
       form.setAttribute('data-edit-form', '1');
-      form.className = 'mt-4 pt-4 border-t border-slate2-50/10 grid sm:grid-cols-2 gap-3';
-      function input(name, label, val, type) {
+      form.className = 'mt-4 pt-4 border-t border-slate2-50/10 space-y-5';
+
+      // ----- helpers -----
+      function section(title, sub) {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = '<div class="text-[11px] uppercase tracking-widest font-extrabold text-mv-500">' + title + '</div>' +
+                         (sub ? '<div class="text-xs text-slate2-400 mt-0.5">' + sub + '</div>' : '');
+        wrap.className = 'mt-1';
+        return wrap;
+      }
+      function field(name, label, type, placeholder) {
         const wrap = document.createElement('label');
         wrap.className = 'block';
         wrap.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + label + '</div>';
-        const inp = document.createElement('input');
-        inp.type = type || 'text';
+        const inp = document.createElement(type === 'textarea' ? 'textarea' : 'input');
+        if (type !== 'textarea') inp.type = type || 'text';
         inp.name = name;
-        inp.value = val ?? '';
+        inp.value = draft[name] ?? '';
+        if (placeholder) inp.placeholder = placeholder;
         inp.className = 'w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+        if (type === 'textarea') { inp.rows = 3; inp.className += ' resize-y'; }
+        inp.oninput = () => {
+          const v = inp.value;
+          draft[name] = (type === 'number') ? (v === '' ? '' : Number(v)) : v;
+        };
         wrap.appendChild(inp);
         return wrap;
       }
-      form.appendChild(input('name', 'Name', current.name));
-      form.appendChild(input('cuisine', 'Cuisine', current.cuisine));
-      form.appendChild(input('barrio', 'Barrio', current.barrio));
-      form.appendChild(input('priceTier', 'Price tier (1–4)', current.priceTier ?? 2, 'number'));
-      if (!isSeed) {
-        form.appendChild(input('address', 'Address', current.address));
-        form.appendChild(input('postcode', 'Postcode', current.postcode));
-        form.appendChild(input('website', 'Website', current.website));
-        form.appendChild(input('instagram', 'Instagram', current.instagram));
+      function row2(...kids) {
+        const g = document.createElement('div');
+        g.className = 'grid sm:grid-cols-2 gap-3';
+        kids.forEach(k => k && g.appendChild(k));
+        return g;
       }
+
+      // ----- 1. BASICS -----
+      form.appendChild(section('Basics'));
+      form.appendChild(row2(
+        field('name', 'Name'),
+        field('cuisine', 'Cuisine', 'text', 'e.g. Catalan · Tapas')
+      ));
+      form.appendChild(row2(
+        field('barrio', 'Barrio', 'text', 'e.g. Eixample'),
+        field('priceTier', 'Price tier (1–4)', 'number')
+      ));
+      form.appendChild(row2(
+        field('rating', 'Rating (0–5)', 'number'),
+        field('reviews', 'Reviews count', 'number')
+      ));
+
+      // ----- 2. LOCATION -----
+      form.appendChild(section('Location'));
+      if (!isSeed) {
+        form.appendChild(row2(
+          field('address', 'Street address'),
+          field('postcode', 'Postcode')
+        ));
+      }
+      form.appendChild(row2(
+        field('lat', 'Latitude', 'number', '41.3789'),
+        field('lng', 'Longitude', 'number', '2.1729')
+      ));
+
+      // ----- 3. CONTACT (partner-only) -----
+      if (!isSeed) {
+        form.appendChild(section('Contact'));
+        form.appendChild(row2(
+          field('website', 'Website', 'text', 'https://…'),
+          field('instagram', 'Instagram', 'text', '@handle')
+        ));
+        form.appendChild(row2(
+          field('phone', 'Phone'),
+          field('hours', 'Hours', 'text', 'Mon–Sun 13:00–16:00')
+        ));
+      }
+
+      // ----- 4. DEAL TERMS (partner-only) -----
+      if (!isSeed) {
+        form.appendChild(section('Deal terms', 'Admin edits propagate to members immediately — they do NOT go through partner-approval.'));
+        form.appendChild(field('dealTerms', '', 'textarea'));
+      }
+
+      // ----- 5. PHOTOS -----
+      form.appendChild(section('Photos', 'First photo is the cover. Up to 8 photos. JPG/PNG, ≤ 8 MB each — auto-compressed on upload.'));
+      const photosWrap = document.createElement('div');
+      photosWrap.className = 'space-y-3';
+      form.appendChild(photosWrap);
+
+      function renderPhotos() {
+        photosWrap.innerHTML = '';
+        if (draft.photos.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'rounded-xl bg-slate2-50/[0.02] border border-dashed border-slate2-50/15 px-4 py-6 text-center text-sm text-slate2-400 italic';
+          empty.textContent = 'No photos yet';
+          photosWrap.appendChild(empty);
+        } else {
+          const grid = document.createElement('div');
+          grid.className = 'grid grid-cols-3 sm:grid-cols-4 gap-2';
+          draft.photos.forEach((src, i) => {
+            const tile = document.createElement('div');
+            tile.className = 'relative rounded-xl overflow-hidden border border-slate2-50/15 bg-slate2-50/[0.03]';
+            tile.style.aspectRatio = '1 / 1';
+            tile.innerHTML =
+              '<img src="' + src + '" class="w-full h-full object-cover" alt="venue photo ' + (i+1) + '"/>' +
+              (i === 0 ? '<span class="absolute top-1.5 left-1.5 rounded-full bg-mv-500 text-white text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 shadow-md">Cover</span>' : '');
+            // Action row at the bottom of each tile
+            const actions = document.createElement('div');
+            actions.className = 'absolute bottom-1 right-1 flex gap-0.5';
+            function btn(label, title, fn, classes) {
+              const b = document.createElement('button');
+              b.type = 'button';
+              b.className = 'rounded-full grid place-items-center text-[11px] font-extrabold cursor-pointer ' + classes + ' w-6 h-6';
+              b.textContent = label;
+              b.title = title;
+              b.onclick = fn;
+              return b;
+            }
+            if (i > 0) actions.appendChild(btn('↑', 'Move up', () => { const t = draft.photos[i-1]; draft.photos[i-1] = draft.photos[i]; draft.photos[i] = t; renderPhotos(); }, 'bg-slate2-50/95 text-ink-900'));
+            if (i < draft.photos.length - 1) actions.appendChild(btn('↓', 'Move down', () => { const t = draft.photos[i+1]; draft.photos[i+1] = draft.photos[i]; draft.photos[i] = t; renderPhotos(); }, 'bg-slate2-50/95 text-ink-900'));
+            if (i > 0) actions.appendChild(btn('★', 'Set as cover', () => { const c = draft.photos[i]; draft.photos.splice(i, 1); draft.photos.unshift(c); renderPhotos(); }, 'bg-mv-500 text-white'));
+            actions.appendChild(btn('×', 'Delete', () => { draft.photos.splice(i, 1); renderPhotos(); }, 'bg-red-500 text-white'));
+            tile.appendChild(actions);
+            grid.appendChild(tile);
+          });
+          photosWrap.appendChild(grid);
+        }
+        // File input (always present at the bottom of the photos section)
+        const upload = document.createElement('label');
+        upload.className = 'block cursor-pointer';
+        const dz = document.createElement('div');
+        dz.className = 'rounded-2xl border-2 border-dashed border-slate2-50/15 hover:border-mv-500/50 transition px-4 py-4 text-center text-sm font-bold text-slate2-300';
+        dz.innerHTML = '+ Add photo(s) <span class="text-xs text-slate2-500 font-normal ml-1">(JPG/PNG, ≤ 8 MB, auto-compressed)</span>';
+        upload.appendChild(dz);
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.multiple = true;
+        fileInput.className = 'hidden';
+        fileInput.onchange = async (ev) => {
+          const files = Array.from(ev.target.files || []);
+          for (const f of files) {
+            if (draft.photos.length >= 8) { toast('Max 8 photos'); break; }
+            try {
+              const compressed = await compressImage(f, 1600, 0.85);
+              draft.photos.push(compressed);
+            } catch (err) {
+              toast(err.message || 'Photo upload failed');
+            }
+          }
+          renderPhotos();
+          ev.target.value = '';
+        };
+        upload.appendChild(fileInput);
+        photosWrap.appendChild(upload);
+      }
+      renderPhotos();
+
+      // ----- ACTIONS -----
       const actions = document.createElement('div');
-      actions.className = 'sm:col-span-2 flex gap-2 justify-end mt-2';
+      actions.className = 'flex gap-2 justify-end pt-4 border-t border-slate2-50/10';
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'rounded-full bg-slate2-50/10 border border-slate2-50/15 text-slate2-50 px-5 py-2 text-xs font-bold cursor-pointer hover:bg-slate2-50/15';
+      cancel.textContent = 'Cancel';
+      cancel.onclick = () => form.remove();
       const save = document.createElement('button');
       save.type = 'button';
-      save.className = 'rounded-full bg-mv-500 hover:bg-mv-600 text-white px-4 py-2 text-xs font-extrabold cursor-pointer';
+      save.className = 'rounded-full bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-xs font-extrabold cursor-pointer shadow-lg shadow-mv-500/20';
       save.textContent = 'Save changes';
       save.onclick = () => {
+        // Diff draft against current. Only persist actually-changed fields,
+        // including photos which are compared by JSON.
         const changes = {};
-        form.querySelectorAll('input').forEach(inp => {
-          const v = inp.type === 'number' ? Number(inp.value) : inp.value.trim();
-          if (v !== '' && v !== (current[inp.name] ?? '')) changes[inp.name] = v;
+        Object.keys(draft).forEach(k => {
+          const oldVal = current[k];
+          const newVal = draft[k];
+          if (k === 'photos') {
+            const a = oldVal || [];
+            if (JSON.stringify(a) !== JSON.stringify(newVal)) changes.photos = newVal;
+            return;
+          }
+          // Empty string + undefined are equivalent — don't write empty
+          // overrides on top of seeds where the field was never set.
+          if (newVal === '' && (oldVal === undefined || oldVal === null || oldVal === '')) return;
+          if (newVal !== oldVal) changes[k] = newVal;
         });
         if (Object.keys(changes).length === 0) { toast('No changes'); return; }
         if (isSeed) {
@@ -6432,17 +6617,13 @@ function Admin() {
           Object.assign(venue, changes);
         }
         saveStore();
-        toast('Saved · ' + (changes.name || venue.name));
+        toast('Saved · ' + (draft.name || venue.name));
         render();
       };
-      const cancel = document.createElement('button');
-      cancel.type = 'button';
-      cancel.className = 'rounded-full bg-slate2-50/10 border border-slate2-50/15 text-slate2-50 px-4 py-2 text-xs font-bold cursor-pointer';
-      cancel.textContent = 'Cancel';
-      cancel.onclick = () => form.remove();
       actions.appendChild(cancel);
       actions.appendChild(save);
       form.appendChild(actions);
+
       return form;
     }
 
