@@ -520,7 +520,7 @@ saveStore();
 // Cervecería is owned by the seeded demo partner (see store.partnerVenues).
 // The rest below are static "platform" venues. Each row: [name, barrio, cuisine, priceTier, rating, reviews, lat, lng].
 const VENUE_SEEDS = [
-  ['Bar Cañete','El Raval','Catalan · Tapas',3,4.6,5460, 41.3789, 2.1729],
+  ['Bar Solete','El Raval','Catalan · Tapas',3,4.6,5460, 41.3789, 2.1729],
   ['Disfrutar','Eixample','Modern · Tasting',4,4.8,3200, 41.3870, 2.1517],
   ['Bodega Biarritz','El Born','Tapas',2,4.7,1842, 41.3837, 2.1827],
   ['Quimet & Quimet','Poble Sec','Tapas · Wine',3,4.5,6710, 41.3737, 2.1670],
@@ -590,12 +590,18 @@ function toMemberShape(pv) {
   };
 }
 // Merged venue list — platform seeds + every LIVE partner venue. Member-facing.
+// Admin-editable: any seed venue overrides stored in store.seedOverrides[slug]
+// are merged on top of the hardcoded VENUES so admin can rename/recuisine/
+// reshelf placeholder venues without touching source code. The shape of an
+// override is a partial object — only the fields the admin actually changed.
 function getAllVenues() {
   // G3: REMOVED venues never surface to members. PAUSED also stays out of
   // Discover/Map; they resolve through findVenueBySlug only (for saved
   // venues + direct links).
   const partnerLive = (store.partnerVenues || []).filter(pv => pv.status === 'LIVE').map(toMemberShape);
-  return [...partnerLive, ...VENUES];
+  const overrides = store.seedOverrides || {};
+  const seeds = VENUES.map(v => overrides[v.slug] ? { ...v, ...overrides[v.slug] } : v);
+  return [...partnerLive, ...seeds];
 }
 function findVenueBySlug(slug) {
   // Direct-link path: a member who has a saved venue, an active booking, or
@@ -1945,7 +1951,7 @@ function Landing() {
         )
       ),
       el('div',{class:'flex flex-col items-center'},
-        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><defs><clipPath id="mvHowHero2Clip"><rect x="20" y="76" width="240" height="170" rx="6"/></clipPath></defs><g clip-path="url(#mvHowHero2Clip)"><rect x="20" y="76" width="240" height="170" fill="#F4ECDD"/><image href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" xlink:href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" x="20" y="76" width="240" height="170" preserveAspectRatio="xMidYMid slice"/></g><rect x="20" y="76" width="240" height="170" rx="6" fill="none" stroke="#1C0F06" stroke-opacity="0.06"/><text x="32" y="278" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="22" font-weight="800" fill="#1C0F06">Bar Cañete</text><text x="32" y="298" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#82765E">Catalan tapas · Eixample</text><g transform="translate(32 312)" font-family="-apple-system, sans-serif" font-size="10" font-weight="700"><text fill="#FBBF24">★</text><text x="10" fill="#1C0F06">4.9</text><text x="32" fill="#82765E">·</text><text x="42" fill="#1C0F06">€€€</text><text x="68" fill="#82765E">·</text><text x="78" fill="#10B981">Open</text></g><g transform="translate(20 340)"><rect width="240" height="68" rx="12" fill="#DC4A26" fill-opacity="0.10" stroke="#DC4A26" stroke-opacity="0.45" stroke-width="1.4"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#DC4A26">STANDING DEAL</text><text x="14" y="40" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="15" font-weight="800" fill="#1C0F06">2×1 full menu</text><text x="14" y="56" font-family="-apple-system, sans-serif" font-size="9" fill="#82765E">Tue–Thu · Lunch + dinner · 6 seats</text><g transform="translate(186 22)"><rect width="42" height="22" rx="11" fill="#DC4A26"/><text x="21" y="15" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" fill="white" text-anchor="middle">PICK</text></g></g><g transform="translate(20 416)"><rect width="240" height="48" rx="12" fill="#FBBF24" fill-opacity="0.16" stroke="#FBBF24" stroke-opacity="0.6" stroke-width="1.2"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#B73A1A">FLASH · TODAY</text><text x="14" y="38" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#1C0F06">Free dessert with any main</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FAF6EF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="22" text-anchor="middle" fill="#DC4A26">Discover</text><text x="220" y="22" text-anchor="middle" fill="#82765E">Bookings</text></g></g></svg>'}),
+        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><defs><clipPath id="mvHowHero2Clip"><rect x="20" y="76" width="240" height="170" rx="6"/></clipPath></defs><g clip-path="url(#mvHowHero2Clip)"><rect x="20" y="76" width="240" height="170" fill="#F4ECDD"/><image href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" xlink:href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" x="20" y="76" width="240" height="170" preserveAspectRatio="xMidYMid slice"/></g><rect x="20" y="76" width="240" height="170" rx="6" fill="none" stroke="#1C0F06" stroke-opacity="0.06"/><text x="32" y="278" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="22" font-weight="800" fill="#1C0F06">Bar Solete</text><text x="32" y="298" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#82765E">Catalan tapas · Eixample</text><g transform="translate(32 312)" font-family="-apple-system, sans-serif" font-size="10" font-weight="700"><text fill="#FBBF24">★</text><text x="10" fill="#1C0F06">4.9</text><text x="32" fill="#82765E">·</text><text x="42" fill="#1C0F06">€€€</text><text x="68" fill="#82765E">·</text><text x="78" fill="#10B981">Open</text></g><g transform="translate(20 340)"><rect width="240" height="68" rx="12" fill="#DC4A26" fill-opacity="0.10" stroke="#DC4A26" stroke-opacity="0.45" stroke-width="1.4"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#DC4A26">STANDING DEAL</text><text x="14" y="40" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="15" font-weight="800" fill="#1C0F06">2×1 full menu</text><text x="14" y="56" font-family="-apple-system, sans-serif" font-size="9" fill="#82765E">Tue–Thu · Lunch + dinner · 6 seats</text><g transform="translate(186 22)"><rect width="42" height="22" rx="11" fill="#DC4A26"/><text x="21" y="15" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" fill="white" text-anchor="middle">PICK</text></g></g><g transform="translate(20 416)"><rect width="240" height="48" rx="12" fill="#FBBF24" fill-opacity="0.16" stroke="#FBBF24" stroke-opacity="0.6" stroke-width="1.2"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#B73A1A">FLASH · TODAY</text><text x="14" y="38" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#1C0F06">Free dessert with any main</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FAF6EF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="22" text-anchor="middle" fill="#DC4A26">Discover</text><text x="220" y="22" text-anchor="middle" fill="#82765E">Bookings</text></g></g></svg>'}),
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'2'),
@@ -1955,7 +1961,7 @@ function Landing() {
         )
       ),
       el('div',{class:'flex flex-col items-center'},
-        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="140" y="98" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#82765E" text-anchor="middle">REDEEMING AT</text><text x="140" y="132" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="26" font-weight="800" fill="#1C0F06" text-anchor="middle">Bar Cañete</text><text x="140" y="156" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#DC4A26" text-anchor="middle">2×1 on the full menu</text><g transform="translate(28 200)"><text x="112" y="-14" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#82765E" text-anchor="middle">SLIDE TO REDEEM</text><rect x="0" y="0" width="224" height="56" rx="28" fill="#F4ECDD" stroke="#DC4A26" stroke-opacity="0.5" stroke-width="2"/><defs><linearGradient id="slidegrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#DC4A26"/><stop offset="100%" stop-color="#F08461"/></linearGradient><clipPath id="slideclip"><rect x="0" y="0" width="224" height="56" rx="28"/></clipPath></defs><g clip-path="url(#slideclip)"><rect x="0" y="0" width="60" height="56" rx="28" fill="url(#slidegrad)"/></g><text x="124" y="34" font-family="-apple-system, sans-serif" font-size="12" font-weight="800" letter-spacing="2.5" fill="#3D2818" text-anchor="middle">SLIDE →</text><g><circle cx="28" cy="28" r="22" fill="white" stroke="#DC4A26" stroke-opacity="0.5" stroke-width="1.5"/><path d="M 18 28 L 36 28 M 30 22 L 36 28 L 30 34" stroke="#DC4A26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g><g transform="translate(28 300)"><rect width="224" height="118" rx="14" fill="#DC4A26" fill-opacity="0.06" stroke="#DC4A26" stroke-opacity="0.25"/><text x="112" y="26" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2" fill="#3D2818" text-anchor="middle">DO THIS AT THE TABLE</text><text x="20" y="56" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">1. Tell your server.</text><text x="20" y="78" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">2. Slide the bar above.</text><text x="20" y="100" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">3. Show the screen.</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FAF6EF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="22" text-anchor="middle" fill="#82765E">Discover</text><text x="220" y="22" text-anchor="middle" fill="#DC4A26">Bookings</text></g></g></svg>'}),
+        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="140" y="98" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#82765E" text-anchor="middle">REDEEMING AT</text><text x="140" y="132" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="26" font-weight="800" fill="#1C0F06" text-anchor="middle">Bar Solete</text><text x="140" y="156" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#DC4A26" text-anchor="middle">2×1 on the full menu</text><g transform="translate(28 200)"><text x="112" y="-14" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#82765E" text-anchor="middle">SLIDE TO REDEEM</text><rect x="0" y="0" width="224" height="56" rx="28" fill="#F4ECDD" stroke="#DC4A26" stroke-opacity="0.5" stroke-width="2"/><defs><linearGradient id="slidegrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#DC4A26"/><stop offset="100%" stop-color="#F08461"/></linearGradient><clipPath id="slideclip"><rect x="0" y="0" width="224" height="56" rx="28"/></clipPath></defs><g clip-path="url(#slideclip)"><rect x="0" y="0" width="60" height="56" rx="28" fill="url(#slidegrad)"/></g><text x="124" y="34" font-family="-apple-system, sans-serif" font-size="12" font-weight="800" letter-spacing="2.5" fill="#3D2818" text-anchor="middle">SLIDE →</text><g><circle cx="28" cy="28" r="22" fill="white" stroke="#DC4A26" stroke-opacity="0.5" stroke-width="1.5"/><path d="M 18 28 L 36 28 M 30 22 L 36 28 L 30 34" stroke="#DC4A26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g><g transform="translate(28 300)"><rect width="224" height="118" rx="14" fill="#DC4A26" fill-opacity="0.06" stroke="#DC4A26" stroke-opacity="0.25"/><text x="112" y="26" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2" fill="#3D2818" text-anchor="middle">DO THIS AT THE TABLE</text><text x="20" y="56" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">1. Tell your server.</text><text x="20" y="78" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">2. Slide the bar above.</text><text x="20" y="100" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">3. Show the screen.</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FAF6EF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="22" text-anchor="middle" fill="#82765E">Discover</text><text x="220" y="22" text-anchor="middle" fill="#DC4A26">Bookings</text></g></g></svg>'}),
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'3'),
@@ -6296,6 +6302,15 @@ function Admin() {
                     pv.status='PENDING_APPROVAL'; pv.submittedAt=Date.now(); pv.approvedAt=null; saveStore(); toast('Sent back for review'); render();
                   });
                 }},'Re-review'),
+                // Inline Edit — opens a small form below the venue row.
+                // Saves directly to store.partnerVenues (no admin-approval
+                // gate; admins bypass the partner-side change-request flow).
+                el('button',{class:'rounded-full bg-slate2-50/10 border border-slate2-50/15 px-3 py-1 text-xs font-bold cursor-pointer', onclick:(ev)=>{
+                  const card = ev.target.closest('.rounded-2xl');
+                  const existing = card.querySelector('[data-edit-form]');
+                  if (existing) { existing.remove(); return; }
+                  card.appendChild(buildEditForm(pv, false));
+                }},'Edit'),
                 el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:pv.slug})},'View'),
                 el('button',{class:'rounded-full bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
                   confirmDo('Permanently DELETE ' + pv.name + '? This removes the venue, all its bookings, redemptions, and reviews. Owner account is kept. This cannot be undone.', ()=>{
@@ -6305,9 +6320,132 @@ function Admin() {
               )
             )
           );
-        })
+        }),
+
+        // ===== Catalog (seed venues) — placeholder restaurants hardcoded in
+        // VENUES that appear on Discover/Map until real partners onboard.
+        // Admin-editable via store.seedOverrides — changes persist in
+        // localStorage and are applied at read time by getAllVenues(). =====
+        el('div',{class:'mt-10 pt-6 border-t border-slate2-50/10'},
+          el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+            el('div',{},
+              el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-extrabold'},'Catalog · seed venues'),
+              el('h3',{class:'mt-1 font-bold text-base text-slate2-50'},
+                'Placeholder restaurants', el('span',{class:'text-slate2-400 font-normal'}, ' · used to populate Discover before real partners onboard')
+              )
+            ),
+            // Reset overrides — wipes any admin edits applied on top of the
+            // hardcoded seed catalog. Restores the source-of-truth names.
+            Object.keys(store.seedOverrides || {}).length > 0 && el('button',{
+              class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1.5 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
+              onclick:()=>{ confirmDo('Reset all catalog overrides? This restores every seed venue to its source-of-truth values.', ()=>{
+                store.seedOverrides = {}; saveStore(); toast('Catalog overrides cleared'); render();
+              }); }
+            }, 'Reset all overrides (' + Object.keys(store.seedOverrides).length + ')')
+          ),
+          el('div',{class:'mt-4 space-y-3'},
+            ...VENUES.map(v => {
+              const ovr = (store.seedOverrides || {})[v.slug] || {};
+              const live = { ...v, ...ovr };
+              const isEdited = Object.keys(ovr).length > 0;
+              return el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-4 relative'},
+                el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
+                  el('div',{class:'flex-1 min-w-[200px]'},
+                    el('div',{class:'flex items-center gap-2 flex-wrap'},
+                      el('div',{class:'font-bold text-base'}, live.name),
+                      isEdited && el('span',{class:'rounded-full bg-mv-500/20 text-mv-400 border border-mv-500/40 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Edited'),
+                      el('span',{class:'rounded-full bg-slate2-50/5 text-slate2-400 border border-slate2-50/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Seed')
+                    ),
+                    el('div',{class:'text-xs text-slate2-400 mt-1'}, (live.barrio || '—'), ' · ', (live.cuisine || '—'), ' · ', '€'.repeat(Math.max(1, Math.min(4, live.priceTier ?? 2))))
+                  ),
+                  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
+                    el('button',{class:'rounded-full bg-slate2-50/10 border border-slate2-50/15 px-3 py-1 text-xs font-bold cursor-pointer', onclick:(ev)=>{
+                      const card = ev.target.closest('.rounded-2xl');
+                      const existing = card.querySelector('[data-edit-form]');
+                      if (existing) { existing.remove(); return; }
+                      card.appendChild(buildEditForm(v, true));
+                    }},'Edit'),
+                    isEdited && el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+                      delete store.seedOverrides[v.slug]; saveStore(); toast('Reverted ' + v.name); render();
+                    }}, 'Revert'),
+                    el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:v.slug})},'View')
+                  )
+                )
+              );
+            })
+          )
+        )
       );
     }
+
+    // Build an inline edit form for a venue. `isSeed = true` saves to
+    // store.seedOverrides[slug]; otherwise saves directly to the partner
+    // venue in store.partnerVenues. Editable fields differ slightly:
+    // seed venues only expose Name / Cuisine / Barrio / Price tier; partner
+    // venues additionally expose Address / Postcode / Website / Instagram.
+    function buildEditForm(venue, isSeed) {
+      const current = isSeed
+        ? { ...venue, ...((store.seedOverrides || {})[venue.slug] || {}) }
+        : venue;
+      const form = document.createElement('div');
+      form.setAttribute('data-edit-form', '1');
+      form.className = 'mt-4 pt-4 border-t border-slate2-50/10 grid sm:grid-cols-2 gap-3';
+      function input(name, label, val, type) {
+        const wrap = document.createElement('label');
+        wrap.className = 'block';
+        wrap.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + label + '</div>';
+        const inp = document.createElement('input');
+        inp.type = type || 'text';
+        inp.name = name;
+        inp.value = val ?? '';
+        inp.className = 'w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+        wrap.appendChild(inp);
+        return wrap;
+      }
+      form.appendChild(input('name', 'Name', current.name));
+      form.appendChild(input('cuisine', 'Cuisine', current.cuisine));
+      form.appendChild(input('barrio', 'Barrio', current.barrio));
+      form.appendChild(input('priceTier', 'Price tier (1–4)', current.priceTier ?? 2, 'number'));
+      if (!isSeed) {
+        form.appendChild(input('address', 'Address', current.address));
+        form.appendChild(input('postcode', 'Postcode', current.postcode));
+        form.appendChild(input('website', 'Website', current.website));
+        form.appendChild(input('instagram', 'Instagram', current.instagram));
+      }
+      const actions = document.createElement('div');
+      actions.className = 'sm:col-span-2 flex gap-2 justify-end mt-2';
+      const save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'rounded-full bg-mv-500 hover:bg-mv-600 text-white px-4 py-2 text-xs font-extrabold cursor-pointer';
+      save.textContent = 'Save changes';
+      save.onclick = () => {
+        const changes = {};
+        form.querySelectorAll('input').forEach(inp => {
+          const v = inp.type === 'number' ? Number(inp.value) : inp.value.trim();
+          if (v !== '' && v !== (current[inp.name] ?? '')) changes[inp.name] = v;
+        });
+        if (Object.keys(changes).length === 0) { toast('No changes'); return; }
+        if (isSeed) {
+          store.seedOverrides = store.seedOverrides || {};
+          store.seedOverrides[venue.slug] = { ...(store.seedOverrides[venue.slug] || {}), ...changes };
+        } else {
+          Object.assign(venue, changes);
+        }
+        saveStore();
+        toast('Saved · ' + (changes.name || venue.name));
+        render();
+      };
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'rounded-full bg-slate2-50/10 border border-slate2-50/15 text-slate2-50 px-4 py-2 text-xs font-bold cursor-pointer';
+      cancel.textContent = 'Cancel';
+      cancel.onclick = () => form.remove();
+      actions.appendChild(cancel);
+      actions.appendChild(save);
+      form.appendChild(actions);
+      return form;
+    }
+
     paintPartners();
     return wrap;
   }
