@@ -511,6 +511,11 @@ if (!Array.isArray(store.changeRequests)) store.changeRequests = [];
 if (!Array.isArray(store.tncVersions) || store.tncVersions.length === 0) {
   store.tncVersions = [{ version: TNC_VERSION, publishedAt: Date.now(), body: TNC_BODY }];
 }
+// Admin tooling (audit log / notes / partner messages) — initialised on first
+// load so the new admin tabs can append without null-checks everywhere.
+if (!Array.isArray(store.auditLog)) store.auditLog = [];
+if (!store.adminNotes || typeof store.adminNotes !== 'object') store.adminNotes = {};
+if (!store.partnerMessages || typeof store.partnerMessages !== 'object') store.partnerMessages = {};
 
 saveStore();
 
@@ -584,6 +589,14 @@ function toMemberShape(pv) {
     // img is the partner's real uploaded photo if any; otherwise null and
     // VenueArt will render an illustrated hero.
     img: (pv.photos && pv.photos[0]) || null,
+    // Pass-through the four photo arrays so the member-facing venue page
+    // can render Food / Venue / Menu strips when the partner has uploaded
+    // categorized galleries. `photos` is the main/cover gallery; the others
+    // are surface-specific.
+    photos:      pv.photos      || [],
+    foodPhotos:  pv.foodPhotos  || [],
+    venuePhotos: pv.venuePhotos || [],
+    menuPhotos:  pv.menuPhotos  || [],
     times: times.length ? times : ['Lunch · 13:00-15:30','Dinner · 19:30-22:00'],
     _kind: 'partner',
     _pv: pv
@@ -613,6 +626,48 @@ function findVenueBySlug(slug) {
   if (live) return live;
   const paused = (store.partnerVenues || []).find(pv => pv.slug === slug && (pv.status === 'PAUSED' || pv.status === 'LIVE'));
   return paused ? toMemberShape(paused) : null;
+}
+
+// ----------------------------------------------------------------------
+// Audit log (E1+E2) — append-only record of admin-side mutations against a
+// venue. Existing handlers can opt-in by calling logAudit(...) — see TODO
+// list in the source for the recommended hooks (Approve / Reject /
+// Pause / Resume / Force-removal / Force-delete / seedOverride save /
+// partner-edit approve / admin manual override-redeem).
+//
+// Shape: { id, ts, adminId, venueSlug, action, before, after, reason }
+// before/after are snapshots (plain objects); pass null when not relevant
+// (e.g. for "approved" we only really need `after`). The Audit tab uses
+// `before` to populate its "Revert to this state" button.
+// ----------------------------------------------------------------------
+function logAudit(action, venueSlug, before, after, reason) {
+  try {
+    if (!Array.isArray(store.auditLog)) store.auditLog = [];
+    const u = (typeof currentUser === 'function') ? currentUser() : null;
+    store.auditLog.unshift({
+      id: 'au_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6),
+      ts: Date.now(),
+      adminId: u ? u.id : null,
+      venueSlug: venueSlug || null,
+      action: action || 'unknown',
+      // Deep-clone so later in-place edits don't mutate the audit record.
+      before: before == null ? null : JSON.parse(JSON.stringify(before)),
+      after:  after  == null ? null : JSON.parse(JSON.stringify(after)),
+      reason: reason || null
+    });
+    // Cap the log so localStorage doesn't blow over time. 2000 entries is
+    // plenty for the demo and an order of magnitude above the visible cap.
+    if (store.auditLog.length > 2000) store.auditLog.length = 2000;
+    saveStore();
+  } catch (e) { /* never let audit failures break the parent operation */ }
+}
+
+// How many admin notes have been written about this venue? Used by the
+// Notes tab (and any partner/admin UI that wants a small badge later).
+function venueNoteCount(slug) {
+  if (!store.adminNotes || !slug) return 0;
+  const arr = store.adminNotes[slug];
+  return Array.isArray(arr) ? arr.length : 0;
 }
 
 // G2: dual-state deal model.
@@ -1228,6 +1283,19 @@ window.MV_T = {
     'nav.join': 'Únete',
     'nav.openApp': 'Abrir la app →',
     'hero.eyebrow': 'Próximamente en Barcelona · Verano 2026',
+    // ----- Pre-launch waiting-list signup -----
+    'waitlist.eyebrow':       'Próximamente · plazas limitadas',
+    'waitlist.title':         'Apúntate a la lista de espera',
+    'waitlist.body':          'Cuando abramos en Barcelona, los miembros de la lista entran primero. Sin spam, sólo el aviso de lanzamiento.',
+    'waitlist.placeholder':   'tu@email.com',
+    'waitlist.cta':           'Unirme a la lista',
+    'waitlist.submitting':    'Apuntándote…',
+    'waitlist.success.title': 'Estás dentro.',
+    'waitlist.success.body':  'Te avisaremos cuando abramos. Nada más, te lo prometemos.',
+    'waitlist.error.invalid': 'Introduce un email válido.',
+    'waitlist.error.server':  'No hemos podido apuntarte ahora mismo. Inténtalo de nuevo en un momento.',
+    'waitlist.error.network': 'Sin conexión. Inténtalo de nuevo cuando vuelvas a tener red.',
+    'waitlist.fineprint':     'Un único email cuando abramos. Cancelable con un clic.',
     'hero.line1': 'Disfruta de lo mejor.',
     'hero.line2': 'Ahorra en el resto.',
     'hero.subhead.lead': 'Tu ciudad está llena de sabores increíbles y rincones únicos que aún no conoces. ',
@@ -1327,6 +1395,19 @@ window.MV_T = {
     'nav.join': 'Join',
     'nav.openApp': 'Open the app →',
     'hero.eyebrow': 'Launching in Barcelona · Summer 2026',
+    // ----- Pre-launch waiting-list signup -----
+    'waitlist.eyebrow':       'Launching soon · limited seats',
+    'waitlist.title':         'Join the waiting list',
+    'waitlist.body':          'When we open in Barcelona, the list goes in first. No spam — just the launch notice.',
+    'waitlist.placeholder':   'you@email.com',
+    'waitlist.cta':           'Join the list',
+    'waitlist.submitting':    'Adding you…',
+    'waitlist.success.title': 'You’re in.',
+    'waitlist.success.body':  'We’ll email you the moment we open. Nothing else, we promise.',
+    'waitlist.error.invalid': 'Please enter a valid email.',
+    'waitlist.error.server':  'Couldn’t add you right now. Please try again in a moment.',
+    'waitlist.error.network': 'You’re offline. Try again when you’re back online.',
+    'waitlist.fineprint':     'One email when we open. Unsubscribe in one click.',
     'hero.line1': 'Enjoy the Best.',
     'hero.line2': 'Save the Rest.',
     'hero.subhead.lead': 'Your city is packed with incredible flavors and unique locations you haven\u0027t even met yet. ',
@@ -2142,6 +2223,94 @@ function Landing() {
       ) // close membership-card outer div
       ) // close the .relative mx-auto max-w-3xl wrapper
     ), // close section
+    // ====== Waiting-list signup ============================================
+    // Pre-launch email capture. Posts to Supabase REST API (table:
+    // Launch-waitlist, column: email). Inline success/error states; no
+    // page-reload. The publishable key is a public anon key — safe to ship
+    // client-side as long as the table's RLS allows anonymous inserts and
+    // restricts reads (which Supabase does by default for `anon`).
+    el('section',{class:'relative overflow-hidden bg-ink-950'},
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #DC4A26 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'relative mx-auto max-w-3xl px-4 py-20 md:py-24 text-center'},
+        el('span',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 ring-1 ring-mv-500/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'},
+          el('span',{class:'h-1.5 w-1.5 rounded-full bg-mv-500 animate-pulse'}),
+          t('waitlist.eyebrow')
+        ),
+        el('h2',{class:'mt-5 font-serif-display text-4xl md:text-5xl font-extrabold leading-[1.05] text-slate2-50'},
+          t('waitlist.title')
+        ),
+        el('p',{class:'mt-4 text-base text-slate2-300 max-w-xl mx-auto'}, t('waitlist.body')),
+        // Form — controlled rendering via paint() so success / error states
+        // swap inline without touching the rest of the page.
+        (() => {
+          const wrap = el('div',{class:'mt-8 max-w-md mx-auto'});
+          let state = 'idle'; // idle | submitting | done | error
+          let errorMsg = '';
+          let lastEmail = '';
+          function paint() {
+            wrap.innerHTML = '';
+            if (state === 'done') {
+              wrap.appendChild(
+                el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
+                  el('div',{class:'text-2xl mb-1'},'✓'),
+                  el('div',{class:'font-bold text-slate2-50'}, t('waitlist.success.title')),
+                  el('div',{class:'mt-1 text-sm text-slate2-300'}, t('waitlist.success.body'))
+                )
+              );
+              return;
+            }
+            const form = el('form',{class:'flex flex-col sm:flex-row gap-2', onsubmit: async (ev) => {
+              ev.preventDefault();
+              const email = (ev.target.email?.value || '').trim().toLowerCase();
+              if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                state = 'error'; errorMsg = t('waitlist.error.invalid'); paint(); return;
+              }
+              state = 'submitting'; lastEmail = email; paint();
+              try {
+                const r = await fetch('https://qjrqnnrucdvpwrbkxean.supabase.co/rest/v1/Launch-waitlist', {
+                  method: 'POST',
+                  headers: {
+                    'apikey': 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
+                    'Authorization': 'Bearer sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                  },
+                  body: JSON.stringify({ email })
+                });
+                if (r.ok || r.status === 201) { state = 'done'; paint(); return; }
+                // Duplicate email — Postgres unique violation surfaces as 409
+                // or 23505. Treat as success: user already on the list.
+                const txt = await r.text().catch(() => '');
+                if (r.status === 409 || /duplicate|23505|unique/i.test(txt)) {
+                  state = 'done'; paint(); return;
+                }
+                state = 'error'; errorMsg = t('waitlist.error.server'); paint();
+              } catch (e) {
+                state = 'error'; errorMsg = t('waitlist.error.network'); paint();
+              }
+            }},
+              el('input',{ name:'email', type:'email', required: true,
+                placeholder: t('waitlist.placeholder'),
+                disabled: state === 'submitting',
+                value: lastEmail,
+                class:'flex-1 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition disabled:opacity-50'
+              }),
+              el('button',{ type:'submit',
+                disabled: state === 'submitting',
+                class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition shrink-0 disabled:opacity-60 disabled:cursor-wait'
+              }, state === 'submitting' ? t('waitlist.submitting') : t('waitlist.cta'))
+            );
+            wrap.appendChild(form);
+            if (state === 'error') {
+              wrap.appendChild(el('div',{class:'mt-2 text-sm text-red-300'}, errorMsg));
+            }
+            wrap.appendChild(el('p',{class:'mt-3 text-xs text-slate2-500'}, t('waitlist.fineprint')));
+          }
+          paint();
+          return wrap;
+        })()
+      )
+    ),
     el('footer',{class:'border-t border-slate2-50/5 mt-4'},
       el('div',{class:'mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-slate2-400'},
         el('span',{class:'flex items-center gap-2'},
@@ -3578,6 +3747,39 @@ function Venue() {
         )
       ) // close the slot-picker div
       ), // close the <aside> (sticky right column), comma to next sibling
+      // ---- Categorized photo strips (Food / Venue / Menu) ----
+      // Each category is a horizontal-scroll thumbnail strip. Only renders
+      // when the corresponding array has photos — keeps the page clean for
+      // venues that haven't been curated yet. Merged seed venues read these
+      // arrays from store.seedOverrides; partner venues read directly.
+      ...[
+        { key: 'foodPhotos',  label: 'Food',                glyph: '🍽️' },
+        { key: 'venuePhotos', label: 'Inside the restaurant', glyph: '🪑' },
+        { key: 'menuPhotos',  label: 'The menu',             glyph: '📋' }
+      ].filter(cat => Array.isArray(v[cat.key]) && v[cat.key].length > 0).map((cat, idx) => {
+        return el('div',{class:'mt-6 md:col-start-1' + (idx === 0 ? ' md:row-start-3' : '')},
+          el('div',{class:'flex items-baseline justify-between'},
+            el('h3',{class:'font-bold text-base flex items-center gap-2'},
+              el('span',{}, cat.glyph),
+              el('span',{}, cat.label)
+            ),
+            el('span',{class:'text-xs text-slate2-400'}, v[cat.key].length + ' photo' + (v[cat.key].length === 1 ? '' : 's'))
+          ),
+          // Horizontal scroll strip on mobile; grid on desktop. Clicking a
+          // thumb opens it full-size in a new tab (light-weight lightbox-lite).
+          el('div',{class:'mt-3 flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-3 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-2 md:pb-0'},
+            ...v[cat.key].map((src, i) =>
+              el('a',{
+                href: src, target: '_blank', rel:'noopener',
+                class:'relative shrink-0 w-56 md:w-auto rounded-2xl overflow-hidden border border-slate2-50/10 hover:border-mv-500/40 transition cursor-pointer snap-start',
+                style:'aspect-ratio: 4/3'
+              },
+                el('img',{ src, alt: cat.label + ' ' + (i+1), loading:'lazy', class:'w-full h-full object-cover' })
+              )
+            )
+          )
+        );
+      }),
       // ---- Aggregated member reviews (left column row 3) ----
       // We already collect star ratings after redemption; surface them so a
       // diner browsing this venue can see what other members thought.
@@ -5901,6 +6103,9 @@ function Admin() {
 
   // G3: pending change requests (removal + future edit). Tab badge.
   const pendingRequests = (store.changeRequests || []).filter(cr => cr.status === 'PENDING');
+  // Surface flagged reviews count on the Reviews tab as a badge so admins see
+  // when moderation work is queued.
+  const flaggedReviewsCount = (store.reviews || []).filter(r => r.flagged).length;
   // ===== Tabs nav =====
   const tabs = [
     ['overview','📊 Overview', pendingVenues.length || 0],
@@ -5908,6 +6113,11 @@ function Admin() {
     ['requests','🛠️ Requests', pendingRequests.length || 0],
     ['users','👤 Users', 0],
     ['activity','🎫 Activity', 0],
+    ['insights','📈 Insights', 0],
+    ['reviews','⭐ Reviews', flaggedReviewsCount || 0],
+    ['messages','💬 Messages', 0],
+    ['notes','📝 Notes', 0],
+    ['audit','🧾 Audit', 0],
     ['system','⚙️ System', 0]
   ];
   const tabBar = el('div',{class:'mx-auto max-w-6xl mt-6 overflow-x-auto px-4'},
@@ -6234,18 +6444,143 @@ function Admin() {
 
   // ===== Tab: Partners =====
   function AdminPartners() {
+    // ----- closure state (survives paintPartners() re-renders within a
+    //       single AdminPartners() invocation; render() resets it) -----
     let q = '';
     let statusFilter = 'all';
+    // Bulk-select (C1+C2): tracks slugs for partner-venue selection and
+    // override slugs for seed-venue selection. Cleared after bulk mutation.
+    const selectedPartners = new Set();
+    const selectedSeeds = new Set();
+    // Multi-axis filter panel (D1)
+    const filters = {
+      barrios: new Set(),       // empty = no filter
+      cuisines: new Set(),
+      priceMin: 1, priceMax: 4,
+      ratingMin: 0, ratingMax: 5,
+      photos: 'any'             // 'any' | 'has' | 'missing'
+    };
+    let filtersOpen = false;
+    // Sortable columns (D3)
+    let sortKey = 'default';    // 'default' | 'name' | 'status' | 'rating' | 'redemptions' | 'submitted'
+    let sortDir = 'asc';
+    // Status priority used for default sort (PENDING first, REJECTED last).
+    const STATUS_PRIORITY = { 'PENDING_APPROVAL': 0, 'LIVE': 1, 'PAUSED': 2, 'DRAFT': 3, 'REJECTED': 4 };
+
+    // Quality score (G6): returns { score, missing[] } for a partner venue.
+    // 10 fields each worth 1 point; "missing" lists the ones that scored 0.
+    function qualityFor(pv, isSeed) {
+      const checks = [
+        ['name',       !!(pv.name && String(pv.name).trim())],
+        ['cuisine',    !!(pv.cuisine && String(pv.cuisine).trim())],
+        ['barrio',     !!(pv.barrio && String(pv.barrio).trim())],
+        ['priceTier',  pv.priceTier != null && pv.priceTier !== ''],
+        ['rating',     Number(pv.rating) > 0],
+        ['reviews',    Number(pv.reviews) > 0],
+        ['photos',     (pv.photos || []).length > 0]
+      ];
+      // K3: seeds don't have these slots so we exclude them from missing-list.
+      if (!isSeed) {
+        checks.push(
+          ['address',   !!(pv.address && String(pv.address).trim())],
+          ['website',   !!(pv.website && String(pv.website).trim())],
+          ['dealTerms', !!(pv.dealTerms && String(pv.dealTerms).trim())]
+        );
+      }
+      const missing = checks.filter(([,ok]) => !ok).map(([k]) => k);
+      // Score is always out of 10 for partners; for seeds we scale to /10 so
+      // the badge thresholds (>=8 green, 5-7 amber, <=4 red) stay consistent.
+      const total = checks.length;
+      const score = total - missing.length;
+      const scaled = isSeed ? Math.round((score / total) * 10) : score;
+      return { score: scaled, missing, isSeed };
+    }
+
+    function qualityBadge(q) {
+      let cls;
+      if (q.score >= 8)      cls = 'bg-accent-emer/20 text-accent-emer border-accent-emer/40';
+      else if (q.score >= 5) cls = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+      else                   cls = 'bg-red-500/20 text-red-300 border-red-500/40';
+      const title = q.missing.length ? ('Missing: ' + q.missing.join(', ')) : 'All quality fields populated';
+      return el('span',{class:'rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + cls, title}, 'Q ' + q.score + '/10');
+    }
+
     const wrap = el('div',{class:'space-y-4'});
+
+    function clearAllFilters() {
+      filters.barrios.clear();
+      filters.cuisines.clear();
+      filters.priceMin = 1; filters.priceMax = 4;
+      filters.ratingMin = 0; filters.ratingMax = 5;
+      filters.photos = 'any';
+    }
+    function anyFilterActive() {
+      return filters.barrios.size > 0 || filters.cuisines.size > 0
+        || filters.priceMin !== 1 || filters.priceMax !== 4
+        || filters.ratingMin !== 0 || filters.ratingMax !== 5
+        || filters.photos !== 'any';
+    }
+
     function paintPartners() {
       wrap.innerHTML = '';
+
+      // --- Compute filtered list ---
       const filtered = store.partnerVenues.filter(v => {
         if (statusFilter !== 'all' && v.status !== statusFilter) return false;
-        if (!q) return true;
-        const owner = store.users.find(x => x.id === v.ownerId);
-        const hay = (v.name + ' ' + (v.cuisine||'') + ' ' + (v.barrio||'') + ' ' + (owner?.email||'')).toLowerCase();
-        return hay.includes(q.toLowerCase());
+        if (q) {
+          const owner = store.users.find(x => x.id === v.ownerId);
+          const hay = (v.name + ' ' + (v.cuisine||'') + ' ' + (v.barrio||'') + ' ' + (owner?.email||'')).toLowerCase();
+          if (!hay.includes(q.toLowerCase())) return false;
+        }
+        if (filters.barrios.size > 0 && !filters.barrios.has(v.barrio || '')) return false;
+        if (filters.cuisines.size > 0 && !filters.cuisines.has(v.cuisine || '')) return false;
+        const pt = Number(v.priceTier ?? 0);
+        if (pt < filters.priceMin || pt > filters.priceMax) return false;
+        const rt = Number(v.rating ?? 0);
+        if (rt < filters.ratingMin || rt > filters.ratingMax) return false;
+        const photoCount = (v.photos || []).length;
+        if (filters.photos === 'has' && photoCount === 0) return false;
+        if (filters.photos === 'missing' && photoCount > 0) return false;
+        return true;
       });
+
+      // --- Sort filtered list (D3) ---
+      const dir = sortDir === 'asc' ? 1 : -1;
+      filtered.sort((a, b) => {
+        if (sortKey === 'default') {
+          const sa = STATUS_PRIORITY[a.status] ?? 99;
+          const sb = STATUS_PRIORITY[b.status] ?? 99;
+          if (sa !== sb) return sa - sb;
+          return (a.name || '').localeCompare(b.name || '');
+        }
+        let av, bv;
+        if (sortKey === 'name')        { av = (a.name||'').toLowerCase(); bv = (b.name||'').toLowerCase(); }
+        else if (sortKey === 'status') { av = STATUS_PRIORITY[a.status] ?? 99; bv = STATUS_PRIORITY[b.status] ?? 99; }
+        else if (sortKey === 'rating') { av = Number(a.rating||0); bv = Number(b.rating||0); }
+        else if (sortKey === 'redemptions') {
+          av = store.redemptions.filter(r => r.venueSlug === a.slug).length;
+          bv = store.redemptions.filter(r => r.venueSlug === b.slug).length;
+        }
+        else if (sortKey === 'submitted') { av = a.submittedAt || 0; bv = b.submittedAt || 0; }
+        if (av < bv) return -1 * dir;
+        if (av > bv) return  1 * dir;
+        return 0;
+      });
+
+      // --- Unique values for multi-select filters (from full list, not
+      //     filtered — otherwise filter options vanish when filter is on) ---
+      const allBarrios  = Array.from(new Set(store.partnerVenues.map(v => v.barrio  || '').filter(Boolean))).sort();
+      const allCuisines = Array.from(new Set(store.partnerVenues.map(v => v.cuisine || '').filter(Boolean))).sort();
+
+      // Prune stale selections (venues that no longer match the filter or
+      // were deleted) — keeps "Pause N" counts honest.
+      const filteredSlugs = new Set(filtered.map(v => v.slug));
+      for (const slug of Array.from(selectedPartners)) {
+        if (!store.partnerVenues.find(v => v.slug === slug)) selectedPartners.delete(slug);
+      }
+
+      // ============== HEADER: search + status pills + selectAll ==============
+      const allFilteredSelected = filtered.length > 0 && filtered.every(v => selectedPartners.has(v.slug));
       wrap.append(
         el('div',{class:'flex items-center gap-3 flex-wrap'},
           el('div',{class:'flex-1 min-w-[200px] flex items-center gap-2 bg-slate2-50/5 rounded-full px-3 py-2 border border-slate2-50/10'},
@@ -6259,10 +6594,212 @@ function Admin() {
                 onclick:()=>{ statusFilter = s; paintPartners(); }
               }, s === 'all' ? 'All' : s)
             )
+          ),
+          el('button',{class:'rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer ' + (filtersOpen || anyFilterActive() ? 'bg-mv-500/20 text-mv-400 border border-mv-500/40' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+            onclick:()=>{ filtersOpen = !filtersOpen; paintPartners(); }
+          }, (anyFilterActive() ? '● ' : '') + 'Filters')
+        )
+      );
+
+      // ============== Quick filter presets (D2) ==============
+      wrap.append(
+        el('div',{class:'flex items-center gap-2 flex-wrap'},
+          el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Quick filters'),
+          el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 text-slate2-300 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
+            onclick:()=>{
+              statusFilter = 'PENDING_APPROVAL';
+              clearAllFilters();
+              // 24h cutoff applied as a synthetic filter: filter on submittedAt
+              // can't be expressed in `filters`, so we keep statusFilter and
+              // tighten via a one-shot transient — simplest path: tag filters.
+              filters._pendingOver24h = true;
+              paintPartners();
+              wrap.scrollIntoView({behavior:'smooth', block:'start'});
+            }}, 'Pending >24h'),
+          el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 text-slate2-300 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
+            onclick:()=>{
+              statusFilter = 'all';
+              clearAllFilters();
+              filters.photos = 'missing';
+              paintPartners();
+              wrap.scrollIntoView({behavior:'smooth', block:'start'});
+            }}, 'No photos'),
+          el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 text-slate2-300 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
+            onclick:()=>{
+              statusFilter = 'all';
+              clearAllFilters();
+              filters._noRedemptions = true;
+              paintPartners();
+              wrap.scrollIntoView({behavior:'smooth', block:'start'});
+            }}, 'No redemptions')
+        )
+      );
+
+      // ============== Filter panel (D1) ==============
+      if (filtersOpen) {
+        const panel = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+          el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+            el('div',{class:'text-[11px] uppercase tracking-widest font-extrabold text-mv-500'},'Filters'),
+            anyFilterActive() && el('button',{class:'rounded-full bg-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer',
+              onclick:()=>{ clearAllFilters(); paintPartners(); }
+            }, 'Clear all')
+          ),
+          el('div',{},
+            el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'Barrio'),
+            el('div',{class:'flex flex-wrap gap-1'},
+              ...allBarrios.map(b =>
+                el('button',{class:'rounded-full px-2.5 py-1 text-xs font-bold cursor-pointer ' + (filters.barrios.has(b) ? 'bg-mv-500/30 text-mv-400 border border-mv-500/50' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+                  onclick:()=>{ if(filters.barrios.has(b)) filters.barrios.delete(b); else filters.barrios.add(b); paintPartners(); }
+                }, b)
+              ),
+              allBarrios.length === 0 && el('span',{class:'text-xs text-slate2-400'},'—')
+            )
+          ),
+          el('div',{},
+            el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'Cuisine'),
+            el('div',{class:'flex flex-wrap gap-1'},
+              ...allCuisines.map(c =>
+                el('button',{class:'rounded-full px-2.5 py-1 text-xs font-bold cursor-pointer ' + (filters.cuisines.has(c) ? 'bg-mv-500/30 text-mv-400 border border-mv-500/50' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+                  onclick:()=>{ if(filters.cuisines.has(c)) filters.cuisines.delete(c); else filters.cuisines.add(c); paintPartners(); }
+                }, c)
+              ),
+              allCuisines.length === 0 && el('span',{class:'text-xs text-slate2-400'},'—')
+            )
+          ),
+          el('div',{class:'grid sm:grid-cols-2 gap-3'},
+            el('div',{},
+              el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'Price tier  · ' + '€'.repeat(filters.priceMin) + '–' + '€'.repeat(filters.priceMax)),
+              el('div',{class:'flex items-center gap-2'},
+                el('input',{type:'range', min:1, max:4, step:1, value:filters.priceMin, class:'flex-1',
+                  onInput:e=>{ filters.priceMin = Math.min(Number(e.target.value), filters.priceMax); paintPartners(); }}),
+                el('input',{type:'range', min:1, max:4, step:1, value:filters.priceMax, class:'flex-1',
+                  onInput:e=>{ filters.priceMax = Math.max(Number(e.target.value), filters.priceMin); paintPartners(); }})
+              )
+            ),
+            el('div',{},
+              el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'Rating · ' + filters.ratingMin.toFixed(1) + '–' + filters.ratingMax.toFixed(1)),
+              el('div',{class:'flex items-center gap-2'},
+                el('input',{type:'range', min:0, max:5, step:0.5, value:filters.ratingMin, class:'flex-1',
+                  onInput:e=>{ filters.ratingMin = Math.min(Number(e.target.value), filters.ratingMax); paintPartners(); }}),
+                el('input',{type:'range', min:0, max:5, step:0.5, value:filters.ratingMax, class:'flex-1',
+                  onInput:e=>{ filters.ratingMax = Math.max(Number(e.target.value), filters.ratingMin); paintPartners(); }})
+              )
+            )
+          ),
+          el('div',{},
+            el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1'},'Photos'),
+            el('div',{class:'flex gap-1 flex-wrap'},
+              ...[['any','Any'],['has','Has photos'],['missing','Missing photos']].map(([v,lab]) =>
+                el('button',{class:'rounded-full px-3 py-1 text-xs font-bold cursor-pointer ' + (filters.photos === v ? 'bg-mv-500/30 text-mv-400 border border-mv-500/50' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+                  onclick:()=>{ filters.photos = v; paintPartners(); }}, lab)
+              )
+            )
           )
-        ),
-        el('div',{class:'text-xs text-slate2-400'}, filtered.length + ' venue' + (filtered.length===1?'':'s')),
-        ...filtered.map(pv => {
+        );
+        wrap.append(panel);
+      }
+
+      // Honor synthetic preset flags by re-filtering AFTER above so they
+      // override what `filtered` already has.
+      let displayList = filtered;
+      if (filters._pendingOver24h) {
+        const cutoff = Date.now() - 24*3600*1000;
+        displayList = displayList.filter(v => v.status === 'PENDING_APPROVAL' && (v.submittedAt || 0) < cutoff);
+      }
+      if (filters._noRedemptions) {
+        displayList = displayList.filter(v => store.redemptions.filter(r => r.venueSlug === v.slug).length === 0);
+      }
+      const displayAllSelected = displayList.length > 0 && displayList.every(v => selectedPartners.has(v.slug));
+
+      // ============== Bulk-actions sticky bar (C1+C2) ==============
+      if (selectedPartners.size > 0) {
+        const bar = el('div',{class:'sticky top-0 z-10 rounded-2xl bg-mv-500/20 border border-mv-500/50 backdrop-blur px-4 py-3 flex items-center gap-2 flex-wrap'},
+          el('div',{class:'text-sm font-extrabold text-mv-400'}, selectedPartners.size + ' selected'),
+          el('button',{class:'rounded-full bg-amber-500/30 text-amber-200 border border-amber-500/50 px-3 py-1 text-xs font-bold cursor-pointer',
+            onclick:()=>{
+              const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && v.status === 'LIVE');
+              if (targets.length === 0) { toast('No LIVE venues in selection'); return; }
+              confirmDo('Pause ' + targets.length + ' venue' + (targets.length===1?'':'s') + '?', () => {
+                targets.forEach(v => { v.status = 'PAUSED'; });
+                saveStore(); toast('Paused ' + targets.length); selectedPartners.clear(); render();
+              });
+            }}, 'Pause ' + selectedPartners.size),
+          el('button',{class:'rounded-full bg-accent-emer/30 text-accent-emer border border-accent-emer/50 px-3 py-1 text-xs font-bold cursor-pointer',
+            onclick:()=>{
+              const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && v.status === 'PAUSED');
+              if (targets.length === 0) { toast('No PAUSED venues in selection'); return; }
+              confirmDo('Resume ' + targets.length + ' venue' + (targets.length===1?'':'s') + '?', () => {
+                targets.forEach(v => { v.status = 'LIVE'; });
+                saveStore(); toast('Resumed ' + targets.length); selectedPartners.clear(); render();
+              });
+            }}, 'Resume ' + selectedPartners.size),
+          el('button',{class:'rounded-full bg-mv-500/30 text-mv-400 border border-mv-500/50 px-3 py-1 text-xs font-bold cursor-pointer',
+            onclick:()=>{
+              const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && (v.status === 'LIVE' || v.status === 'PAUSED'));
+              if (targets.length === 0) { toast('No LIVE/PAUSED venues in selection'); return; }
+              confirmDo('Send ' + targets.length + ' venue' + (targets.length===1?'':'s') + ' back for re-review?', () => {
+                targets.forEach(v => { v.status='PENDING_APPROVAL'; v.submittedAt=Date.now(); v.approvedAt=null; });
+                saveStore(); toast('Sent ' + targets.length + ' for review'); selectedPartners.clear(); render();
+              });
+            }}, 'Re-review ' + selectedPartners.size),
+          el('button',{class:'rounded-full bg-red-500/30 text-red-200 border border-red-500/50 px-3 py-1 text-xs font-bold cursor-pointer',
+            onclick:()=>{
+              const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug));
+              if (targets.length === 0) return;
+              confirmDo('Permanently DELETE ' + targets.length + ' venue' + (targets.length===1?'':'s') + '? Bookings, redemptions, reviews are removed. Cannot be undone.', () => {
+                targets.forEach(v => deleteVenue(v.id));
+                toast('Deleted ' + targets.length); selectedPartners.clear(); render();
+              });
+            }}, 'Delete ' + selectedPartners.size),
+          el('button',{class:'rounded-full bg-slate2-50/10 border border-slate2-50/15 px-3 py-1 text-xs font-bold cursor-pointer',
+            onclick:()=>{ selectedPartners.clear(); paintPartners(); }
+          }, 'Clear selection')
+        );
+        wrap.append(bar);
+      }
+
+      // ============== Count + Select-all + Sort headers ==============
+      wrap.append(
+        el('div',{class:'flex items-center gap-3 flex-wrap text-xs text-slate2-400'},
+          el('label',{class:'flex items-center gap-2 cursor-pointer'},
+            el('input',{type:'checkbox', checked: displayAllSelected,
+              onChange: e => {
+                if (e.target.checked) displayList.forEach(v => selectedPartners.add(v.slug));
+                else displayList.forEach(v => selectedPartners.delete(v.slug));
+                paintPartners();
+              }}),
+            el('span',{}, 'Select all matching filter')
+          ),
+          el('div',{class:'ml-auto'}, displayList.length + ' venue' + (displayList.length===1?'':'s'))
+        )
+      );
+
+      // Sort header row — clickable column titles.
+      function sortBtn(key, label) {
+        const active = sortKey === key;
+        const arrow = active ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+        return el('button',{class:'rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest cursor-pointer ' + (active ? 'bg-mv-500/20 text-mv-400 border border-mv-500/40' : 'bg-slate2-50/5 text-slate2-400 border border-slate2-50/10'),
+          onclick:()=>{
+            if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+            else { sortKey = key; sortDir = 'asc'; }
+            paintPartners();
+          }}, label + arrow);
+      }
+      wrap.append(
+        el('div',{class:'flex items-center gap-1 flex-wrap'},
+          el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mr-1'},'Sort'),
+          sortBtn('default','Default'),
+          sortBtn('name','Name'),
+          sortBtn('status','Status'),
+          sortBtn('rating','Rating'),
+          sortBtn('redemptions','Redemptions'),
+          sortBtn('submitted','Submitted')
+        )
+      );
+
+      // ============== Partner venue cards ==============
+      wrap.append(
+        ...displayList.map(pv => {
           const owner = store.users.find(x => x.id === pv.ownerId);
           const reds = store.redemptions.filter(r => r.venueSlug === pv.slug).length;
           const activeBks = store.bookings.filter(b => b.venueSlug === pv.slug && !b.redeemed && !b.cancelled && b.expiresAt > Date.now()).length;
@@ -6272,16 +6809,27 @@ function Admin() {
           else if (pv.status === 'PENDING_APPROVAL') statusBadge = 'bg-mv-500/20 text-mv-400 border-mv-500/40';
           else if (pv.status === 'REJECTED') statusBadge = 'bg-red-500/20 text-red-300 border-red-500/40';
           else statusBadge = 'bg-slate2-50/5 text-slate2-400 border-slate2-50/10';
+
+          const quality = qualityFor(pv, false);
+          const showMissing = quality.score <= 6 && quality.missing.length > 0;
+
           return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
             el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
-              el('div',{class:'flex-1 min-w-[200px]'},
-                el('div',{class:'flex items-center gap-2 flex-wrap'},
-                  el('div',{class:'font-bold text-lg'}, pv.name),
-                  el('span',{class:'rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + statusBadge}, pv.status)
-                ),
-                el('div',{class:'text-xs text-slate2-400 mt-1'}, (pv.barrio || '—'), ' · ', (pv.cuisine || '—'), ' · ', owner?.email ?? 'no owner'),
-                el('div',{class:'text-xs text-slate2-400'}, (pv.photos||[]).length, ' photos · ', reds, ' redemptions · ', activeBks, ' active booking', activeBks===1?'':'s'),
-                pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'},'Rejection reason: ', pv.rejectionReason)
+              el('div',{class:'flex items-start gap-3 flex-1 min-w-[200px]'},
+                el('input',{type:'checkbox', class:'mt-1.5 shrink-0', checked: selectedPartners.has(pv.slug),
+                  onChange:e=>{ if (e.target.checked) selectedPartners.add(pv.slug); else selectedPartners.delete(pv.slug); paintPartners(); }
+                }),
+                el('div',{class:'flex-1 min-w-[200px]'},
+                  el('div',{class:'flex items-center gap-2 flex-wrap'},
+                    el('div',{class:'font-bold text-lg'}, pv.name),
+                    el('span',{class:'rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + statusBadge}, pv.status),
+                    qualityBadge(quality)
+                  ),
+                  el('div',{class:'text-xs text-slate2-400 mt-1'}, (pv.barrio || '—'), ' · ', (pv.cuisine || '—'), ' · ', owner?.email ?? 'no owner'),
+                  showMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'},'Missing: ', quality.missing.join(', ')),
+                  el('div',{class:'text-xs text-slate2-400'}, (pv.photos||[]).length, ' photos · ', reds, ' redemptions · ', activeBks, ' active booking', activeBks===1?'':'s'),
+                  pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'},'Rejection reason: ', pv.rejectionReason)
+                )
               ),
               el('div',{class:'flex gap-2 flex-wrap shrink-0'},
                 pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-full bg-accent-emer text-ink-900 px-3 py-1 text-xs font-extrabold cursor-pointer', onclick:()=>{
@@ -6320,12 +6868,35 @@ function Admin() {
               )
             )
           );
-        }),
+        })
+      );
 
-        // ===== Catalog (seed venues) — placeholder restaurants hardcoded in
-        // VENUES that appear on Discover/Map until real partners onboard.
-        // Admin-editable via store.seedOverrides — changes persist in
-        // localStorage and are applied at read time by getAllVenues(). =====
+      // ===== Catalog (seed venues) — placeholder restaurants hardcoded in
+      // VENUES that appear on Discover/Map until real partners onboard.
+      // Admin-editable via store.seedOverrides — changes persist in
+      // localStorage and are applied at read time by getAllVenues(). =====
+
+      // Seed bulk-actions bar (delete overrides only — seeds have no status).
+      const seedBulkBar = selectedSeeds.size > 0 ? el('div',{class:'mt-4 rounded-2xl bg-mv-500/20 border border-mv-500/50 px-4 py-3 flex items-center gap-2 flex-wrap'},
+        el('div',{class:'text-sm font-extrabold text-mv-400'}, selectedSeeds.size + ' seed' + (selectedSeeds.size===1?'':'s') + ' selected'),
+        el('button',{class:'rounded-full bg-red-500/30 text-red-200 border border-red-500/50 px-3 py-1 text-xs font-bold cursor-pointer',
+          onclick:()=>{
+            const slugs = Array.from(selectedSeeds);
+            const withOverrides = slugs.filter(s => (store.seedOverrides || {})[s]);
+            if (withOverrides.length === 0) { toast('Selected seeds have no overrides to delete'); return; }
+            confirmDo('Delete ' + withOverrides.length + ' override' + (withOverrides.length===1?'':'s') + '? This restores the source-of-truth catalog values.', ()=>{
+              withOverrides.forEach(s => { delete store.seedOverrides[s]; });
+              saveStore(); toast('Deleted ' + withOverrides.length + ' overrides'); selectedSeeds.clear(); render();
+            });
+          }}, 'Delete ' + selectedSeeds.size + ' override' + (selectedSeeds.size===1?'':'s')),
+        el('button',{class:'rounded-full bg-slate2-50/10 border border-slate2-50/15 px-3 py-1 text-xs font-bold cursor-pointer',
+          onclick:()=>{ selectedSeeds.clear(); paintPartners(); }
+        }, 'Clear selection')
+      ) : null;
+
+      const allSeedsSelected = VENUES.length > 0 && VENUES.every(v => selectedSeeds.has(v.slug));
+
+      wrap.append(
         el('div',{class:'mt-10 pt-6 border-t border-slate2-50/10'},
           el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
             el('div',{},
@@ -6343,20 +6914,40 @@ function Admin() {
               }); }
             }, 'Reset all overrides (' + Object.keys(store.seedOverrides).length + ')')
           ),
+          seedBulkBar,
+          el('div',{class:'mt-3 flex items-center gap-2 text-xs text-slate2-400'},
+            el('label',{class:'flex items-center gap-2 cursor-pointer'},
+              el('input',{type:'checkbox', checked: allSeedsSelected,
+                onChange:e=>{
+                  if (e.target.checked) VENUES.forEach(v => selectedSeeds.add(v.slug));
+                  else VENUES.forEach(v => selectedSeeds.delete(v.slug));
+                  paintPartners();
+                }}),
+              el('span',{}, 'Select all seeds')
+            )
+          ),
           el('div',{class:'mt-4 space-y-3'},
             ...VENUES.map(v => {
               const ovr = (store.seedOverrides || {})[v.slug] || {};
               const live = { ...v, ...ovr };
               const isEdited = Object.keys(ovr).length > 0;
+              const sq = qualityFor(live, true);
+              const showSeedMissing = sq.score <= 6 && sq.missing.length > 0;
               return el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-4 relative'},
                 el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
-                  el('div',{class:'flex-1 min-w-[200px]'},
-                    el('div',{class:'flex items-center gap-2 flex-wrap'},
-                      el('div',{class:'font-bold text-base'}, live.name),
-                      isEdited && el('span',{class:'rounded-full bg-mv-500/20 text-mv-400 border border-mv-500/40 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Edited'),
-                      el('span',{class:'rounded-full bg-slate2-50/5 text-slate2-400 border border-slate2-50/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Seed')
-                    ),
-                    el('div',{class:'text-xs text-slate2-400 mt-1'}, (live.barrio || '—'), ' · ', (live.cuisine || '—'), ' · ', '€'.repeat(Math.max(1, Math.min(4, live.priceTier ?? 2))))
+                  el('div',{class:'flex items-start gap-3 flex-1 min-w-[200px]'},
+                    el('input',{type:'checkbox', class:'mt-1 shrink-0', checked: selectedSeeds.has(v.slug),
+                      onChange:e=>{ if (e.target.checked) selectedSeeds.add(v.slug); else selectedSeeds.delete(v.slug); paintPartners(); }
+                    }),
+                    el('div',{class:'flex-1 min-w-[200px]'},
+                      el('div',{class:'flex items-center gap-2 flex-wrap'},
+                        el('div',{class:'font-bold text-base'}, live.name),
+                        isEdited && el('span',{class:'rounded-full bg-mv-500/20 text-mv-400 border border-mv-500/40 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Edited'),
+                        el('span',{class:'rounded-full bg-slate2-50/5 text-slate2-400 border border-slate2-50/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Seed')
+                      ),
+                      el('div',{class:'text-xs text-slate2-400 mt-1'}, (live.barrio || '—'), ' · ', (live.cuisine || '—'), ' · ', '€'.repeat(Math.max(1, Math.min(4, live.priceTier ?? 2)))),
+                      showSeedMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'},'Missing: ', sq.missing.join(', '))
+                    )
                   ),
                   el('div',{class:'flex gap-2 flex-wrap shrink-0'},
                     el('button',{class:'rounded-full bg-slate2-50/10 border border-slate2-50/15 px-3 py-1 text-xs font-bold cursor-pointer', onclick:(ev)=>{
@@ -6402,24 +6993,38 @@ function Admin() {
         : venue;
 
       // Working draft — mutated as the user types/uploads, applied on Save.
+      // Four photo arrays are tracked separately so admins can curate the
+      // gallery per surface (cover, food, venue interior/exterior, menu).
       const draft = {
-        name:      current.name      ?? '',
-        cuisine:   current.cuisine   ?? '',
-        barrio:    current.barrio    ?? '',
-        priceTier: current.priceTier ?? 2,
-        rating:    current.rating    ?? 4.5,
-        reviews:   current.reviews   ?? 0,
-        address:   current.address   ?? '',
-        postcode:  current.postcode  ?? '',
-        lat:       current.lat       ?? '',
-        lng:       current.lng       ?? '',
-        website:   current.website   ?? '',
-        instagram: current.instagram ?? '',
-        phone:     current.phone     ?? '',
-        hours:     current.hours     ?? '',
-        dealTerms: current.dealTerms ?? '',
-        photos:    [...(current.photos || [])]
+        name:         current.name         ?? '',
+        cuisine:      current.cuisine      ?? '',
+        barrio:       current.barrio       ?? '',
+        priceTier:    current.priceTier    ?? 2,
+        rating:       current.rating       ?? 4.5,
+        reviews:      current.reviews      ?? 0,
+        address:      current.address      ?? '',
+        postcode:     current.postcode     ?? '',
+        lat:          current.lat          ?? '',
+        lng:          current.lng          ?? '',
+        website:      current.website      ?? '',
+        instagram:    current.instagram    ?? '',
+        phone:        current.phone        ?? '',
+        hours:        current.hours        ?? '',
+        dealTerms:    current.dealTerms    ?? '',
+        // Deep-clone slot array so per-slot edits to the draft don't mutate
+        // the live venue until Save is pressed.
+        dealSlots:    JSON.parse(JSON.stringify(current.dealSlots || [])),
+        photos:       [...(current.photos       || [])],
+        foodPhotos:   [...(current.foodPhotos   || [])],
+        venuePhotos:  [...(current.venuePhotos  || [])],
+        menuPhotos:   [...(current.menuPhotos   || [])]
       };
+
+      // H3: unsaved-changes tracking. Flipped on any input/upload/slot edit
+      // and consulted by the Cancel button + the window beforeunload guard
+      // installed further down.
+      let isDirty = false;
+      const markDirty = () => { isDirty = true; };
 
       const form = document.createElement('div');
       form.setAttribute('data-edit-form', '1');
@@ -6433,20 +7038,27 @@ function Admin() {
         wrap.className = 'mt-1';
         return wrap;
       }
-      function field(name, label, type, placeholder) {
+      // H1: required-field marker. Pass `required: true` to render a red
+      // asterisk after the label and flag the input as required for save.
+      const REQUIRED_FIELDS = ['name', 'cuisine', 'barrio'];
+      function field(name, label, type, placeholder, opts) {
+        const required = !!(opts && opts.required);
         const wrap = document.createElement('label');
         wrap.className = 'block';
-        wrap.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + label + '</div>';
+        const star = required ? ' <span class="text-red-400" aria-hidden="true">*</span>' : '';
+        wrap.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + label + star + '</div>';
         const inp = document.createElement(type === 'textarea' ? 'textarea' : 'input');
         if (type !== 'textarea') inp.type = type || 'text';
         inp.name = name;
         inp.value = draft[name] ?? '';
         if (placeholder) inp.placeholder = placeholder;
+        if (required) inp.setAttribute('aria-required', 'true');
         inp.className = 'w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
         if (type === 'textarea') { inp.rows = 3; inp.className += ' resize-y'; }
         inp.oninput = () => {
           const v = inp.value;
           draft[name] = (type === 'number') ? (v === '' ? '' : Number(v)) : v;
+          markDirty();
         };
         wrap.appendChild(inp);
         return wrap;
@@ -6461,11 +7073,11 @@ function Admin() {
       // ----- 1. BASICS -----
       form.appendChild(section('Basics'));
       form.appendChild(row2(
-        field('name', 'Name'),
-        field('cuisine', 'Cuisine', 'text', 'e.g. Catalan · Tapas')
+        field('name', 'Name', 'text', undefined, { required: true }),
+        field('cuisine', 'Cuisine', 'text', 'e.g. Catalan · Tapas', { required: true })
       ));
       form.appendChild(row2(
-        field('barrio', 'Barrio', 'text', 'e.g. Eixample'),
+        field('barrio', 'Barrio', 'text', 'e.g. Eixample', { required: true }),
         field('priceTier', 'Price tier (1–4)', 'number')
       ));
       form.appendChild(row2(
@@ -6499,86 +7111,532 @@ function Admin() {
         ));
       }
 
-      // ----- 4. DEAL TERMS (partner-only) -----
+      // ----- 4. DEAL (partner-only) -----
+      //   A3 LIVE-vs-DRAFT diff panel at the top, then default dealTerms
+      //   textarea, then per-slot inline editor (A1+A2).
+      // Seeds have no deal model at all — skip the entire section.
       if (!isSeed) {
         form.appendChild(section('Deal terms', 'Admin edits propagate to members immediately — they do NOT go through partner-approval.'));
-        form.appendChild(field('dealTerms', '', 'textarea'));
-      }
 
-      // ----- 5. PHOTOS -----
-      form.appendChild(section('Photos', 'First photo is the cover. Up to 8 photos. JPG/PNG, ≤ 8 MB each — auto-compressed on upload.'));
-      const photosWrap = document.createElement('div');
-      photosWrap.className = 'space-y-3';
-      form.appendChild(photosWrap);
+        // A3: Proposed-changes / diff panel. Compares the editor draft (top
+        // of buildEditForm) against the snapshot members currently see
+        // (pv.liveDeal). Re-rendered into `diffMount` on every relevant
+        // input so admins watch their diff shrink/grow as they type.
+        const diffMount = document.createElement('div');
+        form.appendChild(diffMount);
 
-      function renderPhotos() {
-        photosWrap.innerHTML = '';
-        if (draft.photos.length === 0) {
-          const empty = document.createElement('div');
-          empty.className = 'rounded-xl bg-slate2-50/[0.02] border border-dashed border-slate2-50/15 px-4 py-6 text-center text-sm text-slate2-400 italic';
-          empty.textContent = 'No photos yet';
-          photosWrap.appendChild(empty);
-        } else {
-          const grid = document.createElement('div');
-          grid.className = 'grid grid-cols-3 sm:grid-cols-4 gap-2';
-          draft.photos.forEach((src, i) => {
-            const tile = document.createElement('div');
-            tile.className = 'relative rounded-xl overflow-hidden border border-slate2-50/15 bg-slate2-50/[0.03]';
-            tile.style.aspectRatio = '1 / 1';
-            tile.innerHTML =
-              '<img src="' + src + '" class="w-full h-full object-cover" alt="venue photo ' + (i+1) + '"/>' +
-              (i === 0 ? '<span class="absolute top-1.5 left-1.5 rounded-full bg-mv-500 text-white text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 shadow-md">Cover</span>' : '');
-            // Action row at the bottom of each tile
-            const actions = document.createElement('div');
-            actions.className = 'absolute bottom-1 right-1 flex gap-0.5';
-            function btn(label, title, fn, classes) {
-              const b = document.createElement('button');
-              b.type = 'button';
-              b.className = 'rounded-full grid place-items-center text-[11px] font-extrabold cursor-pointer ' + classes + ' w-6 h-6';
-              b.textContent = label;
-              b.title = title;
-              b.onclick = fn;
-              return b;
-            }
-            if (i > 0) actions.appendChild(btn('↑', 'Move up', () => { const t = draft.photos[i-1]; draft.photos[i-1] = draft.photos[i]; draft.photos[i] = t; renderPhotos(); }, 'bg-slate2-50/95 text-ink-900'));
-            if (i < draft.photos.length - 1) actions.appendChild(btn('↓', 'Move down', () => { const t = draft.photos[i+1]; draft.photos[i+1] = draft.photos[i]; draft.photos[i] = t; renderPhotos(); }, 'bg-slate2-50/95 text-ink-900'));
-            if (i > 0) actions.appendChild(btn('★', 'Set as cover', () => { const c = draft.photos[i]; draft.photos.splice(i, 1); draft.photos.unshift(c); renderPhotos(); }, 'bg-mv-500 text-white'));
-            actions.appendChild(btn('×', 'Delete', () => { draft.photos.splice(i, 1); renderPhotos(); }, 'bg-red-500 text-white'));
-            tile.appendChild(actions);
-            grid.appendChild(tile);
-          });
-          photosWrap.appendChild(grid);
+        function fmtSlotLine(s) {
+          if (!s) return '—';
+          const days = s.days || (Array.isArray(s.daysArr) ? s.daysArr.join('/') : '');
+          const time = (s.timeStart || '') + (s.timeEnd ? '-' + s.timeEnd : '');
+          const cap  = (typeof s.seatCap === 'number') ? (' · cap ' + s.seatCap) : '';
+          const act  = s.active ? '' : ' · inactive';
+          return (s.label || '(no label)') + ' — ' + [days, time].filter(Boolean).join(' ') + cap + act;
         }
-        // File input (always present at the bottom of the photos section)
-        const upload = document.createElement('label');
-        upload.className = 'block cursor-pointer';
-        const dz = document.createElement('div');
-        dz.className = 'rounded-2xl border-2 border-dashed border-slate2-50/15 hover:border-mv-500/50 transition px-4 py-4 text-center text-sm font-bold text-slate2-300';
-        dz.innerHTML = '+ Add photo(s) <span class="text-xs text-slate2-500 font-normal ml-1">(JPG/PNG, ≤ 8 MB, auto-compressed)</span>';
-        upload.appendChild(dz);
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.multiple = true;
-        fileInput.className = 'hidden';
-        fileInput.onchange = async (ev) => {
-          const files = Array.from(ev.target.files || []);
-          for (const f of files) {
-            if (draft.photos.length >= 8) { toast('Max 8 photos'); break; }
-            try {
-              const compressed = await compressImage(f, 1600, 0.85);
-              draft.photos.push(compressed);
-            } catch (err) {
-              toast(err.message || 'Photo upload failed');
-            }
+        function slotsKey(arr) {
+          // Stable key for diff comparison — ignores `id` (cosmetic) so
+          // re-keying doesn't masquerade as a real change.
+          return JSON.stringify((arr || []).map(s => ({
+            label: s.label || '',
+            days: s.days || '',
+            timeStart: s.timeStart || '',
+            timeEnd: s.timeEnd || '',
+            active: !!s.active,
+            seatCap: Number(s.seatCap) || 0,
+            terms: s.terms || ''
+          })));
+        }
+
+        function paintDiff() {
+          diffMount.innerHTML = '';
+          const pv = venue; // partner venue (isSeed === false here)
+          if (!pv || !pv.liveDeal) return;
+          const live = pv.liveDeal;
+          const diffs = [];
+          if ((live.dealTerms || '') !== (draft.dealTerms || '')) {
+            diffs.push({ k: 'Default deal terms', live: live.dealTerms || '—', draft: draft.dealTerms || '—' });
           }
-          renderPhotos();
-          ev.target.value = '';
+          if (slotsKey(live.dealSlots) !== slotsKey(draft.dealSlots)) {
+            const liveLines  = (live.dealSlots || []).map(fmtSlotLine).join('\n') || '—';
+            const draftLines = (draft.dealSlots || []).map(fmtSlotLine).join('\n') || '—';
+            diffs.push({ k: 'Deal slots', live: liveLines, draft: draftLines, multiline: true });
+          }
+          if (diffs.length === 0) return;
+
+          const panel = document.createElement('div');
+          panel.className = 'rounded-2xl border border-mv-500/40 bg-mv-500/10 p-3 mt-2';
+          const head = document.createElement('div');
+          head.className = 'flex items-center justify-between gap-3 flex-wrap';
+          head.innerHTML =
+            '<div>' +
+              '<div class="text-[11px] uppercase tracking-widest font-extrabold text-mv-500">Proposed changes</div>' +
+              '<div class="text-xs text-slate2-300 mt-0.5">Draft differs from what members see right now. Save persists the draft; Apply pushes it live in one click.</div>' +
+            '</div>';
+          const pushBtn = document.createElement('button');
+          pushBtn.type = 'button';
+          pushBtn.className = 'rounded-full bg-mv-500 hover:bg-mv-600 text-white px-3 py-1.5 text-xs font-extrabold cursor-pointer shrink-0';
+          pushBtn.textContent = 'Apply draft to live now';
+          pushBtn.onclick = () => {
+            confirmDo('Push this draft to LIVE immediately? Members will see it on next render.', () => {
+              // Sync pv first so liveDeal reflects what we just persisted.
+              pv.dealTerms = draft.dealTerms;
+              pv.dealSlots = JSON.parse(JSON.stringify(draft.dealSlots));
+              pv.liveDeal = {
+                dealTerms: pv.dealTerms,
+                dealSlots: JSON.parse(JSON.stringify(pv.dealSlots)),
+                creditsPerUser: pv.creditsPerUser
+              };
+              saveStore();
+              toast('Pushed live');
+              render();
+            });
+          };
+          head.appendChild(pushBtn);
+          panel.appendChild(head);
+
+          const rows = document.createElement('div');
+          rows.className = 'mt-3 space-y-2';
+          diffs.forEach(d => {
+            const row = document.createElement('div');
+            row.className = 'rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 p-2';
+            const pre = d.multiline
+              ? '<pre class="whitespace-pre-wrap break-words text-xs text-slate2-200 font-mono leading-snug">'
+              : '<div class="text-xs text-slate2-200 break-words">';
+            const post = d.multiline ? '</pre>' : '</div>';
+            row.innerHTML =
+              '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + d.k + '</div>' +
+              '<div class="grid sm:grid-cols-2 gap-2">' +
+                '<div>' +
+                  '<div class="text-[9px] uppercase tracking-widest text-slate2-500 font-bold mb-0.5">Live (members see)</div>' +
+                  pre + escapeHtmlSafe(String(d.live)) + post +
+                '</div>' +
+                '<div>' +
+                  '<div class="text-[9px] uppercase tracking-widest text-mv-500 font-bold mb-0.5">Draft</div>' +
+                  pre + escapeHtmlSafe(String(d.draft)) + post +
+                '</div>' +
+              '</div>';
+            rows.appendChild(row);
+          });
+          panel.appendChild(rows);
+          diffMount.appendChild(panel);
+        }
+        // Local safe-html helper — keep buildEditForm self-contained.
+        function escapeHtmlSafe(s) {
+          return s.replace(/[&<>"']/g, ch => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+          }[ch]));
+        }
+
+        // Default dealTerms textarea — venue-wide fallback used by any slot
+        // that opts into "use default".
+        const dealTermsWrap = document.createElement('div');
+        dealTermsWrap.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">Default deal terms (venue-wide)</div>';
+        const dealTermsTa = document.createElement('textarea');
+        dealTermsTa.rows = 3;
+        dealTermsTa.value = draft.dealTerms || '';
+        dealTermsTa.className = 'w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
+        dealTermsTa.oninput = () => {
+          draft.dealTerms = dealTermsTa.value;
+          markDirty();
+          paintDiff();
+          // Refresh "use default" indicator on every slot — slots tied to the
+          // default need to keep their `terms` in sync visually.
+          renderSlots();
         };
-        upload.appendChild(fileInput);
-        photosWrap.appendChild(upload);
+        dealTermsWrap.appendChild(dealTermsTa);
+        form.appendChild(dealTermsWrap);
+
+        // A1+A2: per-slot inline editor.
+        const slotsHeader = document.createElement('div');
+        slotsHeader.className = 'flex items-center justify-between gap-2 mt-3';
+        slotsHeader.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-300 font-extrabold">Deal slots</div>';
+        const addSlotBtn = document.createElement('button');
+        addSlotBtn.type = 'button';
+        addSlotBtn.className = 'rounded-full bg-slate2-50/10 border border-slate2-50/15 text-slate2-50 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/15';
+        addSlotBtn.textContent = '+ Add slot';
+        addSlotBtn.onclick = () => {
+          draft.dealSlots.push({
+            id: 's_' + Math.random().toString(36).slice(2,8),
+            label: 'New slot',
+            days: 'Mon-Fri',
+            timeStart: '19:00',
+            timeEnd: '21:00',
+            active: true,
+            seatCap: 4,
+            terms: draft.dealTerms || ''
+          });
+          markDirty();
+          renderSlots();
+          paintDiff();
+        };
+        slotsHeader.appendChild(addSlotBtn);
+        form.appendChild(slotsHeader);
+
+        const slotsMount = document.createElement('div');
+        slotsMount.className = 'mt-2 space-y-3';
+        form.appendChild(slotsMount);
+
+        function renderSlots() {
+          slotsMount.innerHTML = '';
+          if (!draft.dealSlots.length) {
+            const empty = document.createElement('div');
+            empty.className = 'rounded-xl bg-slate2-50/[0.02] border border-dashed border-slate2-50/15 p-3 text-sm text-slate2-400 italic';
+            empty.textContent = 'No slots yet. Add one to expose this venue’s deal to members.';
+            slotsMount.appendChild(empty);
+            return;
+          }
+          draft.dealSlots.forEach((s, idx) => {
+            const card = document.createElement('div');
+            card.className = 'rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 p-3';
+
+            // Top row: label + active toggle + remove
+            const top = document.createElement('div');
+            top.className = 'flex items-center gap-2 flex-wrap';
+            const labelInp = document.createElement('input');
+            labelInp.type = 'text';
+            labelInp.value = s.label || '';
+            labelInp.placeholder = 'Slot label (e.g. Lunch · 13:00-15:30)';
+            labelInp.className = 'flex-1 min-w-[160px] bg-slate2-50/[0.04] border border-slate2-50/15 rounded-lg px-2 py-1 text-sm font-bold text-slate2-50 outline-none focus:border-mv-500/60';
+            labelInp.oninput = () => { s.label = labelInp.value; markDirty(); paintDiff(); };
+            top.appendChild(labelInp);
+
+            const toggleWrap = document.createElement('div');
+            toggleWrap.className = 'flex items-center gap-2 shrink-0';
+            const toggleLabel = document.createElement('span');
+            toggleLabel.className = 'text-[10px] uppercase tracking-widest text-slate2-400 font-bold';
+            toggleLabel.textContent = 'Active';
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            const paintToggle = () => {
+              toggle.className = 'h-6 w-11 rounded-full transition relative cursor-pointer border ' + (s.active ? 'bg-accent-emer border-accent-emer/60' : 'bg-slate2-50/10 border-slate2-50/15');
+              toggle.innerHTML = '<span class="absolute top-0.5 ' + (s.active ? 'right-0.5' : 'left-0.5') + ' h-5 w-5 rounded-full bg-white transition"></span>';
+            };
+            paintToggle();
+            toggle.onclick = () => { s.active = !s.active; markDirty(); paintToggle(); paintDiff(); };
+            toggleWrap.appendChild(toggleLabel);
+            toggleWrap.appendChild(toggle);
+            top.appendChild(toggleWrap);
+
+            const rmBtn = document.createElement('button');
+            rmBtn.type = 'button';
+            rmBtn.className = 'rounded-full bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer shrink-0';
+            rmBtn.textContent = 'Remove';
+            rmBtn.onclick = () => {
+              draft.dealSlots.splice(idx, 1);
+              markDirty();
+              renderSlots();
+              paintDiff();
+            };
+            top.appendChild(rmBtn);
+
+            card.appendChild(top);
+
+            // Days / time / cap grid
+            const grid = document.createElement('div');
+            grid.className = 'grid sm:grid-cols-2 gap-2 mt-3';
+
+            function mkInput(labelText, val, placeholder, onChange, type) {
+              const w = document.createElement('label');
+              w.className = 'block';
+              w.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + labelText + '</div>';
+              const i = document.createElement('input');
+              i.type = type || 'text';
+              i.value = (val === undefined || val === null) ? '' : val;
+              if (placeholder) i.placeholder = placeholder;
+              i.className = 'w-full rounded-lg bg-slate2-50/[0.04] border border-slate2-50/15 px-2 py-1 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+              i.oninput = () => { onChange(i.value); markDirty(); paintDiff(); };
+              w.appendChild(i);
+              return w;
+            }
+
+            grid.appendChild(mkInput('Days', s.days || '', 'e.g. Mon-Fri', v => { s.days = v; }));
+
+            const timeRow = document.createElement('div');
+            timeRow.className = 'grid grid-cols-2 gap-2';
+            timeRow.appendChild(mkInput('Start', s.timeStart || '', '19:00', v => { s.timeStart = v; }));
+            timeRow.appendChild(mkInput('End', s.timeEnd || '', '21:00', v => { s.timeEnd = v; }));
+            grid.appendChild(timeRow);
+
+            const capRow = document.createElement('div');
+            capRow.className = 'grid grid-cols-2 gap-2';
+            capRow.appendChild(mkInput('Seat cap', (typeof s.seatCap === 'number' ? s.seatCap : 4), '4', v => {
+              const n = Number(v);
+              s.seatCap = Number.isFinite(n) ? n : 0;
+            }, 'number'));
+            grid.appendChild(capRow);
+
+            card.appendChild(grid);
+
+            // Per-slot terms with "use default" checkbox.
+            const termsWrap = document.createElement('div');
+            termsWrap.className = 'mt-3';
+            const termsHead = document.createElement('div');
+            termsHead.className = 'flex items-center justify-between gap-2 flex-wrap';
+            termsHead.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold">Per-slot terms</div>';
+            const useDefaultLbl = document.createElement('label');
+            useDefaultLbl.className = 'flex items-center gap-1.5 text-xs text-slate2-300 cursor-pointer select-none';
+            const useDefaultCb = document.createElement('input');
+            useDefaultCb.type = 'checkbox';
+            const isUsingDefault = () => (s.terms === (draft.dealTerms || '')) || !s.terms;
+            useDefaultCb.checked = isUsingDefault();
+            useDefaultLbl.appendChild(useDefaultCb);
+            const useDefaultText = document.createElement('span');
+            useDefaultText.textContent = 'Use default';
+            useDefaultLbl.appendChild(useDefaultText);
+            termsHead.appendChild(useDefaultLbl);
+            termsWrap.appendChild(termsHead);
+
+            const termsTa = document.createElement('textarea');
+            termsTa.rows = 2;
+            termsTa.value = isUsingDefault() ? (draft.dealTerms || '') : (s.terms || '');
+            termsTa.disabled = useDefaultCb.checked;
+            termsTa.className = 'mt-1 w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y disabled:opacity-50';
+            termsTa.oninput = () => { s.terms = termsTa.value; markDirty(); paintDiff(); };
+            useDefaultCb.onchange = () => {
+              if (useDefaultCb.checked) {
+                s.terms = draft.dealTerms || '';
+                termsTa.value = s.terms;
+                termsTa.disabled = true;
+              } else {
+                termsTa.disabled = false;
+                termsTa.focus();
+              }
+              markDirty();
+              paintDiff();
+            };
+            termsWrap.appendChild(termsTa);
+
+            card.appendChild(termsWrap);
+
+            slotsMount.appendChild(card);
+          });
+        }
+        renderSlots();
+        paintDiff();
       }
-      renderPhotos();
+
+      // ----- 5. PHOTOS — four categorized galleries -----
+      //   `photos`      → main / cover (first photo shows on Discover, Map,
+      //                   venue page header — the primary brand image)
+      //   `foodPhotos`  → hero shots of dishes
+      //   `venuePhotos` → interior, exterior, ambiance, bar
+      //   `menuPhotos`  → menu pages, specials board, wine list
+      //
+      // Each category is its own self-contained section with upload, reorder,
+      // set-as-cover and delete controls. Limits per category: 12 photos.
+      // When the Main category is empty AND we have a cuisine to match
+      // against, the empty state actually renders the cuisinePhotoFor()
+      // image so admin sees what's currently displayed before deciding to
+      // replace it.
+      form.appendChild(section('Photos', 'Four galleries. JPG/PNG, ≤ 8 MB each — auto-compressed on upload. Up to 12 per category.'));
+      const photoCategories = [
+        { key: 'photos',      label: 'Main · Cover gallery',         hint: 'First photo here is the cover everywhere this venue appears (Discover, Map, venue page header). Aim for a hero shot that reads at thumbnail size.' },
+        { key: 'foodPhotos',  label: 'Food',                          hint: 'Hero shots of signature dishes. Shown in the Food strip on the venue page.' },
+        { key: 'venuePhotos', label: 'Restaurant · interior & exterior', hint: 'Dining room, bar, façade, ambiance. Shown in the Venue strip on the venue page.' },
+        { key: 'menuPhotos',  label: 'Menu',                          hint: 'Photos of menu pages, daily specials, wine list. Shown as a dedicated Menu strip on the venue page.' }
+      ];
+
+      photoCategories.forEach((cat, catIdx) => {
+        const catWrap = document.createElement('div');
+        catWrap.className = catIdx === 0
+          ? 'mt-3'
+          : 'mt-5 pt-4 border-t border-slate2-50/8';
+
+        // B2: per-category select-mode state. `selectMode` toggles overlay
+        // checkboxes on every tile; `selected` is a Set of indices into
+        // draft[cat.key] (snapshot at click time, recomputed on render so
+        // re-orders don't desync).
+        let selectMode = false;
+        const selected = new Set();
+
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-3 flex-wrap';
+        const headerText = document.createElement('div');
+        headerText.innerHTML =
+          '<div class="text-[10px] uppercase tracking-widest text-slate2-300 font-extrabold">' + cat.label + '</div>' +
+          '<div class="text-xs text-slate2-400 mt-0.5">' + cat.hint + '</div>';
+        header.appendChild(headerText);
+
+        // Right-side: "Select" toggle (B2). Hidden when category is empty.
+        const selectToggle = document.createElement('button');
+        selectToggle.type = 'button';
+        selectToggle.className = 'rounded-full bg-slate2-50/10 border border-slate2-50/15 text-slate2-300 px-3 py-1 text-[11px] font-bold cursor-pointer hover:bg-slate2-50/15 shrink-0';
+        selectToggle.textContent = 'Select';
+        selectToggle.onclick = () => {
+          selectMode = !selectMode;
+          selected.clear();
+          renderCat();
+        };
+        header.appendChild(selectToggle);
+
+        catWrap.appendChild(header);
+
+        const area = document.createElement('div');
+        area.className = 'mt-3 space-y-3';
+        catWrap.appendChild(area);
+
+        function renderCat() {
+          area.innerHTML = '';
+          const arr = draft[cat.key];
+
+          // Keep the Select toggle in the right state (hide when empty, label
+          // reflects the current mode).
+          if (arr.length === 0) {
+            selectMode = false;
+            selected.clear();
+            selectToggle.style.display = 'none';
+          } else {
+            selectToggle.style.display = '';
+            selectToggle.textContent = selectMode ? 'Done' : 'Select';
+            selectToggle.className = 'rounded-full ' + (selectMode
+              ? 'bg-mv-500 text-white border border-mv-500'
+              : 'bg-slate2-50/10 border border-slate2-50/15 text-slate2-300 hover:bg-slate2-50/15')
+              + ' px-3 py-1 text-[11px] font-bold cursor-pointer shrink-0';
+          }
+
+          if (arr.length === 0) {
+            // Empty state. For the Main category we show what's CURRENTLY
+            // rendering — the cuisine-matched stock photo from
+            // cuisinePhotoFor() — so admin sees what they'd be replacing.
+            // For other categories, just an italic placeholder line.
+            const empty = document.createElement('div');
+            empty.className = 'rounded-xl bg-slate2-50/[0.02] border border-dashed border-slate2-50/15 p-3';
+            if (cat.key === 'photos') {
+              let fallbackUrl = null;
+              try { fallbackUrl = (typeof cuisinePhotoFor === 'function') ? cuisinePhotoFor({ ...venue, cuisine: draft.cuisine || venue.cuisine }) : null; } catch(e){}
+              if (fallbackUrl) {
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-3';
+                row.innerHTML =
+                  '<img src="' + fallbackUrl + '" class="w-24 h-24 rounded-lg object-cover border border-slate2-50/15 shrink-0" alt="Current cuisine-matched stock photo"/>' +
+                  '<div class="flex-1 min-w-0 text-sm">' +
+                    '<div class="font-bold text-slate2-200">Currently showing this stock photo</div>' +
+                    '<div class="text-xs text-slate2-400 mt-1">Cuisine-matched fallback for <span class="font-bold text-slate2-200">' + (draft.cuisine || venue.cuisine || 'this cuisine') + '</span>. Upload a real photo below to replace it on Discover, Map, and the venue page header.</div>' +
+                  '</div>';
+                empty.appendChild(row);
+              } else {
+                empty.innerHTML = '<div class="text-sm text-slate2-400 italic">No cover photo yet — upload to give this venue a real brand image.</div>';
+              }
+            } else {
+              empty.innerHTML = '<div class="text-sm text-slate2-400 italic">No ' + cat.label.split('·')[0].trim().toLowerCase() + ' photos yet.</div>';
+            }
+            area.appendChild(empty);
+          } else {
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-3 sm:grid-cols-4 gap-2';
+            arr.forEach((src, i) => {
+              const tile = document.createElement('div');
+              tile.className = 'relative rounded-xl overflow-hidden border border-slate2-50/15 bg-slate2-50/[0.03]';
+              tile.style.aspectRatio = '1 / 1';
+              tile.innerHTML =
+                '<img src="' + src + '" class="w-full h-full object-cover" alt="' + cat.label + ' photo ' + (i+1) + '"/>' +
+                (i === 0 ? '<span class="absolute top-1.5 left-1.5 rounded-full bg-mv-500 text-white text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 shadow-md">' + (cat.key === 'photos' ? 'Cover' : 'First') + '</span>' : '');
+
+              if (selectMode) {
+                // B2: render a full-tile checkbox overlay; suppress per-tile
+                // action buttons so the surface is unambiguous.
+                const overlay = document.createElement('button');
+                overlay.type = 'button';
+                const isChecked = selected.has(i);
+                overlay.className = 'absolute inset-0 cursor-pointer border-2 ' + (isChecked ? 'border-mv-500 bg-mv-500/30' : 'border-transparent bg-black/0 hover:bg-black/20');
+                overlay.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
+                overlay.setAttribute('aria-label', (isChecked ? 'Deselect' : 'Select') + ' photo ' + (i+1));
+                const tick = document.createElement('span');
+                tick.className = 'absolute top-1.5 right-1.5 w-6 h-6 rounded-full grid place-items-center text-xs font-extrabold border ' + (isChecked ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/90 text-ink-900 border-white');
+                tick.textContent = isChecked ? '✓' : '';
+                overlay.appendChild(tick);
+                overlay.onclick = () => {
+                  if (selected.has(i)) selected.delete(i);
+                  else selected.add(i);
+                  renderCat();
+                };
+                tile.appendChild(overlay);
+              } else {
+                const actions = document.createElement('div');
+                actions.className = 'absolute bottom-1 right-1 flex gap-0.5';
+                function btn(label, title, fn, classes) {
+                  const b = document.createElement('button');
+                  b.type = 'button';
+                  b.className = 'rounded-full grid place-items-center text-[11px] font-extrabold cursor-pointer ' + classes + ' w-6 h-6';
+                  b.textContent = label;
+                  b.title = title;
+                  b.onclick = fn;
+                  return b;
+                }
+                if (i > 0)                    actions.appendChild(btn('↑', 'Move up',       () => { const t = arr[i-1]; arr[i-1] = arr[i]; arr[i] = t; markDirty(); renderCat(); }, 'bg-slate2-50/95 text-ink-900'));
+                if (i < arr.length - 1)       actions.appendChild(btn('↓', 'Move down',     () => { const t = arr[i+1]; arr[i+1] = arr[i]; arr[i] = t; markDirty(); renderCat(); }, 'bg-slate2-50/95 text-ink-900'));
+                if (i > 0)                    actions.appendChild(btn('★', cat.key === 'photos' ? 'Set as cover' : 'Move to front', () => { const c = arr[i]; arr.splice(i, 1); arr.unshift(c); markDirty(); renderCat(); }, 'bg-mv-500 text-white'));
+                actions.appendChild(btn('×', 'Delete', () => { arr.splice(i, 1); markDirty(); renderCat(); }, 'bg-red-500 text-white'));
+                tile.appendChild(actions);
+              }
+              grid.appendChild(tile);
+            });
+            area.appendChild(grid);
+          }
+
+          // B2: bulk-delete action bar — only when in select mode AND ≥1
+          // tile is checked. Filters by index in descending order so
+          // splices don't shift earlier indices.
+          if (selectMode && selected.size > 0) {
+            const bulkBar = document.createElement('div');
+            bulkBar.className = 'flex items-center justify-between gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-3 py-2';
+            const count = selected.size;
+            bulkBar.innerHTML = '<div class="text-xs text-red-200 font-bold">' + count + ' selected</div>';
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'rounded-full bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-xs font-extrabold cursor-pointer';
+            delBtn.textContent = 'Delete ' + count + ' selected';
+            delBtn.onclick = () => {
+              confirmDo('Delete ' + count + ' photo' + (count===1?'':'s') + '?', () => {
+                const idxs = Array.from(selected).sort((a,b) => b - a);
+                idxs.forEach(i => { arr.splice(i, 1); });
+                selected.clear();
+                if (arr.length === 0) selectMode = false;
+                markDirty();
+                renderCat();
+              });
+            };
+            bulkBar.appendChild(delBtn);
+            area.appendChild(bulkBar);
+          }
+
+          // Upload control (always at the bottom of the category)
+          const upload = document.createElement('label');
+          upload.className = 'block cursor-pointer';
+          const dz = document.createElement('div');
+          dz.className = 'rounded-2xl border-2 border-dashed border-slate2-50/15 hover:border-mv-500/50 transition px-4 py-3 text-center text-sm font-bold text-slate2-300';
+          const verb = cat.key === 'photos' ? 'photo' : cat.label.split('·')[0].trim().toLowerCase() + ' photo';
+          dz.innerHTML = '+ Add ' + verb + '(s) <span class="text-xs text-slate2-500 font-normal ml-1">(' + arr.length + '/12)</span>';
+          upload.appendChild(dz);
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.multiple = true;
+          fileInput.className = 'hidden';
+          fileInput.onchange = async (ev) => {
+            const files = Array.from(ev.target.files || []);
+            let added = 0;
+            for (const f of files) {
+              if (arr.length >= 12) { toast('Max 12 photos per category'); break; }
+              try {
+                const compressed = await compressImage(f, 1600, 0.85);
+                arr.push(compressed);
+                added++;
+              } catch (err) {
+                toast(err.message || 'Photo upload failed');
+              }
+            }
+            if (added) markDirty();
+            renderCat();
+            ev.target.value = '';
+          };
+          upload.appendChild(fileInput);
+          area.appendChild(upload);
+        }
+
+        renderCat();
+        form.appendChild(catWrap);
+      });
 
       // ----- ACTIONS -----
       const actions = document.createElement('div');
@@ -6587,21 +7645,55 @@ function Admin() {
       cancel.type = 'button';
       cancel.className = 'rounded-full bg-slate2-50/10 border border-slate2-50/15 text-slate2-50 px-5 py-2 text-xs font-bold cursor-pointer hover:bg-slate2-50/15';
       cancel.textContent = 'Cancel';
-      cancel.onclick = () => form.remove();
+
+      // H3: window beforeunload guard. Only activates while isDirty is true.
+      // We hold the handler reference so we can unbind on save/cancel/remove
+      // — otherwise it leaks across renders.
+      const beforeUnload = (ev) => {
+        if (!isDirty) return;
+        ev.preventDefault();
+        ev.returnValue = '';
+        return '';
+      };
+      window.addEventListener('beforeunload', beforeUnload);
+      // Tear down listener whenever the form leaves the DOM, defensively.
+      function teardown() {
+        window.removeEventListener('beforeunload', beforeUnload);
+      }
+
+      cancel.onclick = () => {
+        const closeNow = () => { teardown(); form.remove(); };
+        if (isDirty) {
+          confirmDo('Discard unsaved changes?', closeNow);
+        } else {
+          closeNow();
+        }
+      };
       const save = document.createElement('button');
       save.type = 'button';
       save.className = 'rounded-full bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-xs font-extrabold cursor-pointer shadow-lg shadow-mv-500/20';
       save.textContent = 'Save changes';
       save.onclick = () => {
-        // Diff draft against current. Only persist actually-changed fields,
-        // including photos which are compared by JSON.
+        // H1: required-field guard. Empty/whitespace-only Name, Cuisine,
+        // or Barrio aborts the save with a toast.
+        for (const rk of REQUIRED_FIELDS) {
+          const rv = draft[rk];
+          if (typeof rv !== 'string' || rv.trim() === '') {
+            toast(rk.charAt(0).toUpperCase() + rk.slice(1) + ' is required', 'err');
+            return;
+          }
+        }
+        // Diff draft against current. Only persist actually-changed fields.
+        // The four photo arrays + dealSlots are array-typed and require
+        // JSON-string comparison.
+        const ARRAY_FIELDS = ['photos', 'foodPhotos', 'venuePhotos', 'menuPhotos', 'dealSlots'];
         const changes = {};
         Object.keys(draft).forEach(k => {
           const oldVal = current[k];
           const newVal = draft[k];
-          if (k === 'photos') {
+          if (ARRAY_FIELDS.includes(k)) {
             const a = oldVal || [];
-            if (JSON.stringify(a) !== JSON.stringify(newVal)) changes.photos = newVal;
+            if (JSON.stringify(a) !== JSON.stringify(newVal)) changes[k] = newVal;
             return;
           }
           // Empty string + undefined are equivalent — don't write empty
@@ -6616,6 +7708,8 @@ function Admin() {
         } else {
           Object.assign(venue, changes);
         }
+        isDirty = false;
+        teardown();
         saveStore();
         toast('Saved · ' + (draft.name || venue.name));
         render();
@@ -6822,6 +7916,753 @@ function Admin() {
     return wrap;
   }
 
+  // ===== Tab: Insights (G1+G2) =====
+  // Marketplace-wide KPIs + per-venue dashboards. Read-only — no mutations.
+  function AdminInsights() {
+    let expandedSlug = null; // which venue's 30-day sparkline is open
+    const wrap = el('div',{class:'space-y-6'});
+
+    // Tiny SVG sparkline — 30 daily redemption counts for one venue.
+    function sparklineFor(slug) {
+      const now = Date.now();
+      const days = 30;
+      const counts = new Array(days).fill(0);
+      (store.redemptions || []).forEach(r => {
+        if (r.venueSlug !== slug || !r.redeemedAt) return;
+        const dayIdx = Math.floor((now - r.redeemedAt) / 86400000);
+        if (dayIdx >= 0 && dayIdx < days) counts[days - 1 - dayIdx]++;
+      });
+      const max = Math.max(1, ...counts);
+      const W = 360, H = 50, step = W / (days - 1);
+      const points = counts.map((c,i) => i*step + ',' + (H - (c/max)*(H-6) - 3)).join(' ');
+      const total = counts.reduce((a,b)=>a+b, 0);
+      // Inline SVG — no external lib.
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox','0 0 ' + W + ' ' + H);
+      svg.setAttribute('width','100%');
+      svg.setAttribute('height',H);
+      svg.setAttribute('preserveAspectRatio','none');
+      const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      poly.setAttribute('fill','none');
+      poly.setAttribute('stroke','#DC4A26');
+      poly.setAttribute('stroke-width','2');
+      poly.setAttribute('points', points);
+      svg.appendChild(poly);
+      return el('div',{class:'mt-2 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 p-3'},
+        el('div',{class:'flex items-center justify-between text-xs text-slate2-400 mb-1'},
+          el('span',{},'30-day redemptions'),
+          el('span',{class:'font-bold text-slate2-50'}, String(total) + ' total · peak ' + max + '/day')
+        ),
+        svg
+      );
+    }
+
+    function paintInsights() {
+      wrap.innerHTML = '';
+
+      const liveAll = store.partnerVenues.filter(v => v.status === 'LIVE');
+      const weekAgo = Date.now() - 7*86400000;
+      const redemptionsThisWeek = (store.redemptions || []).filter(r => r.redeemedAt && r.redeemedAt >= weekAgo).length;
+      const allReviews = (store.reviews || []);
+      const avgRating = allReviews.length
+        ? (allReviews.reduce((s,r)=>s+(r.stars||0),0) / allReviews.length)
+        : 0;
+      const activeSubs = Object.values(store.subscriptions || {}).filter(s => s && s.status === 'ACTIVE').length;
+
+      // KPI strip — 4 cards.
+      wrap.append(
+        el('div',{class:'grid md:grid-cols-4 gap-4'},
+          StatPanel('🏪','Live venues', liveAll.length, 'currently active'),
+          StatPanel('🎫','Redemptions / week', redemptionsThisWeek, 'last 7 days'),
+          StatPanel('⭐','Avg rating', avgRating ? avgRating.toFixed(2) : '—', allReviews.length + ' review' + (allReviews.length===1?'':'s')),
+          StatPanel('💳','Active subscriptions', activeSubs, 'paying members')
+        )
+      );
+
+      // ----- Top 5 by redemption count -----
+      const allVenuesForRanking = [...liveAll.map(toMemberShape), ...VENUES];
+      const seen = new Set();
+      const dedup = allVenuesForRanking.filter(v => {
+        if (seen.has(v.slug)) return false; seen.add(v.slug); return true;
+      });
+      const byRedemptions = dedup
+        .map(v => ({ v, n: (store.redemptions || []).filter(r => r.venueSlug === v.slug).length }))
+        .filter(x => x.n > 0)
+        .sort((a,b) => b.n - a.n)
+        .slice(0, 5);
+
+      wrap.append(
+        el('div',{},
+          el('h2',{class:'text-xl font-extrabold'},'Top 5 venues — by redemption count'),
+          byRedemptions.length === 0
+            ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No redemptions yet.')
+            : el('ul',{class:'mt-3 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
+                ...byRedemptions.map(({v, n}, i) => {
+                  const rowChildren = [
+                    el('button',{
+                      class:'w-full flex items-center justify-between gap-3 px-4 py-3 text-sm cursor-pointer bg-transparent border-0 text-left',
+                      onclick:()=>{
+                        expandedSlug = (expandedSlug === v.slug) ? null : v.slug;
+                        paintInsights();
+                      }
+                    },
+                      el('span',{class:'flex items-center gap-3 min-w-0'},
+                        el('span',{class:'text-slate2-400 w-5 text-right'}, String(i+1) + '.'),
+                        el('span',{class:'font-bold text-slate2-50 truncate'}, v.name),
+                        el('span',{class:'text-xs text-slate2-400 truncate'}, v.barrio || '—')
+                      ),
+                      el('span',{class:'flex items-center gap-2 shrink-0'},
+                        el('span',{class:'font-extrabold text-slate2-50'}, String(n)),
+                        el('span',{class:'text-xs text-slate2-400'}, n === 1 ? 'redemption' : 'redemptions'),
+                        el('span',{class:'text-xs text-slate2-400 ml-2'}, expandedSlug === v.slug ? '▾' : '▸')
+                      )
+                    )
+                  ];
+                  if (expandedSlug === v.slug) rowChildren.push(el('div',{class:'px-4 pb-4'}, sparklineFor(v.slug)));
+                  return el('li',{}, ...rowChildren);
+                })
+              )
+        )
+      );
+
+      // ----- Top 5 by rating (min 5 reviews) -----
+      const byRating = dedup
+        .map(v => {
+          const rs = (store.reviews || []).filter(r => r.venueSlug === v.slug);
+          if (rs.length < 5) return null;
+          const avg = rs.reduce((s,r)=>s+(r.stars||0),0) / rs.length;
+          return { v, avg, count: rs.length };
+        })
+        .filter(Boolean)
+        .sort((a,b) => b.avg - a.avg)
+        .slice(0, 5);
+
+      wrap.append(
+        el('div',{},
+          el('h2',{class:'text-xl font-extrabold'},'Top 5 venues — by rating'),
+          el('p',{class:'mt-1 text-xs text-slate2-400'},'Minimum 5 reviews to qualify.'),
+          byRating.length === 0
+            ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No venues meet the threshold yet.')
+            : el('ul',{class:'mt-3 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
+                ...byRating.map(({v, avg, count}, i) => {
+                  const rowChildren = [
+                    el('button',{
+                      class:'w-full flex items-center justify-between gap-3 px-4 py-3 text-sm cursor-pointer bg-transparent border-0 text-left',
+                      onclick:()=>{
+                        expandedSlug = (expandedSlug === v.slug) ? null : v.slug;
+                        paintInsights();
+                      }
+                    },
+                      el('span',{class:'flex items-center gap-3 min-w-0'},
+                        el('span',{class:'text-slate2-400 w-5 text-right'}, String(i+1) + '.'),
+                        el('span',{class:'font-bold text-slate2-50 truncate'}, v.name),
+                        el('span',{class:'text-xs text-slate2-400 truncate'}, v.barrio || '—')
+                      ),
+                      el('span',{class:'flex items-center gap-2 shrink-0'},
+                        el('span',{class:'font-extrabold text-slate2-50'}, '★ ' + avg.toFixed(2)),
+                        el('span',{class:'text-xs text-slate2-400'}, '(' + count + ')'),
+                        el('span',{class:'text-xs text-slate2-400 ml-2'}, expandedSlug === v.slug ? '▾' : '▸')
+                      )
+                    )
+                  ];
+                  if (expandedSlug === v.slug) rowChildren.push(el('div',{class:'px-4 pb-4'}, sparklineFor(v.slug)));
+                  return el('li',{}, ...rowChildren);
+                })
+              )
+        )
+      );
+
+      // ----- Last 10 redemptions -----
+      const recent = (store.redemptions || []).slice().sort((a,b) => (b.redeemedAt||0) - (a.redeemedAt||0)).slice(0, 10);
+      wrap.append(
+        el('div',{},
+          el('h2',{class:'text-xl font-extrabold'},'Last 10 redemptions'),
+          recent.length === 0
+            ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No redemptions yet.')
+            : el('ul',{class:'mt-3 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
+                ...recent.map(r => {
+                  const m = store.users.find(x => x.id === r.memberId);
+                  const v = findVenueBySlug(r.venueSlug);
+                  return el('li',{class:'flex items-center justify-between gap-3 px-4 py-3 text-sm'},
+                    el('span',{class:'flex items-center gap-2 min-w-0'},
+                      el('span',{class:'text-accent-emer'}, '✓'),
+                      el('span',{class:'text-slate2-200 truncate'}, (m ? (m.name || m.email) : 'unknown member') + ' · ' + (v ? v.name : r.venueSlug))
+                    ),
+                    el('span',{class:'text-xs text-slate2-400 shrink-0'}, r.redeemedAt ? new Date(r.redeemedAt).toLocaleString('en-GB') : '—')
+                  );
+                })
+              )
+        )
+      );
+    }
+    paintInsights();
+    return wrap;
+  }
+
+  // ===== Tab: Reviews (L1) =====
+  // Moderation list across every venue. Filter chips + sort toggle, plus a
+  // basic profanity heuristic that auto-flags any review containing a banned
+  // word so the admin sees them in the "Flagged" bucket on the next paint.
+  function AdminReviews() {
+    let filter = 'all'; // all | flagged | low | high
+    let sortBy = 'recency'; // recency | rating | venue
+    const wrap = el('div',{class:'space-y-4'});
+
+    // Tiny English+Spanish word list. Intentionally minimal — the goal is to
+    // catch obvious cases, not to ship a content-moderation engine.
+    const PROFANITY = ['fuck','shit','idiot','imbécil','mierda','jodido'];
+    function looksProfane(text) {
+      if (!text) return false;
+      const t = String(text).toLowerCase();
+      return PROFANITY.some(w => t.indexOf(w) !== -1);
+    }
+
+    // Auto-flag pass on every paint. Only sets flagged=true; never clears it
+    // (an admin who manually un-flags shouldn't see it re-flagged).
+    function autoFlag() {
+      let touched = false;
+      (store.reviews || []).forEach(r => {
+        if (!r.flagged && looksProfane(r.note)) { r.flagged = true; touched = true; }
+      });
+      if (touched) saveStore();
+    }
+
+    function paintReviews() {
+      autoFlag();
+      wrap.innerHTML = '';
+      let list = (store.reviews || []).slice();
+      if (filter === 'flagged') list = list.filter(r => r.flagged);
+      else if (filter === 'low') list = list.filter(r => (r.stars || 0) <= 2);
+      else if (filter === 'high') list = list.filter(r => (r.stars || 0) >= 5);
+      if (sortBy === 'recency') list.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+      else if (sortBy === 'rating') list.sort((a,b) => (b.stars||0) - (a.stars||0));
+      else if (sortBy === 'venue') list.sort((a,b) => (a.venueSlug||'').localeCompare(b.venueSlug||''));
+
+      const chips = [
+        ['all','All', (store.reviews||[]).length],
+        ['flagged','Flagged', (store.reviews||[]).filter(r=>r.flagged).length],
+        ['low','Low (≤2★)', (store.reviews||[]).filter(r=>(r.stars||0)<=2).length],
+        ['high','High (≥5★)', (store.reviews||[]).filter(r=>(r.stars||0)>=5).length]
+      ];
+
+      wrap.append(
+        el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+          el('div',{class:'flex gap-1 flex-wrap'},
+            ...chips.map(([k,l,n]) => el('button',{
+              class:'rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer ' + (filter===k ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+              onclick:()=>{ filter = k; paintReviews(); }
+            }, l + ' (' + n + ')'))
+          ),
+          el('div',{class:'flex items-center gap-2 text-xs text-slate2-400'},
+            'Sort:',
+            ...[['recency','Recent'],['rating','Rating'],['venue','Venue']].map(([k,l]) => el('button',{
+              class:'rounded-full px-3 py-1 cursor-pointer ' + (sortBy===k ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+              onclick:()=>{ sortBy = k; paintReviews(); }
+            }, l))
+          )
+        ),
+        el('div',{class:'text-xs text-slate2-400'}, list.length + ' review' + (list.length===1?'':'s'))
+      );
+
+      if (list.length === 0) {
+        wrap.append(el('p',{class:'text-sm text-slate2-400'},'No reviews match this filter.'));
+        return;
+      }
+
+      wrap.append(
+        el('div',{class:'space-y-2'},
+          ...list.map(r => {
+            const m = store.users.find(x => x.id === r.memberId);
+            const v = findVenueBySlug(r.venueSlug);
+            const note = r.note || '';
+            const trimmed = note.length > 120 ? (note.slice(0, 120) + '…') : note;
+            const flagged = !!r.flagged;
+            return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
+              el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
+                el('div',{class:'min-w-0 flex-1'},
+                  el('div',{class:'text-sm font-bold text-amber-300'}, '★'.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
+                  el('p',{class:'mt-1 text-sm text-slate2-200'}, trimmed || el('em',{class:'text-slate2-400'},'(no note)')),
+                  el('div',{class:'mt-2 text-xs text-slate2-400'},
+                    (m ? ((m.name||'') + ' · ' + m.email) : 'unknown member'),
+                    ' · ',
+                    el('button',{class:'underline cursor-pointer bg-transparent border-0', onclick:()=>v && go('venue',{slug:v.slug})}, v ? v.name : r.venueSlug),
+                    ' · ',
+                    r.createdAt ? new Date(r.createdAt).toLocaleString('en-GB') : '—'
+                  )
+                ),
+                el('div',{class:'flex items-center gap-2 shrink-0'},
+                  el('button',{
+                    class:'rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer ' + (flagged ? 'bg-red-500/20 text-red-200 border border-red-500/40' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+                    onclick:()=>{ r.flagged = !r.flagged; saveStore(); paintReviews(); }
+                  }, flagged ? '⚑ Flagged' : '⚐ Flag'),
+                  el('button',{
+                    class:'rounded-full px-3 py-1.5 text-xs font-bold cursor-pointer bg-red-500/20 text-red-200 border border-red-500/40',
+                    onclick:()=>{
+                      confirmDo('Delete this review? Cannot be undone.', () => {
+                        store.reviews = (store.reviews || []).filter(x => x.id !== r.id);
+                        saveStore(); toast('Review deleted'); paintReviews();
+                      });
+                    }
+                  }, 'Delete')
+                )
+              )
+            );
+          })
+        )
+      );
+    }
+    paintReviews();
+    return wrap;
+  }
+
+  // ===== Tab: Messages (F1+F2+F4) =====
+  // Per-partner conversation threads with pre-built templates. Admin → partner
+  // messages are stored on store.partnerMessages[slug]; the partner side of
+  // the loop is wired in F4 when we add the partner portal inbox. For now
+  // this is admin-only outbound (with a placeholder for inbound history if a
+  // future agent seeds 'partner->admin' messages).
+  function AdminMessages() {
+    const TEMPLATES = [
+      { id: 'welcome',     label: 'Welcome',                text: 'Welcome to Menuverso! Your venue is live and members can now book your 2-for-1 offer. Let us know if you need anything in the first week — we usually see the strongest pickup once your photos and deal terms are polished.' },
+      { id: 'photos_good', label: 'Photos look great',      text: 'Just a quick note — your photos look great. Members respond best to bright, well-framed shots like these, so thanks for putting in the effort.' },
+      { id: 'photos_hr',   label: 'Need higher-res photos', text: 'We took a look at your photos and the resolution is a bit low for our member-facing carousels. Could you upload a few higher-res shots (ideally 1600px+ on the long edge)? Happy to point at examples if useful.' },
+      { id: 'approval',    label: 'Approval reminder',      text: 'Friendly nudge — your venue is still pending review on our side. We aim to clear the queue within 48h; if you have any questions in the meantime, just reply here.' },
+      { id: 'reject',      label: 'Generic rejection',      text: 'Thanks for submitting your venue. We aren\'t able to approve it in its current form — most commonly this is because the deal terms, photos, or address details need a bit more work. Please revise and resubmit when ready.' },
+      { id: 'rereview',    label: 'Re-review needed',       text: 'Heads up — we noticed some recent edits to your offer/deal terms and we\'re sending it back for a quick re-review. Members will continue to see the previously-approved version until we sign off on the new one.' }
+    ];
+
+    let selectedSlug = null;
+    let composer = '';
+    let selectedTemplateId = '';
+    const wrap = el('div',{class:'space-y-4'});
+
+    function paintMessages() {
+      wrap.innerHTML = '';
+      // Sidebar list: every partner-owned venue, ordered by most recent
+      // message (or by name when there's no thread yet).
+      const partners = store.partnerVenues.slice().sort((a,b) => {
+        const am = (store.partnerMessages[a.slug] || []).slice(-1)[0]?.ts || 0;
+        const bm = (store.partnerMessages[b.slug] || []).slice(-1)[0]?.ts || 0;
+        if (am !== bm) return bm - am;
+        return (a.name||'').localeCompare(b.name||'');
+      });
+
+      const sidebar = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
+        partners.length === 0
+          ? el('p',{class:'p-4 text-sm text-slate2-400'},'No partners yet.')
+          : el('ul',{class:'divide-y divide-white/5'},
+              ...partners.map(pv => {
+                const msgs = store.partnerMessages[pv.slug] || [];
+                const owner = store.users.find(x => x.id === pv.ownerId);
+                const last = msgs[msgs.length - 1];
+                return el('li',{},
+                  el('button',{
+                    class:'w-full text-left px-4 py-3 text-sm cursor-pointer bg-transparent border-0 ' + (selectedSlug === pv.slug ? 'bg-slate2-50/10' : ''),
+                    onclick:()=>{ selectedSlug = pv.slug; composer = ''; selectedTemplateId = ''; paintMessages(); }
+                  },
+                    el('div',{class:'font-bold text-slate2-50 truncate'}, pv.name),
+                    el('div',{class:'text-xs text-slate2-400 truncate'}, owner ? owner.email : 'no owner'),
+                    el('div',{class:'mt-1 flex items-center justify-between gap-2'},
+                      el('span',{class:'text-xs text-slate2-400 truncate'}, last ? (last.text.slice(0, 60) + (last.text.length>60?'…':'')) : el('em',{},'No messages yet')),
+                      msgs.length > 0 && el('span',{class:'text-[10px] text-slate2-400 shrink-0'}, String(msgs.length))
+                    )
+                  )
+                );
+              })
+            )
+      );
+
+      // Conversation pane
+      let pane;
+      if (!selectedSlug) {
+        pane = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Pick a partner on the left to view the thread.');
+      } else {
+        const pv = store.partnerVenues.find(x => x.slug === selectedSlug);
+        const owner = pv ? store.users.find(x => x.id === pv.ownerId) : null;
+        const msgs = (store.partnerMessages[selectedSlug] || []).slice();
+
+        pane = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+          el('div',{class:'flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-slate2-50/10'},
+            el('div',{class:'min-w-0'},
+              el('div',{class:'font-bold text-slate2-50'}, pv ? pv.name : selectedSlug),
+              el('div',{class:'text-xs text-slate2-400 truncate'}, owner ? owner.email : 'no owner')
+            ),
+            el('span',{class:'text-xs text-slate2-400 shrink-0'}, msgs.length + ' message' + (msgs.length===1?'':'s'))
+          ),
+          // History
+          msgs.length === 0
+            ? el('p',{class:'text-sm text-slate2-400 italic'},'No messages yet — start the conversation below.')
+            : el('div',{class:'space-y-2 max-h-[360px] overflow-y-auto pr-1'},
+                ...msgs.map(m => {
+                  const fromAdmin = m.dir === 'admin->partner';
+                  return el('div',{class:'rounded-xl border p-3 ' + (fromAdmin ? 'bg-mv-500/10 border-mv-500/30 ml-8' : 'bg-slate2-50/5 border-slate2-50/10 mr-8')},
+                    el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400'}, fromAdmin ? 'Admin → Partner' : 'Partner → Admin'),
+                    el('p',{class:'mt-1 text-sm text-slate2-200 whitespace-pre-wrap'}, m.text),
+                    el('div',{class:'mt-1 text-[10px] text-slate2-400'}, m.ts ? new Date(m.ts).toLocaleString('en-GB') : '')
+                  );
+                })
+              ),
+          // Composer
+          el('div',{class:'pt-3 border-t border-slate2-50/10 space-y-2'},
+            el('div',{class:'flex items-center gap-2 flex-wrap'},
+              el('label',{class:'text-xs text-slate2-400'},'Template:'),
+              el('select',{class:'bg-slate2-50/5 border border-slate2-50/10 rounded-full px-3 py-1 text-xs text-slate2-50 cursor-pointer',
+                onChange: e => {
+                  selectedTemplateId = e.target.value;
+                  const tpl = TEMPLATES.find(t => t.id === selectedTemplateId);
+                  if (tpl) composer = tpl.text;
+                  paintMessages();
+                }
+              },
+                el('option',{value:''}, '— Pick a template —'),
+                ...TEMPLATES.map(t => el('option',{value:t.id, selected: selectedTemplateId === t.id ? '' : false}, t.label))
+              )
+            ),
+            (() => {
+              const ta = el('textarea',{class:'w-full bg-slate2-50/5 border border-slate2-50/10 rounded-xl p-3 text-sm text-slate2-50 outline-none', rows:'4', placeholder:'Write a message to this partner…',
+                onInput: e => { composer = e.target.value; }
+              });
+              ta.value = composer;
+              return ta;
+            })(),
+            el('div',{class:'flex justify-end'},
+              el('button',{class:'rounded-full bg-mv-500 text-white px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+                const text = composer.trim();
+                if (!text) { toast('Write something first', 'err'); return; }
+                if (!store.partnerMessages[selectedSlug]) store.partnerMessages[selectedSlug] = [];
+                store.partnerMessages[selectedSlug].push({
+                  id: 'pm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6),
+                  ts: Date.now(),
+                  dir: 'admin->partner',
+                  text,
+                  templateId: selectedTemplateId || null
+                });
+                saveStore();
+                toast('Message sent');
+                composer = '';
+                selectedTemplateId = '';
+                paintMessages();
+              }},'Send')
+            )
+          )
+        );
+      }
+
+      wrap.append(
+        el('div',{class:'grid md:grid-cols-[260px_1fr] gap-4'},
+          sidebar,
+          pane
+        )
+      );
+    }
+    paintMessages();
+    return wrap;
+  }
+
+  // ===== Tab: Notes (E3) =====
+  // Internal admin notes per venue — never shown to members or partners.
+  // Stored as store.adminNotes[slug] = [{ id, ts, adminId, text }].
+  function AdminNotes() {
+    let selectedSlug = null;
+    let draft = '';
+    const wrap = el('div',{class:'space-y-4'});
+
+    function paintNotes() {
+      wrap.innerHTML = '';
+      const partners = store.partnerVenues.slice().sort((a,b) => {
+        const an = venueNoteCount(a.slug);
+        const bn = venueNoteCount(b.slug);
+        if (an !== bn) return bn - an;
+        return (a.name||'').localeCompare(b.name||'');
+      });
+
+      // Also surface platform seeds that have notes — admins may want to
+      // annotate placeholder venues too.
+      const seedSlugsWithNotes = Object.keys(store.adminNotes || {})
+        .filter(s => !partners.some(pv => pv.slug === s))
+        .map(s => {
+          const v = findVenueBySlug(s);
+          return v ? { slug: s, name: v.name } : null;
+        })
+        .filter(Boolean);
+
+      const sidebar = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
+        el('ul',{class:'divide-y divide-white/5'},
+          ...partners.map(pv => {
+            const n = venueNoteCount(pv.slug);
+            return el('li',{},
+              el('button',{
+                class:'w-full text-left px-4 py-3 text-sm cursor-pointer bg-transparent border-0 ' + (selectedSlug === pv.slug ? 'bg-slate2-50/10' : ''),
+                onclick:()=>{ selectedSlug = pv.slug; draft = ''; paintNotes(); }
+              },
+                el('div',{class:'flex items-center justify-between gap-2'},
+                  el('span',{class:'font-bold text-slate2-50 truncate'}, pv.name),
+                  n > 0 && el('span',{class:'text-[10px] font-extrabold text-slate2-50 bg-mv-500 px-1.5 rounded-full shrink-0'}, String(n))
+                ),
+                el('div',{class:'text-xs text-slate2-400 truncate'}, pv.status)
+              )
+            );
+          }),
+          ...seedSlugsWithNotes.map(s => el('li',{},
+            el('button',{
+              class:'w-full text-left px-4 py-3 text-sm cursor-pointer bg-transparent border-0 ' + (selectedSlug === s.slug ? 'bg-slate2-50/10' : ''),
+              onclick:()=>{ selectedSlug = s.slug; draft = ''; paintNotes(); }
+            },
+              el('div',{class:'flex items-center justify-between gap-2'},
+                el('span',{class:'font-bold text-slate2-50 truncate'}, s.name),
+                el('span',{class:'text-[10px] font-extrabold text-slate2-50 bg-mv-500 px-1.5 rounded-full shrink-0'}, String(venueNoteCount(s.slug)))
+              ),
+              el('div',{class:'text-xs text-slate2-400 truncate'},'platform seed')
+            )
+          ))
+        )
+      );
+
+      let pane;
+      if (!selectedSlug) {
+        pane = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Pick a venue on the left to view its notes.');
+      } else {
+        const v = findVenueBySlug(selectedSlug);
+        const notes = (store.adminNotes[selectedSlug] || []).slice().sort((a,b) => (b.ts||0) - (a.ts||0));
+        pane = el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+          el('div',{class:'flex items-center justify-between gap-3 pb-3 border-b border-slate2-50/10'},
+            el('div',{class:'min-w-0'},
+              el('div',{class:'font-bold text-slate2-50'}, v ? v.name : selectedSlug),
+              el('div',{class:'text-xs text-slate2-400'}, notes.length + ' note' + (notes.length===1?'':'s'))
+            )
+          ),
+          // Composer
+          (() => {
+            const ta = el('textarea',{class:'w-full bg-slate2-50/5 border border-slate2-50/10 rounded-xl p-3 text-sm text-slate2-50 outline-none', rows:'3', placeholder:'Add an internal note about this venue…',
+              onInput: e => { draft = e.target.value; }
+            });
+            ta.value = draft;
+            return el('div',{class:'space-y-2'},
+              ta,
+              el('div',{class:'flex justify-end'},
+                el('button',{class:'rounded-full bg-slate2-50 text-ink-900 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+                  const text = draft.trim();
+                  if (!text) { toast('Write something first', 'err'); return; }
+                  if (!store.adminNotes[selectedSlug]) store.adminNotes[selectedSlug] = [];
+                  store.adminNotes[selectedSlug].push({
+                    id: 'nt_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6),
+                    ts: Date.now(),
+                    adminId: u.id,
+                    text
+                  });
+                  saveStore(); toast('Note saved'); draft = ''; paintNotes();
+                }},'Save note')
+              )
+            );
+          })(),
+          // History
+          notes.length === 0
+            ? el('p',{class:'text-sm text-slate2-400 italic'},'No notes yet.')
+            : el('ul',{class:'space-y-2'},
+                ...notes.map(n => {
+                  const author = store.users.find(usr => usr.id === n.adminId);
+                  return el('li',{class:'rounded-xl bg-slate2-50/5 border border-slate2-50/10 p-3'},
+                    el('div',{class:'flex items-center justify-between text-xs text-slate2-400 mb-1'},
+                      el('span',{}, author ? ((author.name||'') + ' · ' + author.email) : 'unknown admin'),
+                      el('span',{class:'flex items-center gap-2'},
+                        el('span',{}, n.ts ? new Date(n.ts).toLocaleString('en-GB') : '—'),
+                        el('button',{class:'underline text-red-300 cursor-pointer bg-transparent border-0', onclick:()=>{
+                          confirmDo('Delete this note?', () => {
+                            store.adminNotes[selectedSlug] = (store.adminNotes[selectedSlug] || []).filter(x => x.id !== n.id);
+                            saveStore(); toast('Note deleted'); paintNotes();
+                          });
+                        }},'Delete')
+                      )
+                    ),
+                    el('p',{class:'text-sm text-slate2-200 whitespace-pre-wrap'}, n.text)
+                  );
+                })
+              )
+        );
+      }
+
+      wrap.append(
+        el('div',{class:'grid md:grid-cols-[260px_1fr] gap-4'},
+          sidebar,
+          pane
+        )
+      );
+    }
+    paintNotes();
+    return wrap;
+  }
+
+  // ===== Tab: Audit (E1+E2) =====
+  // Read-only history of admin mutations against venues, plus a "revert to
+  // this state" button on each entry that applies the recorded `before`
+  // snapshot back onto the venue (partnerVenues or seedOverrides).
+  function AdminAudit() {
+    let q = '';
+    let venueFilter = ''; // slug or ''
+    let expandedId = null;
+    let showAll = false;
+    const wrap = el('div',{class:'space-y-4'});
+
+    function applyRevert(entry) {
+      if (!entry || !entry.venueSlug || !entry.before) { toast('Nothing to revert', 'err'); return; }
+      const slug = entry.venueSlug;
+      const before = entry.before;
+      // Try partnerVenues first.
+      const pv = store.partnerVenues.find(x => x.slug === slug);
+      if (pv) {
+        // Take a snapshot of current state BEFORE overwriting so the revert
+        // itself is auditable.
+        const currentSnap = JSON.parse(JSON.stringify(pv));
+        Object.keys(before).forEach(k => { pv[k] = JSON.parse(JSON.stringify(before[k])); });
+        logAudit('revert', slug, currentSnap, pv, 'reverted to audit entry ' + entry.id);
+        saveStore(); toast('Reverted ' + (pv.name || slug)); render();
+        return;
+      }
+      // Otherwise treat as a seedOverride.
+      if (!store.seedOverrides) store.seedOverrides = {};
+      const prev = store.seedOverrides[slug] ? JSON.parse(JSON.stringify(store.seedOverrides[slug])) : null;
+      store.seedOverrides[slug] = JSON.parse(JSON.stringify(before));
+      logAudit('revert', slug, prev, store.seedOverrides[slug], 'reverted seedOverride to audit entry ' + entry.id);
+      saveStore(); toast('Reverted seed override for ' + slug); render();
+    }
+
+    function paintAudit() {
+      wrap.innerHTML = '';
+      let entries = (store.auditLog || []).slice();
+      entries.sort((a,b) => (b.ts||0) - (a.ts||0));
+      if (venueFilter) entries = entries.filter(e => e.venueSlug === venueFilter);
+      if (q) {
+        const needle = q.toLowerCase();
+        entries = entries.filter(e => {
+          const v = e.venueSlug ? findVenueBySlug(e.venueSlug) : null;
+          const hay = (e.action + ' ' + (e.venueSlug||'') + ' ' + (v?.name||'') + ' ' + (e.reason||'')).toLowerCase();
+          return hay.includes(needle);
+        });
+      }
+      const totalMatching = entries.length;
+      const HARD_CAP = 500;
+      if (!showAll) entries = entries.slice(0, HARD_CAP);
+
+      // Unique slugs (for filter dropdown)
+      const slugs = Array.from(new Set((store.auditLog || []).map(e => e.venueSlug).filter(Boolean)));
+
+      wrap.append(
+        el('div',{class:'flex items-center gap-3 flex-wrap'},
+          el('div',{class:'flex-1 min-w-[200px] flex items-center gap-2 bg-slate2-50/5 rounded-full px-3 py-2 border border-slate2-50/10'},
+            el('span',{class:'text-slate2-400'},'🔍'),
+            el('input',{class:'bg-transparent outline-none text-sm flex-1', placeholder:'Search action, venue, reason', value:q,
+              onInput: e => { q = e.target.value; paintAudit(); }})
+          ),
+          el('select',{class:'bg-slate2-50/5 border border-slate2-50/10 rounded-full px-3 py-1.5 text-xs text-slate2-50 cursor-pointer',
+            onChange: e => { venueFilter = e.target.value; paintAudit(); }
+          },
+            el('option',{value:''}, 'All venues'),
+            ...slugs.map(s => {
+              const v = findVenueBySlug(s);
+              return el('option',{value:s, selected: venueFilter === s ? '' : false}, v ? v.name : s);
+            })
+          )
+        ),
+        el('div',{class:'flex items-center justify-between gap-3'},
+          el('div',{class:'text-xs text-slate2-400'},
+            totalMatching + ' entr' + (totalMatching===1?'y':'ies') + (totalMatching > HARD_CAP && !showAll ? ' · showing first ' + HARD_CAP : '')
+          ),
+          totalMatching > HARD_CAP && el('button',{class:'text-xs underline cursor-pointer bg-transparent border-0 text-slate2-300',
+            onclick:()=>{ showAll = !showAll; paintAudit(); }
+          }, showAll ? 'Limit to ' + HARD_CAP : 'Show all ' + totalMatching)
+        )
+      );
+
+      if (entries.length === 0) {
+        wrap.append(el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'},
+          (store.auditLog || []).length === 0
+            ? 'No audit entries yet — existing admin handlers can opt in by calling logAudit(...). See the helper comments in source for the recommended hooks.'
+            : 'No entries match this filter.'
+        ));
+        return;
+      }
+
+      // Compute a stable diff between two snapshots — top-level keys only,
+      // good enough for the demo's small venue shape.
+      function diffRows(before, after) {
+        const keys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+        const rows = [];
+        keys.forEach(k => {
+          const a = (before||{})[k];
+          const b = (after||{})[k];
+          if (JSON.stringify(a) === JSON.stringify(b)) return;
+          rows.push({ k, a, b });
+        });
+        return rows;
+      }
+      function fmt(v) {
+        if (v == null) return el('em',{class:'text-slate2-400'},'(none)');
+        if (typeof v === 'object') return el('code',{class:'text-xs text-slate2-300 break-all'}, JSON.stringify(v));
+        return el('span',{class:'text-xs text-slate2-200'}, String(v));
+      }
+
+      wrap.append(
+        el('div',{class:'space-y-2'},
+          ...entries.map(e => {
+            const v = e.venueSlug ? findVenueBySlug(e.venueSlug) : null;
+            const author = store.users.find(usr => usr.id === e.adminId);
+            const isOpen = expandedId === e.id;
+            const rows = isOpen ? diffRows(e.before, e.after) : [];
+            return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10'},
+              el('button',{class:'w-full text-left px-4 py-3 cursor-pointer bg-transparent border-0',
+                onclick:()=>{ expandedId = isOpen ? null : e.id; paintAudit(); }
+              },
+                el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+                  el('div',{class:'min-w-0 flex-1'},
+                    el('div',{class:'text-sm'},
+                      el('span',{class:'font-extrabold text-slate2-50'}, e.action),
+                      ' · ',
+                      el('span',{class:'text-slate2-300'}, v ? v.name : (e.venueSlug || '(no venue)')),
+                    ),
+                    el('div',{class:'text-xs text-slate2-400'},
+                      (author ? author.email : 'unknown admin'),
+                      ' · ',
+                      e.ts ? new Date(e.ts).toLocaleString('en-GB') : '',
+                      e.reason ? ' · ' + e.reason : ''
+                    )
+                  ),
+                  el('span',{class:'text-xs text-slate2-400 shrink-0'}, isOpen ? '▾' : '▸')
+                )
+              ),
+              isOpen && el('div',{class:'px-4 pb-4 border-t border-slate2-50/10 pt-3 space-y-2'},
+                rows.length === 0
+                  ? el('p',{class:'text-xs text-slate2-400 italic'},'No field-level differences captured.')
+                  : el('div',{class:'overflow-x-auto'},
+                      el('table',{class:'w-full text-xs'},
+                        el('thead',{class:'text-slate2-400 text-left uppercase tracking-widest'},
+                          el('tr',{}, el('th',{class:'pb-2 pr-3'},'Field'), el('th',{class:'pb-2 pr-3'},'Before'), el('th',{class:'pb-2'},'After'))
+                        ),
+                        el('tbody',{},
+                          ...rows.map(r => el('tr',{class:'border-t border-slate2-50/5 align-top'},
+                            el('td',{class:'py-2 pr-3 font-mono text-slate2-300 whitespace-nowrap'}, r.k),
+                            el('td',{class:'py-2 pr-3 text-red-300'}, fmt(r.a)),
+                            el('td',{class:'py-2 text-accent-emer'}, fmt(r.b))
+                          ))
+                        )
+                      )
+                    ),
+                el('div',{class:'flex justify-end'},
+                  e.before
+                    ? el('button',{class:'rounded-full bg-mv-500 text-white px-4 py-1.5 text-xs font-extrabold cursor-pointer', onclick:()=>{
+                        confirmDo('Revert ' + (v ? v.name : e.venueSlug) + ' to the recorded "before" state? This overwrites current fields.', () => applyRevert(e));
+                      }},'↺ Revert to this state')
+                    : el('span',{class:'text-xs text-slate2-400 italic'},'No "before" snapshot recorded — revert disabled.')
+                )
+              )
+            );
+          })
+        )
+      );
+    }
+    paintAudit();
+    return wrap;
+  }
+
   // ===== Tab: System =====
   function AdminSystem() {
     const dataJson = (() => { try { return JSON.stringify(store, null, 2); } catch { return '{}'; } })();
@@ -6906,6 +8747,11 @@ function Admin() {
       tab === 'requests' ? AdminRequests() :
       tab === 'users' ? AdminUsers() :
       tab === 'activity' ? AdminActivity() :
+      tab === 'insights' ? AdminInsights() :
+      tab === 'reviews' ? AdminReviews() :
+      tab === 'messages' ? AdminMessages() :
+      tab === 'notes' ? AdminNotes() :
+      tab === 'audit' ? AdminAudit() :
       tab === 'system' ? AdminSystem() :
       AdminOverview()
     )
