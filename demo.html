@@ -1338,6 +1338,7 @@ window.MV_T = {
  'banner.concept': 'Demo en desarrollo — los restaurantes mostrados son ilustrativos y no están afiliados con menuverso.',
  'nav.howItWorks': 'Cómo funciona',
  'nav.forRestaurants': 'Para Restaurantes',
+    'nav.signOut': 'Cerrar sesión',
  'nav.signIn': 'Iniciar sesión',
  'nav.join': 'Únete',
  'nav.openApp': 'Abrir la app →',
@@ -1357,9 +1358,9 @@ window.MV_T = {
  'waitlist.fineprint': 'Un único email cuando abramos. Cancelable con un clic.',
  'hero.line1': 'Disfruta de lo mejor.',
  'hero.line2': 'Ahorra en el resto.',
- 'hero.subhead.lead': ' ',
- 'hero.subhead.brand': 'menuverso',
- 'hero.subhead.tail': ': las joyas culinarias de Barcelona, solo para miembros.',
+ 'hero.subhead.lead': '',
+ 'hero.subhead.brand': '',
+ 'hero.subhead.tail': 'Las joyas culinarias de Barcelona. Solo para miembros.',
  'hero.ctaJoin': 'Únete — desde 3,99 €/mes',
  'hero.ctaApp': 'Abrir la app →',
  'hero.ctaHow': 'Cómo funciona',
@@ -1486,6 +1487,7 @@ window.MV_T = {
  'banner.concept': 'Demo in progress — the restaurants shown are illustrative and not affiliated with menuverso.',
  'nav.howItWorks': 'How it works',
  'nav.forRestaurants': 'For Restaurants',
+    'nav.signOut': 'Sign out',
  'nav.signIn': 'Sign in',
  'nav.join': 'Join',
  'nav.openApp': 'Open the app →',
@@ -1505,9 +1507,9 @@ window.MV_T = {
  'waitlist.fineprint': 'One email when we open. Unsubscribe in one click.',
  'hero.line1': 'Enjoy the Best.',
  'hero.line2': 'Save the Rest.',
- 'hero.subhead.lead': ' ',
- 'hero.subhead.brand': 'menuverso',
- 'hero.subhead.tail': ': Barcelona\u0027s hidden culinary gems, members only.',
+ 'hero.subhead.lead': '',
+ 'hero.subhead.brand': '',
+ 'hero.subhead.tail': 'Barcelona\u0027s hidden culinary gems. Members only.',
  'hero.ctaJoin': 'Join — from €3.99/mo',
  'hero.ctaApp': 'Open the app →',
  'hero.ctaHow': 'See How It Works',
@@ -1880,9 +1882,12 @@ function AppTopBar({ showNav }) {
  else if (u.role==='ADMIN') go('admin');
  else go('partner-portal');
  }},
- el('span',{class:'h-6 w-6 rounded-full bg-mv-500 grid place-items-center text-xs font-extrabold'}, (u.firstName?.[0] ?? u.email[0]).toUpperCase()),
+ el('span',{class:'h-6 w-6 rounded-full bg-mv-500 grid place-items-center text-xs font-extrabold text-white'}, (u.firstName?.[0] ?? u.email[0]).toUpperCase()),
  el('span',{class:'hidden md:inline'}, u.firstName ?? u.email.split('@')[0])
- )
+ ),
+ // Easy one-tap sign-out — accessible from every authenticated page,
+ // not buried at the bottom of the profile.
+ el('button',{class:'rounded-full border border-slate2-50/15 text-slate2-300 hover:text-slate2-50 hover:border-slate2-50/30 font-bold px-3 py-1.5 text-xs cursor-pointer bg-transparent transition', title:'Sign out', onclick:logout}, t('nav.signOut'))
  // Same <nav> structure + gap-5 as MarketingHeader so chrome stays pixel-stable.
  ) : el('nav',{class:'flex items-center gap-5 text-sm text-slate2-300'},
  el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>{
@@ -2309,8 +2314,6 @@ function Landing() {
  el('span',{class:'text-mv-500 italic'}, t('hero.line2'))
  ),
  el('p',{class:'hero-on-video mx-auto mt-6 max-w-2xl text-lg'},
- t('hero.subhead.lead'),
- el('strong',{}, t('hero.subhead.brand')),
  t('hero.subhead.tail')
  ),
  el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
@@ -2510,7 +2513,7 @@ function Landing() {
  el('ul',{class:'mt-5 space-y-2 text-sm text-slate2-100'},
  ...['Curated Barcelona restaurants','2×1 on whatever the kitchen offers','Cancel any time'].map(s =>
  el('li',{class:'flex items-center gap-2.5'},
- el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},'✓'),
+ el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},''),
  el('span',{class:'font-medium'}, s)
  ))
  ),
@@ -2563,7 +2566,7 @@ function Landing() {
  if (state === 'done') {
  wrap.appendChild(
  el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
- el('div',{class:'text-2xl mb-1'},'✓'),
+ el('div',{class:'text-2xl mb-1'},''),
  el('div',{class:'font-bold text-slate2-50'}, t('waitlist.success.title')),
  el('div',{class:'mt-1 text-sm text-slate2-300'}, t('waitlist.success.body'))
  )
@@ -2869,7 +2872,7 @@ function Checkout() {
  return AppShell(el('div',{class:'p-6 text-center'},
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'← Back'),
  el('div',{class:'mt-8'},
- el('div',{class:'mx-auto h-16 w-16 rounded-full bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer'},'✓'),
+ el('div',{class:'mx-auto h-16 w-16 rounded-full bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer'},''),
  el('h1',{class:'mt-4 text-2xl font-extrabold'},'You\'re already subscribed.'),
  el('p',{class:'mt-2 text-slate2-400 text-sm'},'Renews ', new Date(currentSub().renewsAt).toLocaleDateString('en-GB')),
  el('button',{class:'mt-8 rounded-full bg-slate2-50 text-ink-900 px-6 py-3 font-bold cursor-pointer', onclick:()=>go('app')},'Open the app →')
@@ -2891,7 +2894,7 @@ function Checkout() {
  el('p',{class:'text-center text-xs text-slate2-400 mt-1'},'or €6.99/mo billed monthly'),
  el('ul',{class:'mt-5 space-y-2 text-sm'},
  ...['2-for-1 on whatever each partner offers','Standing deals + flash deals','Cancel anytime','Instant activation']
- .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer'},'✓'), s))
+ .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer'},''), s))
  ),
  el('button',{class:'mt-6 w-full rounded-2xl bg-slate2-50 text-ink-900 hover:bg-slate2-200 py-3.5 font-extrabold cursor-pointer', onclick:()=>{
  store.subscriptions[u.id] = { status:'ACTIVE', startedAt: Date.now(), renewsAt: Date.now()+30*86400000, city:'Barcelona', cancelAtPeriodEnd:false };
@@ -2973,7 +2976,7 @@ function AppDiscover() {
  value:q,
  onInput: e => { q = e.target.value; paintGrid(); }
  }),
- q && el('button',{class:'text-slate2-400 hover:text-slate2-50 text-sm bg-transparent border-0 cursor-pointer', onclick:e => { q=''; e.currentTarget.previousElementSibling.value=''; paintGrid(); }},'✕')
+ q && el('button',{class:'text-slate2-400 hover:text-slate2-50 text-sm bg-transparent border-0 cursor-pointer', onclick:e => { q=''; e.currentTarget.previousElementSibling.value=''; paintGrid(); }},'×')
  ),
  el('button',{class:'md:hidden h-9 w-9 rounded-full bg-slate2-50/5 border border-slate2-50/10 grid place-items-center cursor-pointer', onclick:()=>go('map')},'')
  )
@@ -3637,7 +3640,7 @@ function BookingHistoryRow(b, u) {
  cancelHint && el('div',{class:'mt-1 text-[11px] text-slate2-500 italic'}, cancelHint),
  existingReview
  ? el('div',{class:'mt-2 text-accent-amber text-sm'},
- ''.repeat(existingReview.stars), el('span',{class:'text-slate2-500'}, '☆'.repeat(5 - existingReview.stars)),
+ ''.repeat(existingReview.stars), el('span',{class:'text-slate2-500'}, ''.repeat(5 - existingReview.stars)),
  existingReview.note && el('span',{class:'ml-2 text-xs text-slate2-400 italic'}, '"' + existingReview.note + '"')
  )
  : null,
@@ -4184,7 +4187,7 @@ function Venue() {
  statusIcon = ''; statusLabel = 'Paused'; statusClass = 'text-amber-300';
  ariaLabel = `${slotLabel} at ${slotTime} — venue paused, not bookable`;
  } else if (creditsExhausted) {
- statusIcon = '✓'; statusLabel = 'No credits'; statusClass = 'text-slate2-500';
+ statusIcon = ''; statusLabel = 'No credits'; statusClass = 'text-slate2-500';
  ariaLabel = `${slotLabel} at ${slotTime} — you have no monthly credits left here`;
  } else if (isFull) {
  statusIcon = '●'; statusLabel = 'Full'; statusClass = 'text-slate2-500';
@@ -4595,7 +4598,7 @@ function Booking() {
  const existingReview = (store.reviews || []).find(r => r.memberId === u.id && r.venueSlug === b.venueSlug);
  const rated = !!existingReview;
  inner.append(el('div',{class:'p-6 text-center'},
- el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},'✓'),
+ el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},''),
  el('h1',{class:'mt-5 text-2xl font-extrabold'},'Redeemed'),
  el('p',{class:'mt-1 text-slate2-300'}, v?.name),
  el('p',{class:'mt-1 text-xs text-slate2-500'}, new Date(b.redeemedAt).toLocaleString('en-GB')),
@@ -4605,7 +4608,7 @@ function Booking() {
  rated
  ? el('div',{class:'text-center'},
  el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Your rating'),
- el('div',{class:'mt-2 text-accent-amber text-2xl'}, ''.repeat(existingReview.stars) + '☆'.repeat(5 - existingReview.stars)),
+ el('div',{class:'mt-2 text-accent-amber text-2xl'}, ''.repeat(existingReview.stars) + ''.repeat(5 - existingReview.stars)),
  existingReview.note && el('p',{class:'mt-2 text-sm text-slate2-300 italic'}, '"' + existingReview.note + '"')
  )
  : (() => {
@@ -5020,7 +5023,7 @@ function PartnerLanding() {
  'Cancel any time from your portal',
  'Pause and resume listings instantly'
  ].map(s =>
- el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-mv-500 font-extrabold'},'✓'), s))
+ el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-mv-500 font-extrabold'},''), s))
  ),
  el('div',{class:'mt-7 text-center'},
  el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-10 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{
@@ -5560,7 +5563,7 @@ function PartnerOnboarding() {
  },'Set as cover'),
  el('button',{class:'absolute top-1 right-1 h-7 w-7 rounded-full bg-ink-900/90 border border-slate2-50/20 text-xs cursor-pointer hover:bg-red-600/80',
  onclick:()=>{ pv.photos.splice(i,1); saveStore(); paint(); }
- },'✕')
+ },'×')
  )),
  el('label',{class:'aspect-[4/3] rounded-lg border-2 border-dashed border-slate2-50/15 grid place-items-center cursor-pointer hover:bg-slate2-50/[0.05] text-center text-slate2-400 text-sm'},
  el('div',{}, el('div',{class:'text-3xl'},''), el('div',{class:'text-xs mt-1'},'Add photos')),
@@ -5719,7 +5722,7 @@ function PartnerOnboarding() {
  saveStore();
  toast('Submitted for review — we\'ll email you within 1 business day');
  go('partner-portal',{tab:'overview'});
- }}, 'Accept & Submit for review ✓')
+ }}, 'Accept & Submit for review ')
  )
  );
 
@@ -5755,7 +5758,7 @@ function PortalOverview() {
  el('ul',{class:'mt-4 space-y-2'},
  ...items.map(i => el('li',{class:'flex items-center justify-between gap-3 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 px-3 py-2.5'},
  el('div',{class:'flex items-center gap-3 min-w-0'},
- el('div',{class:'h-5 w-5 rounded-full border-2 grid place-items-center text-[10px] shrink-0 ' + (i.done ? 'bg-accent-emer border-accent-emer text-ink-900' : 'border-slate2-50/30 text-transparent')},'✓'),
+ el('div',{class:'h-5 w-5 rounded-full border-2 grid place-items-center text-[10px] shrink-0 ' + (i.done ? 'bg-accent-emer border-accent-emer text-ink-900' : 'border-slate2-50/30 text-transparent')},''),
  el('span',{class: 'text-sm ' + (i.done ? 'line-through text-slate2-400' : '')}, i.title)
  ),
  !i.done && el('button',{class:'text-xs font-bold underline text-mv-500 cursor-pointer bg-transparent border-0 shrink-0', onclick:i.go}, i.cta)
@@ -6022,10 +6025,10 @@ function PortalDeals() {
  // Track which slot has its conditions editor open. One at a time keeps the
  // page compact; each slot's terms are still independent.
  const expandedSlots = new Set();
- // Reusable "✓ Saved" affordance — turns a button green for ~1s then resets.
+ // Reusable " Saved" affordance — turns a button green for ~1s then resets.
  function flashSaved(btn, originalText) {
  btn.disabled = true;
- btn.textContent = '✓ Saved';
+ btn.textContent = ' Saved';
  btn.classList.add('bg-accent-emer'); btn.classList.remove('bg-mv-500','hover:bg-mv-600');
  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
  setTimeout(()=>{
@@ -6325,7 +6328,7 @@ function PortalProfile() {
  el('img',{src, class:'w-full h-full object-cover'}),
  el('button',{class:'absolute top-1 right-1 h-7 w-7 rounded-full bg-ink-900/90 border border-slate2-50/20 text-xs cursor-pointer hover:bg-red-600/80',
  onclick:()=>{ pv.photos.splice(i,1); saveStore(); paint(); }
- },'✕')
+ },'×')
  )),
  // Upload tile
  el('label',{class:'aspect-[4/3] rounded-lg border-2 border-dashed border-slate2-50/15 grid place-items-center cursor-pointer hover:bg-slate2-50/[0.05] text-center text-slate2-400 text-sm'},
@@ -6725,7 +6728,7 @@ function Admin() {
  pv.offerPublishedAt = Date.now();
  if (!pv.offerVersion) pv.offerVersion = 1;
  saveStore(); toast('Approved ' + pv.name); render();
- }},'✓ Approve'),
+ }},' Approve'),
  el('button',{class:'rounded-full bg-slate2-50/10 border border-slate2-50/10 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
  const reason = window.prompt('Reason to send the partner (optional):') || 'A reviewer asked for changes. Please refine your profile and resubmit.';
  pv.status = 'REJECTED'; pv.rejectionReason = reason; saveStore(); toast('Rejected ' + pv.name); render();
@@ -7401,7 +7404,7 @@ function Admin() {
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
  pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-full bg-accent-emer text-ink-900 px-3 py-1 text-xs font-extrabold cursor-pointer', onclick:()=>{
  pv.status='LIVE'; pv.approvedAt=Date.now(); saveStore(); toast('Approved'); render();
- }},'✓ Approve'),
+ }},' Approve'),
  pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-full bg-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  const reason = window.prompt('Reason:') || 'Requires more info.';
  pv.status='REJECTED'; pv.rejectionReason=reason; saveStore(); toast('Rejected'); render();
@@ -8110,7 +8113,7 @@ function Admin() {
  overlay.setAttribute('aria-label', (isChecked ? 'Deselect' : 'Select') + ' photo ' + (i+1));
  const tick = document.createElement('span');
  tick.className = 'absolute top-1.5 right-1.5 w-6 h-6 rounded-full grid place-items-center text-xs font-extrabold border ' + (isChecked ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/90 text-ink-900 border-white');
- tick.textContent = isChecked ? '✓' : '';
+ tick.textContent = isChecked ? '' : '';
  overlay.appendChild(tick);
  overlay.onclick = () => {
  if (selected.has(i)) selected.delete(i);
@@ -8654,7 +8657,7 @@ function Admin() {
  const v = findVenueBySlug(r.venueSlug);
  return el('li',{class:'flex items-center justify-between gap-3 px-4 py-3 text-sm'},
  el('span',{class:'flex items-center gap-2 min-w-0'},
- el('span',{class:'text-accent-emer'}, '✓'),
+ el('span',{class:'text-accent-emer'}, ''),
  el('span',{class:'text-slate2-200 truncate'}, (m ? (m.name || m.email) : 'unknown member') + ' · ' + (v ? v.name : r.venueSlug))
  ),
  el('span',{class:'text-xs text-slate2-400 shrink-0'}, r.redeemedAt ? new Date(r.redeemedAt).toLocaleString('en-GB') : '—')
@@ -8749,7 +8752,7 @@ function Admin() {
  return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0 flex-1'},
- el('div',{class:'text-sm font-bold text-amber-300'}, ''.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
+ el('div',{class:'text-sm font-bold text-amber-300'}, ''.repeat(r.stars||0) + ''.repeat(Math.max(0,5-(r.stars||0)))),
  el('p',{class:'mt-1 text-sm text-slate2-200'}, trimmed || el('em',{class:'text-slate2-400'},'(no note)')),
  el('div',{class:'mt-2 text-xs text-slate2-400'},
  (m ? ((m.name||'') + ' · ' + m.email) : 'unknown member'),
@@ -9423,7 +9426,7 @@ window.MV_TR_ES = {
  "Resume": "Reanudar",
  "Loading…": "Cargando…",
  "Done": "Hecho",
- "Done ✓": "Hecho ✓",
+ "Done ": "Hecho ",
  "Add photos": "Añadir fotos",
  "Acknowledge": "Aceptar",
  "Acknowledged": "Aceptado",
@@ -9696,9 +9699,9 @@ window.MV_TR_ES = {
  "Approve & ship live": "Aprobar y publicar",
  "Approve + hard delete": "Aprobar + eliminar definitivamente",
  "Approve removal": "Aprobar eliminación",
- "✓ Approve": "✓ Aprobar",
+ " Approve": " Aprobar",
  "Re-review": "Re-revisar",
- "Accept & Submit for review ✓": "Aceptar y enviar a revisión ✓",
+ "Accept & Submit for review ": "Aceptar y enviar a revisión ",
  "Grant sub": "Conceder suscripción",
  "Subscribe — from €3.99/mo": "Suscríbete — desde 3,99 €/mes",
  "Subscribe →": "Suscribirse →",
