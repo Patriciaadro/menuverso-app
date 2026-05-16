@@ -23,29 +23,31 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        // === PASTEL v3 — cream paper, warm-dark text, terracotta brand ===
-        // The semantics of the existing tokens are FLIPPED (low number = max
-        // contrast). This kept the codebase's bg-ink-* / text-slate2-* refs
-        // working without thousands of class renames.
+        // === NOMOLESTEN v4 — white paper, near-black text, red brand ===
+        // Same token NAMES as warm v3 (kept to avoid thousands of class
+        // renames), but the hex values now point to Nomolesten's palette:
+        //   red NM #E5382A · red dark #C42D20 · near-black #1D1D1B ·
+        //   Tailwind grays · star yellow #FBBC04.
         //
         // Revert options (cd to project root, copy backup over the live file):
-        //   to warm-dark v2:    cp Menuverso-demo.warm2.bak.html Menuverso-demo.html
-        //   to gentle warm v1:  cp Menuverso-demo.warm1.bak.html Menuverso-demo.html
-        //   to cool slate v0:   cp Menuverso-demo.cool.bak.html Menuverso-demo.html
+        //   to warm v3 (pastel):     cp Menuverso-demo.nomolesten-pre.bak.html Menuverso-demo.html
+        //   to warm-dark v2:         cp Menuverso-demo.warm2.bak.html Menuverso-demo.html
+        //   to gentle warm v1:       cp Menuverso-demo.warm1.bak.html Menuverso-demo.html
+        //   to cool slate v0:        cp Menuverso-demo.cool.bak.html Menuverso-demo.html
         // ================================================================
-        // Page surfaces. ink-950 is the page background — now pure white per
-        // the brand refresh; cards/tonal breaks still use the warmer creams.
-        ink:   { 950:'#FFFFFF', 900:'#F4ECDD', 800:'#EFE4D2', 700:'#E5D5B8' },
-        // Text / ink-on-paper — warm-dark tones. Lower number = darker (max contrast).
-        // Headlines: slate2-50 (#1C0F06). Body: slate2-300 (#523622). Muted: slate2-500.
-        slate2:{ 50:'#1C0F06', 100:'#2A1A0E', 200:'#3D2818', 300:'#523622', 400:'#82765E', 500:'#A89A82' },
-        // Cream — deeper warm accents that contrast against the paper bg (badges,
-        // dividers, low-key CTAs). Used where you want a tonal break on cream.
-        cream: { 100:'#EDDFC4', 200:'#D9C29D', 300:'#B89A6E', 400:'#8C7250' },
-        accent:{ amber:'#FBBF24', pink:'#FB7185', emer:'#10B981' },
-        // Primary brand — terracotta. UNCHANGED. The colour family is Catalan
-        // tile / paprika / mole, anchoring the page against cream paper.
-        mv:    { 400:'#F08461', 500:'#DC4A26', 600:'#B73A1A', 700:'#8C2D14' }
+        // Page surfaces. ink-950 stays pure white; the warmer cream tones
+        // become Tailwind grays (subtle tonal breaks instead of cream paper).
+        ink:   { 950:'#FFFFFF', 900:'#F9FAFB', 800:'#F3F4F6', 700:'#E5E7EB' },
+        // Text / ink-on-paper — near-black tones. Lower number = darker (max contrast).
+        // Headlines: slate2-50 (#1D1D1B). Body: slate2-300. Muted: slate2-500.
+        slate2:{ 50:'#1D1D1B', 100:'#222222', 200:'#404040', 300:'#525252', 400:'#9CA3AF', 500:'#6B7280' },
+        // Cream — replaced by Tailwind grays for badges/dividers/low-key CTAs.
+        cream: { 100:'#F9FAFB', 200:'#E5E7EB', 300:'#9CA3AF', 400:'#6B7280' },
+        // Star yellow swapped to Nomolesten's exact value; pink/emerald kept
+        // (universal "like" / "success" semantics).
+        accent:{ amber:'#FBBC04', pink:'#FB7185', emer:'#10B981' },
+        // Primary brand — Nomolesten red.
+        mv:    { 400:'#F47A6B', 500:'#E5382A', 600:'#C42D20', 700:'#A0241A' }
       }
     }
   }
@@ -58,21 +60,21 @@ tailwind.config = {
      overlay default which has zero width and causes layout to jump). */
   html { scrollbar-gutter: stable; overflow-y: scroll; }
   html, body { margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #FFFFFF; color: #2A1A0E; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #FFFFFF; color: #222222; }
   /* Custom scrollbar — takes real width on macOS so layout stays stable. */
   ::-webkit-scrollbar { width: 12px; height: 12px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(28,15,6,0.14); border-radius: 6px; border: 2px solid #FFFFFF; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(28,15,6,0.26); }
+  ::-webkit-scrollbar-thumb { background: rgba(29,29,27,0.14); border-radius: 6px; border: 2px solid #FFFFFF; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(29,29,27,0.26); }
   /* Firefox equivalent */
-  html { scrollbar-width: thin; scrollbar-color: rgba(28,15,6,0.18) transparent; }
+  html { scrollbar-width: thin; scrollbar-color: rgba(29,29,27,0.18) transparent; }
   h1,h2,h3 { letter-spacing: -0.015em; }
   /* Editorial display serif — pairs with sans body to give a culinary-magazine feel.
      Used on hero H1, section H2s, venue name, member name. Inter stays everywhere else. */
   .font-serif-display { font-family: 'Fraunces', 'Source Serif Pro', 'Georgia', serif; font-optical-sizing: auto; letter-spacing: -0.022em; font-feature-settings: 'ss01'; }
   /* Hero text sits on the video and stays legible regardless of frame content —
      light cream foreground with a soft dark halo. */
-  .hero-on-video { color: #FAF6EF; text-shadow: 0 2px 18px rgba(28,15,6,0.55), 0 1px 3px rgba(28,15,6,0.4); }
+  .hero-on-video { color: #FFFFFF; text-shadow: 0 2px 18px rgba(29,29,27,0.55), 0 1px 3px rgba(29,29,27,0.4); }
   .hero-on-video strong { color: #FFFFFF; }
   /* Animated shimmer overlay for the redemption verification screen — defeats
      screenshots because the gradient is constantly moving. */
@@ -118,19 +120,19 @@ tailwind.config = {
   .pop { animation: pop .4s cubic-bezier(.2,1.4,.4,1); }
   @keyframes pop { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   .digit { font-variant-numeric: tabular-nums; }
-  .frame { box-shadow: 0 30px 80px rgba(28,15,6,.18); }
-  input::placeholder { color: #A89A82; }
+  .frame { box-shadow: 0 30px 80px rgba(29,29,27,.18); }
+  input::placeholder { color: #9CA3AF; }
 
   /* ===== Stellar map styling — brand-coherent overrides ===== */
   /* Make the Leaflet container blend into our cream-paper UI. */
-  .leaflet-container { background: #F4ECDD; font-family: inherit; outline: none; }
+  .leaflet-container { background: #F9FAFB; font-family: inherit; outline: none; }
   /* Attribution panel — dark on cream. */
-  .leaflet-control-attribution { background: rgba(255,250,240,0.85) !important; color: #6F624E !important; font-size: 9px !important; padding: 2px 6px !important; }
+  .leaflet-control-attribution { background: rgba(255,255,255,0.85) !important; color: #6F624E !important; font-size: 9px !important; padding: 2px 6px !important; }
   .leaflet-control-attribution a { color: #4A3D2A !important; }
   /* Custom zoom controls — cream pills with dark text, terracotta hover. */
-  .leaflet-bar { box-shadow: 0 8px 24px rgba(28,15,6,.10) !important; border: 0 !important; }
-  .leaflet-bar a { background: rgba(255,250,240,0.96) !important; color: #2A1A0E !important; border-color: rgba(28,15,6,.08) !important; font-weight: 800; }
-  .leaflet-bar a:hover { background: #DC4A26 !important; color: #fff !important; }
+  .leaflet-bar { box-shadow: 0 8px 24px rgba(29,29,27,.10) !important; border: 0 !important; }
+  .leaflet-bar a { background: rgba(255,255,255,0.96) !important; color: #222222 !important; border-color: rgba(29,29,27,.08) !important; font-weight: 800; }
+  .leaflet-bar a:hover { background: #E5382A !important; color: #fff !important; }
 
   /* ----- Pins: simple coral dot with cuisine glyph. Name lives in a tooltip
      that only shows on hover/active state — keeps the map uncluttered. ----- */
@@ -142,9 +144,9 @@ tailwind.config = {
     position: absolute; top: 0; left: 50%;
     transform: translateX(-50%);
     width: 36px; height: 36px; border-radius: 50%;
-    background: #DC4A26;
+    background: #E5382A;
     border: 2.5px solid #FFFFFF;
-    box-shadow: 0 6px 14px rgba(220,74,38,.45), 0 1px 0 rgba(255,255,255,.2) inset;
+    box-shadow: 0 6px 14px rgba(229,56,42,.45), 0 1px 0 rgba(255,255,255,.2) inset;
     display: grid; place-items: center;
     font-size: 18px; line-height: 1;
     transition: transform .18s ease, box-shadow .18s ease;
@@ -155,16 +157,16 @@ tailwind.config = {
     width: 0; height: 0;
     border-left: 7px solid transparent;
     border-right: 7px solid transparent;
-    border-top: 11px solid #DC4A26;
-    filter: drop-shadow(0 4px 4px rgba(220,74,38,.35));
+    border-top: 11px solid #E5382A;
+    filter: drop-shadow(0 4px 4px rgba(229,56,42,.35));
   }
   .mv-pin-name {
     position: absolute; bottom: 100%; left: 50%;
     transform: translateX(-50%);
     margin-bottom: 6px;
-    background: #1C0F06;
-    color: #FAF6EF;
-    border: 1px solid rgba(255,250,240,.18);
+    background: #1D1D1B;
+    color: #FFFFFF;
+    border: 1px solid rgba(255,255,255,.18);
     padding: 5px 10px;
     border-radius: 9999px;
     font-size: 11px; font-weight: 700;
@@ -172,12 +174,12 @@ tailwind.config = {
     pointer-events: none;
     opacity: 0;
     transition: opacity .15s ease, transform .15s ease;
-    box-shadow: 0 6px 18px rgba(28,15,6,.30);
+    box-shadow: 0 6px 18px rgba(29,29,27,.30);
   }
   .mv-pin-wrap:hover .mv-pin-name,
   .mv-pin-wrap.is-active .mv-pin-name { opacity: 1; transform: translateX(-50%) translateY(-2px); }
-  .mv-pin-wrap:hover .mv-pin { transform: translateX(-50%) scale(1.12); box-shadow: 0 12px 28px rgba(220,74,38,.55); }
-  .mv-pin-wrap.is-active .mv-pin { transform: translateX(-50%) scale(1.18); background: #FFFFFF; color: #DC4A26; border-color: #DC4A26; }
+  .mv-pin-wrap:hover .mv-pin { transform: translateX(-50%) scale(1.12); box-shadow: 0 12px 28px rgba(229,56,42,.55); }
+  .mv-pin-wrap.is-active .mv-pin { transform: translateX(-50%) scale(1.18); background: #FFFFFF; color: #E5382A; border-color: #E5382A; }
   .mv-pin-wrap.is-active .mv-pin-tail { border-top-color: #FFFFFF; filter: drop-shadow(0 4px 4px rgba(255,255,255,.2)); }
   /* Live-now: green pulse ring around the pin head. */
   .mv-pin-wrap.is-live::before {
@@ -197,7 +199,7 @@ tailwind.config = {
   /* ----- Cluster bubbles — real circles (we don't load MarkerCluster.Default.css
      so we have to supply our own shape too, not just colour). ----- */
   .marker-cluster {
-    background: rgba(220,74,38,.18) !important;
+    background: rgba(229,56,42,.18) !important;
     border-radius: 50% !important;
     width: 44px !important; height: 44px !important;
     text-align: center;
@@ -205,42 +207,42 @@ tailwind.config = {
   .marker-cluster div {
     width: 32px !important; height: 32px !important;
     margin: 6px 0 0 6px !important;
-    background: #DC4A26 !important;
+    background: #E5382A !important;
     color: #fff !important;
     border-radius: 50% !important;
     border: 2px solid #FFFFFF !important;
     font-weight: 800 !important;
-    box-shadow: 0 6px 16px rgba(220,74,38,.5);
+    box-shadow: 0 6px 16px rgba(229,56,42,.5);
     display: grid; place-items: center;
   }
   .marker-cluster span { line-height: 1 !important; font-size: 13px; }
   /* Brand-styled popups — cream paper with dark text. */
-  .leaflet-popup-content-wrapper { background: #FAF6EF !important; color: #2A1A0E !important; border-radius: 14px !important; box-shadow: 0 20px 50px rgba(28,15,6,.22) !important; padding: 0 !important; overflow: hidden; border: 1px solid rgba(28,15,6,.08); }
+  .leaflet-popup-content-wrapper { background: #FFFFFF !important; color: #222222 !important; border-radius: 14px !important; box-shadow: 0 20px 50px rgba(29,29,27,.22) !important; padding: 0 !important; overflow: hidden; border: 1px solid rgba(29,29,27,.08); }
   .leaflet-popup-content { margin: 0 !important; line-height: 1.4 !important; min-width: 240px; }
-  .leaflet-popup-tip { background: #FAF6EF !important; }
-  .leaflet-popup-close-button { color: #82765E !important; padding: 8px !important; }
+  .leaflet-popup-tip { background: #FFFFFF !important; }
+  .leaflet-popup-close-button { color: #9CA3AF !important; padding: 8px !important; }
   .mv-popup { padding: 10px 12px 12px; }
-  .mv-popup-img { width: 100%; height: 96px; background: #EDDFC4 center/cover no-repeat; border-radius: 10px; margin-bottom: 8px; }
-  .mv-popup-title { font-weight: 800; font-size: 14px; color: #1C0F06; }
-  .mv-popup-sub { font-size: 11px; color: #82765E; margin-top: 1px; }
-  .mv-popup-btn { display: inline-block; margin-top: 8px; background: #DC4A26; color: #fff !important; font-weight: 800; font-size: 11px; padding: 7px 12px; border-radius: 9999px; text-decoration: none; }
-  .mv-popup-btn:hover { background: #B73A1A; }
+  .mv-popup-img { width: 100%; height: 96px; background: #F9FAFB center/cover no-repeat; border-radius: 10px; margin-bottom: 8px; }
+  .mv-popup-title { font-weight: 800; font-size: 14px; color: #1D1D1B; }
+  .mv-popup-sub { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
+  .mv-popup-btn { display: inline-block; margin-top: 8px; background: #E5382A; color: #fff !important; font-weight: 800; font-size: 11px; padding: 7px 12px; border-radius: 9999px; text-decoration: none; }
+  .mv-popup-btn:hover { background: #C42D20; }
   /* Map container has a subtle vignette so it doesn't feel like a flat plate. */
   .mv-map-frame { position: relative; }
   .mv-map-frame::after {
     content:''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
-    box-shadow: inset 0 0 80px rgba(28,15,6,.12), inset 0 0 0 1px rgba(28,15,6,.08);
+    box-shadow: inset 0 0 80px rgba(29,29,27,.12), inset 0 0 0 1px rgba(29,29,27,.08);
   }
   /* List rows — hover highlights matching pin via JS. */
-  .mv-listrow.is-active { background: rgba(220,74,38,.08); border-color: rgba(220,74,38,.4); }
+  .mv-listrow.is-active { background: rgba(229,56,42,.08); border-color: rgba(229,56,42,.4); }
 
   /* ====================================================================
      Phase 1 — member-discovery UX uplift.
      Flash pulse, photo cards, rails, ticker.
      ==================================================================== */
   @keyframes mv-flash-pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 74, 38, 0.55); }
-    50%      { transform: scale(1.08); box-shadow: 0 0 0 14px rgba(220, 74, 38, 0); }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(229,56,42, 0.55); }
+    50%      { transform: scale(1.08); box-shadow: 0 0 0 14px rgba(229,56,42, 0); }
   }
   /* Flash pin — slow pulsing coral ring layered on the existing pin head. */
   .mv-pin-wrap.is-flash .mv-pin {
@@ -249,15 +251,15 @@ tailwind.config = {
   /* Hover halo synced between list row and pin. */
   .mv-pin-wrap.is-hover .mv-pin {
     transform: translateX(-50%) scale(1.18);
-    box-shadow: 0 14px 32px rgba(220,74,38,.55), 0 0 0 4px rgba(220,74,38,.18);
+    box-shadow: 0 14px 32px rgba(229,56,42,.55), 0 0 0 4px rgba(229,56,42,.18);
   }
   .mv-flash-chip {
     display: inline-flex; align-items: center; gap: 4px;
     padding: 3px 8px; border-radius: 999px;
-    background: linear-gradient(135deg, #DC4A26 0%, #F26B1F 100%);
-    color: #FAF6EF; font-size: 10px; font-weight: 800;
+    background: linear-gradient(135deg, #E5382A 0%, #F26B1F 100%);
+    color: #FFFFFF; font-size: 10px; font-weight: 800;
     letter-spacing: 0.08em; text-transform: uppercase;
-    box-shadow: 0 2px 8px rgba(220, 74, 38, 0.4);
+    box-shadow: 0 2px 8px rgba(229,56,42, 0.4);
   }
   .mv-flash-chip::before {
     content: ''; display: inline-block; width: 5px; height: 5px;
@@ -266,11 +268,11 @@ tailwind.config = {
   }
   .mv-card-photo {
     position: relative; overflow: hidden; border-radius: 14px;
-    background: #F4ECDD;
+    background: #F9FAFB;
   }
   .mv-card-photo::after {
     content: ''; position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(28,15,6,0.55) 0%, rgba(28,15,6,0) 50%);
+    background: linear-gradient(to top, rgba(29,29,27,0.55) 0%, rgba(29,29,27,0) 50%);
     pointer-events: none;
   }
   .mv-rail {
@@ -279,7 +281,7 @@ tailwind.config = {
     scrollbar-width: thin;
   }
   .mv-rail::-webkit-scrollbar { height: 6px; }
-  .mv-rail::-webkit-scrollbar-thumb { background: rgba(28,15,6,0.18); border-radius: 3px; }
+  .mv-rail::-webkit-scrollbar-thumb { background: rgba(29,29,27,0.18); border-radius: 3px; }
   .mv-rail > * { scroll-snap-align: start; flex: 0 0 auto; }
   .mv-ticker-track {
     display: inline-flex; gap: 40px; padding-right: 40px;
@@ -1206,9 +1208,9 @@ function renderIllustratedVenue(venue, opts={}) {
   let h = 0; for (let i=0;i<seed.length;i++) h = (h*31 + seed.charCodeAt(i)) >>> 0;
   // Coral-family palettes only — keep every card brand-consistent. No amber outlier.
   const palettes = [
-    { from:'#1F0A12', via:'#150812', to:'#0A0613', accent:'#DC4A26' }, // wine
+    { from:'#1F0A12', via:'#150812', to:'#0A0613', accent:'#E5382A' }, // wine
     { from:'#1A0A14', via:'#100612', to:'#070612', accent:'#FB7185' }, // soft coral
-    { from:'#181014', via:'#100C12', to:'#070612', accent:'#DC4A26' }  // espresso w/ coral
+    { from:'#181014', via:'#100C12', to:'#070612', accent:'#E5382A' }  // espresso w/ coral
   ];
   const p = palettes[h % palettes.length];
   const uid = 'va' + h.toString(36);
@@ -1461,7 +1463,24 @@ window.MV_T = {
     'discover.mood.wine':    'Bar de vinos',
     'discover.mood.casual':  'Bocado informal',
     'discover.mood.group':   'Cena en grupo',
-    'discover.mood.special': 'Noche especial'
+    'discover.mood.special': 'Noche especial',
+    'discover.deal': 'oferta',
+    'discover.deals': 'ofertas',
+    'discover.matchYourSearch': 'según tu búsqueda',
+    'discover.inBarcelona': 'en Barcelona',
+    'discover.clearFilters': 'Quitar filtros',
+    'discover.subscribe': 'Suscríbete →',
+    'venue.howToRedeem.title': 'Cómo canjear · 3 pasos',
+    'venue.howToRedeem.step1.h': 'Llega al restaurante',
+    'venue.howToRedeem.step1.b': 'Siéntate como siempre',
+    'venue.howToRedeem.step2.h': 'Toca el turno abierto',
+    'venue.howToRedeem.step2.b': 'Genera tu código en la app',
+    'venue.howToRedeem.step3.h': 'Muestra el código al camarero',
+    'venue.howToRedeem.step3.b': 'Listo, te aplican el 2×1',
+    'venue.pickSlot': 'Elige un turno',
+    'venue.tapOpenSlotHint': 'Toca un turno cuando esté abierto para conseguir tu código.',
+    'venue.openNowBanner': 'Hay un turno abierto ahora mismo — tócalo para canjear',
+    'venue.nextOpeningBanner': 'Próximo turno disponible'
   },
   en: {
     'banner.concept': 'Demo in progress — the restaurants shown are illustrative and not affiliated with menuverso.',
@@ -1586,7 +1605,24 @@ window.MV_T = {
     'discover.mood.wine':    'Wine bar',
     'discover.mood.casual':  'Casual bite',
     'discover.mood.group':   'Group dinner',
-    'discover.mood.special': 'Special night'
+    'discover.mood.special': 'Special night',
+    'discover.deal': 'deal',
+    'discover.deals': 'deals',
+    'discover.matchYourSearch': 'match your search',
+    'discover.inBarcelona': 'in Barcelona',
+    'discover.clearFilters': 'Clear filters',
+    'discover.subscribe': 'Subscribe →',
+    'venue.howToRedeem.title': 'How to redeem · 3 steps',
+    'venue.howToRedeem.step1.h': 'Arrive at the restaurant',
+    'venue.howToRedeem.step1.b': 'Sit down like normal',
+    'venue.howToRedeem.step2.h': 'Tap an open slot',
+    'venue.howToRedeem.step2.b': 'Generates your code in the app',
+    'venue.howToRedeem.step3.h': 'Show the code to your server',
+    'venue.howToRedeem.step3.b': 'Done — they apply the 2×1',
+    'venue.pickSlot': 'Pick a slot',
+    'venue.tapOpenSlotHint': 'Tap a slot when it\'s open to get your code.',
+    'venue.openNowBanner': 'A slot is open right now — tap it to redeem',
+    'venue.nextOpeningBanner': 'Next available slot'
   }
 };
 function t(k){ return (window.MV_T[MV_LANG]&&window.MV_T[MV_LANG][k]) || window.MV_T.en[k] || k; }
@@ -1831,13 +1867,22 @@ function AppTopBar({ showNav }) {
           return navItem('saved', n > 0 ? '❤️' : '🤍', 'Saved' + (n > 0 ? ` (${n})` : ''), 'saved');
         })()
       ) : el('span',{}),
-      u ? el('button',{class:'flex items-center gap-2 rounded-full bg-slate2-50/5 border border-slate2-50/10 hover:bg-slate2-50/10 px-3 py-1.5 text-sm font-bold cursor-pointer', onclick:()=>{
-        if (u.role==='MEMBER') go('profile');
-        else if (u.role==='ADMIN') go('admin');
-        else go('partner-portal');
-      }},
-        el('span',{class:'h-6 w-6 rounded-full bg-mv-500 grid place-items-center text-xs font-extrabold'}, (u.firstName?.[0] ?? u.email[0]).toUpperCase()),
-        el('span',{class:'hidden md:inline'}, u.firstName ?? u.email.split('@')[0])
+      u ? el('div',{class:'flex items-center gap-2'},
+        // Language toggle — mirror of the signed-out toggle, compact icon-only.
+        // Signed-in members still need to flip the page language; the marketing
+        // header is gone once they're logged in, so this is the only access.
+        el('button',{class:'inline-flex items-center gap-1.5 rounded-full border-2 border-mv-500/55 text-mv-500 font-extrabold px-3 py-1.5 text-xs cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')},
+          el('span',{class:'inline-flex shrink-0', style:'width:13px;height:13px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}),
+          el('span',{class:'tracking-wider'}, MV_LANG === 'es' ? 'EN' : 'ES')
+        ),
+        el('button',{class:'flex items-center gap-2 rounded-full bg-slate2-50/5 border border-slate2-50/10 hover:bg-slate2-50/10 px-3 py-1.5 text-sm font-bold cursor-pointer', onclick:()=>{
+          if (u.role==='MEMBER') go('profile');
+          else if (u.role==='ADMIN') go('admin');
+          else go('partner-portal');
+        }},
+          el('span',{class:'h-6 w-6 rounded-full bg-mv-500 grid place-items-center text-xs font-extrabold'}, (u.firstName?.[0] ?? u.email[0]).toUpperCase()),
+          el('span',{class:'hidden md:inline'}, u.firstName ?? u.email.split('@')[0])
+        )
       // Same <nav> structure + gap-5 as MarketingHeader so chrome stays pixel-stable.
       ) : el('nav',{class:'flex items-center gap-5 text-sm text-slate2-300'},
         el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>{
@@ -1933,7 +1978,7 @@ function PhotoVenueCard(v, opts = {}) {
   const heightClass = compact ? 'h-[160px]' : 'h-[200px]';
   const card = el('a',{
     href:'#venue/' + v.slug,
-    class:'group block ' + widthClass + ' rounded-2xl bg-white border border-ink-900/8 overflow-hidden shadow-[0_2px_8px_rgba(28,15,6,0.04)] hover:shadow-[0_12px_28px_rgba(28,15,6,0.12)] hover:-translate-y-0.5 transition-all',
+    class:'group block ' + widthClass + ' rounded-2xl bg-white border border-ink-900/8 overflow-hidden shadow-[0_2px_8px_rgba(29,29,27,0.04)] hover:shadow-[0_12px_28px_rgba(29,29,27,0.12)] hover:-translate-y-0.5 transition-all',
     style:'text-decoration:none;color:inherit;',
     'data-slug': v.slug,
     onclick: (e) => { e.preventDefault(); go('venue', { slug: v.slug }); }
@@ -1958,7 +2003,7 @@ function PhotoVenueCard(v, opts = {}) {
     ),
     el('div',{class:'p-3.5 flex items-center justify-between gap-3 bg-white'},
       el('div',{class:'min-w-0 flex-1'},
-        el('div',{class:'text-[12px] font-semibold text-ink-900 truncate', style:'color:#1C0F06'},
+        el('div',{class:'text-[12px] font-semibold text-ink-900 truncate', style:'color:#1D1D1B'},
           (v.liveDeal && v.liveDeal.terms) || v.dealTerms || (t('discover.twoForOne') || '2×1 en la carta')
         ),
         slotsLeft != null && slotsLeft <= 5
@@ -2012,7 +2057,7 @@ function MoodTile(mood, isActive, onClick) {
     type:'button',
     class:'group shrink-0 flex flex-col items-center justify-center w-[88px] h-[88px] rounded-2xl border transition-all cursor-pointer ' +
           (isActive
-            ? 'bg-mv-500 text-white border-mv-500 shadow-[0_6px_18px_rgba(220,74,38,0.32)]'
+            ? 'bg-mv-500 text-white border-mv-500 shadow-[0_6px_18px_rgba(229,56,42,0.32)]'
             : 'bg-white text-ink-900 border-ink-900/8 hover:border-mv-500/40 hover:bg-mv-500/[0.04] hover:-translate-y-0.5'),
     onclick: onClick
   },
@@ -2036,18 +2081,18 @@ function LiveTicker() {
     const initials = member ? ((member.firstName||'?')[0] + '.') : '?';
     const memberName = member ? ((member.firstName||'') + ' ' + ((member.lastName||'?')[0] || '') + '.') : 'Alguien';
     const minsAgo = Math.max(1, Math.round((Date.now() - (r.redeemedAt||Date.now())) / 60000));
-    return el('span',{class:'inline-flex items-center gap-2 text-[12px]', style:'color:#523622'},
-      el('span',{class:'inline-flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold', style:'background:rgba(220,74,38,0.12);color:#8C2D14'}, initials),
+    return el('span',{class:'inline-flex items-center gap-2 text-[12px]', style:'color:#525252'},
+      el('span',{class:'inline-flex items-center justify-center h-6 w-6 rounded-full text-[10px] font-bold', style:'background:rgba(229,56,42,0.12);color:#A0241A'}, initials),
       el('span',{},
-        el('strong',{class:'font-semibold', style:'color:#1C0F06'}, memberName),
+        el('strong',{class:'font-semibold', style:'color:#1D1D1B'}, memberName),
         ' ', (t('discover.justRedeemed') || 'acaba de canjear en'), ' ',
-        el('strong',{class:'font-semibold', style:'color:#1C0F06'}, v.name || r.venueSlug),
+        el('strong',{class:'font-semibold', style:'color:#1D1D1B'}, v.name || r.venueSlug),
         ' · ', minsAgo + ' ' + (t('discover.minAgo') || 'min')
       )
     );
   });
   // Duplicate items so the marquee loops seamlessly.
-  return el('div',{class:'mv-ticker overflow-hidden py-2.5 rounded-2xl', style:'background:rgba(220,74,38,0.06);border:1px solid rgba(28,15,6,0.06);'},
+  return el('div',{class:'mv-ticker overflow-hidden py-2.5 rounded-2xl', style:'background:rgba(229,56,42,0.06);border:1px solid rgba(29,29,27,0.06);'},
     el('div',{class:'mv-ticker-track px-4'}, ...items, ...items)
   );
 }
@@ -2087,7 +2132,7 @@ function Landing() {
       // Warm coral atmospheric wash — kept ONLY on the top-right so it
       // doesn't fight the cream paper bg. Lower opacity now since the
       // page is already light.
-      el('div',{class:'absolute inset-0 opacity-30 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #F08461 0, transparent 38%);'}),
+      el('div',{class:'absolute inset-0 opacity-30 pointer-events-none', style:'background-image: radial-gradient(circle at 78% 22%, #F47A6B 0, transparent 38%);'}),
       // BARCELONA LANDSCAPE — the visual centerpiece of the page WHEN
       // there's no video. Sagrada Familia rising big in the centre-left,
       // Casa Batlló's wavy roof to the right, Park Güell's mosaic bench
@@ -2099,7 +2144,7 @@ function Landing() {
         '<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
 
           // ===== TIBIDABO mountain ridge — distant horizon =====
-          '<g stroke="#3D2818" stroke-width="1.4" stroke-opacity="0.14">'+
+          '<g stroke="#404040" stroke-width="1.4" stroke-opacity="0.14">'+
             '<path d="M 0 460 Q 100 430 200 450 Q 300 390 400 420 Q 500 360 620 400 Q 720 350 820 380 Q 920 360 1020 390 Q 1140 340 1240 380 Q 1360 410 1480 380 Q 1560 360 1600 380"/>'+
           '</g>'+
           // Tibidabo Temple del Sagrat Cor — coral cross on the peak
@@ -2110,7 +2155,7 @@ function Landing() {
           '</g>'+
 
           // ===== SAGRADA FAMILIA — the centerpiece. Eight tall spires, the iconic silhouette. =====
-          '<g transform="translate(720 820)" stroke="#3D2818" stroke-width="2" stroke-opacity="0.22">'+
+          '<g transform="translate(720 820)" stroke="#404040" stroke-width="2" stroke-opacity="0.22">'+
             // Eight spires — heights vary in the famous arrangement
             '<path d="M -200 0 L -178 -210 L -156 0 Z"/>'+
             '<path d="M -144 0 L -116 -300 L -88 0 Z"/>'+
@@ -2138,7 +2183,7 @@ function Landing() {
           '</g>'+
 
           // ===== CASA BATLLÓ — right side. Wavy roof + bone pillars + balcony masks =====
-          '<g transform="translate(1200 600)" stroke="#3D2818" stroke-width="1.8" stroke-opacity="0.18">'+
+          '<g transform="translate(1200 600)" stroke="#404040" stroke-width="1.8" stroke-opacity="0.18">'+
             // The dragon-back roof
             '<path d="M 0 60 Q 50 -10 100 40 Q 150 90 200 20 Q 250 -40 300 40 Q 340 90 380 50"/>'+
             // Building outline
@@ -2187,7 +2232,7 @@ function Landing() {
           '</g>'+
 
           // ===== BARCELONETA palm tree — far left, rising tall =====
-          '<g transform="translate(20 900)" stroke="#3D2818" stroke-width="1.6" stroke-opacity="0.18">'+
+          '<g transform="translate(20 900)" stroke="#404040" stroke-width="1.6" stroke-opacity="0.18">'+
             // Trunk with gentle curve
             '<path d="M 0 0 Q 6 -120 0 -240 Q -6 -360 4 -460"/>'+
             // Fronds radiating
@@ -2207,7 +2252,7 @@ function Landing() {
           '</g>'+
 
           // ===== CITY ROOFTOP SKYLINE — full width across the bottom =====
-          '<g stroke="#3D2818" stroke-width="1.4" stroke-opacity="0.15">'+
+          '<g stroke="#404040" stroke-width="1.4" stroke-opacity="0.15">'+
             '<path d="M 0 870 L 80 870 L 80 830 L 140 830 L 140 855 L 200 855 L 220 835 L 240 835 L 240 870 L 320 870 L 320 810 L 380 810 L 380 870 L 440 870 L 440 845 L 520 845 L 540 825 L 560 845 L 620 845 L 620 870 L 720 870 L 720 815 L 780 815 L 780 870 L 880 870 L 900 850 L 920 870 L 1000 870 L 1000 830 L 1080 830 L 1080 860 L 1160 860 L 1160 870 L 1240 870 L 1260 850 L 1300 850 L 1300 815 L 1360 815 L 1360 870 L 1480 870 L 1480 840 L 1540 840 L 1540 870 L 1600 870"/>'+
           '</g>'+
           // Scattered lit windows across the skyline
@@ -2237,7 +2282,7 @@ function Landing() {
             '<path d="M -16 -28 Q -8 -22 0 -22 Q 8 -22 16 -28" stroke-opacity="0.55"/>'+
           '</g>'+
           // Candle to the right with flame
-          '<g transform="translate(1480 880)" stroke="#3D2818" stroke-width="1.6" stroke-opacity="0.18">'+
+          '<g transform="translate(1480 880)" stroke="#404040" stroke-width="1.6" stroke-opacity="0.18">'+
             '<rect x="-10" y="-44" width="20" height="60" rx="2"/>'+
             '<line x1="-16" y1="16" x2="16" y2="16" stroke-opacity="0.55"/>'+
           '</g>'+
@@ -2288,7 +2333,7 @@ function Landing() {
         ),
         el('div',{class:'mt-16 grid gap-12 md:gap-10 md:grid-cols-3'},
       el('div',{class:'flex flex-col items-center'},
-        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="32" y="100" font-family="-apple-system, sans-serif" font-size="15" font-weight="800" fill="#1C0F06">Barcelona</text><path d="M 116 94 L 121 99 L 126 94" stroke="#1C0F06" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><clipPath id="mvHowMap1Clip"><rect x="20" y="116" width="240" height="336" rx="6"/></clipPath></defs><g clip-path="url(#mvHowMap1Clip)"><rect x="20" y="116" width="240" height="336" fill="#EFE4D2"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116 L 260 116 L 260 452 Z" fill="#BFD3CC" fill-opacity="0.55"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116" stroke="#8FA89C" stroke-width="0.8" fill="none"/><ellipse cx="62" cy="158" rx="22" ry="14" fill="#C4D3B0" fill-opacity="0.85"/><rect x="180" y="280" width="32" height="26" rx="4" fill="#C4D3B0" fill-opacity="0.78"/><ellipse cx="55" cy="408" rx="28" ry="18" fill="#C4D3B0" fill-opacity="0.72"/><g stroke="#3D2818" stroke-width="1.5" stroke-opacity="0.32" fill="none" stroke-linecap="round"><path d="M 22 235 Q 130 200 240 168"/><path d="M 22 295 Q 130 280 240 275"/><path d="M 130 118 Q 130 250 130 385"/><path d="M 178 118 Q 180 280 184 410"/><path d="M 145 200 Q 152 280 170 415"/></g><g stroke="#3D2818" stroke-width="0.6" stroke-opacity="0.20" fill="none"><line x1="50" y1="180" x2="50" y2="380"/><line x1="78" y1="160" x2="78" y2="395"/><line x1="108" y1="155" x2="108" y2="395"/><line x1="158" y1="140" x2="158" y2="410"/><line x1="202" y1="135" x2="202" y2="270"/><line x1="220" y1="125" x2="220" y2="250"/><line x1="40" y1="200" x2="225" y2="184"/><line x1="40" y1="225" x2="230" y2="208"/><line x1="40" y1="255" x2="235" y2="240"/><line x1="40" y1="325" x2="230" y2="318"/><line x1="40" y1="358" x2="228" y2="352"/><line x1="50" y1="392" x2="220" y2="385"/></g><g font-family="-apple-system, sans-serif" font-size="6" font-weight="800" letter-spacing="1.8" fill="#6E5D44"><text x="44" y="175">GRÀCIA</text><text x="92" y="248">EIXAMPLE</text><text x="160" y="330">EL BORN</text><text x="198" y="372" fill="#5A8A78">BARCELONETA</text><text x="34" y="405">MONTJUÏC</text></g><g><circle cx="118" cy="218" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="152" cy="186" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="178" cy="232" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="96"  cy="276" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="200" cy="332" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="138" cy="348" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="170" cy="378" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="108" cy="395" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/><circle cx="84"  cy="328" r="5" fill="#DC4A26" stroke="white" stroke-width="1.5"/></g><g transform="translate(140 280)"><circle r="18" fill="#DC4A26" fill-opacity="0.22"/><circle r="13" fill="#DC4A26"/><text font-family="-apple-system, sans-serif" font-weight="800" font-size="11" fill="white" text-anchor="middle" y="4">5</text></g></g><g transform="translate(0 462)"><rect x="10" y="0" width="260" height="62" fill="#FAF6EF"/><line x1="20" y1="2" x2="260" y2="2" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="36" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="36" text-anchor="middle" fill="#DC4A26">Discover</text><text x="220" y="36" text-anchor="middle" fill="#82765E">Bookings</text></g><circle cx="140" cy="46" r="2.5" fill="#DC4A26"/></g></svg>'}),
+        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="32" y="100" font-family="-apple-system, sans-serif" font-size="15" font-weight="800" fill="#1D1D1B">Barcelona</text><path d="M 116 94 L 121 99 L 126 94" stroke="#1D1D1B" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><clipPath id="mvHowMap1Clip"><rect x="20" y="116" width="240" height="336" rx="6"/></clipPath></defs><g clip-path="url(#mvHowMap1Clip)"><rect x="20" y="116" width="240" height="336" fill="#F3F4F6"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116 L 260 116 L 260 452 Z" fill="#BFD3CC" fill-opacity="0.55"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116" stroke="#8FA89C" stroke-width="0.8" fill="none"/><ellipse cx="62" cy="158" rx="22" ry="14" fill="#C4D3B0" fill-opacity="0.85"/><rect x="180" y="280" width="32" height="26" rx="4" fill="#C4D3B0" fill-opacity="0.78"/><ellipse cx="55" cy="408" rx="28" ry="18" fill="#C4D3B0" fill-opacity="0.72"/><g stroke="#404040" stroke-width="1.5" stroke-opacity="0.32" fill="none" stroke-linecap="round"><path d="M 22 235 Q 130 200 240 168"/><path d="M 22 295 Q 130 280 240 275"/><path d="M 130 118 Q 130 250 130 385"/><path d="M 178 118 Q 180 280 184 410"/><path d="M 145 200 Q 152 280 170 415"/></g><g stroke="#404040" stroke-width="0.6" stroke-opacity="0.20" fill="none"><line x1="50" y1="180" x2="50" y2="380"/><line x1="78" y1="160" x2="78" y2="395"/><line x1="108" y1="155" x2="108" y2="395"/><line x1="158" y1="140" x2="158" y2="410"/><line x1="202" y1="135" x2="202" y2="270"/><line x1="220" y1="125" x2="220" y2="250"/><line x1="40" y1="200" x2="225" y2="184"/><line x1="40" y1="225" x2="230" y2="208"/><line x1="40" y1="255" x2="235" y2="240"/><line x1="40" y1="325" x2="230" y2="318"/><line x1="40" y1="358" x2="228" y2="352"/><line x1="50" y1="392" x2="220" y2="385"/></g><g font-family="-apple-system, sans-serif" font-size="6" font-weight="800" letter-spacing="1.8" fill="#6E5D44"><text x="44" y="175">GRÀCIA</text><text x="92" y="248">EIXAMPLE</text><text x="160" y="330">EL BORN</text><text x="198" y="372" fill="#5A8A78">BARCELONETA</text><text x="34" y="405">MONTJUÏC</text></g><g><circle cx="118" cy="218" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="152" cy="186" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="178" cy="232" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="96"  cy="276" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="200" cy="332" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="138" cy="348" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="170" cy="378" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="108" cy="395" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/><circle cx="84"  cy="328" r="5" fill="#E5382A" stroke="white" stroke-width="1.5"/></g><g transform="translate(140 280)"><circle r="18" fill="#E5382A" fill-opacity="0.22"/><circle r="13" fill="#E5382A"/><text font-family="-apple-system, sans-serif" font-weight="800" font-size="11" fill="white" text-anchor="middle" y="4">5</text></g></g><g transform="translate(0 462)"><rect x="10" y="0" width="260" height="62" fill="#FFFFFF"/><line x1="20" y1="2" x2="260" y2="2" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="36" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="36" text-anchor="middle" fill="#E5382A">Discover</text><text x="220" y="36" text-anchor="middle" fill="#9CA3AF">Bookings</text></g><circle cx="140" cy="46" r="2.5" fill="#E5382A"/></g></svg>'}),
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'1'),
@@ -2298,7 +2343,7 @@ function Landing() {
         )
       ),
       el('div',{class:'flex flex-col items-center'},
-        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><defs><clipPath id="mvHowHero2Clip"><rect x="20" y="76" width="240" height="170" rx="6"/></clipPath></defs><g clip-path="url(#mvHowHero2Clip)"><rect x="20" y="76" width="240" height="170" fill="#F4ECDD"/><image href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" xlink:href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" x="20" y="76" width="240" height="170" preserveAspectRatio="xMidYMid slice"/></g><rect x="20" y="76" width="240" height="170" rx="6" fill="none" stroke="#1C0F06" stroke-opacity="0.06"/><text x="32" y="278" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="22" font-weight="800" fill="#1C0F06">Bar Solete</text><text x="32" y="298" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#82765E">Catalan tapas · Eixample</text><g transform="translate(32 312)" font-family="-apple-system, sans-serif" font-size="10" font-weight="700"><text fill="#FBBF24">★</text><text x="10" fill="#1C0F06">4.9</text><text x="32" fill="#82765E">·</text><text x="42" fill="#1C0F06">€€€</text><text x="68" fill="#82765E">·</text><text x="78" fill="#10B981">Open</text></g><g transform="translate(20 340)"><rect width="240" height="68" rx="12" fill="#DC4A26" fill-opacity="0.10" stroke="#DC4A26" stroke-opacity="0.45" stroke-width="1.4"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#DC4A26">STANDING DEAL</text><text x="14" y="40" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="15" font-weight="800" fill="#1C0F06">2×1 full menu</text><text x="14" y="56" font-family="-apple-system, sans-serif" font-size="9" fill="#82765E">Tue–Thu · Lunch + dinner · 6 seats</text><g transform="translate(186 22)"><rect width="42" height="22" rx="11" fill="#DC4A26"/><text x="21" y="15" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" fill="white" text-anchor="middle">PICK</text></g></g><g transform="translate(20 416)"><rect width="240" height="48" rx="12" fill="#FBBF24" fill-opacity="0.16" stroke="#FBBF24" stroke-opacity="0.6" stroke-width="1.2"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#B73A1A">FLASH · TODAY</text><text x="14" y="38" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#1C0F06">Free dessert with any main</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FAF6EF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="22" text-anchor="middle" fill="#DC4A26">Discover</text><text x="220" y="22" text-anchor="middle" fill="#82765E">Bookings</text></g></g></svg>'}),
+        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><defs><clipPath id="mvHowHero2Clip"><rect x="20" y="76" width="240" height="170" rx="6"/></clipPath></defs><g clip-path="url(#mvHowHero2Clip)"><rect x="20" y="76" width="240" height="170" fill="#F9FAFB"/><image href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" xlink:href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" x="20" y="76" width="240" height="170" preserveAspectRatio="xMidYMid slice"/></g><rect x="20" y="76" width="240" height="170" rx="6" fill="none" stroke="#1D1D1B" stroke-opacity="0.06"/><text x="32" y="278" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="22" font-weight="800" fill="#1D1D1B">Bar Solete</text><text x="32" y="298" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#9CA3AF">Catalan tapas · Eixample</text><g transform="translate(32 312)" font-family="-apple-system, sans-serif" font-size="10" font-weight="700"><text fill="#FBBC04">★</text><text x="10" fill="#1D1D1B">4.9</text><text x="32" fill="#9CA3AF">·</text><text x="42" fill="#1D1D1B">€€€</text><text x="68" fill="#9CA3AF">·</text><text x="78" fill="#10B981">Open</text></g><g transform="translate(20 340)"><rect width="240" height="68" rx="12" fill="#E5382A" fill-opacity="0.10" stroke="#E5382A" stroke-opacity="0.45" stroke-width="1.4"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#E5382A">STANDING DEAL</text><text x="14" y="40" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="15" font-weight="800" fill="#1D1D1B">2×1 full menu</text><text x="14" y="56" font-family="-apple-system, sans-serif" font-size="9" fill="#9CA3AF">Tue–Thu · Lunch + dinner · 6 seats</text><g transform="translate(186 22)"><rect width="42" height="22" rx="11" fill="#E5382A"/><text x="21" y="15" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" fill="white" text-anchor="middle">PICK</text></g></g><g transform="translate(20 416)"><rect width="240" height="48" rx="12" fill="#FBBC04" fill-opacity="0.16" stroke="#FBBC04" stroke-opacity="0.6" stroke-width="1.2"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#C42D20">FLASH · TODAY</text><text x="14" y="38" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#1D1D1B">Free dessert with any main</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FFFFFF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="22" text-anchor="middle" fill="#E5382A">Discover</text><text x="220" y="22" text-anchor="middle" fill="#9CA3AF">Bookings</text></g></g></svg>'}),
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'2'),
@@ -2308,7 +2353,7 @@ function Landing() {
         )
       ),
       el('div',{class:'flex flex-col items-center'},
-        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1C0F06"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FAF6EF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1C0F06"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1C0F06">9:41</text><g transform="translate(220 50)" fill="#1C0F06"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="140" y="98" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#82765E" text-anchor="middle">REDEEMING AT</text><text x="140" y="132" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="26" font-weight="800" fill="#1C0F06" text-anchor="middle">Bar Solete</text><text x="140" y="156" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#DC4A26" text-anchor="middle">2×1 on the full menu</text><g transform="translate(28 200)"><text x="112" y="-14" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#82765E" text-anchor="middle">SLIDE TO REDEEM</text><rect x="0" y="0" width="224" height="56" rx="28" fill="#F4ECDD" stroke="#DC4A26" stroke-opacity="0.5" stroke-width="2"/><defs><linearGradient id="slidegrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#DC4A26"/><stop offset="100%" stop-color="#F08461"/></linearGradient><clipPath id="slideclip"><rect x="0" y="0" width="224" height="56" rx="28"/></clipPath></defs><g clip-path="url(#slideclip)"><rect x="0" y="0" width="60" height="56" rx="28" fill="url(#slidegrad)"/></g><text x="124" y="34" font-family="-apple-system, sans-serif" font-size="12" font-weight="800" letter-spacing="2.5" fill="#3D2818" text-anchor="middle">SLIDE →</text><g><circle cx="28" cy="28" r="22" fill="white" stroke="#DC4A26" stroke-opacity="0.5" stroke-width="1.5"/><path d="M 18 28 L 36 28 M 30 22 L 36 28 L 30 34" stroke="#DC4A26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g><g transform="translate(28 300)"><rect width="224" height="118" rx="14" fill="#DC4A26" fill-opacity="0.06" stroke="#DC4A26" stroke-opacity="0.25"/><text x="112" y="26" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2" fill="#3D2818" text-anchor="middle">DO THIS AT THE TABLE</text><text x="20" y="56" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">1. Tell your server.</text><text x="20" y="78" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">2. Slide the bar above.</text><text x="20" y="100" font-family="-apple-system, sans-serif" font-size="11" fill="#3D2818">3. Show the screen.</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FAF6EF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1C0F06" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#82765E">Profile</text><text x="140" y="22" text-anchor="middle" fill="#82765E">Discover</text><text x="220" y="22" text-anchor="middle" fill="#DC4A26">Bookings</text></g></g></svg>'}),
+        el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="32" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="140" y="98" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#9CA3AF" text-anchor="middle">REDEEMING AT</text><text x="140" y="132" font-family="Fraunces, Georgia, serif" font-style="italic" font-size="26" font-weight="800" fill="#1D1D1B" text-anchor="middle">Bar Solete</text><text x="140" y="156" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#E5382A" text-anchor="middle">2×1 on the full menu</text><g transform="translate(28 200)"><text x="112" y="-14" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#9CA3AF" text-anchor="middle">SLIDE TO REDEEM</text><rect x="0" y="0" width="224" height="56" rx="28" fill="#F9FAFB" stroke="#E5382A" stroke-opacity="0.5" stroke-width="2"/><defs><linearGradient id="slidegrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#E5382A"/><stop offset="100%" stop-color="#F47A6B"/></linearGradient><clipPath id="slideclip"><rect x="0" y="0" width="224" height="56" rx="28"/></clipPath></defs><g clip-path="url(#slideclip)"><rect x="0" y="0" width="60" height="56" rx="28" fill="url(#slidegrad)"/></g><text x="124" y="34" font-family="-apple-system, sans-serif" font-size="12" font-weight="800" letter-spacing="2.5" fill="#404040" text-anchor="middle">SLIDE →</text><g><circle cx="28" cy="28" r="22" fill="white" stroke="#E5382A" stroke-opacity="0.5" stroke-width="1.5"/><path d="M 18 28 L 36 28 M 30 22 L 36 28 L 30 34" stroke="#E5382A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g><g transform="translate(28 300)"><rect width="224" height="118" rx="14" fill="#E5382A" fill-opacity="0.06" stroke="#E5382A" stroke-opacity="0.25"/><text x="112" y="26" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2" fill="#404040" text-anchor="middle">DO THIS AT THE TABLE</text><text x="20" y="56" font-family="-apple-system, sans-serif" font-size="11" fill="#404040">1. Tell your server.</text><text x="20" y="78" font-family="-apple-system, sans-serif" font-size="11" fill="#404040">2. Slide the bar above.</text><text x="20" y="100" font-family="-apple-system, sans-serif" font-size="11" fill="#404040">3. Show the screen.</text></g><g transform="translate(0 482)"><rect x="10" y="0" width="260" height="42" fill="#FFFFFF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="22" text-anchor="middle" fill="#9CA3AF">Discover</text><text x="220" y="22" text-anchor="middle" fill="#E5382A">Bookings</text></g></g></svg>'}),
         el('div',{class:'mt-7 w-full max-w-[280px]'},
           el('div',{class:'flex items-center gap-2.5'},
             el('span',{class:'grid place-items-center h-6 w-6 rounded-full bg-mv-500 text-[11px] font-extrabold text-white'},'3'),
@@ -2325,7 +2370,7 @@ function Landing() {
       el('div',{class:'absolute inset-0 pointer-events-none', style:'mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 10%, rgba(0,0,0,1) 35%, rgba(0,0,0,1) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 10%, rgba(0,0,0,1) 35%, rgba(0,0,0,1) 100%);', html:
         '<svg viewBox="0 0 1600 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%" fill="none" stroke-linecap="round" stroke-linejoin="round">'+
           // Distant mountain (Tibidabo silhouette)
-          '<g stroke="#3D2818" stroke-width="1.4" stroke-opacity="0.10">'+
+          '<g stroke="#404040" stroke-width="1.4" stroke-opacity="0.10">'+
             '<path d="M 0 320 Q 100 280 200 290 Q 280 240 360 250 Q 440 200 540 230 Q 620 180 720 220 Q 820 260 940 240 Q 1060 200 1180 250 Q 1300 280 1420 240 Q 1520 220 1600 250"/>'+
           '</g>'+
           // Tibidabo church spire (the one with the cross on top)
@@ -2335,7 +2380,7 @@ function Landing() {
             '<line x1="-5" y1="-18" x2="5" y2="-18"/>'+
           '</g>'+
           // City skyline (lower horizon) — assorted rooftops
-          '<g stroke="#3D2818" stroke-width="1.3" stroke-opacity="0.09">'+
+          '<g stroke="#404040" stroke-width="1.3" stroke-opacity="0.09">'+
             '<path d="M 0 420 L 80 420 L 80 380 L 140 380 L 140 410 L 200 410 L 220 390 L 240 390 L 240 420 L 320 420 L 320 360 L 380 360 L 380 420 L 440 420 L 440 400 L 520 400 L 540 380 L 560 400 L 620 400 L 620 420 L 720 420 L 720 370 L 780 370 L 780 420 L 880 420 L 900 400 L 920 420 L 1000 420 L 1000 380 L 1080 380 L 1080 410 L 1160 410 L 1160 420 L 1240 420 L 1260 400 L 1300 400 L 1300 370 L 1360 370 L 1360 420 L 1480 420 L 1480 390 L 1540 390 L 1540 420 L 1600 420"/>'+
           '</g>'+
           // Subtle scattered points of light — windows lit up in the city
@@ -2353,7 +2398,7 @@ function Landing() {
             '<circle cx="1500" cy="408" r="1.5"/>'+
           '</g>'+
           // A bottle on its side at the bottom (post-meal vibe)
-          '<g transform="translate(140 530) rotate(-8)" stroke="#3D2818" stroke-width="1.4" stroke-opacity="0.10">'+
+          '<g transform="translate(140 530) rotate(-8)" stroke="#404040" stroke-width="1.4" stroke-opacity="0.10">'+
             '<rect x="-50" y="-12" width="100" height="24" rx="4"/>'+
             '<rect x="50" y="-8" width="20" height="16"/>'+
             '<line x1="-50" y1="0" x2="50" y2="0" stroke-opacity="0.4"/>'+
@@ -2431,9 +2476,9 @@ function Landing() {
         el('div',{class:'absolute -inset-4 bg-gradient-to-br from-mv-500/25 via-cream-100/50 to-mv-500/20 rounded-[2rem] blur-2xl opacity-70 group-hover:opacity-95 transition-opacity duration-700'}),
         // The card itself — cream cardstock with warm gradient
         el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl shadow-mv-500/[0.12] ring-1 ring-mv-500/15 transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
-          style:'background: linear-gradient(135deg, #FAF6EF 0%, #F4ECDD 50%, #EDDFC4 100%); transform-style: preserve-3d;'},
+          style:'background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 50%, #F9FAFB 100%); transform-style: preserve-3d;'},
           // Subtle paper-grain pattern — soft terracotta wash + diagonal hairlines
-          el('div',{class:'absolute inset-0 opacity-60 pointer-events-none', style:'background-image: radial-gradient(circle at 22% 0%, rgba(220,74,38,0.10) 0, transparent 45%), repeating-linear-gradient(45deg, rgba(28,15,6,0.025) 0 6px, transparent 6px 12px);'}),
+          el('div',{class:'absolute inset-0 opacity-60 pointer-events-none', style:'background-image: radial-gradient(circle at 22% 0%, rgba(229,56,42,0.10) 0, transparent 45%), repeating-linear-gradient(45deg, rgba(29,29,27,0.025) 0 6px, transparent 6px 12px);'}),
           // Left-edge terracotta accent stripe — like a real club card bookmark
           el('div',{class:'absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-mv-400 via-mv-500 to-mv-600 pointer-events-none'}),
           // Card body
@@ -2456,7 +2501,7 @@ function Landing() {
             // three text nodes via the class hooks (.mv-price-amount/label/sub).
             el('div',{class:'mt-7'},
               el('div',{class:'flex items-baseline gap-1'},
-                el('span',{class:'mv-price-amount font-serif-display italic text-7xl font-extrabold text-mv-500 drop-shadow-[0_2px_6px_rgba(220,74,38,0.18)] transition-colors'},'€3.99'),
+                el('span',{class:'mv-price-amount font-serif-display italic text-7xl font-extrabold text-mv-500 drop-shadow-[0_2px_6px_rgba(229,56,42,0.18)] transition-colors'},'€3.99'),
                 el('span',{class:'mv-price-label text-sm font-bold text-slate2-400'},'/mo · annual')
               ),
               el('div',{class:'mv-price-sub mt-1 text-[11px] text-slate2-400'},'Billed once a year — €47.88 up front. Save €36 vs monthly.')
@@ -2496,7 +2541,7 @@ function Landing() {
     // client-side as long as the table's RLS allows anonymous inserts and
     // restricts reads (which Supabase does by default for `anon`).
     el('section',{class:'relative overflow-hidden bg-ink-950'},
-      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #DC4A26 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #E5382A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
       el('div',{class:'relative mx-auto max-w-3xl px-4 py-20 md:py-24 text-center'},
         el('span',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 ring-1 ring-mv-500/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'},
           el('span',{class:'h-1.5 w-1.5 rounded-full bg-mv-500 animate-pulse'}),
@@ -2990,7 +3035,9 @@ function AppDiscover() {
   function paintFilterToggle() {
     filterToggle.innerHTML = '';
     const activeCount = (filter !== 'all' ? 1 : 0) + activeBarrios.size + (activeMood ? 1 : 0);
-    filterToggle.append(
+    // NOTE: native DOM .append() stringifies null/false to "null"/"false",
+    // so we must filter falsy values out before spreading.
+    const children = [
       el('button',{
         type:'button',
         class:'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer transition bg-slate2-50/5 text-slate2-300 border border-slate2-50/10 hover:bg-slate2-50/[0.1]',
@@ -3004,8 +3051,9 @@ function AppDiscover() {
         type:'button',
         class:'text-xs underline text-slate2-400 hover:text-slate2-50 cursor-pointer bg-transparent border-0',
         onclick:()=>{ filter='all'; activeMood=null; activeBarrios.clear(); paintMoods(); paintFilterToggle(); paintFilterPanel(); paintGrid(); }
-      }, 'Clear filters') : null
-    );
+      }, t('discover.clearFilters') || 'Clear filters') : null
+    ].filter(Boolean);
+    filterToggle.append(...children);
   }
   function paintFilterPanel() {
     filterPanel.innerHTML = '';
@@ -3053,12 +3101,14 @@ function AppDiscover() {
   function paintGrid() {
     const list = getAllVenues().filter(matches);
     summary.innerHTML = '';
-    summary.append(
-      el('span',{}, '📍 ', el('span',{class:'text-slate2-50 font-bold'}, list.length + ' deal' + (list.length===1?'':'s')),
-        q || filter !== 'all' || activeMood || activeBarrios.size > 0 ? ' match your search' : ' in Barcelona'
-      ),
-      !hasSub() && el('button',{class:'text-mv-500 text-xs font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('checkout')},'Subscribe →')
-    );
+    const hasActiveFilter = q || filter !== 'all' || activeMood || activeBarrios.size > 0;
+    const dealsWord = list.length === 1 ? (t('discover.deal') || 'deal') : (t('discover.deals') || 'deals');
+    const suffix = hasActiveFilter ? (t('discover.matchYourSearch') || 'match your search') : (t('discover.inBarcelona') || 'in Barcelona');
+    const subRow = [
+      el('span',{}, '📍 ', el('span',{class:'text-slate2-50 font-bold'}, list.length + ' ' + dealsWord), ' ', suffix),
+      !hasSub() ? el('button',{class:'text-mv-500 text-xs font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('checkout')}, t('discover.subscribe') || 'Subscribe →') : null
+    ].filter(Boolean);
+    summary.append(...subRow);
     grid.innerHTML = '';
     if (list.length === 0) {
       grid.appendChild(el('div',{class:'col-span-full text-center py-12 text-slate2-400'},
@@ -3735,7 +3785,7 @@ function AppProfile() {
   const inner = el('div',{class:'pb-24'},
     // ===== HERO HEADER — gradient banner with name, member-since, tier =====
     el('div',{class:'relative overflow-hidden'},
-      el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #DC4A26 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
+      el('div',{class:'absolute inset-0 opacity-50', style:'background-image: radial-gradient(circle at 20% 20%, #E5382A 0, transparent 50%), radial-gradient(circle at 90% 80%, #FB7185 0, transparent 50%);'}),
       el('div',{class:'relative px-5 pt-6 pb-8'},
         el('div',{class:'flex items-start gap-4 flex-wrap'},
           el('div',{class:'avatar-drift h-20 w-20 rounded-2xl bg-gradient-to-br from-mv-500 to-accent-pink grid place-items-center text-4xl font-extrabold shrink-0 shadow-xl shadow-mv-500/30 border-2 border-slate2-50/20'},
@@ -3991,6 +4041,25 @@ function Venue() {
       // Wraps the offer + slot picker so they stay visible while the diner
       // scrolls through reviews on the left. On mobile, falls back to normal flow.
       el('aside',{class:'mt-4 md:mt-0 md:col-start-2 md:row-start-1 md:row-span-3 md:sticky md:top-20 space-y-4'},
+      // How-to-redeem explainer — sits at the top of the booking column so
+      // diners new to Menuverso understand the 3-step flow before they look
+      // at slot availability. Pure presentational; no interaction.
+      el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/8 p-4'},
+        el('div',{class:'text-[10px] uppercase tracking-[0.12em] text-mv-500 font-extrabold'}, t('venue.howToRedeem.title') || 'How to redeem · 3 steps'),
+        el('ol',{class:'mt-3 space-y-2.5'},
+          ...[
+            { n:'1', glyph:'🚶', h: t('venue.howToRedeem.step1.h') || 'Arrive at the restaurant', b: t('venue.howToRedeem.step1.b') || 'Sit down like normal' },
+            { n:'2', glyph:'👉', h: t('venue.howToRedeem.step2.h') || 'Tap an open slot', b: t('venue.howToRedeem.step2.b') || 'Generates your code in the app' },
+            { n:'3', glyph:'📲', h: t('venue.howToRedeem.step3.h') || 'Show the code to your server', b: t('venue.howToRedeem.step3.b') || 'Done — they apply the 2×1' }
+          ].map(s => el('li',{class:'flex items-start gap-3'},
+            el('span',{class:'shrink-0 inline-flex items-center justify-center h-6 w-6 rounded-full bg-mv-500/15 text-mv-500 text-[11px] font-extrabold tabular-nums'}, s.n),
+            el('div',{class:'min-w-0'},
+              el('div',{class:'text-[13px] font-bold text-slate2-50 leading-tight'}, s.h),
+              el('div',{class:'text-[11px] text-slate2-400 mt-0.5 leading-snug'}, s.b)
+            )
+          ))
+        )
+      ),
       // M-2: surface the PAUSED state. Without this banner, members who reach
       // the venue page via saved/direct link see the normal slot picker, try
       // to book, and get a confusing generic toast.
@@ -4044,7 +4113,38 @@ function Venue() {
       // slot's day/time window is not open right now, the button visibly
       // shows "Open <day/time>" instead of "Book →" (B-2 UI).
       el('div',{},
-        el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold mb-2'},'Pick a time slot'),
+        // Smart status banner — when any slot is open right now we say so
+        // (green); otherwise we surface the next opening time (amber) so the
+        // diner knows when to come back. Without this, the slot picker can
+        // read as "no way to redeem" when nothing is currently within hours.
+        (() => {
+          const pvB = v._pv;
+          const liveDealB = pvB ? getLiveDeal(pvB) : null;
+          const slotsB = (liveDealB?.dealSlots || pvB?.dealSlots || []).filter(s => s && s.active);
+          if (!slotsB.length) return null;
+          const openSlot = slotsB.find(s => isSlotBookableNow(pvB, s));
+          if (openSlot) {
+            return el('div',{class:'rounded-xl bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
+              el('span',{class:'h-2 w-2 rounded-full bg-accent-emer shrink-0 animate-pulse'}),
+              el('div',{class:'text-[12px] text-accent-emer font-bold leading-tight'}, t('venue.openNowBanner') || 'A slot is open right now — tap it to redeem')
+            );
+          }
+          // No slot open now — find earliest "next open" hint string via existing helper.
+          const labels = slotsB.map(s => nextOpenLabel(s)).filter(Boolean);
+          const nextHint = labels[0] || null;
+          if (!nextHint) return null;
+          return el('div',{class:'rounded-xl bg-amber-500/12 border border-amber-500/30 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
+            el('span',{class:'text-amber-300 text-[14px] shrink-0'},'⏱'),
+            el('div',{class:'text-[12px] text-amber-200 leading-tight'},
+              el('span',{class:'font-bold'}, t('venue.nextOpeningBanner') || 'Next available slot'),
+              el('span',{class:'opacity-80'},' · ', nextHint)
+            )
+          );
+        })(),
+        el('div',{class:'flex items-baseline justify-between gap-3 mb-2'},
+          el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'}, t('venue.pickSlot') || 'Pick a slot'),
+          el('div',{class:'text-[10px] text-slate2-500 hidden sm:block'}, t('venue.tapOpenSlotHint') || 'Tap an open slot to get your code.')
+        ),
         el('div',{class:'space-y-2'},
           ...((() => {
             const pvForSlots = v._pv;
@@ -4465,7 +4565,7 @@ function Booking() {
       inner.append(
         el('div',{class:'p-5'},
           el('div',{class:'relative rounded-3xl overflow-hidden shadow-2xl shadow-mv-500/30 ring-1 ring-mv-500/40 mt-2'},
-            el('div',{class:'absolute inset-0', style:'background: linear-gradient(135deg, #DC4A26 0%, #F08461 50%, #B73A1A 100%);'}),
+            el('div',{class:'absolute inset-0', style:'background: linear-gradient(135deg, #E5382A 0%, #F47A6B 50%, #C42D20 100%);'}),
             el('div',{class:'absolute inset-0 mv-shimmer-anim opacity-20 pointer-events-none'}),
             el('div',{class:'relative p-7 text-white text-center'},
               el('div',{class:'text-[10px] uppercase tracking-[0.28em] font-extrabold opacity-85'},'Redeeming at'),
@@ -4702,7 +4802,7 @@ function PartnerLanding() {
 
     // HERO — split layout: pitch on left, glass card on right with the headline stat.
     el('section',{class:'relative overflow-hidden grain'},
-      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #DC4A26 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
+      el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #E5382A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
       el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
         el('div',{},
           el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
@@ -4849,7 +4949,7 @@ function PartnerLanding() {
           'No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves — pick up at any one with the scrubber.'
         )
       ),
-      el('div',{class:'mt-12 relative rounded-3xl overflow-hidden border border-slate2-50/10 bg-[#FAF6EF] shadow-2xl shadow-black/40'},
+      el('div',{class:'mt-12 relative rounded-3xl overflow-hidden border border-slate2-50/10 bg-[#FFFFFF] shadow-2xl shadow-black/40'},
         // Subtle glow behind, matches the rest of the brand surfaces.
         el('div',{class:'absolute -inset-6 bg-gradient-to-br from-mv-500/20 to-transparent rounded-3xl blur-2xl pointer-events-none'}),
         el('iframe',{
@@ -4974,7 +5074,7 @@ function PartnerLanding() {
 
     // FINAL CTA — large.
     el('section',{class:'relative overflow-hidden border-t border-slate2-50/5'},
-      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #DC4A26 0, transparent 50%);'}),
+      el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #E5382A 0, transparent 50%);'}),
       el('div',{class:'relative mx-auto max-w-4xl px-4 py-24 text-center'},
         el('h2',{class:'text-4xl md:text-6xl font-extrabold leading-tight'},
           'Your next ', el('span',{class:'text-mv-500'},'slow Tuesday'),
@@ -8413,7 +8513,7 @@ function Admin() {
       svg.setAttribute('preserveAspectRatio','none');
       const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
       poly.setAttribute('fill','none');
-      poly.setAttribute('stroke','#DC4A26');
+      poly.setAttribute('stroke','#E5382A');
       poly.setAttribute('stroke-width','2');
       poly.setAttribute('points', points);
       svg.appendChild(poly);
