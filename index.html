@@ -1404,12 +1404,15 @@ window.MV_T = {
  'facts.approval.label': 'Aprobación',
  // Partner-landing hero
  'partner.hero.eyebrow': 'Para restaurantes de Barcelona',
- 'partner.hero.line1a': 'Llena tus ',
- 'partner.hero.line1b': 'noches flojas.',
- 'partner.hero.line2a': 'Conserva a tus ',
- 'partner.hero.line2b': 'mejores clientes.',
- 'partner.hero.subhead.lead': 'Los miembros de Menuverso ya han pagado desde 3,99 €/mes por el privilegio de salir a cenar. Están buscando dónde aprovecharlo esta noche. ',
+ 'partner.hero.line1a': 'Asóciate gratis con ',
+ 'partner.hero.line1b': 'menuverso',
+ 'partner.hero.line2a': 'y aumenta tus ',
+ 'partner.hero.line2b': 'ganancias.',
+ 'partner.hero.subhead.lead': 'Los miembros de Menuverso ya están pagando una suscripción por el privilegio de salir a cenar y descubrir nuevos lugares. Están buscando dónde aprovecharlo esta noche. ',
  'partner.hero.subhead.em': 'Sé ese sitio.',
+ 'partner.benefit.1': 'Cero coste',
+ 'partner.benefit.2': 'Más visibilidad',
+ 'partner.benefit.3': 'Fácil de usar',
  'partner.hero.badge.zero.pct.body': 'de comisión por reserva — te quedas con toda la cuenta, menos el segundo plato gratis.',
  'partner.hero.badge.zero.euro.body': 'para aparecer en la lista. Sin cuotas de alta, sin suscripción mensual, sin contrato.',
  'partner.hero.badge.you.body': 'eliges los días, los horarios y cuántas mesas hay disponibles.',
@@ -1425,7 +1428,11 @@ window.MV_T = {
  'lead.submit': 'Enviar →',
  'lead.helper': 'Te respondemos en un día hábil. Sin spam, sin emails automáticos.',
  'lead.invalid': 'Introduce un email válido.',
+ 'lead.invalidFields': 'Completa todos los campos con datos válidos.',
  'lead.success': 'Gracias — te respondemos en un día hábil.',
+ 'lead.venue': 'Nombre del local',
+ 'lead.contact': 'Persona de contacto',
+ 'lead.phone': 'Teléfono',
  // Diner's-view preview card
  'preview.dinersView': 'Vista del cliente',
  'preview.label': 'Vista previa',
@@ -1550,12 +1557,15 @@ window.MV_T = {
  'facts.approval.value': '1 day',
  'facts.approval.label': 'Approval',
  'partner.hero.eyebrow': 'For Barcelona restaurants',
- 'partner.hero.line1a': 'Fill your ',
- 'partner.hero.line1b': 'slow nights.',
- 'partner.hero.line2a': 'Keep your ',
- 'partner.hero.line2b': 'best customers.',
- 'partner.hero.subhead.lead': 'Menuverso members already paid from €3.99/month for the privilege of dining out. They\u0027re looking for somewhere to use it tonight. ',
- 'partner.hero.subhead.em': 'Be that somewhere.',
+ 'partner.hero.line1a': 'Partner free with ',
+ 'partner.hero.line1b': 'menuverso',
+ 'partner.hero.line2a': 'and grow your ',
+ 'partner.hero.line2b': 'earnings.',
+ 'partner.hero.subhead.lead': 'Menuverso members already pay a subscription for the privilege of dining out and discovering new places. They\u0027re looking for somewhere to use it tonight. ',
+ 'partner.hero.subhead.em': 'Be that place.',
+ 'partner.benefit.1': 'No cost',
+ 'partner.benefit.2': 'More visibility',
+ 'partner.benefit.3': 'Easy to use',
  'partner.hero.badge.zero.pct.body': 'commission per booking — you keep the full bill, minus the free main.',
  'partner.hero.badge.zero.euro.body': 'to list. No setup fees, no monthly subscription, no contract.',
  'partner.hero.badge.you.body': 'choose the days, time slots, and how many seats are available.',
@@ -1570,7 +1580,11 @@ window.MV_T = {
  'lead.submit': 'Submit →',
  'lead.helper': 'We reply within one business day. No spam, no auto-emails.',
  'lead.invalid': 'Please enter a valid email.',
+ 'lead.invalidFields': 'Please fill all fields with valid info.',
  'lead.success': "Thanks — we\u0027ll be in touch within one business day.",
+ 'lead.venue': 'Location name',
+ 'lead.contact': 'Contact person',
+ 'lead.phone': 'Phone number',
  'preview.dinersView': "Diner\u0027s view",
  'preview.label': 'Preview',
  'preview.serverView': 'PREVIEW · SERVER VIEW',
@@ -4771,22 +4785,33 @@ function PartnerLanding() {
  const leadCapture = el('form',{class:'mt-7 max-w-lg', onsubmit: (ev)=>{
  ev.preventDefault();
  const f = ev.target;
+ const venue = (f.venue && f.venue.value || '').trim();
+ const contact = (f.contact && f.contact.value || '').trim();
+ const phone = (f.phone && f.phone.value || '').trim();
  const email = (f.email && f.email.value || '').trim().toLowerCase();
- if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
- toast(t('lead.invalid'));
+ if (!venue || !contact || !phone || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+ toast(t('lead.invalidFields'));
  return;
  }
  const leads = JSON.parse(localStorage.getItem('mv_partner_leads') || '[]');
- leads.push({ email, ts: Date.now() });
+ leads.push({ venue, contact, phone, email, ts: Date.now() });
  localStorage.setItem('mv_partner_leads', JSON.stringify(leads));
  f.reset();
  toast(t('lead.success'));
  }},
  el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-slate2-400 mb-2'}, t('lead.label')),
+ el('div',{class:'space-y-2'},
+ el('input',{ name:'venue', type:'text', required: true, placeholder: t('lead.venue'),
+ class:'w-full rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ el('input',{ name:'contact', type:'text', required: true, placeholder: t('lead.contact'),
+ class:'w-full rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ el('input',{ name:'phone', type:'tel', required: true, placeholder: t('lead.phone'),
+ class:'w-full rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('div',{class:'flex flex-col sm:flex-row gap-2'},
  el('input',{ name:'email', type:'email', required: true, placeholder: t('lead.placeholder'),
  class:'flex-1 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('button',{ type:'submit', class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition shrink-0'}, t('lead.submit'))
+ )
  ),
  el('p',{class:'mt-2 text-xs text-slate2-500'}, t('lead.helper'))
  );
@@ -4812,15 +4837,11 @@ function PartnerLanding() {
  t('partner.hero.subhead.lead'),
  el('strong',{class:'text-slate2-50'}, t('partner.hero.subhead.em'))
  ),
- el('ul',{class:'mt-7 space-y-2.5 text-slate2-200 text-base max-w-xl'},
- ...[
- [t('facts.commission.value'), t('partner.hero.badge.zero.pct.body')],
- [t('facts.toList.value'), t('partner.hero.badge.zero.euro.body')],
- [(MV_LANG === 'es' ? 'Tú' : 'You'), t('partner.hero.badge.you.body')]
- ].map(([badge,line])=>
- el('li',{class:'flex items-start gap-3'},
- el('span',{class:'mt-0.5 inline-flex items-center justify-center rounded-full bg-mv-500/15 border border-mv-500/30 text-mv-400 px-2.5 py-0.5 text-xs font-extrabold min-w-[44px] text-center'}, badge),
- el('span',{}, line)
+ el('ul',{class:'mt-7 space-y-3 text-slate2-200 text-base max-w-xl'},
+ ...[t('partner.benefit.1'), t('partner.benefit.2'), t('partner.benefit.3')].map(line=>
+ el('li',{class:'flex items-center gap-3'},
+ el('span',{class:'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mv-500/15 border border-mv-500/30 text-mv-400', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="5 12 10 17 19 7"/></svg>'}),
+ el('span',{class:'font-bold text-slate2-50'}, line)
  )
  )
  ),
