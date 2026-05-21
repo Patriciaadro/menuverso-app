@@ -4782,7 +4782,7 @@ function PartnerLanding() {
  // Posts to localStorage in the demo; in production this would POST to a
  // /api/partner-lead route backed by a Supabase `partner_leads` table.
  // The full CTA buttons below this form stay as the higher-commitment path.
- const leadCapture = el('form',{class:'mt-7 max-w-lg', onsubmit: (ev)=>{
+ const leadCapture = el('form',{id:'partner-contact', class:'mt-7 max-w-lg scroll-mt-28', onsubmit: (ev)=>{
  ev.preventDefault();
  const f = ev.target;
  const venue = (f.venue && f.venue.value || '').trim();
@@ -4915,33 +4915,35 @@ function PartnerLanding() {
  el('div',{class:'text-center max-w-3xl mx-auto'},
  el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
  el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
- 'Why partners join',
+ 'Why partner with menuverso',
  el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
  ),
- el('h2',{class:'font-serif-display mt-6 text-5xl md:text-6xl font-extrabold leading-[0.98]'},
- 'Built for ', el('span',{class:'italic text-mv-500'},'restaurant owners,'), el('br'), 'not deal-hunters.'
+ el('h2',{class:'font-serif-display mt-6 text-4xl md:text-6xl font-extrabold leading-[1.0]'},
+ 'Reach new diners, earn more, ', el('span',{class:'italic text-mv-500'},'get more visible.')
  ),
  el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
- 'Three reasons restaurants list with us — each one a different way our model isn\'t the same as the other guys\'.'
+ 'Get discovered — reach new customers easily and at no cost.'
  )
  ),
- el('div',{class:'mt-16 md:mt-20 grid md:grid-cols-3 gap-6'},
+ el('div',{class:'mt-14 md:mt-16 grid md:grid-cols-2 gap-10 md:gap-14 items-center'},
+ // Warm human photo — swap for a real partner/owner photo when available.
+ el('div',{class:'relative'},
+ el('div',{class:'absolute -inset-3 bg-gradient-to-br from-mv-500/20 to-transparent rounded-3xl blur-2xl pointer-events-none'}),
+ el('img',{src:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80&auto=format&fit=crop', alt:'A warm welcome at a partner restaurant', class:'relative rounded-3xl w-full h-[420px] object-cover border border-slate2-50/10 shadow-2xl shadow-black/40'})
+ ),
+ el('div',{class:'space-y-7'},
  ...[
- { glyph:'users', stat:'Tuesday lunch', eyebrow:'Fill the quiet shifts', title:'Quiet shifts, not your prime time.', body:'Members book the slots you choose — Tuesday lunch, Wednesday dinner, early Sunday. Your busy nights stay yours.' },
- { glyph:'receipt', stat:'Full bill', eyebrow:'Keep the full bill', title:'One main free. Everything else, yours.', body:'Members pay for one main; the other\'s free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.' },
- { glyph:'heart', stat:'4–8× a month', eyebrow:'Real locals', title:'Regulars, not coupon-clippers.', body:'A €3.99-and-up monthly fee filters out the deal-hunter crowd. Members are locals who eat out 4–8× a month and bring friends.' }
+ { glyph:'receipt', title:'Zero cost', body:'We charge nothing to be part of menuverso. No setup fee, no monthly subscription, no commission.' },
+ { glyph:'users', title:'Fill your tables', body:'Get your offer in front of new diners — the best food and service in your city — so they come back and become regulars.' },
+ { glyph:'check', title:'Easy to use and set up', body:'No extra complexity, no new software. menuverso keeps it simple so you can focus on your guests and great service.' }
  ].map(p =>
- el('div',{class:'group relative rounded-2xl bg-ink-900/70 border border-mv-500/15 p-7 md:p-8 hover:border-mv-500/40 hover:shadow-xl hover:shadow-mv-500/[0.08] hover:-translate-y-0.5 transition-all duration-300'},
- // Glyph tile + a small stat chip on the right
- el('div',{class:'flex items-start justify-between'},
- el('div',{class:'h-14 w-14 rounded-2xl bg-mv-500/10 ring-1 ring-mv-500/25 grid place-items-center text-mv-500 p-3', html: window.__partnerGlyphs[p.glyph]}),
- el('div',{class:'text-right'},
- el('div',{class:'text-[10px] uppercase tracking-[0.22em] font-bold text-slate2-400'}, p.eyebrow),
- el('div',{class:'mt-1 font-serif-display italic text-lg text-mv-500 font-extrabold'}, p.stat)
+ el('div',{class:'flex items-start gap-4'},
+ el('div',{class:'shrink-0 h-12 w-12 rounded-2xl bg-mv-500/10 ring-1 ring-mv-500/25 grid place-items-center text-mv-500 p-2.5', html: window.__partnerGlyphs[p.glyph]}),
+ el('div',{},
+ el('h3',{class:'font-serif-display text-xl md:text-2xl font-extrabold text-slate2-50 leading-tight'}, p.title),
+ el('p',{class:'mt-1.5 text-[15px] text-slate2-300 leading-relaxed'}, p.body)
  )
- ),
- el('h3',{class:'mt-7 font-serif-display text-2xl md:text-3xl font-extrabold leading-[1.1] text-slate2-50'}, p.title),
- el('p',{class:'mt-3 text-[15px] text-slate2-300 leading-relaxed'}, p.body)
+ )
  )
  )
  )
@@ -4956,14 +4958,11 @@ function PartnerLanding() {
  el('div',{class:'text-center max-w-3xl mx-auto'},
  el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
  el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
- 'The redemption, in 30 seconds',
+ 'In 30 seconds',
  el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
  ),
  el('h2',{class:'font-serif-display mt-6 text-5xl md:text-6xl font-extrabold leading-[0.98]'},
- 'See how a ', el('span',{class:'italic text-mv-500'},'redemption'), ' actually feels.'
- ),
- el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
- 'No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves — pick up at any one with the scrubber.'
+ 'See how easy menuverso is to use.'
  )
  ),
  el('div',{class:'mt-12 relative rounded-3xl overflow-hidden border border-slate2-50/10 bg-[#FFFFFF] shadow-2xl shadow-black/40'},
@@ -4979,75 +4978,6 @@ function PartnerLanding() {
  loading:'lazy',
  title:'How a Menuverso redemption works — six-scene animation'
  })
- )
- ),
-
- // FOUNDER NOTE — an honest "why we built this" pull-quote-style block.
- // No fake testimonials, no invented numbers — but presented with editorial
- // weight (rule + italic Fraunces opener + body in serif) so it carries.
- el('section',{class:'mx-auto max-w-3xl px-4 py-24 md:py-28 border-t border-slate2-50/10'},
- el('div',{class:'text-center'},
- el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
- el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
- 'A note to restaurant owners',
- el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
- ),
- el('h2',{class:'font-serif-display mt-6 text-4xl md:text-6xl font-extrabold leading-[0.95]'},
- 'Why we\'re building ', el('span',{class:'italic text-mv-500'},'Menuverso.')
- )
- ),
- el('div',{class:'mt-10 rounded-3xl bg-ink-900/60 border border-mv-500/15 p-8 md:p-10 leading-relaxed'},
- // Pull-quote opener in italic Fraunces
- el('p',{class:'font-serif-display italic text-2xl md:text-3xl font-extrabold text-slate2-50 leading-snug'},
- '"Most deals platforms pitch you on volume. We\'re building the opposite."'
- ),
- el('div',{class:'mt-8 space-y-4 text-[15px] md:text-base text-slate2-200 leading-relaxed'},
- el('p',{},'Pay a cut of every cover, get a flood of price-sensitive diners, and hope to break even on drinks. That\'s the model. It works for the platform — for the restaurant, the math rarely does.'),
- el('p',{},'Members pay from €3.99/month for the privilege of dining out at a curated set of Barcelona restaurants. That fee is our entire revenue. Your bill goes straight to you — we take ', el('strong',{class:'text-mv-500'},'zero commission'), ' on the food they eat.'),
- el('p',{},'In return, you set the rules: which days, which slots, which seats. Pause for holidays in one click. We\'re onboarding the first venues now and we\'d love yours to be one of them.')
- ),
- el('div',{class:'mt-8 pt-6 border-t border-mv-500/15 text-sm text-slate2-400 flex items-center justify-between flex-wrap gap-3'},
- el('span',{class:'flex items-center gap-2'},
- el('span',{class:'inline-flex h-7 w-7 rounded-full bg-mv-500 items-center justify-center'},
- el('span',{class:'font-serif-display italic font-extrabold text-white text-base leading-none'},'m')
- ),
- el('span',{},'The Menuverso team')
- ),
- el('a',{class:'underline hover:text-mv-500 transition cursor-pointer', href:'mailto:hola@menuverso.com'},'hola@menuverso.com →')
- )
- )
- ),
-
- // PRICING — single transparent card.
- el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-slate2-50/5 text-center'},
- el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Pricing'),
- el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'No commission. ', el('br'), el('span',{class:'text-mv-500'},'No catch.')),
- el('div',{class:'mt-10 rounded-3xl bg-gradient-to-br from-mv-500/10 via-slate2-50/[0.03] to-mv-500/5 border border-mv-500/30 p-8 text-left'},
- el('div',{class:'flex items-baseline justify-center gap-2 text-center'},
- el('span',{class:'text-6xl font-extrabold text-mv-500'},'€0'),
- el('span',{class:'text-slate2-400 font-bold'},'/month')
- ),
- el('div',{class:'mt-1 text-center text-sm text-slate2-400'},'Forever. The deal is your discount, not our fee.'),
- el('ul',{class:'mt-7 grid sm:grid-cols-2 gap-3 text-sm'},
- ...[
- 'No setup fee',
- 'No monthly subscription',
- '0% commission per booking',
- 'No long-term contract',
- 'Cancel any time from your portal',
- 'Pause and resume listings instantly'
- ].map(s =>
- el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-mv-500 font-extrabold'},''), s))
- ),
- el('div',{class:'mt-7 text-center'},
- el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-10 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{
- if (isPartner) return go('partner-portal',{tab:'overview'});
- if (isOtherRole) { logout(); toast('Signed out — you can register a partner account now.'); return go('partner-signup'); }
- go('partner-signup');
- }},
- isPartner ? 'Open partner portal →' : (isOtherRole ? 'Sign out & list a restaurant →' : 'List your restaurant →')
- )
- )
  )
  ),
 
@@ -5094,11 +5024,15 @@ function PartnerLanding() {
  el('div',{class:'absolute inset-0 opacity-20', style:'background-image: radial-gradient(circle at 50% 50%, #E5382A 0, transparent 50%);'}),
  el('div',{class:'relative mx-auto max-w-4xl px-4 py-24 text-center'},
  el('h2',{class:'text-4xl md:text-6xl font-extrabold leading-tight'},
- 'Your next ', el('span',{class:'text-mv-500'},'slow Tuesday'),
- el('br'), 'starts filling tonight.'
+ 'Ready to fill ', el('span',{class:'text-mv-500'},'your tables?')
  ),
- el('p',{class:'mt-5 text-slate2-300 max-w-xl mx-auto'},'Three minutes to list. One business day to approve. Zero risk to try.'),
- el('div',{class:'mt-8 flex justify-center'}, primaryCtas)
+ el('p',{class:'mt-5 text-slate2-300 max-w-xl mx-auto'},'Send us your venue details and we will be in touch within one business day.'),
+ el('div',{class:'mt-8 flex justify-center'},
+ el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-8 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{
+ const f = document.getElementById('partner-contact');
+ if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const inp = f.querySelector('input'); if (inp) setTimeout(function(){ inp.focus(); }, 500); }
+ }}, 'Get in touch →')
+ )
  )
  ),
 
@@ -9549,6 +9483,16 @@ window.MV_TR_ES = {
  "Members pay for one main; the other's free. Drinks, starters, desserts, wine — all charged in full. Your average ticket goes up, not down.": "Los miembros pagan un plato principal; el otro es gratis. Bebidas, entrantes, postres, vino — todo se cobra completo. Tu ticket medio sube, no baja.",
  "Full bill": "Cuenta completa",
  "Real locals": "Locales de verdad",
+ "Why partner with menuverso": "Por qué asociarte con menuverso",
+ "Reach new diners, earn more,": "Llega a nuevos clientes, consigue más ingresos,",
+ "get more visible.": "más visibilidad.",
+ "Get discovered — reach new customers easily and at no cost.": "Hazte conocer: llega a nuevos clientes de una forma fácil y sencilla y sin coste.",
+ "Zero cost": "Zero costes",
+ "We charge nothing to be part of menuverso. No setup fee, no monthly subscription, no commission.": "No cobramos nada por ser parte de menuverso. Sin cuota de alta, sin suscripción mensual, sin comisión.",
+ "Fill your tables": "Llena tus mesas",
+ "Get your offer in front of new diners — the best food and service in your city — so they come back and become regulars.": "Haz que conozcan tu oferta, la mejor comida y servicio de tu ciudad, para que vuelvan y se conviertan en clientes regulares.",
+ "Easy to use and set up": "Fácil de usar e implementar",
+ "No extra complexity, no new software. menuverso keeps it simple so you can focus on your guests and great service.": "Con menuverso no necesitas añadir complejidad ni programas. Te lo ponemos fácil para que te enfoques en tu cliente y en dar el mejor servicio.",
  "Regulars, not coupon-clippers.": "Habituales, no recortadores de cupones.",
  "A €3.99-and-up monthly fee filters out the deal-hunter crowd. Members are locals who eat out 4–8× a month and bring friends.": "Una cuota mensual desde 3,99 € filtra a los cazadores de chollos. Los miembros son locales que salen a cenar de 4 a 8 veces al mes y traen amigos.",
  "4–8× a month": "4–8 veces al mes",
@@ -9567,6 +9511,8 @@ window.MV_TR_ES = {
  "See how a": "Mira cómo se siente un",
  "redemption": "canje",
  "actually feels.": "de verdad.",
+ "In 30 seconds": "En 30 segundos",
+ "See how easy menuverso is to use.": "Mira lo fácil que es usar menuverso.",
  "No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves — pick up at any one with the scrubber.": "Sin códigos QR, sin códigos de personal, sin exportaciones de fin de día. Seis escenas que se reproducen solas — salta a cualquiera con la barra.",
  "Catalan tapas · Eixample": "Tapas catalanas · Eixample",
  "STANDING DEAL": "OFERTA FIJA",
@@ -9643,6 +9589,10 @@ window.MV_TR_ES = {
  "slow Tuesday": "martes flojo",
  "starts filling tonight.": "empieza a llenarse esta noche.",
  "Three minutes to list. One business day to approve. Zero risk to try.": "Tres minutos para listar. Un día hábil para aprobar. Cero riesgo al probar.",
+ "Ready to fill": "¿Listo para llenar",
+ "your tables?": "tus mesas?",
+ "Send us your venue details and we will be in touch within one business day.": "Envíanos los datos de tu local y te contactaremos en un día hábil.",
+ "Get in touch →": "Contáctanos →",
  "The redemption, in 30 seconds": "El canje, en 30 segundos",
  "See how a": "Mira cómo se siente un",
  "actually feels.": "de verdad.",
