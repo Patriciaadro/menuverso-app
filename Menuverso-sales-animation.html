@@ -297,6 +297,16 @@
     text-decoration: none;
   }
 
+  /* Mobile / narrow embed — stack the split so the visual is not squashed. */
+  @media (max-width: 720px) {
+    .split { grid-template-columns: 1fr; gap: 12px; padding: 0 16px; }
+    .text-col { text-align: center; }
+    .visual-col { min-height: auto; }
+    .visual-col svg { width: auto; max-width: 100%; max-height: 248px; height: auto; }
+    .title { font-size: clamp(22px, 6.6vw, 34px); margin-top: 12px; }
+    .subtitle { max-width: 100%; margin-left: auto; margin-right: auto; font-size: 13.5px; }
+    .split.center .visual-col { margin-top: 8px; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .scene { transition: opacity 200ms; }
     .scene.active * { animation-duration: 0.01ms !important; animation-delay: 0s !important; }
@@ -472,7 +482,7 @@
     <div class="split">
       <div class="text-col">
         <span class="step anim-fadein"><span class="num">4</span>Show the screen</span>
-        <h1 class="title serif anim-fadeup">An animated screen <em>that shows up.</em></h1>
+        <h1 class="title serif anim-fadeup">Just show your phone <em>at the table.</em></h1>
         <p class="subtitle anim-fadein">A rotating venue token, a live ticking timestamp, a shimmering gradient. Screenshots can't reproduce it. The server looks, acknowledges, done.</p>
       </div>
       <div class="visual-col anim-popin">
@@ -666,8 +676,8 @@
   "REDEEMING AT": "CANJE EN",
   "Show the screen": "Muestra la pantalla",
   "Animated verification": "Verificación animada",
-  "An animated screen": "Una pantalla animada",
-  "that shows up.": "que aparece al instante.",
+  "Just show your phone": "Solo enseña tu móvil",
+  "at the table.": "en la mesa.",
   "A rotating venue token, a live ticking timestamp, a shimmering gradient. Screenshots can't reproduce it. The server looks, acknowledges, done.": "Un token del local rotativo, una marca de tiempo en vivo, un brillo en movimiento. Las capturas de pantalla no pueden reproducirlo. El camarero mira, confirma, listo.",
   "SHOW TO YOUR SERVER": "ENSEÑA AL CAMARERO",
   "Confirmed": "Confirmado",
