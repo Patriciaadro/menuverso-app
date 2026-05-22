@@ -1360,7 +1360,7 @@ window.MV_T = {
  'hero.line2': 'Ahorra en el resto.',
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
- 'hero.subhead.tail': 'Las joyas culinarias de Barcelona. Solo para miembros.',
+ 'hero.subhead.tail': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas 2x1. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
  'hero.ctaJoin': 'Únete — desde 3,99 €/mes',
  'hero.ctaApp': 'Abrir la app →',
  'hero.ctaHow': 'Cómo funciona',
@@ -1516,7 +1516,7 @@ window.MV_T = {
  'hero.line2': 'Save the Rest.',
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
- 'hero.subhead.tail': 'Barcelona\u0027s hidden culinary gems. Members only.',
+ 'hero.subhead.tail': 'Discover the city\u0027s best-kept secrets with exclusive 2-for-1 deals. From sunset rooftop cocktails and hidden gems to specialty coffee and gourmet bites. Indulge in endless gastronomic experiences — all in one app.',
  'hero.ctaJoin': 'Join — from €3.99/mo',
  'hero.ctaApp': 'Open the app →',
  'hero.ctaHow': 'See How It Works',
@@ -2327,11 +2327,11 @@ function Landing() {
  el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
  el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('hero.eyebrow')
  ),
- el('h1',{class:'hero-on-video font-serif-display mx-auto mt-6 max-w-4xl text-6xl md:text-8xl font-extrabold leading-[0.98]'},
+ el('h1',{class:'hero-on-video font-serif-display mx-auto mt-6 max-w-4xl text-4xl md:text-6xl font-extrabold leading-[1.05]'},
  t('hero.line1'), el('br'),
  el('span',{class:'text-mv-500 italic'}, t('hero.line2'))
  ),
- el('p',{class:'hero-on-video mx-auto mt-6 max-w-2xl text-lg'},
+ el('p',{class:'hero-on-video mx-auto mt-6 max-w-3xl text-base md:text-lg'},
  t('hero.subhead.tail')
  ),
  el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
@@ -2349,7 +2349,6 @@ function Landing() {
  el('section',{id:'how', class:'relative overflow-hidden bg-ink-950'},
  el('div',{class:'mx-auto max-w-6xl px-4 py-24 md:px-6 md:py-28'},
  el('div',{class:'text-center max-w-3xl mx-auto'},
- el('span',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 ring-1 ring-mv-500/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'}, t('how.eyebrow')),
  el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95] text-slate2-50'}, t('how.heading'))
  ),
  el('div',{class:'mt-16 grid gap-12 md:gap-10 md:grid-cols-3'},
@@ -2464,14 +2463,15 @@ function Landing() {
  b.classList.toggle('text-slate2-300', !active);
  b.classList.toggle('hover:text-slate2-100', !active);
  });
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  if (plan === 'annual') {
  amount.textContent = '€3.99';
- label.textContent = '/mo · annual';
- sub.textContent = 'Billed once a year — €47.88 up front. Save €36 vs monthly.';
+ label.textContent = es ? '/mes · anual' : '/mo · annual';
+ sub.textContent = es ? 'Se cobra una vez al año — 47,88 €. Ahorras 36 € frente al plan mensual.' : 'Billed once a year — €47.88 up front. Save €36 vs monthly.';
  } else {
  amount.textContent = '€6.99';
- label.textContent = '/mo · monthly';
- sub.textContent = 'Billed each month. Cancel any month.';
+ label.textContent = es ? '/mes · mensual' : '/mo · monthly';
+ sub.textContent = es ? 'Se cobra cada mes. Cancela cuando quieras.' : 'Billed each month. Cancel any month.';
  }
  }
  btns.forEach(b => b.addEventListener('click', () => setPlan(b.dataset.plan)));
@@ -2529,23 +2529,12 @@ function Landing() {
  ),
  // Inclusions — slate text with solid terracotta check pills
  el('ul',{class:'mt-5 space-y-2 text-sm text-slate2-100'},
- ...['Curated Barcelona restaurants','2×1 on whatever the kitchen offers','Cancel any time'].map(s =>
+ ...['Cancel any time','Access to all the deals','Pays for itself in one visit'].map(s =>
  el('li',{class:'flex items-center gap-2.5'},
  el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},''),
  el('span',{class:'font-medium'}, s)
  ))
  ),
- // Member meta-line — terracotta hairline divider above
- el('div',{class:'mt-7 pt-5 border-t border-mv-500/25 flex items-end justify-between text-xs'},
- el('div',{},
- el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold text-slate2-400'},'Member from'),
- el('div',{class:'mt-0.5 font-serif-display italic text-lg font-extrabold text-slate2-100'},'Summer 2026')
- ),
- el('div',{class:'text-right'},
- el('div',{class:'text-[8px] uppercase tracking-[0.25em] font-bold text-slate2-400'},'Serial'),
- el('div',{class:'mt-0.5 font-mono font-bold text-sm tracking-wider text-mv-600'},'MV·000142')
- )
- )
  ),
  // Bottom: thin warm terracotta strip (replaces the black magnetic strip)
  el('div',{class:'absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-mv-400 via-mv-500 to-mv-400 opacity-85'})
@@ -4763,6 +4752,24 @@ function PartnerLanding() {
  const isPartner = me?.role === 'PARTNER_OWNER';
  const isOtherRole = me && !isPartner;
 
+ // Partner-page glyph library (Lucide-style icons) — defined up-front
+ // so every section can reference it regardless of layout order.
+ if (!window.__partnerGlyphs) window.__partnerGlyphs = {
+ users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/><circle cx="17" cy="8" r="2.5" opacity="0.5"/><path d="M19.5 20v-1a3.5 3.5 0 0 0-2.5-3.4" opacity="0.5"/></svg>',
+ receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="2.5" opacity="0.9"/></svg>',
+ heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 6 5.5 6c1.7 0 3.2 1 4 2.5C10.3 7 11.8 6 13.5 6c3 0 4.5 3 3 6-2.5 4.5-9.5 9-9.5 9z" fill="currentColor" fill-opacity="0.18"/></svg>',
+ document:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="14" y2="18"/></svg>',
+ check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><polyline points="7.5 12.5 10.5 15.5 16 9.5"/></svg>',
+ calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/><circle cx="16" cy="14.5" r="1.1" fill="currentColor" fill-opacity="0.4"/></svg>',
+ keypad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="currentColor" fill-opacity="0.22"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity="0.5"/></svg>',
+ barChart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="13" width="3" height="7" fill="currentColor" fill-opacity="0.22"/><rect x="11" y="9" width="3" height="11"/><rect x="16" y="5" width="3" height="15" fill="currentColor" fill-opacity="0.22"/></svg>',
+ profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="11" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 11-3"/><path d="M17 13l5 5-2 1-2 1 1-2 1-2-3-3z" fill="currentColor" fill-opacity="0.22"/></svg>',
+ layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polygon points="12 3 21 8 12 13 3 8" fill="currentColor" fill-opacity="0.22"/><polyline points="3 13 12 18 21 13"/><polyline points="3 17 12 22 21 17" opacity="0.5"/></svg>',
+ pause: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><line x1="10" y1="8.5" x2="10" y2="15.5" stroke-width="2"/><line x1="14" y1="8.5" x2="14" y2="15.5" stroke-width="2"/></svg>',
+ phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="6" y="2" width="12" height="20" rx="2.5"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><text x="12" y="13" font-family="Courier, monospace" font-size="5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">842</text></svg>',
+ chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M21 11.5a8.5 8.5 0 0 1-13 7.2L3 20.5l1.8-4.7A8.5 8.5 0 1 1 21 11.5z" fill="currentColor" fill-opacity="0.15"/><circle cx="8.5" cy="11.5" r="0.9" fill="currentColor"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor"/><circle cx="15.5" cy="11.5" r="0.9" fill="currentColor"/></svg>'
+ };
+
  const primaryCtas = el('div',{class:'flex flex-wrap items-center gap-3'},
  !me && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('partner-signup')}, t('partner.hero.cta.list')),
  !me && el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>{
@@ -4812,103 +4819,13 @@ function PartnerLanding() {
  class:'flex-1 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('button',{ type:'submit', class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition shrink-0'}, t('lead.submit'))
  )
- ),
- el('p',{class:'mt-2 text-xs text-slate2-500'}, t('lead.helper'))
+ )
  );
 
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
  // Shared Concept banner (one across the whole app).
  ConceptBanner(),
  MarketingHeader(),
-
- // HERO — split layout: pitch on left, glass card on right with the headline stat.
- el('section',{class:'relative overflow-hidden grain'},
- el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #E5382A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
- el('div',{class:'relative mx-auto max-w-6xl px-4 py-20 md:py-24 grid md:grid-cols-2 gap-12 items-center'},
- el('div',{},
- el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
- el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('partner.hero.eyebrow')
- ),
- el('h1',{class:'mt-5 text-4xl md:text-6xl font-extrabold leading-[1.05]'},
- t('partner.hero.line1a'), el('span',{class:'text-mv-500'}, t('partner.hero.line1b')), el('br'),
- t('partner.hero.line2a'), el('span',{class:'text-mv-500'}, t('partner.hero.line2b'))
- ),
- el('p',{class:'mt-5 text-lg text-slate2-300 max-w-xl'},
- t('partner.hero.subhead.lead'),
- el('strong',{class:'text-slate2-50'}, t('partner.hero.subhead.em'))
- ),
- el('ul',{class:'mt-7 space-y-3 text-slate2-200 text-base max-w-xl'},
- ...[t('partner.benefit.1'), t('partner.benefit.2'), t('partner.benefit.3')].map(line=>
- el('li',{class:'flex items-center gap-3'},
- el('span',{class:'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mv-500/15 border border-mv-500/30 text-mv-400', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="5 12 10 17 19 7"/></svg>'}),
- el('span',{class:'font-bold text-slate2-50'}, line)
- )
- )
- ),
- // Lead-capture form first (low-commitment ask), then the full
- // CTA buttons (higher-commitment paths) below it.
- leadCapture,
- el('div',{class:'mt-5'}, primaryCtas)
- ),
- // Right column — "this is what your listing looks like to a diner".
- // Real venue photo (the demo partner's), then a tiny code-redemption
- // preview tile to anchor the redemption flow. Two visual moments, both
- // honestly labelled as previews.
- (() => {
- const sample = (store.partnerVenues && store.partnerVenues.find(p => p.status === 'LIVE')) || null;
- const sampleSlug = sample ? sample.slug : (getAllVenues()[0]?.slug);
- const previewVenue = sample ? toMemberShape(sample) : getAllVenues().find(v => v.slug === sampleSlug);
- return el('div',{class:'relative'},
- el('div',{class:'absolute -inset-4 bg-gradient-to-br from-mv-500/30 to-transparent rounded-3xl blur-2xl'}),
- el('div',{class:'relative rounded-3xl border border-slate2-50/10 bg-ink-900/80 backdrop-blur p-5 shadow-2xl'},
- el('div',{class:'flex items-center justify-between text-xs text-slate2-400'},
- el('span',{class:'flex items-center gap-2'},
- el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}), t('preview.dinersView')
- ),
- el('span',{class:'font-bold text-mv-400'}, t('preview.label'))
- ),
- // Member-side venue card preview — exactly what diners see.
- previewVenue && el('div',{class:'mt-4 rounded-2xl overflow-hidden bg-slate2-50/[0.04] border border-slate2-50/10'},
- el('div',{class:'relative'},
- VenueArt(previewVenue, {aspect:'16/9', radius:'rounded-none'}),
- el('div',{class:'absolute top-2 left-2 rounded-full bg-mv-500 text-white text-[10px] font-extrabold uppercase tracking-widest px-2 py-1 shadow-lg shadow-mv-500/30 z-10'},'2×1 main'),
- el('div',{class:'absolute top-2 right-2 rounded-full bg-ink-900/80 backdrop-blur text-slate2-50 text-[10px] font-bold px-2 py-1 flex items-center gap-1 z-10'},
- ILLUS.smallPin('h-3 w-3 text-mv-500'), previewVenue.barrio
- )
- ),
- el('div',{class:'p-3 flex items-center gap-2'},
- ILLUS.cuisineGlyph(cuisineGlyphFor(previewVenue.cuisine), 'h-4 w-4 text-mv-500'),
- el('div',{class:'min-w-0 flex-1'},
- el('div',{class:'font-bold truncate'}, previewVenue.name),
- el('div',{class:'text-[11px] text-slate2-400 truncate'}, previewVenue.cuisine)
- ),
- el('span',{class:'text-accent-amber text-xs shrink-0'}, ' ', (previewVenue.rating ?? 4.6).toFixed(1))
- )
- ),
- )
- );
- })()
- )
- ),
-
- // ====== Partner-page glyph library — clean Lucide-style line icons ======
- // Inherits color from `text-mv-500` via currentColor so every glyph picks
- // up the brand terracotta automatically. 24x24 viewBox, scales fluidly.
- (() => { if (!window.__partnerGlyphs) window.__partnerGlyphs = {
- users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/><circle cx="17" cy="8" r="2.5" opacity="0.5"/><path d="M19.5 20v-1a3.5 3.5 0 0 0-2.5-3.4" opacity="0.5"/></svg>',
- receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="2.5" opacity="0.9"/></svg>',
- heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 6 5.5 6c1.7 0 3.2 1 4 2.5C10.3 7 11.8 6 13.5 6c3 0 4.5 3 3 6-2.5 4.5-9.5 9-9.5 9z" fill="currentColor" fill-opacity="0.18"/></svg>',
- document:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="14" y2="18"/></svg>',
- check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><polyline points="7.5 12.5 10.5 15.5 16 9.5"/></svg>',
- calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/><circle cx="16" cy="14.5" r="1.1" fill="currentColor" fill-opacity="0.4"/></svg>',
- keypad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="currentColor" fill-opacity="0.22"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity="0.5"/></svg>',
- barChart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="13" width="3" height="7" fill="currentColor" fill-opacity="0.22"/><rect x="11" y="9" width="3" height="11"/><rect x="16" y="5" width="3" height="15" fill="currentColor" fill-opacity="0.22"/></svg>',
- profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="11" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 11-3"/><path d="M17 13l5 5-2 1-2 1 1-2 1-2-3-3z" fill="currentColor" fill-opacity="0.22"/></svg>',
- layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polygon points="12 3 21 8 12 13 3 8" fill="currentColor" fill-opacity="0.22"/><polyline points="3 13 12 18 21 13"/><polyline points="3 17 12 22 21 17" opacity="0.5"/></svg>',
- pause: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><line x1="10" y1="8.5" x2="10" y2="15.5" stroke-width="2"/><line x1="14" y1="8.5" x2="14" y2="15.5" stroke-width="2"/></svg>',
- phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="6" y="2" width="12" height="20" rx="2.5"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><text x="12" y="13" font-family="Courier, monospace" font-size="5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">842</text></svg>',
- chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M21 11.5a8.5 8.5 0 0 1-13 7.2L3 20.5l1.8-4.7A8.5 8.5 0 1 1 21 11.5z" fill="currentColor" fill-opacity="0.15"/><circle cx="8.5" cy="11.5" r="0.9" fill="currentColor"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor"/><circle cx="15.5" cy="11.5" r="0.9" fill="currentColor"/></svg>'
- }; })(),
 
  // ====== "Why partners join" — three editorial value pillars ======
  el('section',{class:'mx-auto max-w-6xl px-4 py-24 md:py-28'},
@@ -4923,13 +4840,14 @@ function PartnerLanding() {
  ),
  el('p',{class:'mt-5 text-lg text-slate2-300 leading-relaxed'},
  'Get discovered — reach new customers easily and at no cost.'
- )
+ ),
+ el('a',{class:'mt-4 inline-block text-sm text-slate2-400 underline hover:text-mv-500 cursor-pointer', onclick:()=>go('partner-signin')},'Already a partner? Sign in →')
  ),
  el('div',{class:'mt-14 md:mt-16 grid md:grid-cols-2 gap-10 md:gap-14 items-center'},
  // Warm human photo — swap for a real partner/owner photo when available.
  el('div',{class:'relative'},
  el('div',{class:'absolute -inset-3 bg-gradient-to-br from-mv-500/20 to-transparent rounded-3xl blur-2xl pointer-events-none'}),
- el('img',{src:'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=900&q=80&auto=format&fit=crop', alt:'A warm welcome at a partner restaurant', class:'relative rounded-3xl w-full h-[420px] object-cover border border-slate2-50/10 shadow-2xl shadow-black/40'})
+ el('img',{src:'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=900&q=80&auto=format&fit=crop', alt:'menuverso and a restaurant becoming partners', class:'relative rounded-3xl w-full h-[420px] object-cover border border-slate2-50/10 shadow-2xl shadow-black/40'})
  ),
  el('div',{class:'space-y-7'},
  ...[
@@ -4946,6 +4864,17 @@ function PartnerLanding() {
  )
  )
  )
+ )
+ ),
+
+ // ====== Contact form — relocated here from the old hero ======
+ el('section',{class:'mx-auto max-w-3xl px-4 pb-20 md:pb-24'},
+ el('div',{class:'rounded-3xl bg-ink-900/60 border border-mv-500/15 p-8 md:p-10'},
+ el('h2',{class:'font-serif-display text-3xl md:text-4xl font-extrabold leading-tight text-center'},
+ 'Get in touch — ', el('span',{class:'italic text-mv-500'},'list your restaurant.')
+ ),
+ el('p',{class:'mt-3 text-center text-slate2-300'},'Send us your details and we will get back to you.'),
+ el('div',{class:'mt-6 flex justify-center'}, leadCapture)
  )
  ),
 
@@ -4976,34 +4905,8 @@ function PartnerLanding() {
  class:'relative block w-full',
  style:'height: clamp(520px, 70vh, 760px); border: 0;',
  loading:'lazy',
- title:'How a Menuverso redemption works — six-scene animation'
+ title:'How a Menuverso redemption works — five-scene animation'
  })
- )
- ),
-
- // FAQ.
- el('section',{class:'mx-auto max-w-3xl px-4 py-20 border-t border-slate2-50/5'},
- el('div',{class:'text-center'},
- el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'FAQ'),
- el('h2',{class:'font-serif-display mt-2 text-4xl md:text-6xl font-extrabold leading-tight'},'Questions ', el('span',{class:'text-mv-500'},'before you list'))
- ),
- el('div',{class:'mt-10 space-y-3'},
- ...[
- ['So how does Menuverso make money if there\'s no commission?','Members pay €3.99/month (billed annually) or €6.99/month (billed monthly). That subscription is our only revenue. We don\'t take a cut of your bill and we never will — it\'d undermine the trust that gets restaurants to list here in the first place.'],
- ['What if I get too many bookings?','You control the slots. Each slot has a seat cap. Once it\'s full, members can\'t book it. You can pause your entire listing in one click — useful for holidays, private events, or when a server quits.'],
- ['Do I have to discount every dish?','Not unless you want to. You set the deal — could be 2x1 on mains only, drinks only, full menu, a flash dessert giveaway, percentage off the bill. Members see the terms before they slide to redeem.'],
- ['Can I exclude certain dishes (e.g. lobster, special menu)?','Yes. In Profile → Deals, you write the terms. "Excludes tasting menu", "Mains under €25", whatever you like. The terms are shown to members before they book.'],
- ['How does the staff know the redemption is real?','Members slide-to-redeem at the table in front of your server, then show an animated verification screen — rotating venue token, live timestamp, shimmer pattern. Screenshots can\'t fake it. The same redemption pings your dashboard in real time as a secondary confirmation.'],
- ['Can I list multiple restaurants?','Yes — one partner account, multiple venues. Each venue has its own slots, hours, and dashboard. Get in touch and we\'ll set it up.']
- ].map(([q,a])=>
- el('details',{class:'group rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-5 cursor-pointer hover:border-mv-500/30 transition'},
- el('summary',{class:'flex items-center justify-between gap-4 list-none cursor-pointer'},
- el('span',{class:'font-bold text-slate2-50'}, q),
- el('span',{class:'text-mv-500 text-xl transform group-open:rotate-45 transition'},'+')
- ),
- el('p',{class:'mt-3 text-sm text-slate2-400 leading-relaxed'}, a)
- )
- )
  )
  ),
 
@@ -9484,6 +9387,12 @@ window.MV_TR_ES = {
  "Full bill": "Cuenta completa",
  "Real locals": "Locales de verdad",
  "Why partner with menuverso": "Por qué asociarte con menuverso",
+ "Access to all the deals": "Acceso a todas las ofertas",
+ "Pays for itself in one visit": "Se amortiza en una sola visita",
+ "Already a partner? Sign in →": "¿Ya eres partner? Inicia sesión →",
+ "Get in touch —": "Contáctanos —",
+ "list your restaurant.": "lista tu restaurante.",
+ "Send us your details and we will get back to you.": "Envíanos tus datos y te contactaremos.",
  "Reach new diners, earn more,": "Llega a nuevos clientes, consigue más ingresos,",
  "get more visible.": "más visibilidad.",
  "Get discovered — reach new customers easily and at no cost.": "Hazte conocer: llega a nuevos clientes de una forma fácil y sencilla y sin coste.",

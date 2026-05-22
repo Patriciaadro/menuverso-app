@@ -318,7 +318,7 @@
       <div class="text-col">
         <span class="step anim-fadein"><span class="num">1</span>Pick a deal</span>
         <h1 class="title serif anim-fadeup">Open the app at any partner restaurant.</h1>
-        <p class="subtitle anim-fadein">Browse standing 2x1s and same-day flash deals. The member taps the one they want — no QR, no code, no promo to remember.</p>
+        <p class="subtitle anim-fadein">Browse standing 2x1s and same-day flash deals. The member taps the one they want.</p>
       </div>
       <div class="visual-col anim-popin">
         <svg viewBox="0 0 460 540" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -413,7 +413,7 @@
       <div class="text-col">
         <span class="step anim-fadein"><span class="num">3</span>Slide to confirm</span>
         <h1 class="title serif anim-fadeup">One <em>gesture.</em></h1>
-        <p class="subtitle anim-fadein">In front of the server, the member slides a bar to confirm. A simple deliberate action — proves intent, defeats accidental taps.</p>
+        <p class="subtitle anim-fadein">In front of the server, the member slides a bar to confirm. A simple deliberate action.</p>
       </div>
       <div class="visual-col anim-popin">
         <svg viewBox="0 0 460 540" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -472,7 +472,7 @@
     <div class="split">
       <div class="text-col">
         <span class="step anim-fadein"><span class="num">4</span>Show the screen</span>
-        <h1 class="title serif anim-fadeup">An animated screen <em>that can't be faked.</em></h1>
+        <h1 class="title serif anim-fadeup">An animated screen <em>that shows up.</em></h1>
         <p class="subtitle anim-fadein">A rotating venue token, a live ticking timestamp, a shimmering gradient. Screenshots can't reproduce it. The server looks, acknowledges, done.</p>
       </div>
       <div class="visual-col anim-popin">
@@ -605,24 +605,6 @@
     </div>
   </section>
 
-  <!-- ============== SCENE 6 — Why partners join ============== -->
-  <section class="scene" data-scene="6">
-    <div class="split center">
-      <div class="text-col">
-        <span class="step anim-fadein"><span class="num">6</span>Your side of the deal</span>
-        <h1 class="title serif anim-fadeup">Your <em>slow Tuesdays,</em> filled.</h1>
-        <p class="subtitle anim-fadein">No commission. No setup fees. No contract. You set the deal, the slots, the rules. You keep the full bill on the second cover.</p>
-        <div class="stat-row anim-popin">
-          <div class="stat-card"><div class="big">0%</div><div class="lbl">Commission</div></div>
-          <div class="stat-card"><div class="big">€0</div><div class="lbl">To list — forever</div></div>
-          <div class="stat-card"><div class="big">1 day</div><div class="lbl">Application → live</div></div>
-          <div class="stat-card"><div class="big">You</div><div class="lbl">Set every deal</div></div>
-        </div>
-        <a href="https://menuverso.com/partner" class="cta-final anim-fadeup">List your restaurant — free →</a>
-        <div style="margin-top: 10px; font-size: 12px; color: var(--slatem);">menuverso.com · hola@menuverso.com</div>
-      </div>
-    </div>
-  </section>
 
 </div>
 
@@ -666,7 +648,7 @@
   "Next scene": "Siguiente escena",
   "Pick a deal": "Elige una oferta",
   "Open the app at any partner restaurant.": "Abre la app en cualquier restaurante partner.",
-  "Browse standing 2x1s and same-day flash deals. The member taps the one they want — no QR, no code, no promo to remember.": "Explora 2×1 fijos y ofertas flash del día. El miembro toca la que quiere — sin QR, sin código, sin promo que recordar.",
+  "Browse standing 2x1s and same-day flash deals. The member taps the one they want.": "Explora 2×1 fijos y ofertas flash del día. El miembro toca la que quiere.",
   "Confirm the place": "Confirma el sitio",
   "Confirm the restaurant": "Confirma el restaurante",
   "One tap. The full menu, the deal terms, the slot.": "Un toque. Toda la carta, las condiciones, el turno.",
@@ -674,7 +656,7 @@
   "Slide to confirm": "Desliza para confirmar",
   "One": "Un",
   "gesture.": "gesto.",
-  "In front of the server, the member slides a bar to confirm. A simple deliberate action — proves intent, defeats accidental taps.": "Frente al camarero, el miembro desliza una barra para confirmar. Una acción simple y deliberada — demuestra intención, evita toques accidentales.",
+  "In front of the server, the member slides a bar to confirm. A simple deliberate action.": "Frente al camarero, el miembro desliza una barra para confirmar. Una acción simple y deliberada.",
   "DO THIS AT THE TABLE": "HAZ ESTO EN LA MESA",
   "1. Tell your server.": "1. Avisa al camarero.",
   "2. Slide the bar above.": "2. Desliza la barra de arriba.",
@@ -685,7 +667,7 @@
   "Show the screen": "Muestra la pantalla",
   "Animated verification": "Verificación animada",
   "An animated screen": "Una pantalla animada",
-  "that can't be faked.": "imposible de falsificar.",
+  "that shows up.": "que aparece al instante.",
   "A rotating venue token, a live ticking timestamp, a shimmering gradient. Screenshots can't reproduce it. The server looks, acknowledges, done.": "Un token del local rotativo, una marca de tiempo en vivo, un brillo en movimiento. Las capturas de pantalla no pueden reproducirlo. El camarero mira, confirma, listo.",
   "SHOW TO YOUR SERVER": "ENSEÑA AL CAMARERO",
   "Confirmed": "Confirmado",
@@ -786,7 +768,7 @@
 
   // Per-scene durations (ms). Scene 2 + 6 quicker; 3, 4, 5 a bit longer
   // because the animation inside has to play out fully.
-  const DURATIONS = [4500, 4000, 5500, 5500, 6000, 5000];
+  const DURATIONS = [4500, 4000, 5500, 5500, 6000];
   const TICK = 60;
   let current = 0;
   let playing = true;
