@@ -1429,6 +1429,7 @@ window.MV_T = {
  'lead.helper': 'Te respondemos en un día hábil. Sin spam, sin emails automáticos.',
  'lead.invalid': 'Introduce un email válido.',
  'lead.invalidFields': 'Completa todos los campos con datos válidos.',
+ 'lead.invalidPhone': 'Introduce un teléfono válido (mínimo 9 dígitos).',
  'lead.success': 'Gracias — te respondemos en un día hábil.',
  'lead.venue': 'Nombre del local',
  'lead.contact': 'Persona de contacto',
@@ -1581,6 +1582,7 @@ window.MV_T = {
  'lead.helper': 'We reply within one business day. No spam, no auto-emails.',
  'lead.invalid': 'Please enter a valid email.',
  'lead.invalidFields': 'Please fill all fields with valid info.',
+ 'lead.invalidPhone': 'Enter a valid phone number (at least 9 digits).',
  'lead.success': "Thanks — we\u0027ll be in touch within one business day.",
  'lead.venue': 'Location name',
  'lead.contact': 'Contact person',
@@ -4795,9 +4797,16 @@ function PartnerLanding() {
  const venue = (f.venue && f.venue.value || '').trim();
  const contact = (f.contact && f.contact.value || '').trim();
  const phone = (f.phone && f.phone.value || '').trim();
+ const phoneDigits = phone.replace(/[^0-9]/g, '');
  const email = (f.email && f.email.value || '').trim().toLowerCase();
  if (!venue || !contact || !phone || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
  toast(t('lead.invalidFields'));
+ return;
+ }
+ // Phone must be a real number — 9 to 15 digits (Spanish numbers are 9;
+ // allows an international prefix). Spaces, dashes, parens, + are stripped.
+ if (phoneDigits.length < 9 || phoneDigits.length > 15) {
+ toast(t('lead.invalidPhone'));
  return;
  }
  const leads = JSON.parse(localStorage.getItem('mv_partner_leads') || '[]');
@@ -4812,7 +4821,7 @@ function PartnerLanding() {
  class:'w-full rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('input',{ name:'contact', type:'text', required: true, placeholder: t('lead.contact'),
  class:'w-full rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
- el('input',{ name:'phone', type:'tel', required: true, placeholder: t('lead.phone'),
+ el('input',{ name:'phone', type:'tel', required: true, inputmode:'tel', pattern:'[+()0-9 .\u2011-]{9,}', placeholder: t('lead.phone'),
  class:'w-full rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('div',{class:'flex flex-col sm:flex-row gap-2'},
  el('input',{ name:'email', type:'email', required: true, placeholder: t('lead.placeholder'),
