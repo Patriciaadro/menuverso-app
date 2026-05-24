@@ -1340,6 +1340,7 @@ window.MV_T = {
  'nav.forRestaurants': 'Para Restaurantes',
     'nav.signOut': 'Cerrar sesión',
  'nav.signIn': 'Iniciar sesión',
+ 'nav.signInShort': 'Entrar',
  'nav.join': 'Únete',
  'nav.openApp': 'Abrir la app →',
  'hero.eyebrow': 'Próximamente en Barcelona · Verano 2026',
@@ -1497,6 +1498,7 @@ window.MV_T = {
  'nav.forRestaurants': 'For Restaurants',
     'nav.signOut': 'Sign out',
  'nav.signIn': 'Sign in',
+ 'nav.signInShort': 'Sign in',
  'nav.join': 'Join',
  'nav.openApp': 'Open the app →',
  'hero.eyebrow': 'Launching in Barcelona · Summer 2026',
@@ -1918,7 +1920,10 @@ function AppTopBar({ showNav }) {
  el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
  // Language switcher — small EN/ES toggle. Sits before Sign in / Join.
  el('button',{class:'inline-flex items-center gap-1.5 rounded-full border-2 border-mv-500/55 text-mv-500 font-extrabold px-3.5 py-1.5 text-sm cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, el('span',{class:'inline-flex shrink-0', style:'width:14px;height:14px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}),el('span',{class:'tracking-wider'}, t('lang.switchLabel'))),
- el('button',{class:'rounded-full border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')}, t('nav.signIn')),
+ el('button',{class:'rounded-full border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')},
+ el('span',{class:'sm:hidden'}, t('nav.signInShort')),
+ el('span',{class:'hidden sm:inline'}, t('nav.signIn'))
+ ),
  el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer shadow-lg shadow-mv-500/20 transition', onclick:()=>go('signup')}, t('nav.join'))
  )
  )
