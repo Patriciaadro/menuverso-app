@@ -283,6 +283,13 @@ tailwind.config = {
  .mv-rail::-webkit-scrollbar { height: 6px; }
  .mv-rail::-webkit-scrollbar-thumb { background: rgba(29,29,27,0.18); border-radius: 3px; }
  .mv-rail > * { scroll-snap-align: start; flex: 0 0 auto; }
+ /* Right-edge fade: the partly-visible next item reads as an intentional
+    "scroll for more" cue rather than a broken cut-off. Works on any
+    background and needs no JS — key for mobile, where the scrollbar hides. */
+ .mv-rail, .mv-fadex {
+ -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+ mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+ }
  .mv-ticker-track {
  display: inline-flex; gap: 40px; padding-right: 40px;
  animation: mv-ticker 30s linear infinite;
@@ -3040,7 +3047,7 @@ function AppDiscover() {
  const moodRow = el('div',{class:'px-5 pt-2'});
  function paintMoods() {
  moodRow.innerHTML = '';
- const inner = el('div',{class:'flex items-center gap-3 overflow-x-auto pb-2'},
+ const inner = el('div',{class:'mv-fadex flex items-center gap-3 overflow-x-auto pb-2'},
  ...MV_MOODS.map(m => MoodTile(m, activeMood === m.key, () => {
  activeMood = (activeMood === m.key) ? null : m.key;
  paintMoods(); paintGrid();
