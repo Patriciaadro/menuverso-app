@@ -2843,6 +2843,18 @@ function Signin() {
 // P-1: clickable demo-account rows. Click → fills email + password fields in
 // the nearest <form> and focuses the submit button so a single Enter signs in.
 function DemoAccountsCrib({ partner = false } = {}) {
+ // Demo-mode gate: hide unless ?demo=1 has been seen in the URL this session.
+ // Visit menuverso.com/?demo=1 once to enable for the rest of the tab session
+ // (useful for investor walkthroughs); normal visitors never see the box.
+ try {
+  const params = new URLSearchParams(location.search);
+  if (params.get('demo') === '1') {
+   try { sessionStorage.setItem('mv_demo', '1'); } catch (e) {}
+  }
+  let on = false;
+  try { on = sessionStorage.getItem('mv_demo') === '1'; } catch (e) {}
+  if (!on) return el('div');
+ } catch (e) { return el('div'); }
  // On the partner sign-in, hide the Member row, clicking it would fill
  // member creds the partner-signin handler then rejects with a confusing
  // "use member sign-in" toast. Admin works either side (handlers route
