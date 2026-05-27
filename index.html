@@ -443,6 +443,90 @@ function loadStore() {
 }
 function saveStore() {
  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { console.warn('localStorage full', e); }
+ // Phase 2: cross-device venue sync. Only fires when a partner or admin
+ // is signed in — members making local-only changes (saved list, prefs)
+ // never push venue data to Supabase.
+ if (typeof scheduleVenueSync === 'function') scheduleVenueSync();
+}
+
+// ============================================================================
+// Phase 2 · Supabase venue sync (added 2026-05-27)
+// Wraps the same publishable anon key used by the waitlist + partner_leads
+// forms. Reads/writes are best-effort: failures fall back silently to the
+// localStorage demo, so a broken connection or missing table never blocks
+// the UI. Real venue persistence + multi-device sync rides on this.
+// ============================================================================
+const MV_SUPABASE_URL = 'https://qjrqnnrucdvpwrbkxean.supabase.co';
+const MV_SUPABASE_KEY = 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA';
+const MV_SUPABASE_HEADERS = {
+ 'apikey': MV_SUPABASE_KEY,
+ 'Authorization': 'Bearer ' + MV_SUPABASE_KEY,
+ 'Content-Type': 'application/json'
+};
+
+// Upsert a single venue into the venues table. Fire-and-forget.
+function syncVenueToSupabase(pv) {
+ if (!pv || !pv.id) return;
+ const payload = { id: pv.id, data: pv, updated_at: new Date().toISOString() };
+ fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
+ method: 'POST',
+ headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+ body: JSON.stringify(payload)
+ }).catch(function(e){ console.warn('venue sync failed', e && e.message); });
+}
+
+// Debounced sync. Only the signed-in partner's venue (or, for admins,
+// all venues) gets pushed — members never trigger a venue write.
+var _venueSyncTimer = null;
+function scheduleVenueSync() {
+ if (_venueSyncTimer) clearTimeout(_venueSyncTimer);
+ _venueSyncTimer = setTimeout(function(){
+ try {
+ if (!state || !state.session) return;
+ var u = (store.users || []).find(function(x){ return x.id === state.session.userId; });
+ if (!u) return;
+ if (u.role === 'PARTNER_OWNER') {
+ var pv = (store.partnerVenues || []).find(function(v){ return v.ownerId === u.id; });
+ if (pv) syncVenueToSupabase(pv);
+ } else if (u.role === 'ADMIN') {
+ (store.partnerVenues || []).forEach(syncVenueToSupabase);
+ }
+ } catch (e) { console.warn('scheduleVenueSync error', e && e.message); }
+ }, 1200);
+}
+
+// Pull venues from Supabase on boot. Merge into store.partnerVenues:
+// Supabase row wins for any matching id (it is the cross-device source
+// of truth). Local-only venues that aren't in Supabase are left alone.
+// Writes to localStorage directly so we don't trigger a sync loop.
+function fetchVenuesFromSupabaseAndMerge() {
+ return fetch(MV_SUPABASE_URL + '/rest/v1/venues?select=id,data,updated_at', {
+ headers: MV_SUPABASE_HEADERS
+ }).then(function(r){
+ if (!r.ok) throw new Error('fetch venues HTTP ' + r.status);
+ return r.json();
+ }).then(function(rows){
+ if (!Array.isArray(rows) || rows.length === 0) return 0;
+ if (!store.partnerVenues) store.partnerVenues = [];
+ var changed = 0;
+ rows.forEach(function(row){
+ if (!row || !row.data || !row.id) return;
+ var idx = store.partnerVenues.findIndex(function(v){ return v.id === row.id; });
+ if (idx >= 0) {
+ // Supabase wins for matched ids (newest cross-device state).
+ store.partnerVenues[idx] = row.data;
+ } else {
+ store.partnerVenues.push(row.data);
+ }
+ changed++;
+ });
+ // Write directly to localStorage to avoid re-triggering scheduleVenueSync.
+ try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {}
+ if (changed && typeof render === 'function') {
+ try { render(); } catch (e) {}
+ }
+ return changed;
+ }).catch(function(e){ console.warn('venue fetch failed', e && e.message); return 0; });
 }
 function loadSession() {
  try {
@@ -10054,6 +10138,11 @@ if (state.session) {
 }
 render();
 installIdleTimeout();
+// Phase 2: kick off cross-device venue pull right after first render so
+// the UI paints fast first, then upgrades to Supabase data when it arrives.
+if (typeof fetchVenuesFromSupabaseAndMerge === 'function') {
+ setTimeout(function(){ fetchVenuesFromSupabaseAndMerge(); }, 50);
+}
 </script>
 </body>
 </html>
