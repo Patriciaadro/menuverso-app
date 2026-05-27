@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1345,11 +1345,15 @@ function logout() {
  ======================================================================== */
 var MV_LANG = (function(){
  try {
- var s = localStorage.getItem('mv_lang');
+ // Bumped key on 2026-05-26 so any prior 'en' caches are ignored once,
+ // ensuring every returning visitor restarts in Spanish (they can re-toggle).
+ var s = localStorage.getItem('mv_lang_v2');
  if (s === 'es' || s === 'en') return s;
  } catch(e){}
  return 'es'; // Castellano default, set per Amir on 2026-05-14
 })();
+// Keep <html lang> in sync with the chosen language, helps screen readers and SEO.
+try { document.documentElement.lang = MV_LANG; } catch(e){}
 window.MV_T = {
  es: {
  'banner.concept': 'Demo en desarrollo, los restaurantes mostrados son ilustrativos y no están afiliados con menuverso.',
@@ -1667,7 +1671,7 @@ window.MV_T = {
  }
 };
 function t(k){ return (window.MV_T[MV_LANG]&&window.MV_T[MV_LANG][k]) || window.MV_T.en[k] || k; }
-function setLang(l){ try{localStorage.setItem('mv_lang', l);}catch(e){} location.reload(); }
+function setLang(l){ try{localStorage.setItem('mv_lang_v2', l);}catch(e){} try{document.documentElement.lang = l;}catch(e){} location.reload(); }
 
 /* ========================================================================
  LAYOUT, MARKETING HEADER + PHONE FRAME
@@ -4829,12 +4833,14 @@ function PartnerLanding() {
  );
 
  // Inline lead-capture form, the neotaste-style "Get in touch" pattern.
- // Posts to localStorage in the demo; in production this would POST to a
- // /api/partner-lead route backed by a Supabase `partner_leads` table.
- // The full CTA buttons below this form stay as the higher-commitment path.
- const leadCapture = el('form',{id:'partner-contact', class:'mt-7 max-w-lg scroll-mt-28', onsubmit: (ev)=>{
+ // Posts to Supabase `partner_leads` (anon insert, same publishable key
+ // pattern as Launch-waitlist). LocalStorage is kept as a safety net so
+ // nothing is lost if the table or RLS isn't set up yet — the local copy
+ // can be exported later via `localStorage.getItem('mv_partner_leads')`.
+ const leadCapture = el('form',{id:'partner-contact', class:'mt-7 max-w-lg scroll-mt-28', onsubmit: async (ev)=>{
  ev.preventDefault();
  const f = ev.target;
+ const btn = f.querySelector('button[type=submit]');
  const venue = (f.venue && f.venue.value || '').trim();
  const contact = (f.contact && f.contact.value || '').trim();
  const phone = (f.phone && f.phone.value || '').trim();
@@ -4850,10 +4856,34 @@ function PartnerLanding() {
  toast(t('lead.invalidPhone'));
  return;
  }
+ // Safety net first: never drop a lead even if the network/POST fails.
+ const lead = { venue, contact, phone, email, ts: Date.now() };
+ try {
  const leads = JSON.parse(localStorage.getItem('mv_partner_leads') || '[]');
- leads.push({ venue, contact, phone, email, ts: Date.now() });
+ leads.push(lead);
  localStorage.setItem('mv_partner_leads', JSON.stringify(leads));
+ } catch (e) {}
+ if (btn) { btn.disabled = true; }
+ // Real persistence: POST to Supabase `partner_leads`.
+ try {
+ const r = await fetch('https://qjrqnnrucdvpwrbkxean.supabase.co/rest/v1/partner_leads', {
+ method: 'POST',
+ headers: {
+ 'apikey': 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
+ 'Authorization': 'Bearer sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
+ 'Content-Type': 'application/json',
+ 'Prefer': 'return=minimal'
+ },
+ body: JSON.stringify({ venue, contact, phone, email })
+ });
+ if (!(r.ok || r.status === 201 || r.status === 409)) {
+ console.warn('partner_leads insert returned', r.status, await r.text().catch(()=>''));
+ }
+ } catch (e) {
+ console.warn('partner_leads insert failed (kept local copy):', e);
+ }
  f.reset();
+ if (btn) { btn.disabled = false; }
  toast(t('lead.success'));
  }},
  el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-slate2-400 mb-2'}, t('lead.label')),
@@ -5390,7 +5420,9 @@ function PartnerOnboarding() {
  function next() {
  if (!validateStep(step)) { saveStore(); paint(); toast('Please fix the highlighted fields', 'err'); return; }
  saveStore();
- if (step < 4) setStep(step + 1);
+ // Wizard is 5 steps (basics→address→photos→review→terms); the final step
+ // uses the dedicated "Accept & Submit" button below, so Next advances 1..4.
+ if (step < 5) setStep(step + 1);
  }
  function back() { saveStore(); setStep(step - 1); }
 
@@ -5492,8 +5524,15 @@ function PartnerOnboarding() {
  textareaField('Description','description', 4, { required:true, maxLen:600, help:'60–600 characters. What makes you special, atmosphere, signature dishes, history.' }),
  el('div',{},
  el('div',{class:'flex items-center justify-between'},
- el('span',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Deal slots'),
+ el('span',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'2×1 deal slots'),
  errors._slots && el('span',{class:'text-xs text-red-400'}, errors._slots)
+ ),
+ el('p',{class:'mt-1 text-[11px] text-slate2-400 leading-relaxed'},
+ 'These are the windows when your 2×1 offer is active, a subset of your opening hours, not the opening hours themselves. Toggle the ones you want.'
+ ),
+ pv.hours && el('div',{class:'mt-2 rounded-lg bg-slate2-50/[0.04] border border-slate2-50/10 px-3 py-2 text-[11px] text-slate2-300'},
+ el('span',{class:'text-slate2-500 uppercase tracking-widest text-[9px] font-bold mr-2'},'Your opening hours'),
+ pv.hours
  ),
  el('div',{class:'mt-2 space-y-2'},
  ...((pv.dealSlots||[]).map(s => el('div',{class:'rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 p-3 flex items-center gap-3'},
@@ -6195,6 +6234,19 @@ function PortalProfile() {
  const pv = currentPartnerVenue();
  if (!pv) return el('div',{class:'text-sm text-slate2-400'},'No venue.');
  const wrap = el('div',{class:'max-w-3xl space-y-5'});
+ // Demo-persistence banner is appended INSIDE paint() (below) so it
+ // survives the wrap.innerHTML = '' that runs on every re-render.
+ function demoBanner() {
+ return el('div',{class:'rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm flex items-start gap-3'},
+ el('div',{class:'mt-0.5 h-2 w-2 rounded-full bg-amber-400 shrink-0'}),
+ el('div',{class:'min-w-0'},
+ el('div',{class:'font-bold text-amber-100'}, 'Modo demo: tus cambios solo se guardan en este dispositivo'),
+ el('p',{class:'mt-1 text-xs text-amber-100/80 leading-relaxed'},
+ 'La sincronización entre móvil y portátil (y la persistencia real en servidor) estará lista cuando conectemos la base de datos. Mientras tanto, lo que edites aquí seguirá visible en este navegador, pero no aparecerá en otros dispositivos. No te preocupes, no se pierde nada: cuando activemos el backend pasamos los datos guardados.'
+ )
+ )
+ );
+ }
 
  function field(label, key, placeholder='') {
  return el('div',{},
@@ -6219,6 +6271,7 @@ function PortalProfile() {
 
  function paint() {
  wrap.innerHTML = '';
+ wrap.append(demoBanner());
  // ---- Photos ----
  wrap.append(el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
  el('div',{class:'flex items-center justify-between'},
