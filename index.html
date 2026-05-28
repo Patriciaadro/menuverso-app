@@ -1525,7 +1525,7 @@ window.MV_T = {
  'partner.hero.badge.zero.pct.body': 'de comisión por reserva, te quedas con toda la cuenta, menos el segundo plato gratis.',
  'partner.hero.badge.zero.euro.body': 'para aparecer en la lista. Sin cuotas de alta, sin suscripción mensual, sin contrato.',
  'partner.hero.badge.you.body': 'eliges los días, los horarios y cuántas mesas hay disponibles.',
- 'partner.hero.cta.list': 'Lista tu restaurante, Gratis →',
+ 'partner.hero.cta.list': 'Contáctanos para listarte →',
  'partner.hero.cta.demo': 'Probar el portal demo',
  'partner.hero.cta.alreadyPartner': '¿Ya eres partner? Inicia sesión →',
  'partner.hero.cta.openPortal': 'Abrir portal de partner',
@@ -1597,6 +1597,11 @@ window.MV_T = {
  'venue.howToRedeem.step3.b': 'Listo, te aplican el 2×1',
  'venue.pickSlot': 'Elige un turno',
  'venue.tapOpenSlotHint': 'Toca un turno cuando esté abierto para conseguir tu código.',
+ 'venue.redeemNow': 'Canjear 2×1 →',
+ 'venue.notAvailableNow': 'No disponible ahora mismo',
+ 'venue.pausedLabel': 'Local en pausa',
+ 'venue.openNowBanner': 'Disponible ahora mismo',
+ 'venue.nextOpeningBanner': 'Próxima disponibilidad',
  'venue.openNowBanner': 'Hay un turno abierto ahora mismo, tócalo para confirmar',
  'venue.nextOpeningBanner': 'Próximo turno disponible'
  },
@@ -1682,7 +1687,7 @@ window.MV_T = {
  'partner.hero.badge.zero.pct.body': 'commission per booking, you keep the full bill, minus the free main.',
  'partner.hero.badge.zero.euro.body': 'to list. No setup fees, no monthly subscription, no contract.',
  'partner.hero.badge.you.body': 'choose the days, time slots, and how many seats are available.',
- 'partner.hero.cta.list': 'List your restaurant, Free →',
+ 'partner.hero.cta.list': 'Contact us to get listed →',
  'partner.hero.cta.demo': 'Try the demo portal',
  'partner.hero.cta.alreadyPartner': 'Already a partner? Sign in →',
  'partner.hero.cta.openPortal': 'Open partner portal',
@@ -1751,6 +1756,11 @@ window.MV_T = {
  'venue.howToRedeem.step3.b': 'Done, they apply the 2×1',
  'venue.pickSlot': 'Pick a slot',
  'venue.tapOpenSlotHint': 'Tap a slot when it\'s open to get your code.',
+ 'venue.redeemNow': 'Redeem 2×1 →',
+ 'venue.notAvailableNow': 'Not available right now',
+ 'venue.pausedLabel': 'Venue paused',
+ 'venue.openNowBanner': 'Available right now',
+ 'venue.nextOpeningBanner': 'Next opening',
  'venue.openNowBanner': 'A slot is open right now, tap it to redeem',
  'venue.nextOpeningBanner': 'Next available slot'
  }
@@ -3103,9 +3113,10 @@ function AppDiscover() {
  }
 
  const inner = el('div',{class:'pb-24'});
+ // 2026-05-28 (Patricia): removed the "Menuverso Deals" h1 — the Barcelona
+ // eyebrow + the rest of the page give plenty of context.
  const header = el('div',{class:'p-5 pb-3 border-b border-slate2-50/5'},
  el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Barcelona'),
- el('h1',{class:'text-2xl font-extrabold'},'Menuverso Deals'),
  el('div',{class:'mt-3 flex items-center gap-2'},
  el('div',{class:'flex-1 flex items-center gap-2 bg-slate2-50/5 rounded-full px-3 py-2 border border-slate2-50/10 focus-within:border-mv-500'},
  el('span',{class:'text-slate2-400'},''),
@@ -4172,25 +4183,9 @@ function Venue() {
  // Wraps the offer + slot picker so they stay visible while the diner
  // scrolls through reviews on the left. On mobile, falls back to normal flow.
  el('aside',{class:'mt-4 md:mt-0 md:col-start-2 md:row-start-1 md:row-span-3 md:sticky md:top-20 space-y-4'},
- // How-to-redeem explainer, sits at the top of the booking column so
- // diners new to Menuverso understand the 3-step flow before they look
- // at slot availability. Pure presentational; no interaction.
- el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/8 p-4'},
- el('div',{class:'text-[10px] uppercase tracking-[0.12em] text-mv-500 font-extrabold'}, t('venue.howToRedeem.title') || 'How to redeem · 3 steps'),
- el('ol',{class:'mt-3 space-y-2.5'},
- ...[
- { n:'1', glyph:'', h: t('venue.howToRedeem.step1.h') || 'Arrive at the restaurant', b: t('venue.howToRedeem.step1.b') || 'Sit down like normal' },
- { n:'2', glyph:'', h: t('venue.howToRedeem.step2.h') || 'Tap an open slot', b: t('venue.howToRedeem.step2.b') || 'Generates your code in the app' },
- { n:'3', glyph:'', h: t('venue.howToRedeem.step3.h') || 'Show the code to your server', b: t('venue.howToRedeem.step3.b') || 'Done, they apply the 2×1' }
- ].map(s => el('li',{class:'flex items-start gap-3'},
- el('span',{class:'shrink-0 inline-flex items-center justify-center h-6 w-6 rounded-full bg-mv-500/15 text-mv-500 text-[11px] font-extrabold tabular-nums'}, s.n),
- el('div',{class:'min-w-0'},
- el('div',{class:'text-[13px] font-bold text-slate2-50 leading-tight'}, s.h),
- el('div',{class:'text-[11px] text-slate2-400 mt-0.5 leading-snug'}, s.b)
- )
- ))
- )
- ),
+ // 2026-05-28 (Patricia): removed the "Cómo confirmar · 3 pasos" explainer.
+ // The actual redemption flow is shown on the next screen after the
+ // member picks the deal, so this preview was redundant.
  // M-2: surface the PAUSED state. Without this banner, members who reach
  // the venue page via saved/direct link see the normal slot picker, try
  // to book, and get a confusing generic toast.
@@ -4213,172 +4208,80 @@ function Venue() {
  const slotTerms = slots.filter(s => s.active).map(s => (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault);
  const allSame = slotTerms.length === 0 || slotTerms.every(t => t === slotTerms[0]);
  const sharedTerms = allSame && slotTerms.length > 0 ? slotTerms[0] : venueDefault;
- // G4: credit indicator, how many monthly credits the signed-in user
- // has left at this restaurant. Shown only to MEMBER role with an
- // active sub (otherwise the cap is moot for now).
- const u = currentUser();
- const cap = liveDeal?.creditsPerUser ?? pvDeals?.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
- const showCredits = u && u.role === 'MEMBER' && hasSub();
- const remaining = showCredits ? userCreditsRemaining(u.id, v.slug, cap) : cap;
- const used = cap - remaining;
+ // 2026-05-28 (Patricia): removed the per-venue monthly-credit row. First
+ // version is "1 redemption per member per subscription" tracked elsewhere,
+ // not a per-venue cap surfaced inline. Restored when proper auth lands.
  return el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'2×1 Main Course'),
  el('div',{class:'mt-1 font-bold'},'Buy one main, get one free'),
  el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'}, sharedTerms),
- !allSame && el('p',{class:'mt-2 text-[10px] text-slate2-400 italic'},'Some time slots have different conditions, see each slot below.'),
- // Credits row, friendly remainder + refresh date.
- showCredits && el('div',{class:'mt-3 pt-3 border-t border-mv-500/20 flex items-center justify-between gap-2'},
- el('div',{class:'text-xs'},
- remaining > 0
- ? el('span',{class:'text-slate2-300'}, el('span',{class:'text-slate2-50 font-bold'}, remaining), ' of ', cap, ' credit', cap===1?'':'s', ' left this month')
- : el('span',{class:'text-amber-300 font-bold'}, 'No credits left here this month')
- ),
- el('span',{class:'text-[10px] text-slate2-500'}, 'Refreshes ', creditsRefreshLabel())
- )
+ !allSame && el('p',{class:'mt-2 text-[10px] text-slate2-400 italic'},'Some time slots have different conditions, see each slot below.')
  );
  })(),
- // Slot picker, when this is a partner-owned venue with per-slot terms
- // that differ from the venue default, show each slot's specific terms
- // inline so the diner sees exactly what applies to the time they pick.
- // Disabled entirely when the venue is PAUSED (M-2 follow-up). When a
- // slot's day/time window is not open right now, the button visibly
- // shows "Open <day/time>" instead of "Book →" (B-2 UI).
- el('div',{},
- // Smart status banner, when any slot is open right now we say so
- // (green); otherwise we surface the next opening time (amber) so the
- // diner knows when to come back. Without this, the slot picker can
- // read as "no way to redeem" when nothing is currently within hours.
+ // 2026-05-28 (Patricia): replaced the multi-slot picker ("Elige un turno")
+ // with a single "Canjear 2×1" call-to-action. First version is "one
+ // redemption per subscription" — letting the diner pick among 3 slots is
+ // overkill for that. We still pass through bookSlot under the hood (using
+ // the slot that's currently open, falling back to the first active one)
+ // so the existing redemption code/confirmation flow keeps working.
  (() => {
- const pvB = v._pv;
- const liveDealB = pvB ? getLiveDeal(pvB) : null;
- const slotsB = (liveDealB?.dealSlots || pvB?.dealSlots || []).filter(s => s && s.active);
- if (!slotsB.length) return null;
- const openSlot = slotsB.find(s => isSlotBookableNow(pvB, s));
- if (openSlot) {
- return el('div',{class:'rounded-xl bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
- el('span',{class:'h-2 w-2 rounded-full bg-accent-emer shrink-0 animate-pulse'}),
- el('div',{class:'text-[12px] text-accent-emer font-bold leading-tight'}, t('venue.openNowBanner') || 'A slot is open right now, tap it to redeem')
- );
- }
- // No slot open now, find earliest "next open" hint string via existing helper.
- const labels = slotsB.map(s => nextOpenLabel(s)).filter(Boolean);
- const nextHint = labels[0] || null;
- if (!nextHint) return null;
- return el('div',{class:'rounded-xl bg-amber-500/12 border border-amber-500/30 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
- el('span',{class:'text-amber-300 text-[14px] shrink-0'},''),
- el('div',{class:'text-[12px] text-amber-200 leading-tight'},
- el('span',{class:'font-bold'}, t('venue.nextOpeningBanner') || 'Next available slot'),
- el('span',{class:'opacity-80'},' · ', nextHint)
- )
- );
- })(),
- el('div',{class:'flex items-baseline justify-between gap-3 mb-2'},
- el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'}, t('venue.pickSlot') || 'Pick a slot'),
- el('div',{class:'text-[10px] text-slate2-500 hidden sm:block'}, t('venue.tapOpenSlotHint') || 'Tap an open slot to get your code.')
- ),
- el('div',{class:'space-y-2'},
- ...((() => {
  const pvForSlots = v._pv;
  const venuePaused = pvForSlots && pvForSlots.status === 'PAUSED';
- // G2: render the LIVE deal's slots, not whatever the partner is
- // currently editing in their draft.
  const liveDeal = pvForSlots ? getLiveDeal(pvForSlots) : null;
- const venueDefault = liveDeal?.dealTerms || pvForSlots?.dealTerms || DEFAULT_DEAL_TERMS;
  const liveSlots = liveDeal?.dealSlots || pvForSlots?.dealSlots || [];
- // G4: also check whether the signed-in member has any monthly
- // credit left at this venue. If not, every slot button is
- // disabled with a credits-exhausted message.
- const _u = currentUser();
- const venueCreditCap = liveDeal?.creditsPerUser ?? pvForSlots?.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
- const venueCreditsLeft = (_u && _u.role === 'MEMBER' && hasSub())
- ? userCreditsRemaining(_u.id, v.slug, venueCreditCap)
- : venueCreditCap; // not signed in / not subscribed → don't block UI here, bookSlot will redirect
- const creditsExhausted = (_u && _u.role === 'MEMBER' && hasSub()) && venueCreditsLeft <= 0;
- if (pvForSlots && Array.isArray(liveSlots) && liveSlots.length > 0) {
- return liveSlots.filter(s => s.active).map(s => {
- const slotLabel = s.label || 'Slot';
- const slotTime = `${s.timeStart}-${s.timeEnd}`;
- const slotTerms = (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault;
- const showCustom = slotTerms !== venueDefault;
- const bookableNow = isSlotBookableNow(pvForSlots, s);
- const cap = Number.isFinite(s.seatCap) ? s.seatCap : 4;
- const used = activeSlotCount(v.slug, `${slotLabel} · ${slotTime}`);
- const remaining = Math.max(0, cap - used);
- const isFull = remaining === 0;
- const isDisabled = venuePaused || !bookableNow || isFull || creditsExhausted;
- // Status: icon + label so colorblind users have a non-color cue.
- let statusIcon = '→';
- let statusLabel = 'Book';
- let statusClass = 'text-mv-500';
- let ariaLabel = `Book ${slotLabel} ${slotTime}`;
- if (venuePaused) {
- statusIcon = ''; statusLabel = 'Paused'; statusClass = 'text-amber-300';
- ariaLabel = `${slotLabel} at ${slotTime}, venue paused, not bookable`;
- } else if (creditsExhausted) {
- statusIcon = ''; statusLabel = 'No credits'; statusClass = 'text-slate2-500';
- ariaLabel = `${slotLabel} at ${slotTime}, you have no monthly credits left here`;
- } else if (isFull) {
- statusIcon = '●'; statusLabel = 'Full'; statusClass = 'text-slate2-500';
- ariaLabel = `${slotLabel} at ${slotTime}, fully booked`;
- } else if (!bookableNow) {
- statusIcon = ''; statusLabel = nextOpenLabel(s); statusClass = 'text-slate2-400';
- ariaLabel = `${slotLabel} at ${slotTime}, ${statusLabel}`;
- }
- const btnClass = isDisabled
- ? 'w-full text-left rounded-xl bg-slate2-50/[0.02] border border-slate2-50/5 px-4 py-3 opacity-60 cursor-not-allowed'
- : 'w-full text-left rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 px-4 py-3 hover:bg-slate2-50/[0.08] cursor-pointer';
- return el('button',{
- class: btnClass,
- disabled: isDisabled || undefined,
- 'aria-disabled': isDisabled ? 'true' : 'false',
- 'aria-label': ariaLabel,
- onclick: isDisabled ? null : (() => bookSlot(v, `${slotLabel} · ${slotTime}`))
- },
- el('div',{class:'flex items-center justify-between gap-3'},
- el('div',{class:'min-w-0'},
- el('div',{class:'font-bold text-sm'}, slotLabel),
- el('div',{class:'text-xs text-slate2-400 flex items-center gap-2 flex-wrap'},
- el('span',{}, slotTime),
- !venuePaused && !isFull && bookableNow && cap < 99 && el('span',{class:'text-[10px] text-slate2-500'}, '· ' + remaining + ' of ' + cap + ' left')
- )
- ),
- el('span',{class:statusClass + ' text-sm font-bold shrink-0 flex items-center gap-1', 'aria-hidden':'true'},
- el('span',{class:'text-xs'}, statusIcon),
- el('span',{}, statusLabel)
- )
- ),
- // Only show terms when they differ from the venue default
- // (the venue default is already rendered in the conditions block above).
- showCustom && el('div',{class:'mt-2 pt-2 border-t border-slate2-50/5'},
- el('div',{class:'text-[9px] uppercase tracking-widest text-mv-400 font-extrabold'},'Conditions for this slot'),
- el('p',{class:'mt-1 text-xs text-slate2-300 leading-relaxed'}, slotTerms)
+ const activeSlots = (liveSlots || []).filter(s => s && s.active);
+ // Inline status hint (open now / next opening)
+ let banner = null;
+ if (activeSlots.length) {
+ const openSlot = activeSlots.find(s => isSlotBookableNow(pvForSlots, s));
+ if (openSlot) {
+ banner = el('div',{class:'rounded-xl bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
+ el('span',{class:'h-2 w-2 rounded-full bg-accent-emer shrink-0 animate-pulse'}),
+ el('div',{class:'text-[12px] text-accent-emer font-bold leading-tight'}, t('venue.openNowBanner') || 'Disponible ahora mismo')
+ );
+ } else {
+ const hint = activeSlots.map(s => nextOpenLabel(s)).find(Boolean);
+ if (hint) {
+ banner = el('div',{class:'rounded-xl bg-amber-500/12 border border-amber-500/30 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
+ el('div',{class:'text-[12px] text-amber-200 leading-tight'},
+ el('span',{class:'font-bold'}, t('venue.nextOpeningBanner') || 'Próxima disponibilidad'),
+ ' · ', hint
  )
  );
- });
  }
- // Fallback for static catalog venues (string-based times array).
- return v.times.map(t => {
- const isDisabled = venuePaused;
- const btnClass = isDisabled
- ? 'w-full text-left rounded-xl bg-slate2-50/[0.02] border border-slate2-50/5 px-4 py-3 opacity-60 cursor-not-allowed'
- : 'w-full text-left rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 px-4 py-3 hover:bg-slate2-50/[0.08] cursor-pointer';
- return el('button',{
- class: btnClass,
- disabled: isDisabled || undefined,
- onclick: isDisabled ? null : (() => bookSlot(v, t))
- },
- el('div',{class:'flex items-center justify-between'},
- el('div',{},
- el('div',{class:'font-bold text-sm'}, t.split(' · ')[0]),
- el('div',{class:'text-xs text-slate2-400'}, t.split(' · ')[1])
- ),
- el('span',{class:(isDisabled?'text-amber-300':'text-mv-500')+' text-sm font-bold'}, isDisabled ? 'Paused' : 'Book →')
- )
+ }
+ }
+ // Pick a target slot: prefer one open right now, else first active.
+ const bookable = activeSlots.find(s => isSlotBookableNow(pvForSlots, s)) || activeSlots[0] || null;
+ const fallbackStaticTime = !pvForSlots && Array.isArray(v.times) ? v.times[0] : null;
+ const canRedeemNow = !venuePaused && (
+ (bookable && isSlotBookableNow(pvForSlots, bookable)) || (!!fallbackStaticTime)
  );
- });
- })())
- )
- ) // close the slot-picker div
+ let onClickHandler = null;
+ if (!venuePaused) {
+ if (bookable && isSlotBookableNow(pvForSlots, bookable)) {
+ const label = (bookable.label || 'Slot') + ' · ' + bookable.timeStart + '-' + bookable.timeEnd;
+ onClickHandler = () => bookSlot(v, label);
+ } else if (fallbackStaticTime) {
+ onClickHandler = () => bookSlot(v, fallbackStaticTime);
+ }
+ }
+ const buttonLabel = venuePaused
+ ? (t('venue.pausedLabel') || 'Local en pausa')
+ : canRedeemNow
+ ? (t('venue.redeemNow') || 'Canjear 2×1 →')
+ : (t('venue.notAvailableNow') || 'No disponible ahora');
+ return el('div',{},
+ banner,
+ el('button',{
+ class: canRedeemNow
+ ? 'w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-6 py-4 text-base font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition'
+ : 'w-full rounded-2xl bg-slate2-50/[0.05] border border-slate2-50/10 px-6 py-4 text-base font-bold text-slate2-400 cursor-not-allowed opacity-70',
+ disabled: !canRedeemNow,
+ onclick: onClickHandler
+ }, buttonLabel)
+ );
+ })()
  ), // close the <aside> (sticky right column), comma to next sibling
  // ---- Categorized photo strips (Food / Venue / Menu) ----
  // Each category is a horizontal-scroll thumbnail strip. Only renders
@@ -4903,7 +4806,9 @@ function PartnerLanding() {
  };
 
  const primaryCtas = el('div',{class:'flex flex-wrap items-center gap-3'},
- !me && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('partner-signup')}, t('partner.hero.cta.list')),
+ // 2026-05-28 (Patricia): public partner sign-up is closed. New restaurants
+ // onboard via the contact form below; menuverso reviews + creates the account.
+ !me && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }}, t('partner.hero.cta.list')),
  !me && el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>{
  setSession('u_demo_partner');
  toast('Signed in as demo partner'); go('partner-portal',{tab:'overview'});
@@ -4913,7 +4818,9 @@ function PartnerLanding() {
  // Logged-in non-partner (member/admin), always show a clear next action.
  // No primary button works because their session blocks partner signup;
  // route them to sign out, which is the actual unblocker.
- isOtherRole && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{ logout(); toast('Signed out, you can register a partner account now.'); go('partner-signup'); }}, t('partner.hero.cta.signOut')),
+ // 2026-05-28 (Patricia): logged-in non-partner clicking the CTA gets sent
+ // to the contact form (no public signup anymore).
+ isOtherRole && el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>{ logout(); toast('Signed out, fill the form to get in touch.'); setTimeout(()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }, 200); }}, t('partner.hero.cta.signOut')),
  isOtherRole && el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>go(me.role === 'ADMIN' ? 'admin' : 'app')}, t('partner.hero.cta.backAccount'))
  );
 
@@ -5396,9 +5303,9 @@ function PartnerSignin() {
  ),
  // Distinct partner-side context block
  el('div',{class:'mt-5 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 text-sm'},
- el('div',{class:'font-bold'},'Not listed yet?'),
- el('p',{class:'mt-1 text-slate2-300 text-xs'},'Adding your restaurant takes about 3 minutes. No listing fee.'),
- el('button',{class:'mt-3 w-full rounded-full bg-slate2-50 text-ink-900 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>go('partner-signup')},'List your restaurant →')
+ el('div',{class:'font-bold'},'¿Aún no estás en Menuverso?'),
+ el('p',{class:'mt-1 text-slate2-300 text-xs'},'Escríbenos y te llamamos para incorporar tu local. Sin cuota.'),
+ el('button',{class:'mt-3 w-full rounded-full bg-slate2-50 text-ink-900 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{ go('partner-landing'); setTimeout(()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }, 350); }},'Contáctanos →')
  ),
  // Cross-link to member sign-in
  el('p',{class:'mt-4 text-center text-xs text-slate2-400'},
