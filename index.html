@@ -1900,6 +1900,27 @@ window.MV_T = {
  }
 };
 function t(k){ return (window.MV_T[MV_LANG]&&window.MV_T[MV_LANG][k]) || window.MV_T.en[k] || k; }
+// 2026-05-28 Wave 2: cuisines are stored as English values in seeded venues
+// (e.g. "Spanish", "Catalan · Tapas") and get rendered inside compound text
+// nodes like "Eixample · Spanish · Tapas · €€" where autoTranslate can't
+// match individual words. Translate each part directly via the dict.
+function localizeCuisine(s) {
+ if (!s) return '';
+ if (MV_LANG !== 'es') return s;
+ var TR = window.MV_TR_ES || {};
+ return String(s).split(/\s*·\s*/).map(function(p){
+ var key = p.trim();
+ return TR[key] || key;
+ }).join(' · ');
+}
+// Localize a single barrio name too (some are Spanish already, others aren't).
+function localizeBarrio(s) {
+ if (!s) return '';
+ if (MV_LANG !== 'es') return s;
+ var TR = window.MV_TR_ES || {};
+ var key = String(s).trim();
+ return TR[key] || key;
+}
 function setLang(l){ try{localStorage.setItem('mv_lang_v2', l);}catch(e){} try{document.documentElement.lang = l;}catch(e){} try{document.title = (l === 'en') ? 'Menuverso · Enjoy the best, save the rest' : 'Menuverso · Disfruta de lo mejor, ahorra en el resto';}catch(e){} location.reload(); }
 
 /* ========================================================================
@@ -2280,7 +2301,7 @@ function PhotoVenueCard(v, opts = {}) {
  el('div',{class:'absolute bottom-3 left-3 right-3 z-10 text-white'},
  el('div',{class:'font-serif-display italic text-[20px] leading-tight drop-shadow-md'}, v.name),
  el('div',{class:'mt-0.5 text-[11px] font-medium opacity-95 drop-shadow'},
- (v.barrio || '') + (v.barrio && v.cuisine ? ' · ' : '') + (v.cuisine || '') +
+ (localizeBarrio(v.barrio) || '') + (v.barrio && v.cuisine ? ' · ' : '') + (localizeCuisine(v.cuisine) || '') +
  (v.priceTier ? ' · ' + '€'.repeat(v.priceTier) : '')
  )
  )
@@ -3470,7 +3491,7 @@ function DealCard(v) {
  el('div',{class:'flex items-start justify-between gap-3'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold truncate'}, v.name),
- el('div',{class:'text-xs text-slate2-400 truncate'}, v.barrio,' · ', v.cuisine,' · ','€'.repeat(v.priceTier))
+ el('div',{class:'text-xs text-slate2-400 truncate'}, localizeBarrio(v.barrio),' · ', localizeCuisine(v.cuisine),' · ','€'.repeat(v.priceTier))
  ),
  Star({ rating: v.rating, reviews: v.reviews })
  ),
@@ -3685,7 +3706,7 @@ function AppMap() {
  '<div class="mv-popup">'
  + (img ? '<div class="mv-popup-img" style="background-image:url(' + img + ')"></div>' : '')
  + '<div class="mv-popup-title">' + escapeHtml(v.name) + '</div>'
- + '<div class="mv-popup-sub">' + escapeHtml(v.barrio || '') + ' · ' + escapeHtml(v.cuisine || '') + ' · ' + priceTier(v) + '</div>'
+ + '<div class="mv-popup-sub">' + escapeHtml(localizeBarrio(v.barrio) || '') + ' · ' + escapeHtml(localizeCuisine(v.cuisine) || '') + ' · ' + priceTier(v) + '</div>'
  + '<a class="mv-popup-btn" data-slug="' + v.slug + '" href="javascript:void(0)">View restaurant →</a>'
  + '</div>'
  );
@@ -4314,7 +4335,7 @@ function Venue() {
  el('div',{class:'md:col-start-1 md:row-start-1 flex items-start justify-between gap-3'},
  el('div',{class:'min-w-0'},
  el('h1',{class:'font-serif-display text-3xl md:text-4xl font-extrabold'}, v.name),
- el('div',{class:'text-xs text-slate2-400 mt-1'}, v.barrio,' · ', v.cuisine,' · ','€'.repeat(v.priceTier))
+ el('div',{class:'text-xs text-slate2-400 mt-1'}, localizeBarrio(v.barrio),' · ', localizeCuisine(v.cuisine),' · ','€'.repeat(v.priceTier))
  ),
  el('div',{class:'text-right'},
  el('div',{class:'text-accent-amber text-sm'},' ', v.rating.toFixed(1)),
@@ -5693,7 +5714,7 @@ function PartnerOnboarding() {
  el('div',{class:'flex items-start justify-between gap-2'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold truncate'}, pv.name || 'Your restaurant'),
- el('div',{class:'text-xs text-slate2-400 truncate'}, (pv.barrio || 'Barrio') + ' · ' + (pv.cuisine || 'Cuisine') + ' · ' + '€'.repeat(pv.priceTier || 0))
+ el('div',{class:'text-xs text-slate2-400 truncate'}, (localizeBarrio(pv.barrio) || 'Barrio') + ' · ' + (localizeCuisine(pv.cuisine) || 'Cuisine') + ' · ' + '€'.repeat(pv.priceTier || 0))
  ),
  el('span',{class:'text-xs text-slate2-400'},', ')
  )
@@ -6936,7 +6957,7 @@ function Admin() {
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'font-bold text-lg'}, pv.name),
  el('div',{class:'text-xs text-slate2-400 mt-0.5'},
- (pv.barrio || ', '), ' · ', (pv.cuisine || ', '),
+ (localizeBarrio(pv.barrio) || ', '), ' · ', (localizeCuisine(pv.cuisine) || ', '),
  ' · ', '€'.repeat(pv.priceTier || 0) || ', ',
  ' · ', owner ? owner.email : 'unknown owner'
  ),
@@ -7702,7 +7723,7 @@ function Admin() {
  el('span',{class:'rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + statusBadge}, pv.status),
  qualityBadge(quality)
  ),
- el('div',{class:'text-xs text-slate2-400 mt-1'}, (pv.barrio || ', '), ' · ', (pv.cuisine || ', '), ' · ', owner?.email ?? 'no owner'),
+ el('div',{class:'text-xs text-slate2-400 mt-1'}, (localizeBarrio(pv.barrio) || ', '), ' · ', (localizeCuisine(pv.cuisine) || ', '), ' · ', owner?.email ?? 'no owner'),
  showMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'},'Missing: ', quality.missing.join(', ')),
  el('div',{class:'text-xs text-slate2-400'}, String((pv.photos||[]).length), ' ', 'photos', ' · ', String(reds), ' ', 'redemptions', ' · ', String(activeBks), ' ', activeBks===1?'active booking':'active bookings'),
  pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'},'Rejection reason: ', pv.rejectionReason)
