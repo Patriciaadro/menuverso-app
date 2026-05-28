@@ -1134,6 +1134,22 @@ function toast(msg, kind='') {
  // container so back-to-back toasts no longer overlap into garbled text
  // (caught during login: "Demo + Welcome back" mashed together at same coords).
  // Dedupe identical messages within a short window to avoid useless stacks.
+ // 2026-05-28 (review screenshot): toasts bypass autoTranslate because they're
+ // appended to document.body AFTER the render() sweep. Translate the message
+ // up-front via the dict (exact match), with a fallback that strips dynamic
+ // suffixes like ", Maria" off "Welcome back, …" so first-name greetings work.
+ if (typeof MV_LANG !== 'undefined' && MV_LANG === 'es' && msg && window.MV_TR_ES) {
+ var TR = window.MV_TR_ES;
+ if (TR[msg]) {
+ msg = TR[msg];
+ } else {
+ // Try "Welcome back, X" → "Bienvenido/a, X" pattern
+ var greetMatch = /^Welcome back, (.+)$/.exec(msg);
+ if (greetMatch) {
+ msg = (TR['Welcome back,'] || 'Bienvenida,') + ' ' + greetMatch[1];
+ }
+ }
+ }
  const bg = kind === 'err' ? '#922D24' : '#B5392D';
  let container = document.getElementById('mv-toast-container');
  if (!container) {
@@ -10847,6 +10863,13 @@ window.MV_TR_ES = {
  "Browse deals →": "Ver ofertas →",
  "Avg rating": "Val. media",
  "AVG RATING": "VAL. MEDIA",
+ // Toast messages that bypass autoTranslate (rendered after render() sweep)
+ "Signed out": "Sesión cerrada",
+ "Signed out after 30 min idle. Sign in again to continue.": "Sesión cerrada por inactividad de 30 min. Inicia sesión de nuevo para continuar.",
+ "Demo credentials filled, press Sign in.": "Datos demo rellenados, pulsa Iniciar sesión.",
+ "Welcome back,": "Bienvenida,",
+ "Welcome back, friend": "Bienvenida, amiga",
+ "Welcome back, partner": "Bienvenido, partner",
  // Source-fixed dynamic strings (split text nodes; need single-word entries)
  "Based on": "Basado en",
  "avg recovered ticket.": "ticket medio recuperado.",
