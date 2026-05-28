@@ -1497,7 +1497,7 @@ function cuisineGlyphFor(c) {
 }
 const Star = ({ rating, reviews, size='text-xs' }) =>
  el('span',{class:`${size} text-slate2-400 inline-flex items-center gap-1`},
- el('span',{class:'text-accent-amber'},''),
+ el('span',{class:'text-accent-amber'},'★'),
  el('span',{class:'text-slate2-50'}, rating.toFixed(1)),
  el('span',{}, '('+(reviews>999?(reviews/1000).toFixed(1)+'k':reviews)+')')
  );
@@ -2798,7 +2798,7 @@ function Landing() {
  el('ul',{class:'mt-5 space-y-2 text-sm text-slate2-100'},
  ...['Cancel any time','Access to all the deals','Pays for itself in one visit'].map(s =>
  el('li',{class:'flex items-center gap-2.5'},
- el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},''),
+ el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white shadow-sm'},'✓'),
  el('span',{class:'font-medium'}, s)
  ))
  ),
@@ -2840,7 +2840,7 @@ function Landing() {
  if (state === 'done') {
  wrap.appendChild(
  el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
- el('div',{class:'text-2xl mb-1'},''),
+ el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓'),
  el('div',{class:'font-bold text-slate2-50'}, t('waitlist.success.title')),
  el('div',{class:'mt-1 text-sm text-slate2-300'}, t('waitlist.success.body'))
  )
@@ -3145,7 +3145,8 @@ function Checkout() {
  if (!u) { go('signup'); return el('div'); }
  if (u.role !== 'MEMBER') {
  return AppShell(el('div',{class:'p-6 text-center'},
- el('div',{class:'mt-8 text-5xl'},''),
+ el('div',{class:'mt-8 mx-auto h-16 w-16 rounded-full bg-slate2-50/[0.06] grid place-items-center text-slate2-300',
+ html:'<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'}, ''),
  el('h1',{class:'mt-3 text-2xl font-extrabold'},'Subscriptions are for members'),
  el('p',{class:'mt-2 text-slate2-400 text-sm'},'You\'re signed in as ',
  u.role==='PARTNER_OWNER' ? 'a partner' : 'an admin',
@@ -3157,7 +3158,7 @@ function Checkout() {
  return AppShell(el('div',{class:'p-6 text-center'},
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'← Back'),
  el('div',{class:'mt-8'},
- el('div',{class:'mx-auto h-16 w-16 rounded-full bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer'},''),
+ el('div',{class:'mx-auto h-16 w-16 rounded-full bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer font-extrabold'},'✓'),
  el('h1',{class:'mt-4 text-2xl font-extrabold'},'You\'re already subscribed.'),
  el('p',{class:'mt-2 text-slate2-400 text-sm'},'Renews ', new Date(currentSub().renewsAt).toLocaleDateString('en-GB')),
  el('button',{class:'mt-8 rounded-full bg-slate2-50 text-ink-900 px-6 py-3 font-bold cursor-pointer', onclick:()=>go('app')},'Open the app →')
@@ -3167,7 +3168,8 @@ function Checkout() {
  const inner = el('div',{class:'p-6'},
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'Skip for now →'),
  el('div',{class:'text-center mt-4'},
- el('div',{class:'text-5xl'},''),
+ el('div',{class:'mx-auto h-16 w-16 rounded-full bg-mv-500/15 grid place-items-center text-mv-500',
+ html:'<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'}, ''),
  el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock 2×1 across the menu'),
  el('p',{class:'text-slate2-300 text-sm mt-2'},'Curated Barcelona restaurants. Cancel anytime.')
  ),
@@ -3179,7 +3181,7 @@ function Checkout() {
  el('p',{class:'text-center text-xs text-slate2-400 mt-1'},'or €6.99/mo billed monthly'),
  el('ul',{class:'mt-5 space-y-2 text-sm'},
  ...['2-for-1 on whatever each partner offers','Standing deals + flash deals','Cancel anytime','Instant activation']
- .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer'},''), s))
+ .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer font-extrabold'},'✓'), s))
  ),
  el('button',{class:'mt-6 w-full rounded-2xl bg-slate2-50 text-ink-900 hover:bg-slate2-200 py-3.5 font-extrabold cursor-pointer', onclick:()=>{
  store.subscriptions[u.id] = { status:'ACTIVE', startedAt: Date.now(), renewsAt: Date.now()+30*86400000, city:'Barcelona', cancelAtPeriodEnd:false };
@@ -3264,7 +3266,8 @@ function AppDiscover() {
  }),
  q && el('button',{class:'text-slate2-400 hover:text-slate2-50 text-sm bg-transparent border-0 cursor-pointer', onclick:e => { q=''; e.currentTarget.previousElementSibling.value=''; paintGrid(); }},'×')
  ),
- el('button',{class:'md:hidden h-9 w-9 rounded-full bg-slate2-50/5 border border-slate2-50/10 grid place-items-center cursor-pointer', onclick:()=>go('map')},'')
+ el('button',{class:'md:hidden h-9 w-9 rounded-full bg-slate2-50/5 border border-slate2-50/10 grid place-items-center cursor-pointer text-slate2-300', onclick:()=>go('map'), 'aria-label':'Open map',
+ html:'<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'}, '')
  )
  );
 
@@ -3408,7 +3411,8 @@ function AppDiscover() {
  grid.innerHTML = '';
  if (list.length === 0) {
  grid.appendChild(el('div',{class:'col-span-full text-center py-12 text-slate2-400'},
- el('div',{class:'text-5xl'},''),
+ el('div',{class:'mx-auto h-14 w-14 rounded-full bg-slate2-50/[0.04] grid place-items-center text-slate2-500',
+ html:'<svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'}, ''),
  el('p',{class:'mt-3 text-sm'},'No matches. Try a different search or filter.'),
  el('button',{class:'mt-4 text-sm text-mv-500 underline cursor-pointer bg-transparent border-0', onclick:()=>{ q=''; filter='all'; activeMood=null; activeBarrios.clear(); paintMoods(); paintFilterToggle(); paintFilterPanel(); paintGrid(); }},'Clear filters')
  ));
@@ -3589,7 +3593,8 @@ function AppMap() {
  rowByslug.clear();
  if (vs.length === 0) {
  listEl.appendChild(el('div',{class:'rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-6 text-center'},
- el('div',{class:'text-3xl'},''),
+ el('div',{class:'mx-auto h-12 w-12 rounded-full bg-slate2-50/[0.05] grid place-items-center text-slate2-500',
+ html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'}, ''),
  el('h3',{class:'mt-2 font-bold text-sm'},'No matches'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Try removing a filter.')
  ));
@@ -3632,7 +3637,8 @@ function AppMap() {
  host.innerHTML = '';
  host.style.height = 'auto';
  host.appendChild(el('div',{class:'p-6 text-center'},
- el('div',{class:'text-3xl'},''),
+ el('div',{class:'mx-auto h-12 w-12 rounded-full bg-slate2-50/[0.05] grid place-items-center text-slate2-500',
+ html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><line x1="3" y1="3" x2="21" y2="21"/></svg>'}, ''),
  el('h3',{class:'mt-2 font-bold'},'Map unavailable'),
  el('p',{class:'mt-1 text-xs text-slate2-400 max-w-sm mx-auto'},'Couldn\'t load the map service. The list on the left is fully usable.')
  ));
@@ -3930,7 +3936,8 @@ function BookingHistoryRow(b, u) {
  el('div',{class:'flex items-start gap-3'},
  v
  ? VenueArt(v, {aspect:'1/1', compact:true, cls:'h-14 w-14 shrink-0', radius:'rounded-xl'})
- : el('div',{class:'h-14 w-14 rounded-xl bg-mv-500/20 shrink-0 grid place-items-center text-xl'},''),
+ : el('div',{class:'h-14 w-14 rounded-xl bg-mv-500/20 shrink-0 grid place-items-center text-mv-500',
+ html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>'}, ''),
  el('div',{class:'flex-1 min-w-0'},
  el('div',{class:'flex items-start justify-between gap-2 flex-wrap'},
  el('button',{class:'font-bold text-base truncate cursor-pointer bg-transparent border-0 text-left hover:text-mv-500', onclick:()=>v && go('venue',{slug:v.slug})}, v?.name ?? '(deleted venue)'),
@@ -3942,9 +3949,10 @@ function BookingHistoryRow(b, u) {
  ),
  cancelHint && el('div',{class:'mt-1 text-[11px] text-slate2-500 italic'}, cancelHint),
  existingReview
- ? el('div',{class:'mt-2 text-accent-amber text-sm'},
- ''.repeat(existingReview.stars), el('span',{class:'text-slate2-500'}, ''.repeat(5 - existingReview.stars)),
- existingReview.note && el('span',{class:'ml-2 text-xs text-slate2-400 italic'}, '"' + existingReview.note + '"')
+ ? el('div',{class:'mt-2 text-accent-amber text-sm tracking-widest'},
+ '★'.repeat(existingReview.stars),
+ el('span',{class:'text-slate2-500'}, '☆'.repeat(5 - existingReview.stars)),
+ existingReview.note && el('span',{class:'ml-2 text-xs text-slate2-400 italic tracking-normal'}, '"' + existingReview.note + '"')
  )
  : null,
  showRate && el('button',{class:'mt-2 text-xs font-bold text-mv-500 underline cursor-pointer bg-transparent border-0', onclick:()=>go('booking',{id:b.id})},'Rate your visit →')
@@ -4308,16 +4316,16 @@ function Venue() {
  const phone = pv?.phone;
  const website = pv?.website;
  const tiles = [];
- tiles.push(el('a',{href: mapsUrl, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center'},
- el('span',{class:'text-xl'},''),
+ tiles.push(el('a',{href: mapsUrl, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
+ el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'},''),
  el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Directions')
  ));
- if (phone) tiles.push(el('a',{href: 'tel:' + phone.replace(/\s/g,''), class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center'},
- el('span',{class:'text-xl'},''),
+ if (phone) tiles.push(el('a',{href: 'tel:' + phone.replace(/\s/g,''), class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
+ el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>'},''),
  el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Call')
  ));
- if (website) tiles.push(el('a',{href: website.startsWith('http') ? website : 'https://' + website, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center'},
- el('span',{class:'text-xl'},''),
+ if (website) tiles.push(el('a',{href: website.startsWith('http') ? website : 'https://' + website, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
+ el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>'},''),
  el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Website')
  ));
  tiles.push(el('button',{class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center bg-transparent',
@@ -4467,7 +4475,7 @@ function Venue() {
  const reviews = venueReviews(v.slug).slice().sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
  if (reviews.length === 0) {
  return el('div',{class:'mt-6 md:col-start-1 md:row-start-3 rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-5 text-center'},
- el('div',{class:'text-2xl'},''),
+ el('div',{class:'text-2xl text-accent-amber'},'★'),
  el('h3',{class:'mt-1 font-bold'},'No member reviews yet'),
  el('p',{class:'mt-1 text-xs text-slate2-400 max-w-xs mx-auto'},'Members rate the experience after they redeem. Be one of the first.')
  );
@@ -4482,7 +4490,10 @@ function Venue() {
  el('div',{class:'mt-3 rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-4 flex items-center gap-4'},
  el('div',{class:'text-center shrink-0'},
  el('div',{class:'text-4xl font-extrabold text-accent-amber leading-none'}, avg.toFixed(1)),
- el('div',{class:'text-accent-amber text-sm tracking-widest mt-1'}, ''.repeat(Math.round(avg))),
+ el('div',{class:'text-accent-amber text-sm tracking-widest mt-1'},
+ '★'.repeat(Math.round(avg)),
+ el('span',{class:'text-slate2-600'}, '☆'.repeat(Math.max(0, 5 - Math.round(avg))))
+ ),
  el('div',{class:'text-[10px] text-slate2-500 uppercase tracking-widest font-bold mt-0.5'},'avg rating')
  ),
  el('div',{class:'flex-1 space-y-1'},
@@ -4508,7 +4519,9 @@ function Venue() {
  el('div',{class:'flex items-center gap-2'},
  el('div',{class:'h-6 w-6 rounded-full bg-mv-500/30 grid place-items-center text-xs font-extrabold'}, initial),
  el('span',{class:'text-xs font-bold'}, name),
- el('span',{class:'text-accent-amber text-xs'}, ''.repeat(r.stars)),
+ el('span',{class:'text-accent-amber text-xs tracking-widest'},
+ '★'.repeat(r.stars), el('span',{class:'text-slate2-600'}, '☆'.repeat(Math.max(0, 5 - r.stars)))
+ ),
  el('span',{class:'text-[10px] text-slate2-500 ml-auto'}, r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '')
  ),
  el('p',{class:'mt-1.5 text-xs text-slate2-300 leading-relaxed'}, '"' + r.note + '"')
@@ -4839,7 +4852,7 @@ function Booking() {
  const existingReview = (store.reviews || []).find(r => r.memberId === u.id && r.venueSlug === b.venueSlug);
  const rated = !!existingReview;
  inner.append(el('div',{class:'p-6 text-center'},
- el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer'},''),
+ el('div',{class:'pop mx-auto h-24 w-24 rounded-full bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer text-accent-emer font-extrabold'},'✓'),
  el('h1',{class:'mt-5 text-2xl font-extrabold'},'Redeemed'),
  el('p',{class:'mt-1 text-slate2-300'}, v?.name),
  el('p',{class:'mt-1 text-xs text-slate2-500'}, new Date(b.redeemedAt).toLocaleString('en-GB')),
@@ -5124,7 +5137,7 @@ function PartnerLanding() {
  // GUARD, for logged-in members/admins who curiously click through.
  isOtherRole && el('section',{class:'mx-auto max-w-3xl px-4 py-10'},
  el('div',{class:'rounded-2xl bg-amber-500/10 border border-amber-500/30 p-5 text-sm flex items-start gap-3 flex-wrap'},
- el('span',{class:'text-2xl shrink-0'},''),
+ el('span',{class:'text-2xl shrink-0 text-amber-200 font-extrabold leading-none'},'⚠'),
  el('div',{class:'flex-1 min-w-[200px]'},
  el('div',{class:'font-bold text-amber-200'},'You\'re signed in as ', me.role === 'ADMIN' ? 'an admin' : 'a member', '.'),
  el('p',{class:'mt-1 text-amber-100/80'},'To explore the partner side without overwriting your session, sign out first.')
@@ -5301,7 +5314,8 @@ function PartnerPortal() {
  if (pv.status === 'PENDING_APPROVAL') {
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, portalHeader,
  el('div',{class:'mx-auto max-w-2xl px-4 py-16 text-center'},
- el('div',{class:'text-5xl'},''),
+ el('div',{class:'mx-auto h-16 w-16 rounded-full bg-amber-500/15 grid place-items-center text-amber-300',
+ html:'<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'}, ''),
  el('h1',{class:'mt-4 text-3xl font-extrabold'},'Under review'),
  el('p',{class:'mt-2 text-slate2-300'},'Thanks, we\'ll email you within one business day. You can keep editing your profile and photos in the meantime — offer details will be set by the menuverso team.'),
  el('div',{class:'mt-6 flex justify-center gap-3 flex-wrap'},
@@ -5321,7 +5335,8 @@ function PartnerPortal() {
  if (pv.status === 'REJECTED') {
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, portalHeader,
  el('div',{class:'mx-auto max-w-2xl px-4 py-16 text-center'},
- el('div',{class:'text-5xl'},''),
+ el('div',{class:'mx-auto h-16 w-16 rounded-full bg-mv-500/15 grid place-items-center text-mv-500',
+ html:'<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'}, ''),
  el('h1',{class:'mt-4 text-3xl font-extrabold'},'We need a bit more info'),
  el('p',{class:'mt-2 text-slate2-300'}, pv.rejectionReason || 'A reviewer asked for changes. Please update your profile and resubmit.'),
  el('div',{class:'mt-6 flex justify-center gap-3'},
@@ -5386,7 +5401,8 @@ function PartnerSignup() {
  el('div',{class:'mx-auto max-w-md px-4 py-12'},
  el('button',{class:'text-slate2-400 text-sm underline cursor-pointer bg-transparent border-0', onclick:()=>go('partner-landing')},'← Back'),
  el('div',{class:'text-center mt-4'},
- el('div',{class:'text-5xl'},''),
+ el('div',{class:'mx-auto h-14 w-14 rounded-2xl bg-mv-500/15 grid place-items-center text-mv-500',
+ html:'<svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'}, ''),
  el('h1',{class:'mt-3 text-2xl font-extrabold'},'List your restaurant'),
  el('p',{class:'mt-1 text-slate2-400 text-sm'},'Create your owner account. Next step adds the venue details.')
  ),
@@ -5494,7 +5510,8 @@ function PartnerSignin() {
  ),
  el('div',{class:'mx-auto max-w-md px-4 py-12'},
  el('div',{class:'text-center'},
- el('div',{class:'mx-auto h-14 w-14 rounded-2xl bg-mv-500/20 border border-mv-500/30 grid place-items-center text-2xl'},''),
+ el('div',{class:'mx-auto h-14 w-14 rounded-2xl bg-mv-500/20 border border-mv-500/30 grid place-items-center text-2xl text-mv-500',
+ html:'<svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>'}, ''),
  el('h1',{class:'mt-4 text-2xl font-extrabold'},'Restaurant sign-in'),
  el('p',{class:'mt-1 text-slate2-400 text-sm'},'Sign in to manage your venue, deals, and codes.')
  ),
@@ -5655,7 +5672,8 @@ function PartnerOnboarding() {
  el('div',{class:'relative'},
  VenueArt({_pv: pv, name: pv.name, slug: pv.slug, cuisine: pv.cuisine, barrio: pv.barrio}, {aspect:'16/9', radius:'rounded-none'}),
  el('div',{class:'absolute top-2 left-2 rounded-full bg-mv-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest z-10'},'2×1 main'),
- el('div',{class:'absolute top-2 right-2 h-8 w-8 rounded-full bg-ink-900/80 grid place-items-center text-sm z-10'},'')
+ el('div',{class:'absolute top-2 right-2 h-8 w-8 rounded-full bg-ink-900/80 grid place-items-center text-sm z-10 text-slate2-100',
+ html:'<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>'},'')
  ),
  el('div',{class:'p-4'},
  el('div',{class:'flex items-start justify-between gap-2'},
@@ -5721,7 +5739,10 @@ function PartnerOnboarding() {
  },'×')
  )),
  el('label',{class:'aspect-[4/3] rounded-lg border-2 border-dashed border-slate2-50/15 grid place-items-center cursor-pointer hover:bg-slate2-50/[0.05] text-center text-slate2-400 text-sm'},
- el('div',{}, el('div',{class:'text-3xl'},''), el('div',{class:'text-xs mt-1'},'Add photos')),
+ el('div',{},
+ el('div',{class:'mx-auto text-3xl text-slate2-400',
+ html:'<svg viewBox="0 0 24 24" class="h-8 w-8 mx-auto" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>'}, ''),
+ el('div',{class:'text-xs mt-1'},'Add photos')),
  el('input',{type:'file', accept:'image/*', multiple:true, class:'hidden', onChange: async e => {
  const files = Array.from(e.target.files || []);
  if (!pv.photos) pv.photos = [];
@@ -5920,7 +5941,7 @@ function PortalOverview() {
  el('ul',{class:'mt-4 space-y-2'},
  ...items.map(i => el('li',{class:'flex items-center justify-between gap-3 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 px-3 py-2.5'},
  el('div',{class:'flex items-center gap-3 min-w-0'},
- el('div',{class:'h-5 w-5 rounded-full border-2 grid place-items-center text-[10px] shrink-0 ' + (i.done ? 'bg-accent-emer border-accent-emer text-ink-900' : 'border-slate2-50/30 text-transparent')},''),
+ el('div',{class:'h-5 w-5 rounded-full border-2 grid place-items-center text-[10px] font-extrabold shrink-0 ' + (i.done ? 'bg-accent-emer border-accent-emer text-ink-900' : 'border-slate2-50/30 text-transparent')}, i.done ? '✓' : ''),
  el('span',{class: 'text-sm ' + (i.done ? 'line-through text-slate2-400' : '')}, i.title)
  ),
  !i.done && el('button',{class:'text-xs font-bold underline text-mv-500 cursor-pointer bg-transparent border-0 shrink-0', onclick:i.go}, i.cta)
@@ -5940,7 +5961,8 @@ function PortalOverview() {
  headerLinks,
  checklist(),
  el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-5 text-center'},
- el('div',{class:'text-4xl'},''),
+ el('div',{class:'mx-auto h-12 w-12 rounded-full bg-mv-500/10 grid place-items-center text-mv-500',
+ html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 11 22 2 13 21 11 13 3 11"/></svg>'}, ''),
  el('h3',{class:'mt-3 font-bold text-lg'},'No data yet'),
  el('p',{class:'mt-1 text-sm text-slate2-400 max-w-md mx-auto'},'Views, redemptions and reviews show up here once members start finding you. Most partners see their first redemption within a week.')
  )
@@ -6058,7 +6080,8 @@ function PortalRedeem() {
  const pv = currentPartnerVenue();
  if (!pv || pv.status !== 'LIVE') {
  return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-center'},
- el('div',{class:'text-4xl'},''),
+ el('div',{class:'mx-auto h-12 w-12 rounded-full bg-slate2-50/[0.06] grid place-items-center text-slate2-400',
+ html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'}, ''),
  el('h2',{class:'mt-3 text-xl font-bold'},'Live feed unavailable'),
  el('p',{class:'mt-2 text-sm text-slate2-400'},'Your venue isn\'t live yet, so members can\'t redeem here yet.')
  );
@@ -6509,7 +6532,8 @@ function PortalProfile() {
  // Upload tile
  el('label',{class:'aspect-[4/3] rounded-lg border-2 border-dashed border-slate2-50/15 grid place-items-center cursor-pointer hover:bg-slate2-50/[0.05] text-center text-slate2-400 text-sm'},
  el('div',{},
- el('div',{class:'text-2xl'},''),
+ el('div',{class:'mx-auto text-2xl text-slate2-400',
+ html:'<svg viewBox="0 0 24 24" class="h-7 w-7 mx-auto" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>'}, ''),
  el('div',{class:'text-xs mt-1'},'Add photos')
  ),
  el('input',{type:'file', accept:'image/*', multiple:true, class:'hidden', onChange: async e => {
@@ -6600,7 +6624,7 @@ function PortalProfile() {
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-sm flex items-center gap-2'},
- el('span',{class:'text-slate2-400'},''), 'Remove this listing'
+ el('span',{class:'text-slate2-400', html:'<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>'}, ''), 'Remove this listing'
  ),
  el('p',{class:'mt-1 text-xs text-slate2-400 leading-relaxed'},
  existingPendingRemoval
@@ -6645,7 +6669,8 @@ function PortalProfile() {
  // ---- G3: REMOVED state, admin approved removal, partner kept access ----
  if (pv.status === 'REMOVED') {
  wrap.append(el('div',{class:'rounded-2xl border border-slate2-50/10 bg-slate2-50/[0.03] p-6 text-center'},
- el('div',{class:'text-2xl'},''),
+ el('div',{class:'mx-auto h-12 w-12 rounded-full bg-slate2-50/[0.06] grid place-items-center text-slate2-400',
+ html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/></svg>'}, ''),
  el('h3',{class:'mt-2 font-bold'},'Your listing was removed'),
  el('p',{class:'mt-1 text-sm text-slate2-400 max-w-md mx-auto'},
  pv.removedAt
@@ -9157,7 +9182,7 @@ function Admin() {
  return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0 flex-1'},
- el('div',{class:'text-sm font-bold text-amber-300'}, ''.repeat(r.stars||0) + ''.repeat(Math.max(0,5-(r.stars||0)))),
+ el('div',{class:'text-sm font-bold text-amber-300 tracking-widest'}, '★'.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
  el('p',{class:'mt-1 text-sm text-slate2-200'}, trimmed || el('em',{class:'text-slate2-400'},'(no note)')),
  el('div',{class:'mt-2 text-xs text-slate2-400'},
  (m ? ((m.name||'') + ' · ' + m.email) : 'unknown member'),
