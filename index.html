@@ -475,6 +475,25 @@ function syncVenueToSupabase(pv) {
  }).catch(function(e){ console.warn('venue sync failed', e && e.message); });
 }
 
+// 2026-05-28 (Patricia): admin edits to the seed catalog (rename / re-cuisine
+// / delete) also need to ride the same cross-device sync. We piggyback on the
+// venues table using id = 'seed_<slug>' for the override row. data carries
+// the partial override patch + a _seedOverride flag for safe identification.
+function syncSeedOverrideToSupabase(slug, override) {
+ if (!slug || !override) return;
+ const rowId = 'seed_' + slug;
+ const payload = {
+ id: rowId,
+ data: Object.assign({ _seedOverride: true, slug: slug }, override),
+ updated_at: new Date().toISOString()
+ };
+ fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
+ method: 'POST',
+ headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+ body: JSON.stringify(payload)
+ }).catch(function(e){ console.warn('seed override sync failed', e && e.message); });
+}
+
 // Debounced sync. Only the signed-in partner's venue (or, for admins,
 // all venues) gets pushed — members never trigger a venue write.
 var _venueSyncTimer = null;
@@ -490,6 +509,12 @@ function scheduleVenueSync() {
  if (pv) syncVenueToSupabase(pv);
  } else if (u.role === 'ADMIN') {
  (store.partnerVenues || []).forEach(syncVenueToSupabase);
+ // 2026-05-28 (Patricia): also push seed-catalog overrides so admin
+ // edits to placeholder restaurants sync across the admin's devices.
+ var overrides = store.seedOverrides || {};
+ Object.keys(overrides).forEach(function(slug){
+ syncSeedOverrideToSupabase(slug, overrides[slug]);
+ });
  }
  } catch (e) { console.warn('scheduleVenueSync error', e && e.message); }
  }, 1200);
@@ -517,6 +542,19 @@ function fetchVenuesFromSupabaseAndMerge() {
  if (st === 'DELETED_BY_ADMIN' || st === 'DELETED_AUDIT') {
  // Also remove from local store if present.
  store.partnerVenues = store.partnerVenues.filter(function(v){ return v.id !== row.id; });
+ return;
+ }
+ // 2026-05-28 (Patricia): seed-override rows (id prefixed 'seed_') hydrate
+ // store.seedOverrides so admin renames/hides on one device show on the next.
+ if (row.id.indexOf('seed_') === 0 || row.data._seedOverride) {
+ var slug = row.data.slug || row.id.slice(5);
+ if (!store.seedOverrides) store.seedOverrides = {};
+ // Strip internal markers before storing
+ var clean = Object.assign({}, row.data);
+ delete clean._seedOverride;
+ delete clean.slug;
+ store.seedOverrides[slug] = clean;
+ changed++;
  return;
  }
  var idx = store.partnerVenues.findIndex(function(v){ return v.id === row.id; });
@@ -827,7 +865,13 @@ function getAllVenues() {
  // venues + direct links).
  const partnerLive = (store.partnerVenues || []).filter(pv => pv.status === 'LIVE').map(toMemberShape);
  const overrides = store.seedOverrides || {};
- const seeds = VENUES.map(v => overrides[v.slug] ? { ...v, ...overrides[v.slug] } : v);
+ // 2026-05-28 (Patricia): seed venues admin-marked with _hidden:true are
+ // hidden from Discover/Map. Admin can use "Revert" to bring them back.
+ const seeds = VENUES.map(v => {
+ const o = overrides[v.slug];
+ if (o && o._hidden) return null;
+ return o ? { ...v, ...o } : v;
+ }).filter(Boolean);
  return [...partnerLive, ...seeds];
 }
 function findVenueBySlug(slug) {
@@ -7671,9 +7715,26 @@ function Admin() {
  card.appendChild(buildEditForm(v, true));
  }},'Edit'),
  isEdited && el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
- delete store.seedOverrides[v.slug]; saveStore(); toast('Reverted ' + v.name); render();
+ delete store.seedOverrides[v.slug];
+ saveStore();
+ // 2026-05-28 (Patricia): also push an EMPTY override row to Supabase so
+ // the revert syncs across devices. Empty {} behaves like no override
+ // in getAllVenues (spread of empty object leaves the seed unchanged).
+ if (typeof syncSeedOverrideToSupabase === 'function') syncSeedOverrideToSupabase(v.slug, {});
+ toast('Reverted ' + v.name); render();
  }}, 'Revert'),
- el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:v.slug})},'View')
+ el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:v.slug})},'View'),
+ // 2026-05-28 (Patricia): admin can now hide a seed venue. Mark as _hidden
+ // in the override layer, sync via Supabase. "Revert" brings it back.
+ el('button',{class:'rounded-full bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ confirmDo('¿Eliminar "' + v.name + '" de Discover? Se ocultará en todos los dispositivos. Puedes restaurarlo más tarde con "Revert".', ()=>{
+ store.seedOverrides = store.seedOverrides || {};
+ store.seedOverrides[v.slug] = { ...(store.seedOverrides[v.slug] || {}), _hidden: true };
+ saveStore();
+ toast('Eliminado ' + v.name);
+ render();
+ });
+ }},'Eliminar')
  )
  )
  );
