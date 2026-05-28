@@ -7789,6 +7789,16 @@ function Admin() {
  // Deep-clone slot array so per-slot edits to the draft don't mutate
  // the live venue until Save is pressed.
  dealSlots: JSON.parse(JSON.stringify(current.dealSlots || [])),
+ // 2026-05-28 (Patricia): admin-managed deals, max 2 per venue. Each
+ // deal carries its own title + description; both surface on the venue
+ // profile (deal cards) and on the Discover card (deal pills). Seeds
+ // that have no deals defined start with the standard 2×1 template so
+ // admin only edits, doesn't have to type from scratch.
+ deals: JSON.parse(JSON.stringify(
+ Array.isArray(current.deals) && current.deals.length
+ ? current.deals
+ : [{ id: 'd_main', title: '2×1 en el menú principal', description: 'Compra un plato principal y llévate otro gratis.', active: true }]
+ )),
  photos: [...(current.photos || [])],
  foodPhotos: [...(current.foodPhotos || [])],
  venuePhotos: [...(current.venuePhotos || [])],
@@ -7859,6 +7869,104 @@ function Admin() {
  field('rating', 'Rating (0–5)', 'number'),
  field('reviews', 'Reviews count', 'number')
  ));
+
+ // ----- OFERTAS (admin-managed, max 2 per venue) -----
+ // 2026-05-28 (Patricia): proper deals editor. Each venue can carry up to
+ // 2 deals; each deal has a title + description + active toggle. Edits
+ // propagate via the same Phase 2 sync that handles the rest of the venue
+ // data, so changes show on every device on next boot.
+ form.appendChild(section('Ofertas', 'Máximo 2 ofertas por local. Aparecen como tarjetas en el perfil del restaurante y como chips en Descubre.'));
+ const dealsMount = document.createElement('div');
+ dealsMount.className = 'space-y-3';
+ form.appendChild(dealsMount);
+
+ function paintDeals() {
+ dealsMount.innerHTML = '';
+ draft.deals.forEach((d, idx) => {
+ const card = document.createElement('div');
+ card.className = 'rounded-2xl border border-mv-500/40 bg-mv-500/10 p-4';
+ // Header row: label + delete
+ const head = document.createElement('div');
+ head.className = 'flex items-center justify-between gap-2 mb-3';
+ head.innerHTML = '<div class="text-[10px] uppercase tracking-widest font-extrabold text-mv-500">Oferta ' + (idx + 1) + '</div>';
+ if (draft.deals.length > 1) {
+ const delBtn = document.createElement('button');
+ delBtn.type = 'button';
+ delBtn.className = 'text-xs font-bold text-red-300 hover:text-red-200 cursor-pointer bg-transparent border-0';
+ delBtn.textContent = '× Eliminar';
+ delBtn.onclick = () => {
+ draft.deals.splice(idx, 1);
+ markDirty();
+ paintDeals();
+ };
+ head.appendChild(delBtn);
+ }
+ card.appendChild(head);
+ // Title
+ const titleLabel = document.createElement('div');
+ titleLabel.className = 'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1';
+ titleLabel.textContent = 'Título de la oferta';
+ card.appendChild(titleLabel);
+ const titleInput = document.createElement('input');
+ titleInput.type = 'text';
+ titleInput.value = d.title || '';
+ titleInput.placeholder = 'ej. 2×1 en el menú principal';
+ titleInput.className = 'w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ titleInput.oninput = () => { d.title = titleInput.value; markDirty(); };
+ card.appendChild(titleInput);
+ // Description
+ const descLabel = document.createElement('div');
+ descLabel.className = 'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mt-3 mb-1';
+ descLabel.textContent = 'Descripción';
+ card.appendChild(descLabel);
+ const descInput = document.createElement('textarea');
+ descInput.rows = 2;
+ descInput.value = d.description || '';
+ descInput.placeholder = 'Explica brevemente la oferta. ej. "Compra un plato principal y llévate otro gratis."';
+ descInput.className = 'w-full rounded-xl bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
+ descInput.oninput = () => { d.description = descInput.value; markDirty(); };
+ card.appendChild(descInput);
+ // Active toggle
+ const actRow = document.createElement('label');
+ actRow.className = 'mt-3 flex items-center gap-2 cursor-pointer';
+ const actCb = document.createElement('input');
+ actCb.type = 'checkbox';
+ actCb.checked = d.active !== false;
+ actCb.className = 'h-4 w-4 cursor-pointer accent-mv-500';
+ actCb.onchange = () => { d.active = actCb.checked; markDirty(); };
+ const actLab = document.createElement('span');
+ actLab.className = 'text-xs text-slate2-300';
+ actLab.textContent = 'Oferta activa (visible para los miembros)';
+ actRow.appendChild(actCb);
+ actRow.appendChild(actLab);
+ card.appendChild(actRow);
+ dealsMount.appendChild(card);
+ });
+ // Add another deal (only if less than 2)
+ if (draft.deals.length < 2) {
+ const addBtn = document.createElement('button');
+ addBtn.type = 'button';
+ addBtn.className = 'w-full rounded-2xl bg-slate2-50/[0.04] border border-dashed border-slate2-50/20 px-4 py-3 text-sm font-bold text-slate2-300 cursor-pointer hover:bg-slate2-50/[0.08] hover:border-mv-500/40';
+ addBtn.textContent = '+ Añadir otra oferta (' + draft.deals.length + ' de 2)';
+ addBtn.onclick = () => {
+ draft.deals.push({
+ id: 'd_' + Math.random().toString(36).slice(2, 8),
+ title: '',
+ description: '',
+ active: true
+ });
+ markDirty();
+ paintDeals();
+ };
+ dealsMount.appendChild(addBtn);
+ } else {
+ const note = document.createElement('div');
+ note.className = 'text-[11px] text-slate2-500 italic';
+ note.textContent = 'Máximo de 2 ofertas alcanzado. Elimina una para añadir otra.';
+ dealsMount.appendChild(note);
+ }
+ }
+ paintDeals();
 
  // ----- 2. LOCATION -----
  form.appendChild(section('Location'));
@@ -8458,10 +8566,22 @@ function Admin() {
  return;
  }
  }
+ // 2026-05-28 (Patricia): clean up the deals[] before diffing. Strip
+ // deals with no title (admin clicked Add but never filled it in),
+ // ensure every deal has a stable id, cap at 2.
+ draft.deals = (draft.deals || [])
+ .filter(d => d && typeof d.title === 'string' && d.title.trim() !== '')
+ .slice(0, 2)
+ .map(d => ({
+ id: d.id || ('d_' + Math.random().toString(36).slice(2, 8)),
+ title: d.title.trim(),
+ description: (d.description || '').trim(),
+ active: d.active !== false
+ }));
  // Diff draft against current. Only persist actually-changed fields.
- // The four photo arrays + dealSlots are array-typed and require
+ // The four photo arrays + dealSlots + deals are array-typed and require
  // JSON-string comparison.
- const ARRAY_FIELDS = ['photos', 'foodPhotos', 'venuePhotos', 'menuPhotos', 'dealSlots'];
+ const ARRAY_FIELDS = ['photos', 'foodPhotos', 'venuePhotos', 'menuPhotos', 'dealSlots', 'deals'];
  const changes = {};
  Object.keys(draft).forEach(k => {
  const oldVal = current[k];
