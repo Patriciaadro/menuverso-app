@@ -4785,21 +4785,27 @@ function Booking() {
  const inner2 = el('div',{class:'text-center'});
  function paintRater() {
  inner2.innerHTML = '';
- inner2.append(
+ // Build children array and filter falsy so `stars > 0 && el(...)`
+ // doesn't leave "false" text nodes (Element.append coerces booleans to
+ // text "false", unlike el() which filters them).
+ const kids = [
  el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'¿Qué tal fue?'),
  el('div',{class:'mt-3 flex justify-center gap-1'},
  ...[1,2,3,4,5].map(n => el('button',{
  class:'text-3xl leading-none cursor-pointer bg-transparent border-0 transition ' + (n <= stars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
  onclick:()=>{ stars = n; paintRater(); }
  }, n <= stars ? '★' : '☆'))
- ),
- stars > 0 && el('textarea',{
+ )
+ ];
+ if (stars > 0) {
+ kids.push(
+ el('textarea',{
  class:'mt-3 w-full bg-slate2-50/[0.04] border border-slate2-50/10 rounded-xl px-3 py-2 text-sm text-slate2-100 placeholder-slate2-500',
  rows:'2',
  placeholder: 'Comentario rápido (opcional)',
  onInput: e => { note = e.target.value; }
  }),
- stars > 0 && el('button',{
+ el('button',{
  class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer transition',
  onclick: ()=>{
  if (!store.reviews) store.reviews = [];
@@ -4816,6 +4822,8 @@ function Booking() {
  }
  },'Enviar valoración')
  );
+ }
+ inner2.append(...kids);
  }
  paintRater();
  card.append(inner2);
@@ -4836,12 +4844,17 @@ function Booking() {
  el('p',{class:'mt-1 text-slate2-300'}, v?.name),
  el('p',{class:'mt-1 text-xs text-slate2-500'}, new Date(b.redeemedAt).toLocaleString('en-GB')),
  el('p',{class:'mt-6 text-sm text-slate2-300'},'Enjoy your meal.'),
- // ---- Rate-your-visit ----
+ // ---- Rate-your-visit (post-6-min view) ----
+ // Mirrors the inline Stage B rater so review prompt is consistent
+ // across both views. Star glyphs were lost to a prior copy-paste,
+ // restored here. Same falsy-children fix as Stage B.
  el('div',{class:'mt-8 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-5 text-left max-w-md mx-auto'},
  rated
  ? el('div',{class:'text-center'},
- el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Your rating'),
- el('div',{class:'mt-2 text-accent-amber text-2xl'}, ''.repeat(existingReview.stars) + ''.repeat(5 - existingReview.stars)),
+ el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Tu valoración'),
+ el('div',{class:'mt-2 text-accent-amber text-2xl tracking-widest'},
+ '★'.repeat(existingReview.stars) + '☆'.repeat(5 - existingReview.stars)
+ ),
  existingReview.note && el('p',{class:'mt-2 text-sm text-slate2-300 italic'}, '"' + existingReview.note + '"')
  )
  : (() => {
@@ -4849,27 +4862,34 @@ function Booking() {
  let stars = 0; let note = '';
  function paintRater() {
  wrap2.innerHTML = '';
- wrap2.append(
- el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'How was it?'),
+ const kids = [
+ el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'¿Qué tal fue?'),
  el('div',{class:'mt-3 flex justify-center gap-1'},
  ...[1,2,3,4,5].map(n => el('button',{
- class:'text-3xl cursor-pointer bg-transparent border-0 transition ' + (n <= stars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
+ class:'text-3xl leading-none cursor-pointer bg-transparent border-0 transition ' + (n <= stars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
  onclick:()=>{ stars = n; paintRater(); }
- }, ''))
- ),
- stars > 0 && el('textarea',{
- class:'mt-3 w-full bg-slate2-50/[0.04] border border-slate2-50/10 rounded-xl px-3 py-2 text-sm', rows:'2', placeholder:'Quick note (optional)',
+ }, n <= stars ? '★' : '☆'))
+ )
+ ];
+ if (stars > 0) {
+ kids.push(
+ el('textarea',{
+ class:'mt-3 w-full bg-slate2-50/[0.04] border border-slate2-50/10 rounded-xl px-3 py-2 text-sm text-slate2-100 placeholder-slate2-500',
+ rows:'2',
+ placeholder:'Comentario rápido (opcional)',
  onInput: e => { note = e.target.value; }
  }),
- stars > 0 && el('button',{
- class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer',
+ el('button',{
+ class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer transition',
  onclick: ()=>{
  if (!store.reviews) store.reviews = [];
  store.reviews.push({ memberId: u.id, venueSlug: b.venueSlug, stars, note: note.trim() || null, createdAt: Date.now() });
- saveStore(); toast('Thanks for the rating'); paint();
+ saveStore(); toast('Gracias por tu valoración'); paint();
  }
- },'Submit rating')
+ },'Enviar valoración')
  );
+ }
+ wrap2.append(...kids);
  }
  paintRater();
  return wrap2;
