@@ -6002,14 +6002,14 @@ function PortalOverview() {
  const moneyCard = el('div',{class:'rounded-3xl bg-gradient-to-br from-mv-500/25 via-mv-500/10 to-transparent border border-mv-500/40 p-6'},
  el('div',{class:'flex items-center justify-between flex-wrap gap-3'},
  el('div',{},
- el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'},' Incremental revenue · this month'),
+ el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'},' ', 'Incremental revenue · this month'),
  el('div',{class:'mt-1 flex items-baseline gap-2'},
  el('span',{class:'text-5xl font-extrabold text-mv-500'},'€', monthRevenue.toLocaleString('en-GB')),
  el('span',{class:'text-xs text-slate2-400'},'est.')
  ),
  el('div',{class:'mt-1 text-xs text-slate2-300'},
- 'Based on ', el('strong',{class:'text-slate2-50'}, Math.round(monthRevenue / AVG_TICKET_EUR), ' redemptions'),
- ' × €' + AVG_TICKET_EUR + ' avg recovered ticket.'
+ 'Based on', ' ', el('strong',{class:'text-slate2-50'}, String(Math.round(monthRevenue / AVG_TICKET_EUR)), ' ', 'redemptions'),
+ ' × €', String(AVG_TICKET_EUR), ' ', 'avg recovered ticket.'
  )
  ),
  el('div',{class:'text-right'},
@@ -8782,10 +8782,10 @@ function Admin() {
  el('span',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, usr.role)
  ),
  el('div',{class:'text-xs text-slate2-400 mt-1'},
- 'Created ', usr.createdAt ? new Date(usr.createdAt).toLocaleDateString('en-GB') : ', ',
- sub ? ' · Sub: ' + sub.status + (sub.cancelAtPeriodEnd ? ' (cancelling ' + new Date(sub.renewsAt).toLocaleDateString('en-GB') + ')' : '') : '',
- venue ? ' · Venue: ' + venue.name + ' (' + venue.status + ')' : '',
- usr.role === 'MEMBER' ? (' · ' + memberBks + ' bookings · ' + memberReds + ' redemptions') : ''
+ 'Created', ' ', usr.createdAt ? new Date(usr.createdAt).toLocaleDateString(MV_LANG==='es'?'es-ES':'en-GB') : '—',
+ sub ? el('span',{}, ' · ', 'Sub:', ' ', sub.status, sub.cancelAtPeriodEnd ? (MV_LANG==='es' ? (' (cancelando ' + new Date(sub.renewsAt).toLocaleDateString('es-ES') + ')') : (' (cancelling ' + new Date(sub.renewsAt).toLocaleDateString('en-GB') + ')')) : '') : '',
+ venue ? el('span',{}, ' · ', 'Venue:', ' ', venue.name, ' (', venue.status, ')') : '',
+ usr.role === 'MEMBER' ? el('span',{}, ' · ', String(memberBks), ' ', memberBks===1?'booking':'bookings', ' · ', String(memberReds), ' ', 'redemptions') : ''
  )
  ),
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
@@ -10653,6 +10653,166 @@ window.MV_TR_ES = {
  "Demo cred filled. Sign in.": "Datos demo rellenados. Inicia sesión.",
  "Welcome back, Maria. Sign in.": "Bienvenida, Maria. Inicia sesión.",
  "Welcome back, Joan. Sign in.": "Bienvenido, Joan. Inicia sesión.",
+
+ // ---- 2026-05-28 Wave 2: cuisine names, more admin/forms ----
+ // Cuisine names (appear on every venue card subtitle + map filter chips)
+ "Spanish": "Española",
+ "Catalan": "Catalana",
+ "Mexican": "Mexicana",
+ "Asian": "Asiática",
+ "Modern": "Moderna",
+ "Modern Catalan": "Catalana moderna",
+ "Wine bar": "Bar de vinos",
+ "Wine": "Vino",
+ "Tasting": "Degustación",
+ "Healthy": "Saludable",
+ "Street": "Callejera",
+ "Tasting menu": "Menú degustación",
+ "Tapas": "Tapas",
+ "Brunch": "Brunch",
+ "Bowls": "Bowls",
+ "Café": "Café",
+ "Coffee": "Café",
+ "Paella": "Paella",
+ "Pizza": "Pizza",
+ "Burger": "Hamburguesa",
+ "Burgers": "Hamburguesas",
+ "Vegan": "Vegano",
+ "Vegetarian": "Vegetariano",
+ "Seafood": "Marisco",
+ "Italian": "Italiana",
+ "Japanese": "Japonesa",
+ "Chinese": "China",
+ "Thai": "Tailandesa",
+ "Indian": "India",
+ "French": "Francesa",
+ "Greek": "Griega",
+ "Lebanese": "Libanesa",
+ "Middle Eastern": "Oriente Medio",
+ "American": "Americana",
+
+ // Auth helper text (sign-in / sign-up / forgot-password)
+ "At least 8 characters": "Al menos 8 caracteres",
+ "Re-type to confirm": "Vuelve a escribir para confirmar",
+ "Tip: tap Show to verify you typed it correctly.": "Consejo: pulsa Mostrar para verificar que lo has escrito bien.",
+ "In production this sends a reset link by email.": "En producción esto envía un enlace de restablecimiento por email.",
+ "In production this emails a reset link to your business address.": "En producción esto envía un enlace de restablecimiento al email de tu empresa.",
+ "Forgot password?": "¿Olvidaste tu contraseña?",
+ "you@example.com": "tu@email.com",
+ "Password": "Contraseña",
+ "Email": "Email",
+ "First name": "Nombre",
+ "Last name": "Apellidos",
+ "Confirm password": "Confirma la contraseña",
+ // Get in touch (fixes the mixed-language heading)
+ "Get in touch,": "Contáctanos,",
+ // Stay added below for safety regardless of trim path
+ "list your restaurant.": "lista tu restaurante.",
+
+ // ---- Admin tabs deep content ----
+ "Search by code, venue, member email": "Buscar por código, local, email del miembro",
+ "Search by email or name": "Buscar por email o nombre",
+ "Search action, venue, reason": "Buscar acción, local, motivo",
+ "Search by name, cuisine, barrio, owner email": "Buscar por nombre, cocina, barrio, email del propietario",
+ "0 bookings": "0 reservas",
+ "1 booking": "1 reserva",
+ "bookings": "reservas",
+ "booking": "reserva",
+ "0 entries": "0 entradas",
+ "entries": "entradas",
+ "entry": "entrada",
+ "users": "usuarios",
+ "user": "usuario",
+ "3 users": "3 usuarios",
+ "Activo": "Activo",
+ "Active": "Activo",
+ "Canjeado": "Canjeado",
+ "Expired": "Expirado",
+ "Cancelled": "Cancelado",
+ "Todos": "Todos",
+ "All venues": "Todos los locales",
+ "Sort:": "Ordenar:",
+ "Recent": "Reciente",
+ "MIEMBRO": "MIEMBRO",
+ "PARTNER": "PARTNER",
+ "ADMIN": "ADMIN",
+ "Editar nombre": "Editar nombre",
+ "Rol": "Rol",
+ // Reviews tab
+ "Flag": "Marcar",
+ "Flagged": "Marcadas",
+ "Low (≤2)": "Bajas (≤2)",
+ "High (≥5)": "Altas (≥5)",
+ "(no note)": "(sin nota)",
+ // Estadísticas tab
+ "Live venues": "Locales en vivo",
+ "Active subscriptions": "Suscripciones activas",
+ "LIVE VENUES": "LOCALES EN VIVO",
+ "ACTIVE SUBSCRIPTIONS": "SUSCRIPCIONES ACTIVAS",
+ "AVG RATING": "VAL. MEDIA",
+ "CANJES / SEMANA": "CANJES / SEMANA",
+ "currently active": "activos actualmente",
+ "paying members": "miembros de pago",
+ "Top 5 venues, by redemption count": "Top 5 locales, por número de canjes",
+ "Top 5 venues, by rating": "Top 5 locales, por valoración",
+ "Minimum 5 reviews to qualify.": "Mínimo 5 reseñas para clasificar.",
+ "No venues meet the threshold yet.": "Ningún local cumple el mínimo todavía.",
+ "Last 10 redemptions": "Últimos 10 canjes",
+ "canjes": "canjes",
+
+ // Sistema tab
+ "Data export": "Exportar datos",
+ "Data import": "Importar datos",
+ "Reset all data": "Restablecer todos los datos",
+ "Paste a JSON dump here…": "Pega aquí un volcado JSON…",
+ "Paste a JSON first": "Pega primero un JSON",
+ "Volcado JSON completo de la demo, útil para depurar o copiar el estado.": "Volcado JSON completo de la demo, útil para depurar o copiar el estado.",
+ "Reemplaza todo el contenido con un JSON exportado previamente. Recarga la app al terminar.": "Reemplaza todo el contenido con un JSON exportado previamente. Recarga la app al terminar.",
+
+ // User row details
+ "Created": "Creado",
+ "Sub:": "Sub:",
+ "Venue:": "Local:",
+ "ACTIVE": "ACTIVA",
+ "LIVE": "EN VIVO",
+
+ // Activity tab columns (uppercase in source, mostly Spanish but adding for safety)
+ "CÓDIGO": "CÓDIGO",
+ "LOCAL": "LOCAL",
+ "MIEMBRO": "MIEMBRO",
+ "ESTADO": "ESTADO",
+ "CUÁNDO": "CUÁNDO",
+ "ACCIONES": "ACCIONES",
+ "No hay reservas que coincidan.": "No hay reservas que coincidan.",
+ "No audit entries yet, existing admin handlers can opt in by calling logAudit(...). See the helper comments in source for the recommended hooks.": "Aún no hay entradas de auditoría. Los handlers admin existentes pueden incorporarse llamando a logAudit(...). Ver comentarios del helper en el código fuente para los hooks recomendados.",
+
+ // Partner portal extras
+ "Active": "Activo",
+ "active": "activo",
+ "Pending review": "Pendiente de revisión",
+ "Live": "En vivo",
+ "Get your first redemption": "Consigue tu primer canje",
+
+ // Welcome back compound (cover multiple greetings)
+ "Welcome back, Maria": "Bienvenida, Maria",
+ "Welcome back, Joan": "Bienvenido, Joan",
+ "Welcome back, Admin": "Bienvenido, Admin",
+ "Sign in.": "Inicia sesión.",
+
+ // Toast messages
+ "Demo cred filled.": "Datos demo rellenados.",
+ "Link copied": "Enlace copiado",
+ "Saved!": "¡Guardado!",
+ "Changes saved.": "Cambios guardados.",
+ "Demo mode: changes save to this device only": "Modo demo: tus cambios solo se guardan en este dispositivo",
+ // Source-fixed dynamic strings (split text nodes; need single-word entries)
+ "Based on": "Basado en",
+ "avg recovered ticket.": "ticket medio recuperado.",
+ "Incremental revenue · this month": "Ingresos incrementales · este mes",
+ "All-time": "Histórico",
+ "Created": "Creado",
+ "Sub:": "Sub:",
+ "Venue:": "Local:",
  // Additional single-word strings used in split text nodes
  "reviews": "reseñas",
  "review": "reseña",
@@ -10712,6 +10872,14 @@ function autoTranslate(root) {
  while ((n = w.nextNode())) {
  var raw = n.nodeValue;
  if (!raw) continue;
+ // Try the raw value first (preserves trailing space/comma/etc.),
+ // then fall back to the trimmed key. Some dict entries intentionally
+ // include trailing punctuation+space (e.g. "Get in touch, ") because
+ // the source renders them as a leading half of a compound heading.
+ if (TR[raw]) {
+ n.nodeValue = TR[raw];
+ continue;
+ }
  var key = raw.trim();
  if (key && TR[key]) {
  // Preserve leading/trailing whitespace from the original node
