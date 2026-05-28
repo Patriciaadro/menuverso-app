@@ -511,6 +511,14 @@ function fetchVenuesFromSupabaseAndMerge() {
  var changed = 0;
  rows.forEach(function(row){
  if (!row || !row.data || !row.id) return;
+ // 2026-05-28 (Pass B step 5): skip tombstoned rows (admin-deleted venues)
+ // so they don't re-appear on devices that hadn't seen the delete yet.
+ var st = row.data && row.data.status;
+ if (st === 'DELETED_BY_ADMIN' || st === 'DELETED_AUDIT') {
+ // Also remove from local store if present.
+ store.partnerVenues = store.partnerVenues.filter(function(v){ return v.id !== row.id; });
+ return;
+ }
  var idx = store.partnerVenues.findIndex(function(v){ return v.id === row.id; });
  if (idx >= 0) {
  // Supabase wins for matched ids (newest cross-device state).
@@ -3216,8 +3224,15 @@ function AppDiscover() {
  const moodRow = el('div',{class:'px-5 pt-2'});
  function paintMoods() {
  moodRow.innerHTML = '';
+ // 2026-05-28 (Pass B step 5): admin can hide individual filter chips via
+ // store.adminMoodHidden (managed in the admin Partners tab). Hidden moods
+ // are skipped on Discover; if an active mood gets hidden mid-session,
+ // reset to null so the venue grid isn't stuck filtering by a hidden chip.
+ const hidden = Array.isArray(store.adminMoodHidden) ? store.adminMoodHidden : [];
+ const visibleMoods = MV_MOODS.filter(m => !hidden.includes(m.key));
+ if (activeMood && hidden.includes(activeMood)) activeMood = null;
  const inner = el('div',{class:'mv-fadex flex items-center gap-3 overflow-x-auto pb-2'},
- ...MV_MOODS.map(m => MoodTile(m, activeMood === m.key, () => {
+ ...visibleMoods.map(m => MoodTile(m, activeMood === m.key, () => {
  activeMood = (activeMood === m.key) ? null : m.key;
  paintMoods(); paintGrid();
  }))
@@ -6649,6 +6664,20 @@ function Admin() {
  Object.keys(store.saved).forEach(uid => { store.saved[uid] = (store.saved[uid] || []).filter(s => s !== v.slug); });
  store.partnerVenues = store.partnerVenues.filter(x => x.id !== venueId);
  saveStore();
+ // 2026-05-28 (Pass B step 5): tombstone the row in Supabase so the
+ // deletion sticks cross-device. anon can't DELETE, so we set the data's
+ // status to DELETED_BY_ADMIN; fetchVenuesFromSupabaseAndMerge skips those.
+ if (typeof MV_SUPABASE_URL !== 'undefined') {
+ fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
+ method: 'POST',
+ headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+ body: JSON.stringify({
+ id: venueId,
+ data: { id: venueId, status: 'DELETED_BY_ADMIN', deleted_at: new Date().toISOString() },
+ updated_at: new Date().toISOString()
+ })
+ }).catch(function(e){ console.warn('venue delete sync failed', e && e.message); });
+ }
  }
 
  // G3: pending change requests (removal + future edit). Tab badge.
@@ -7150,6 +7179,42 @@ function Admin() {
  if (!store.partnerVenues.find(v => v.slug === slug)) selectedPartners.delete(slug);
  }
 
+ // 2026-05-28 (Pass B step 5): admin chip-visibility toggle. Lets admin
+ // hide individual filter chips on Discover (Patricia: "the admin panel
+ // should be able to set this filters"). Stored in store.adminMoodHidden
+ // — localStorage-only for now; cross-device admin-config sync would need
+ // a new Supabase table, deferred to next session.
+ if (!Array.isArray(store.adminMoodHidden)) store.adminMoodHidden = [];
+ wrap.append(
+ el('div',{class:'mb-3 rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
+ el('div',{},
+ el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-extrabold'},'Filtros de Descubre'),
+ el('div',{class:'mt-0.5 text-[11px] text-slate2-400'},'Marca los chips que quieres mostrar en la página Descubre')
+ ),
+ el('span',{class:'text-[10px] text-slate2-500'}, (MV_MOODS.length - store.adminMoodHidden.length) + ' de ' + MV_MOODS.length + ' visibles')
+ ),
+ el('div',{class:'mt-3 flex flex-wrap gap-2'},
+ ...MV_MOODS.map(m => {
+ const lang = (typeof MV_LANG !== 'undefined' && MV_LANG) || 'es';
+ const label = (m.label && (m.label[lang] || m.label.en)) || m.key;
+ const visible = !store.adminMoodHidden.includes(m.key);
+ return el('label',{class:'inline-flex items-center gap-2 cursor-pointer rounded-full px-3 py-1.5 text-xs font-bold border transition ' + (visible ? 'bg-accent-emer/15 border-accent-emer/40 text-accent-emer' : 'bg-slate2-50/[0.04] border-slate2-50/10 text-slate2-400')},
+ el('input',{type:'checkbox', checked: visible, class:'sr-only',
+ onChange: e => {
+ if (e.target.checked) store.adminMoodHidden = store.adminMoodHidden.filter(k => k !== m.key);
+ else if (!store.adminMoodHidden.includes(m.key)) store.adminMoodHidden.push(m.key);
+ saveStore();
+ paintPartners();
+ }
+ }),
+ el('span',{}, visible ? '✓' : '○'),
+ el('span',{}, label)
+ );
+ })
+ )
+ )
+ );
  // 2026-05-28 (Patricia / Pass B step 3): "+ Añadir local" button so the
  // admin can create new partner venues directly (the partner-public signup
  // flow was closed in Pass A — admin onboards manually via this button or
