@@ -667,6 +667,29 @@ if (_emailMigrated > 0) console.log('Migrated', _emailMigrated, 'legacy emails t
  creditsPerUser: pv.creditsPerUser
  };
  }
+ // 2026-05-28 (Patricia / Pass B): each venue now has up to 2 deals with
+ // their own title + description. Migrate older venues by seeding a single
+ // default deal derived from their existing dealTerms.
+ if (!Array.isArray(pv.deals) || pv.deals.length === 0) {
+ pv.deals = [
+ {
+ id: 'd_main',
+ title: '2×1 en el menú principal',
+ description: pv.dealTerms || 'Compra un plato principal y llévate otro gratis. Solo en sala, hasta 2 personas por mesa.',
+ active: true
+ }
+ ];
+ // The seeded Cervecería gets a second example deal so the multi-deal
+ // UI has something to render out of the box on the discover page.
+ if (pv.id === 'pv_cerveceria' && pv.deals.length === 1) {
+ pv.deals.push({
+ id: 'd_drink',
+ title: '2×1 en cervezas Estrella Damm',
+ description: 'Pide dos cervezas y solo pagas una. Válido en horario de tapas.',
+ active: true
+ });
+ }
+ }
 });
 if (!Array.isArray(store.changeRequests)) store.changeRequests = [];
 if (!Array.isArray(store.tncVersions) || store.tncVersions.length === 0) {
@@ -727,6 +750,25 @@ const VENUES = VENUE_SEEDS.map(([name,barrio,cuisine,priceTier,rating,reviews,la
  ======================================================================== */
 // Convert a partner-owned venue (with photos[], dealSlots[], etc.) into the
 // same shape member-facing lists expect (img, times, etc.).
+// 2026-05-28 (Patricia / Pass B): single source of truth for the deals a
+// venue offers. Returns up to 2 active deals (the product cap for v1).
+// Falls back to a sensible default so static catalog venues still render.
+function getVenueDeals(v) {
+ if (!v) return [];
+ // Real venue object (partner or member-shape)
+ const raw = Array.isArray(v.deals) ? v.deals : null;
+ const active = raw ? raw.filter(d => d && d.active && d.title) : null;
+ if (active && active.length > 0) return active.slice(0, 2);
+ // Fallback: synthesize a single default deal so legacy/catalog rows
+ // still display something on the discover card.
+ return [{
+ id: 'd_default',
+ title: '2×1 en el menú principal',
+ description: v.dealTerms || 'Compra un plato principal y llévate otro gratis.',
+ active: true
+ }];
+}
+
 function toMemberShape(pv) {
  // G2: members see the LIVE deal (frozen at last approval), not the
  // partner's editor draft. liveDeal exists for LIVE/PAUSED venues thanks
@@ -747,6 +789,9 @@ function toMemberShape(pv) {
  reviews: pv.reviews ?? 0,
  lat: pv.lat ?? 41.3851,
  lng: pv.lng ?? 2.1734,
+ // 2026-05-28 (Pass B): expose the deals array so discover/profile can
+ // render up to 2 deal pills + descriptions per venue.
+ deals: Array.isArray(pv.deals) ? pv.deals.filter(d => d && d.active && d.title).slice(0, 2) : [],
  // img is the partner's real uploaded photo if any; otherwise null and
  // VenueArt will render an illustrated hero.
  img: (pv.photos && pv.photos[0]) || null,
@@ -1598,6 +1643,7 @@ window.MV_T = {
  'venue.pickSlot': 'Elige un turno',
  'venue.tapOpenSlotHint': 'Toca un turno cuando esté abierto para conseguir tu código.',
  'venue.redeemNow': 'Canjear 2×1 →',
+ 'venue.redeemThisOffer': 'Canjear esta oferta →',
  'venue.notAvailableNow': 'No disponible ahora mismo',
  'venue.pausedLabel': 'Local en pausa',
  'venue.openNowBanner': 'Disponible ahora mismo',
@@ -1757,6 +1803,7 @@ window.MV_T = {
  'venue.pickSlot': 'Pick a slot',
  'venue.tapOpenSlotHint': 'Tap a slot when it\'s open to get your code.',
  'venue.redeemNow': 'Redeem 2×1 →',
+ 'venue.redeemThisOffer': 'Redeem this offer →',
  'venue.notAvailableNow': 'Not available right now',
  'venue.pausedLabel': 'Venue paused',
  'venue.openNowBanner': 'Available right now',
@@ -3290,16 +3337,19 @@ function DealCard(v) {
  const u = currentUser();
  const saved = u ? (store.saved[u.id] || []).includes(v.slug) : false;
  const isLive = isVenueAvailableNow(v);
+ // 2026-05-28 (Patricia / Pass B): NeoTaste-style discover card. Photo +
+ // venue name + up to 2 deal pills underneath. Each pill shows the offer
+ // title so the diner can scan multiple deals at a glance.
+ const deals = getVenueDeals(v);
  return el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden cursor-pointer hover:bg-slate2-50/[0.07] transition', onclick:()=>go('venue',{slug:v.slug})},
  el('div',{class:'relative'},
  VenueArt(v, {aspect:'16/9', radius:'rounded-none'}),
  el('button',{class:'absolute top-2 right-2 h-8 w-8 rounded-full bg-ink-900/80 grid place-items-center text-sm cursor-pointer z-10',
  onclick:(e)=>{ e.stopPropagation(); toggleSaved(v.slug); render(); }
  }, saved ? '' : ''),
- el('div',{class:'absolute top-2 left-2 flex items-center gap-1.5 z-10'},
- el('span',{class:'rounded-full bg-mv-500 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest'},'2×1 main'),
- isLive && el('span',{class:'rounded-full bg-accent-emer/95 text-ink-900 px-2 py-1 text-[10px] font-extrabold uppercase tracking-widest inline-flex items-center gap-1'},
- el('span',{class:'h-1.5 w-1.5 rounded-full bg-ink-900 animate-pulse'}), 'Now'
+ isLive && el('div',{class:'absolute top-2 left-2 z-10'},
+ el('span',{class:'rounded-full bg-accent-emer/95 text-ink-900 px-2 py-1 text-[10px] font-extrabold uppercase tracking-widest inline-flex items-center gap-1'},
+ el('span',{class:'h-1.5 w-1.5 rounded-full bg-ink-900 animate-pulse'}), 'Ahora'
  )
  )
  ),
@@ -3310,6 +3360,13 @@ function DealCard(v) {
  el('div',{class:'text-xs text-slate2-400 truncate'}, v.barrio,' · ', v.cuisine,' · ','€'.repeat(v.priceTier))
  ),
  Star({ rating: v.rating, reviews: v.reviews })
+ ),
+ // Deal pills row, up to 2.
+ deals.length > 0 && el('div',{class:'mt-3 flex flex-wrap items-center gap-1.5'},
+ ...deals.slice(0, 2).map(d => el('span',{
+ class:'inline-flex items-center rounded-full bg-mv-500/15 border border-mv-500/35 text-mv-400 text-[11px] font-extrabold px-2.5 py-1 leading-tight whitespace-nowrap max-w-full truncate',
+ title: d.description || d.title
+ }, d.title))
  )
  )
  );
@@ -4196,53 +4253,42 @@ function Venue() {
  ),
  el('p',{class:'mt-1 text-xs text-amber-200/70'},'This venue isn\'t accepting new bookings right now. Save it and check back.')
  ),
- // Conditions block, uses partner's actual saved terms now. If every
- // slot shares the same terms, render once. If slots differ, render the
- // shared terms here and show per-slot variations inline with the picker.
- (() => {
- const pvDeals = v._pv;
- // G2: read the LIVE deal, partner draft edits don't reach members until admin approves.
- const liveDeal = pvDeals ? getLiveDeal(pvDeals) : null;
- const venueDefault = liveDeal?.dealTerms || pvDeals?.dealTerms || DEFAULT_DEAL_TERMS;
- const slots = liveDeal?.dealSlots || pvDeals?.dealSlots || [];
- const slotTerms = slots.filter(s => s.active).map(s => (typeof s.terms === 'string' && s.terms.trim()) ? s.terms : venueDefault);
- const allSame = slotTerms.length === 0 || slotTerms.every(t => t === slotTerms[0]);
- const sharedTerms = allSame && slotTerms.length > 0 ? slotTerms[0] : venueDefault;
- // 2026-05-28 (Patricia): removed the per-venue monthly-credit row. First
- // version is "1 redemption per member per subscription" tracked elsewhere,
- // not a per-venue cap surfaced inline. Restored when proper auth lands.
- return el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'2×1 Main Course'),
- el('div',{class:'mt-1 font-bold'},'Buy one main, get one free'),
- el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'}, sharedTerms),
- !allSame && el('p',{class:'mt-2 text-[10px] text-slate2-400 italic'},'Some time slots have different conditions, see each slot below.')
- );
- })(),
- // 2026-05-28 (Patricia): replaced the multi-slot picker ("Elige un turno")
- // with a single "Canjear 2×1" call-to-action. First version is "one
- // redemption per subscription" — letting the diner pick among 3 slots is
- // overkill for that. We still pass through bookSlot under the hood (using
- // the slot that's currently open, falling back to the first active one)
- // so the existing redemption code/confirmation flow keeps working.
+ // 2026-05-28 (Patricia / Pass B step 2): each deal card carries its own
+ // "Canjear esta oferta" button. Member picks WHICH deal they're redeeming
+ // (max 2 per venue). Booking still routes through bookSlot using the
+ // currently-open slot, so the redemption-code + confirmation flow is
+ // unchanged. Single status banner above the cards reflects whether the
+ // venue is open right now.
  (() => {
  const pvForSlots = v._pv;
  const venuePaused = pvForSlots && pvForSlots.status === 'PAUSED';
  const liveDeal = pvForSlots ? getLiveDeal(pvForSlots) : null;
+ const venueDefault = liveDeal?.dealTerms || pvForSlots?.dealTerms || DEFAULT_DEAL_TERMS;
  const liveSlots = liveDeal?.dealSlots || pvForSlots?.dealSlots || [];
  const activeSlots = (liveSlots || []).filter(s => s && s.active);
- // Inline status hint (open now / next opening)
+ const dealsForCard = getVenueDeals(v);
+
+ // Pick a target slot for redemption: prefer one open right now, else first active.
+ const bookable = activeSlots.find(s => isSlotBookableNow(pvForSlots, s)) || activeSlots[0] || null;
+ const fallbackStaticTime = !pvForSlots && Array.isArray(v.times) ? v.times[0] : null;
+ const canRedeemNow = !venuePaused && (
+ (bookable && isSlotBookableNow(pvForSlots, bookable)) || (!!fallbackStaticTime)
+ );
+ const slotLabel = (bookable && (bookable.label || 'Slot') + ' · ' + bookable.timeStart + '-' + bookable.timeEnd) || fallbackStaticTime;
+
+ // Optional inline status banner (open now / next opening).
  let banner = null;
  if (activeSlots.length) {
  const openSlot = activeSlots.find(s => isSlotBookableNow(pvForSlots, s));
  if (openSlot) {
- banner = el('div',{class:'rounded-xl bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
+ banner = el('div',{class:'rounded-xl bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 flex items-center gap-2.5'},
  el('span',{class:'h-2 w-2 rounded-full bg-accent-emer shrink-0 animate-pulse'}),
  el('div',{class:'text-[12px] text-accent-emer font-bold leading-tight'}, t('venue.openNowBanner') || 'Disponible ahora mismo')
  );
  } else {
  const hint = activeSlots.map(s => nextOpenLabel(s)).find(Boolean);
  if (hint) {
- banner = el('div',{class:'rounded-xl bg-amber-500/12 border border-amber-500/30 px-3 py-2.5 mb-3 flex items-center gap-2.5'},
+ banner = el('div',{class:'rounded-xl bg-amber-500/12 border border-amber-500/30 px-3 py-2.5 flex items-center gap-2.5'},
  el('div',{class:'text-[12px] text-amber-200 leading-tight'},
  el('span',{class:'font-bold'}, t('venue.nextOpeningBanner') || 'Próxima disponibilidad'),
  ' · ', hint
@@ -4251,35 +4297,37 @@ function Venue() {
  }
  }
  }
- // Pick a target slot: prefer one open right now, else first active.
- const bookable = activeSlots.find(s => isSlotBookableNow(pvForSlots, s)) || activeSlots[0] || null;
- const fallbackStaticTime = !pvForSlots && Array.isArray(v.times) ? v.times[0] : null;
- const canRedeemNow = !venuePaused && (
- (bookable && isSlotBookableNow(pvForSlots, bookable)) || (!!fallbackStaticTime)
- );
- let onClickHandler = null;
- if (!venuePaused) {
- if (bookable && isSlotBookableNow(pvForSlots, bookable)) {
- const label = (bookable.label || 'Slot') + ' · ' + bookable.timeStart + '-' + bookable.timeEnd;
- onClickHandler = () => bookSlot(v, label);
- } else if (fallbackStaticTime) {
- onClickHandler = () => bookSlot(v, fallbackStaticTime);
+
+ // Per-deal redeem button. Same bookSlot under the hood but the deal
+ // title is passed through as context (so the confirmation screen can
+ // reference the right offer in the future).
+ function redeemDeal(deal) {
+ if (!canRedeemNow) return;
+ // Stash the chosen deal id on state so the confirmation flow can read it.
+ try { state.pendingDealId = deal && deal.id; } catch(e){}
+ bookSlot(v, slotLabel);
  }
- }
+
  const buttonLabel = venuePaused
  ? (t('venue.pausedLabel') || 'Local en pausa')
  : canRedeemNow
- ? (t('venue.redeemNow') || 'Canjear 2×1 →')
+ ? (t('venue.redeemThisOffer') || 'Canjear esta oferta →')
  : (t('venue.notAvailableNow') || 'No disponible ahora');
- return el('div',{},
+
+ return el('div',{class:'space-y-3'},
  banner,
+ ...dealsForCard.map(d => el('div',{class:'rounded-2xl bg-mv-500/10 border border-mv-500/30 p-4'},
+ el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'Oferta'),
+ el('div',{class:'mt-1 font-bold'}, d.title),
+ el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'}, d.description || venueDefault),
  el('button',{
  class: canRedeemNow
- ? 'w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-6 py-4 text-base font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition'
- : 'w-full rounded-2xl bg-slate2-50/[0.05] border border-slate2-50/10 px-6 py-4 text-base font-bold text-slate2-400 cursor-not-allowed opacity-70',
+ ? 'mt-3 w-full rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-5 py-3 text-sm font-extrabold cursor-pointer shadow-lg shadow-mv-500/30 transition'
+ : 'mt-3 w-full rounded-2xl bg-slate2-50/[0.05] border border-slate2-50/10 px-5 py-3 text-sm font-bold text-slate2-400 cursor-not-allowed opacity-70',
  disabled: !canRedeemNow,
- onclick: onClickHandler
+ onclick: canRedeemNow ? (() => redeemDeal(d)) : null
  }, buttonLabel)
+ ))
  );
  })()
  ), // close the <aside> (sticky right column), comma to next sibling
@@ -5081,10 +5129,9 @@ function PartnerPortal() {
  el('div',{class:'mx-auto max-w-2xl px-4 py-16 text-center'},
  el('div',{class:'text-5xl'},''),
  el('h1',{class:'mt-4 text-3xl font-extrabold'},'Under review'),
- el('p',{class:'mt-2 text-slate2-300'},'Thanks, we\'ll email you within one business day. While you wait, you can still edit your profile, photos, and deal settings.'),
+ el('p',{class:'mt-2 text-slate2-300'},'Thanks, we\'ll email you within one business day. You can keep editing your profile and photos in the meantime — offer details will be set by the menuverso team.'),
  el('div',{class:'mt-6 flex justify-center gap-3 flex-wrap'},
- el('button',{class:'rounded-full bg-slate2-50 text-ink-900 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>go('partner-portal',{tab:'profile'})},'Edit profile'),
- el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>go('partner-portal',{tab:'deals'})},'Edit deals')
+ el('button',{class:'rounded-full bg-slate2-50 text-ink-900 px-5 py-2.5 font-bold cursor-pointer', onclick:()=>go('partner-portal',{tab:'profile'})},'Edit profile')
  )
  ),
  el('div',{class:'mx-auto max-w-6xl px-4 pb-12'},
@@ -5124,7 +5171,10 @@ function PartnerPortal() {
  // screens instead of breaking onto a second row. Tab labels also
  // shorten on small screens so they fit more often without scrolling.
  el('div',{class:'inline-flex bg-slate2-50/[0.04] border border-slate2-50/10 rounded-full p-1 whitespace-nowrap'},
- ...[['overview','Overview','Overview', 0],['redeem','Redeem code','Redeem', unread],['deals','Deals','Deals', 0],['profile','Profile','Profile', 0]].map(([k,fullLabel,shortLabel,n]) =>
+ // 2026-05-28 (Patricia / Pass B step 4): the "Deals" tab is removed from
+ // partner-side nav. Deal changes are admin-managed (the partner can edit
+ // hours + photos via the Profile tab, but offers / slots are off-limits).
+ ...[['overview','Overview','Overview', 0],['redeem','Redeem code','Redeem', unread],['profile','Profile','Profile', 0]].map(([k,fullLabel,shortLabel,n]) =>
  el('button',{class: 'rounded-full px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 relative shrink-0 ' + (tab===k ? 'bg-slate2-50 text-ink-900' : 'text-slate2-300 hover:text-slate2-50'),
  onclick: ()=>go('partner-portal',{tab:k})},
  el('span',{class:'hidden sm:inline'}, fullLabel),
@@ -5137,7 +5187,12 @@ function PartnerPortal() {
  el('div',{class:'mx-auto max-w-6xl px-4 py-6'},
  tab==='overview' ? PortalOverview()
  : tab==='redeem' ? PortalRedeem()
- : tab==='deals' ? PortalDeals()
+ : tab==='deals' ? (el('div',{class:'max-w-2xl mx-auto rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-center'},
+ el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Ofertas'),
+ el('h3',{class:'mt-3 font-bold text-lg'},'Las ofertas se gestionan desde menuverso'),
+ el('p',{class:'mt-2 text-sm text-slate2-300 max-w-md mx-auto'},'Cualquier cambio en las ofertas (título, descripción, condiciones) lo hace el equipo de Menuverso para mantener una experiencia consistente. Escríbenos a hola@menuverso.com para proponer cambios.'),
+ el('a',{class:'mt-4 inline-block rounded-full bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-sm font-extrabold cursor-pointer', href:'mailto:hola@menuverso.com?subject=Cambio en oferta'},'Contactar equipo')
+ ))
  : PortalProfile()
  ),
  // Support footer, every partner page surfaces a way to ask for help.
@@ -7095,6 +7150,48 @@ function Admin() {
  if (!store.partnerVenues.find(v => v.slug === slug)) selectedPartners.delete(slug);
  }
 
+ // 2026-05-28 (Patricia / Pass B step 3): "+ Añadir local" button so the
+ // admin can create new partner venues directly (the partner-public signup
+ // flow was closed in Pass A — admin onboards manually via this button or
+ // off a contact-form lead). Sets status=PENDING_APPROVAL so the row
+ // shows up in the same review queue as a self-served partner would.
+ wrap.append(
+ el('div',{class:'flex items-center justify-between gap-3 flex-wrap mb-2'},
+ el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},
+ store.partnerVenues.length + ' locales en total'
+ ),
+ el('button',{class:'rounded-full bg-mv-500 hover:bg-mv-600 text-white font-extrabold px-4 py-2 text-sm cursor-pointer shadow-lg shadow-mv-500/30',
+ onclick:()=>{
+ const newId = 'pv_' + Math.random().toString(36).slice(2,10);
+ let baseSlug = 'nuevo-local-' + Math.random().toString(36).slice(2,5);
+ while (store.partnerVenues.some(x => x.slug === baseSlug) || (typeof VENUES !== 'undefined' && VENUES.some(x => x.slug === baseSlug))) {
+ baseSlug = 'nuevo-local-' + Math.random().toString(36).slice(2,5);
+ }
+ const newPv = {
+ id: newId, ownerId: null,
+ name: 'Nuevo local', slug: baseSlug,
+ barrio: '', cuisine: '', priceTier: 2,
+ address: '', postcode: '', phone: '', website: '', instagram: '',
+ description: '', hours: '',
+ photos: [], dealTerms: DEFAULT_DEAL_TERMS, dealSlots: DEFAULT_SLOTS(),
+ deals: [
+ { id: 'd_main', title: '2×1 en el menú principal', description: 'Compra un plato principal y llévate otro gratis.', active: true }
+ ],
+ rating: null, reviews: 0, status: 'PENDING_APPROVAL',
+ submittedAt: Date.now(), approvedAt: null,
+ offerPublishedAt: null, offerVersion: 0,
+ creditsPerUser: DEFAULT_CREDITS_PER_USER,
+ tncAcceptedAt: null, tncVersion: null,
+ createdAt: Date.now()
+ };
+ store.partnerVenues.push(newPv);
+ saveStore();
+ toast('Nuevo local creado en PENDING. Edita los detalles.');
+ paintPartners();
+ }
+ }, '+ Añadir local')
+ )
+ );
  // ============== HEADER: search + status pills + selectAll ==============
  const allFilteredSelected = filtered.length > 0 && filtered.every(v => selectedPartners.has(v.slug));
  wrap.append(
