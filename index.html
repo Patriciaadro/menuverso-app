@@ -1074,9 +1074,29 @@ function go(route, params={}) {
  window.scrollTo(0,0);
 }
 function toast(msg, kind='') {
- const t = el('div',{class:`toast fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full text-white px-5 py-2.5 text-sm shadow-lg border ${kind==='err'?'bg-red-600 border-red-400':'bg-ink-800 border-slate2-50/10'}`}, msg);
+ // 2026-05-28 (Patricia): toast pop-ups now use the Menuverso brand red
+ // instead of muted slate/white so they're clearly visible on light pages
+ // (e.g. the partner landing form where the old toast looked white-on-white).
+ // 'err' uses a darker red + an icon for emphasis. Auto-dismisses at 3.5s
+ // so a non-trivial validation message stays on screen long enough to read.
+ const bg = kind === 'err' ? '#C42D20' : '#E5382A';
+ const t = el('div',{
+ class: 'toast fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full text-white px-5 py-3 text-sm font-bold shadow-2xl flex items-center gap-2 max-w-[92vw]',
+ style: 'background:' + bg + ';box-shadow:0 12px 30px rgba(229,56,42,0.35), 0 0 0 2px rgba(255,255,255,0.18);'
+ });
+ if (kind === 'err') t.appendChild(el('span',{class:'text-base leading-none', 'aria-hidden':'true'},'⚠'));
+ t.appendChild(el('span',{class:'text-center'}, msg));
+ // Fade-in animation so it doesn't pop violently
+ t.style.opacity = '0';
+ t.style.transition = 'opacity 160ms ease-out, transform 160ms ease-out';
+ t.style.transform = 'translate(-50%, 8px)';
  document.body.appendChild(t);
- setTimeout(() => t.remove(), 2600);
+ requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translate(-50%, 0)'; });
+ setTimeout(() => {
+ t.style.opacity = '0';
+ t.style.transform = 'translate(-50%, 8px)';
+ setTimeout(() => t.remove(), 180);
+ }, 3500);
 }
 function currentUser() {
  if (!state.session) return null;
@@ -2208,16 +2228,31 @@ function PhotoVenueCard(v, opts = {}) {
  ),
  el('div',{class:'p-3.5 flex items-center justify-between gap-3 bg-white'},
  el('div',{class:'min-w-0 flex-1'},
- el('div',{class:'text-[12px] font-semibold text-ink-900 truncate', style:'color:#1D1D1B'},
+ // 2026-05-28 (Pass B step 6): render up to 2 deal pills from getVenueDeals(),
+ // matching the DealCard grid behaviour. Falls back to the legacy single-line
+ // "2×1 en la carta" when a venue has no deals defined.
+ (() => {
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0, 2) : [];
+ if (!deals.length) {
+ return el('div',{class:'text-[12px] font-semibold text-ink-900 truncate', style:'color:#1D1D1B'},
  (v.liveDeal && v.liveDeal.terms) || v.dealTerms || (t('discover.twoForOne') || '2×1 en la carta')
- ),
+ );
+ }
+ return el('div',{class:'flex flex-wrap items-center gap-1'},
+ ...deals.map(d => el('span',{
+ class:'inline-flex items-center rounded-full text-[11px] font-extrabold px-2 py-0.5 leading-tight truncate max-w-[140px]',
+ style:'background:rgba(229,56,42,0.10); border:1px solid rgba(229,56,42,0.35); color:#C42D20;',
+ title: d.description || d.title
+ }, d.title))
+ );
+ })(),
  slotsLeft != null && slotsLeft <= 5
- ? el('div',{class:'mt-0.5 text-[11px] font-medium text-mv-600'},
+ ? el('div',{class:'mt-1 text-[11px] font-medium text-mv-600'},
  slotsLeft === 0
  ? (t('discover.soldOut') || 'Sin sitio hoy')
  : (slotsLeft + ' ' + (t('discover.slotsLeftTonight') || 'plazas hoy'))
  )
- : el('div',{class:'mt-0.5 text-[11px]', style:'color:rgba(82,54,34,0.6)'},
+ : el('div',{class:'mt-1 text-[11px]', style:'color:rgba(82,54,34,0.6)'},
  live ? (t('discover.openNow') || 'Abierto ahora') : (t('discover.closedNow') || '')
  )
  ),
