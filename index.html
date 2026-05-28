@@ -1120,27 +1120,40 @@ function go(route, params={}) {
  window.scrollTo(0,0);
 }
 function toast(msg, kind='') {
- // 2026-05-28 (Patricia): toast pop-ups now use the Menuverso brand red
- // instead of muted slate/white so they're clearly visible on light pages
- // (e.g. the partner landing form where the old toast looked white-on-white).
- // 'err' uses a darker red + an icon for emphasis. Auto-dismisses at 3.5s
- // so a non-trivial validation message stays on screen long enough to read.
+ // 2026-05-28 (Patricia): brand-red toast. 'err' uses darker red + ⚠ icon.
+ // 2026-05-28 (E2E fix): toasts now stack vertically in a flex column-reverse
+ // container so back-to-back toasts no longer overlap into garbled text
+ // (caught during login: "Demo + Welcome back" mashed together at same coords).
+ // Dedupe identical messages within a short window to avoid useless stacks.
  const bg = kind === 'err' ? '#A52C23' : '#C8392E';
+ let container = document.getElementById('mv-toast-container');
+ if (!container) {
+ container = document.createElement('div');
+ container.id = 'mv-toast-container';
+ container.style.cssText = 'position:fixed;bottom:96px;left:50%;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column-reverse;gap:8px;align-items:center;pointer-events:none;max-width:92vw;';
+ document.body.appendChild(container);
+ }
+ // Dedupe: if the same message is already on screen, skip rather than restack.
+ const existing = container.querySelectorAll('.toast');
+ for (const ex of existing) {
+ if (ex.dataset.msg === msg) return;
+ }
  const t = el('div',{
- class: 'toast fixed bottom-24 left-1/2 -translate-x-1/2 z-50 rounded-full text-white px-5 py-3 text-sm font-bold shadow-2xl flex items-center gap-2 max-w-[92vw]',
- style: 'background:' + bg + ';box-shadow:0 12px 30px rgba(229,56,42,0.35), 0 0 0 2px rgba(255,255,255,0.18);'
+ class: 'toast rounded-full text-white px-5 py-3 text-sm font-bold shadow-2xl flex items-center gap-2 max-w-[92vw]',
+ style: 'background:' + bg + ';box-shadow:0 12px 30px rgba(229,56,42,0.35), 0 0 0 2px rgba(255,255,255,0.18);pointer-events:auto;'
  });
+ t.dataset.msg = msg;
  if (kind === 'err') t.appendChild(el('span',{class:'text-base leading-none', 'aria-hidden':'true'},'⚠'));
  t.appendChild(el('span',{class:'text-center'}, msg));
  // Fade-in animation so it doesn't pop violently
  t.style.opacity = '0';
  t.style.transition = 'opacity 160ms ease-out, transform 160ms ease-out';
- t.style.transform = 'translate(-50%, 8px)';
- document.body.appendChild(t);
- requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translate(-50%, 0)'; });
+ t.style.transform = 'translateY(8px)';
+ container.appendChild(t);
+ requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateY(0)'; });
  setTimeout(() => {
  t.style.opacity = '0';
- t.style.transform = 'translate(-50%, 8px)';
+ t.style.transform = 'translateY(8px)';
  setTimeout(() => t.remove(), 180);
  }, 3500);
 }
@@ -1692,7 +1705,7 @@ window.MV_T = {
  'discover.slotsLeftTonight': 'plazas hoy',
  'discover.soldOut': 'Sin sitio hoy',
  'discover.openNow': 'Abierto ahora',
- 'discover.closedNow': '',
+ 'discover.closedNow': 'Cerrado ahora',
  'discover.justRedeemed': 'acaba de confirmar en',
  'discover.minAgo': 'min',
  'discover.mood.date': 'Cita nocturna',
@@ -1852,7 +1865,7 @@ window.MV_T = {
  'discover.slotsLeftTonight': 'slots left tonight',
  'discover.soldOut': 'Sold out tonight',
  'discover.openNow': 'Open now',
- 'discover.closedNow': '',
+ 'discover.closedNow': 'Closed now',
  'discover.justRedeemed': 'just redeemed at',
  'discover.minAgo': 'min ago',
  'discover.mood.date': 'Date night',
@@ -1887,7 +1900,7 @@ window.MV_T = {
  }
 };
 function t(k){ return (window.MV_T[MV_LANG]&&window.MV_T[MV_LANG][k]) || window.MV_T.en[k] || k; }
-function setLang(l){ try{localStorage.setItem('mv_lang_v2', l);}catch(e){} try{document.documentElement.lang = l;}catch(e){} location.reload(); }
+function setLang(l){ try{localStorage.setItem('mv_lang_v2', l);}catch(e){} try{document.documentElement.lang = l;}catch(e){} try{document.title = (l === 'en') ? 'Menuverso · Enjoy the best, save the rest' : 'Menuverso · Disfruta de lo mejor, ahorra en el resto';}catch(e){} location.reload(); }
 
 /* ========================================================================
  LAYOUT, MARKETING HEADER + PHONE FRAME
@@ -2286,7 +2299,7 @@ function PhotoVenueCard(v, opts = {}) {
  }
  return el('div',{class:'flex flex-wrap items-center gap-1'},
  ...deals.map(d => el('span',{
- class:'inline-flex items-center rounded-full text-[11px] font-extrabold px-2 py-0.5 leading-tight truncate max-w-[140px]',
+ class:'inline-flex items-center rounded-full text-[11px] font-extrabold px-2 py-0.5 leading-tight whitespace-nowrap max-w-full',
  style:'background:rgba(229,56,42,0.10); border:1px solid rgba(229,56,42,0.35); color:#A52C23;',
  title: d.description || d.title
  }, d.title))
@@ -3857,7 +3870,7 @@ function AppBookings() {
  el('div',{class:'p-5 pb-3 border-b border-slate2-50/5 flex items-end justify-between gap-3 flex-wrap'},
  el('div',{},
  el('h1',{class:'text-2xl font-extrabold'},'Bookings'),
- el('p',{class:'text-xs text-slate2-400 mt-1'}, redeemedCount + ' redeemed · ' + all.length + ' total')
+ el('p',{class:'text-xs text-slate2-400 mt-1'}, String(redeemedCount), ' ', 'redeemed', ' · ', String(all.length), ' ', 'total')
  ),
  el('div',{class:'text-right'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'You\'ve saved'),
@@ -4128,7 +4141,7 @@ function AppProfile() {
  el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Visits'),
  el('div',{class:'mt-1 text-3xl font-extrabold'}, myReds.length),
- el('div',{class:'text-[10px] text-slate2-500 mt-0.5'}, recentReds.length > 0 ? '+' + recentReds.length + ' last 30 days' : 'all-time')
+ el('div',{class:'text-[10px] text-slate2-500 mt-0.5'}, recentReds.length > 0 ? el('span',{},'+', String(recentReds.length), ' ', 'last 30 days') : 'all-time')
  ),
  el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Cuisines'),
@@ -4150,14 +4163,14 @@ function AppProfile() {
  el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'},'Last 12 weeks'),
  el('div',{class:'mt-1 text-2xl font-extrabold'},'€' + (recentSaved + (weekData.slice(0,8).reduce((s,n)=>s+n,0) * AVG_SAVED)).toLocaleString())
  ),
- el('div',{class:'text-right text-[10px] text-slate2-400'},'~€', String(AVG_SAVED), '/visit')
+ el('div',{class:'text-right text-[10px] text-slate2-400'},'~€', String(AVG_SAVED), '/', 'visit')
  ),
  el('div',{class:'mt-4 flex items-end gap-1 h-20'},
  ...weekData.map((v,i) => {
  const isThisWeek = i === weeks - 1;
  return el('div',{class:'flex-1 rounded-t-sm transition-all hover:opacity-100 ' + (v > 0 ? (isThisWeek ? 'bg-mv-500' : 'bg-mv-500/60') : 'bg-slate2-50/5'),
  style:'height:' + Math.max(8, (v / maxWk) * 100) + '%',
- title: v + ' visit' + (v===1?'':'s')
+ title: v + ' ' + (MV_LANG==='es' ? (v===1?'visita':'visitas') : ('visit' + (v===1?'':'s')))
  });
  })
  ),
@@ -4178,7 +4191,7 @@ function AppProfile() {
  ),
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold truncate'}, topCuisine[0]),
- el('div',{class:'text-xs text-slate2-400'}, topCuisine[1] + ' visit' + (topCuisine[1]===1?'':'s'))
+ el('div',{class:'text-xs text-slate2-400'}, String(topCuisine[1]), ' ', topCuisine[1]===1?'visit':'visits')
  )
  )
  ),
@@ -4188,7 +4201,7 @@ function AppProfile() {
  VenueArt(topVenue, {aspect:'1/1', compact:true, cls:'h-12 w-12 shrink-0', radius:'rounded-xl'}),
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'font-bold truncate'}, topVenue.name),
- el('div',{class:'text-xs text-slate2-400 truncate'}, topVenue.barrio + ' · ' + venueCounts[topVenueSlug] + ' visit' + (venueCounts[topVenueSlug]===1?'':'s'))
+ el('div',{class:'text-xs text-slate2-400 truncate'}, topVenue.barrio + ' · ', String(venueCounts[topVenueSlug]), ' ', venueCounts[topVenueSlug]===1?'visit':'visits')
  ),
  el('span',{class:'text-mv-500 font-bold text-sm shrink-0'},'→')
  )
@@ -4305,7 +4318,7 @@ function Venue() {
  ),
  el('div',{class:'text-right'},
  el('div',{class:'text-accent-amber text-sm'},' ', v.rating.toFixed(1)),
- el('div',{class:'text-[10px] text-slate2-500'}, v.reviews,' reviews')
+ el('div',{class:'text-[10px] text-slate2-500'}, String(v.reviews), ' ', 'reviews')
  )
  ),
  // Action row, only renders tiles that have data. No greyed-out shells.
@@ -4485,7 +4498,7 @@ function Venue() {
  return el('div',{class:'mt-6 md:col-start-1 md:row-start-3'},
  el('div',{class:'flex items-baseline justify-between'},
  el('h3',{class:'font-bold text-base'},'Member reviews'),
- el('span',{class:'text-xs text-slate2-400'}, reviews.length + ' rating' + (reviews.length===1?'':'s'))
+ el('span',{class:'text-xs text-slate2-400'}, String(reviews.length), ' ', reviews.length===1?'rating':'ratings')
  ),
  el('div',{class:'mt-3 rounded-2xl bg-slate2-50/[0.03] border border-slate2-50/10 p-4 flex items-center gap-4'},
  el('div',{class:'text-center shrink-0'},
@@ -4584,14 +4597,15 @@ function nextOpenLabel(slotEntry) {
  const cur = now.getHours()*60 + now.getMinutes();
  const [sh,sm] = (slotEntry.timeStart || '00:00').split(':').map(Number);
  const startMin = (sh|0)*60 + (sm|0);
- if (cur < startMin - 30) return 'Opens ' + (slotEntry.timeStart || '');
+ if (cur < startMin - 30) return (MV_LANG === 'es' ? 'Abre a las ' : 'Opens ') + (slotEntry.timeStart || '');
  }
  // Otherwise find the next day-of-week this slot runs.
+ const dayNamesEs = { mon:'lunes', tue:'martes', wed:'miércoles', thu:'jueves', fri:'viernes', sat:'sábado', sun:'domingo' };
  for (let i = 1; i <= 7; i++) {
  const dayKey = dayOrder[(todayIdx + i) % 7];
- if (days.includes(dayKey)) return 'Opens ' + dayNames[dayKey];
+ if (days.includes(dayKey)) return (MV_LANG === 'es' ? 'Abre el ' : 'Opens ') + (MV_LANG === 'es' ? dayNamesEs[dayKey] : dayNames[dayKey]);
  }
- return 'Closed';
+ return MV_LANG === 'es' ? 'Cerrado' : 'Closed';
 }
 // Count active (unredeemed, unexpired, uncancelled) bookings at a slot.
 function activeSlotCount(venueSlug, slotLabel) {
@@ -6018,11 +6032,11 @@ function PortalOverview() {
  el('div',{class:'grid grid-cols-3 gap-3'},
  // Real counters. Subtitles describe the timeframe truthfully.
  StatPanel('','Redemptions (all-time)', totalReds, 'real'),
- StatPanel('','Member rating', avgRating ? avgRating.toFixed(1) : ', ', reviewsForVenue.length + ' rating' + (reviewsForVenue.length===1?'':'s')),
+ StatPanel('','Member rating', avgRating ? avgRating.toFixed(1) : ', ', String(reviewsForVenue.length) + ' ' + (MV_LANG==='es' ? (reviewsForVenue.length===1?'valoración':'valoraciones') : (reviewsForVenue.length===1?'rating':'ratings'))),
  StatPanel('','Days listed', Math.max(1, Math.floor((Date.now() - (pv.approvedAt ?? pv.submittedAt ?? Date.now())) / 86400000)), 'since approval')
  ),
  el('div',{class:'rounded-2xl bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
- el('h3',{class:'font-bold flex items-center gap-2'},' Redemptions by weekday', el('span',{class:'text-[10px] text-slate2-500 font-normal'},'· last 28 days')),
+ el('h3',{class:'font-bold flex items-center gap-2'},' Redemptions by weekday', el('span',{class:'text-[10px] text-slate2-500 font-normal'},'·', ' ', 'last 28 days')),
  reds.length === 0
  ? el('p',{class:'mt-3 text-sm text-slate2-400'},'No redemptions yet, the chart will populate as your code redemptions come in.')
  : el('div',{class:'mt-4 flex items-end gap-2 h-32'},
@@ -7690,7 +7704,7 @@ function Admin() {
  ),
  el('div',{class:'text-xs text-slate2-400 mt-1'}, (pv.barrio || ', '), ' · ', (pv.cuisine || ', '), ' · ', owner?.email ?? 'no owner'),
  showMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'},'Missing: ', quality.missing.join(', ')),
- el('div',{class:'text-xs text-slate2-400'}, (pv.photos||[]).length, ' photos · ', reds, ' redemptions · ', activeBks, ' active booking', activeBks===1?'':'s'),
+ el('div',{class:'text-xs text-slate2-400'}, String((pv.photos||[]).length), ' ', 'photos', ' · ', String(reds), ' ', 'redemptions', ' · ', String(activeBks), ' ', activeBks===1?'active booking':'active bookings'),
  pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'},'Rejection reason: ', pv.rejectionReason)
  )
  ),
@@ -10467,7 +10481,226 @@ window.MV_TR_ES = {
  "No code entry.": "Sin códigos.",
  "No pending edit requests.": "Sin solicitudes de edición pendientes.",
  "No pending removal requests.": "Sin solicitudes de eliminación pendientes.",
- "Venue": "Local"
+ "Venue": "Local",
+
+ // ---- 2026-05-28: bulk additions from E2E click-through audit ----
+ // Member-facing strings caught untranslated on Spanish UI
+ "Are you a restaurant?": "¿Eres un restaurante?",
+ "Search restaurants, cuisines, barrios": "Buscar restaurantes, cocinas, barrios",
+ "Search by name, cuisine, barrio, owner email": "Buscar por nombre, cocina, barrio, email del propietario",
+ "Tell your server you're redeeming with Menuverso before ordering. Slide to confirm in-app at the table and show the animated verification screen. Partner-defined exclusions apply. Cannot be combined with other offers.": "Avisa al camarero antes de pedir de que estás canjeando con Menuverso. Desliza para confirmar en la app en la mesa y muestra la pantalla de verificación animada. Aplican exclusiones definidas por el local. No se puede combinar con otras ofertas.",
+ "Enjoy your meal.": "Que aproveche.",
+ "Redeemed": "Canjeado",
+ "Done, back to profile": "Listo, volver al perfil",
+ "Back to profile": "Volver al perfil",
+ "How was it?": "¿Qué tal fue?",
+ "Your rating": "Tu valoración",
+ "Quick note (optional)": "Comentario rápido (opcional)",
+ "Submit rating": "Enviar valoración",
+ "Thanks for the rating": "Gracias por tu valoración",
+ "Rate your visit →": "Valora tu visita →",
+ "REDEEMING AT": "CANJEANDO EN",
+ "VERIFICATION": "VERIFICACIÓN",
+ "SHOW THIS TO YOUR SERVER": "MUÉSTRASELO AL CAMARERO",
+ "Confirmed · partner notified": "Confirmado · local avisado",
+ // Profile / member stats
+ "Member since": "Miembro desde",
+ "REGULAR": "REGULAR",
+ "GUARDADO": "GUARDADO",
+ "VISITAS": "VISITAS",
+ "COCINAS": "COCINAS",
+ "BARRIOS": "BARRIOS",
+ "tried": "probadas",
+ "explored": "explorados",
+ "your sub": "tu suscripción",
+ "ÚLTIMAS 12 SEMANAS": "ÚLTIMAS 12 SEMANAS",
+ "ESTA SEMANA": "ESTA SEMANA",
+ "HACE 12S": "HACE 12S",
+ "COCINA FAVORITA": "COCINA FAVORITA",
+ "SITIO FAVORITO": "SITIO FAVORITO",
+ "visits": "visitas",
+ "visit": "visita",
+ // Bookings list
+ "0 redeemed · 0 total": "0 canjeadas · 0 totales",
+ "redeemed": "canjeadas",
+ "total": "totales",
+ "Saved €": "Ahorrado €",
+ "Open redemption →": "Abrir canje →",
+ "Pick a restaurant, choose a deal, and slide to redeem at the table.": "Elige un restaurante, una oferta, y desliza para confirmar en la mesa.",
+
+ // ---- Partner portal ----
+ "INCREMENTAL REVENUE · THIS MONTH": "INGRESOS INCREMENTALES · ESTE MES",
+ "est.": "aprox.",
+ "Based on": "Basado en",
+ "redemptions": "canjes",
+ "avg recovered ticket.": "ticket medio recuperado.",
+ "HISTÓRICO": "HISTÓRICO",
+ "REDEMPTIONS (ALL-TIME)": "CANJES (TOTALES)",
+ "real": "reales",
+ "MEMBER RATING": "VALORACIÓN DE MIEMBROS",
+ "ratings": "valoraciones",
+ "rating": "valoración",
+ "DAYS LISTED": "DÍAS PUBLICADO",
+ "desde la aprobación": "desde la aprobación",
+ "TIP": "CONSEJO",
+ "Listings with more photos tend to convert better. You currently have 0. Aim for at least 6 so diners can see the room, the food, and the vibe.": "Los locales con más fotos convierten mejor. Ahora tienes 0. Apunta a un mínimo de 6 para que la gente vea la sala, la comida y el ambiente.",
+ "Redemptions by weekday": "Canjes por día de la semana",
+ "últimos 28 días": "últimos 28 días",
+ "Photos": "Fotos",
+ "uploaded · auto-resized to 1000px": "subidas · redimensionadas a 1000px",
+ "0 uploaded · auto-resized to 1000px": "0 subidas · redimensionadas a 1000px",
+ "Listing live": "Publicación activa",
+ "Listing paused": "Publicación pausada",
+ "New bookings open. Going on holiday or having an off night? Pause to stop accepting new bookings until you resume.": "Aceptando reservas. ¿Te vas de vacaciones o tienes una noche libre? Pausa para dejar de aceptar reservas hasta que vuelvas.",
+ "Pause listing": "Pausar publicación",
+ "Resume listing": "Reanudar publicación",
+ "Status:": "Estado:",
+ "Status": "Estado",
+ "EN VIVO": "EN VIVO",
+ "Listing live · public on Menuverso": "Publicación activa · pública en Menuverso",
+ // Partner portal hero/sidebar misc
+ "Dashboard": "Panel",
+ "PANEL": "PANEL",
+ "Get your first redemption": "Consigue tu primer canje",
+ "Welcome to Menuverso": "Te damos la bienvenida a Menuverso",
+ "to go": "por hacer",
+
+ // ---- Admin tabs and panels ----
+ "Partners": "Locales",
+ "Requests": "Solicitudes",
+ "Users": "Usuarios",
+ "Activity": "Actividad",
+ "Insights": "Estadísticas",
+ "Reviews": "Reseñas",
+ "Messages": "Mensajes",
+ "Notes": "Notas",
+ "Audit": "Auditoría",
+ "System": "Sistema",
+ "PENDING PARTNERS": "LOCALES PENDIENTES",
+ "queue empty": "cola vacía",
+ "LIVE PARTNER VENUES": "LOCALES PUBLICADOS",
+ "real onboarded": "incorporados reales",
+ "MIEMBROS": "MIEMBROS",
+ "registered": "registrados",
+ "ACTIVE BOOKINGS": "RESERVAS ACTIVAS",
+ "5 redemptions total": "5 canjes en total",
+ "redemptions total": "canjes en total",
+ "Last 10": "Últimos 10",
+ "ACTIVIDAD RECIENTE": "ACTIVIDAD RECIENTE",
+ "approved": "aprobado",
+ "submitted for review": "enviado a revisión",
+ "Code redeemed at": "Código canjeado en",
+ "All": "Todos",
+ "Filters": "Filtros",
+ "QUICK FILTERS": "FILTROS RÁPIDOS",
+ "Pending >24h": "Pendiente >24h",
+ "No photos": "Sin fotos",
+ "No redemptions": "Sin canjes",
+ "Select all matching filter": "Seleccionar todos los del filtro",
+ "venues": "locales",
+ "venue": "local",
+ "SORT": "ORDENAR",
+ "DEFAULT ↑": "POR DEFECTO ↑",
+ "DEFAULT ↓": "POR DEFECTO ↓",
+ "NOMBRE": "NOMBRE",
+ "ESTADO": "ESTADO",
+ "RATING": "VALORACIÓN",
+ "REDEMPTIONS": "CANJES",
+ "SUBMITTED": "ENVIADO",
+ "Edit": "Editar",
+ "Ver": "Ver",
+ "Eliminar": "Eliminar",
+ "Pausar": "Pausar",
+ "Re-revisar": "Re-revisar",
+ "Pending": "Pendiente",
+ "PENDIENTE": "PENDIENTE",
+ "PAUSADO": "PAUSADO",
+ "RECHAZADO": "RECHAZADO",
+ "BORRADOR": "BORRADOR",
+ "Placeholder restaurants": "Restaurantes de ejemplo",
+ "Used to populate Discover before real partners onboard": "Para poblar Descubre antes de incorporar locales reales",
+ "Select all seeds": "Seleccionar todas las muestras",
+ "+ Añadir local": "+ Añadir local",
+ // Admin edit form
+ "FOOD": "COMIDA",
+ "RESTAURANT · INTERIOR & EXTERIOR": "RESTAURANTE · INTERIOR Y EXTERIOR",
+ "MENU": "MENÚ",
+ "Hero shots of signature dishes. Shown in the Food strip on the venue page.": "Fotos de los platos estrella. Aparecen en la franja de Comida en la página del local.",
+ "Dining room, bar, façade, ambiance. Shown in the Venue strip on the venue page.": "Sala, barra, fachada, ambiente. Aparecen en la franja del Local en la página del local.",
+ "Photos of menu pages, daily specials, wine list. Shown as a dedicated Menu strip on the venue page.": "Fotos de las páginas del menú, sugerencias del día, carta de vinos. Aparecen en una franja dedicada al Menú en la página del local.",
+ "No food photos yet.": "Aún no hay fotos de comida.",
+ "No restaurant photos yet.": "Aún no hay fotos del restaurante.",
+ "No menu photos yet.": "Aún no hay fotos del menú.",
+ "+ Add food photo(s)": "+ Añadir fotos de comida",
+ "+ Add restaurant photo(s)": "+ Añadir fotos del restaurante",
+ "+ Add menu photo(s)": "+ Añadir fotos del menú",
+ "Save changes": "Guardar cambios",
+ "Add photos": "Añadir fotos",
+ "Añadir fotos": "Añadir fotos",
+ // Activity log entries
+ "Nuevo local approved": "Nuevo local aprobado",
+ "Nuevo local submitted for review": "Nuevo local enviado a revisión",
+ "New mexican approved": "New mexican aprobado",
+ "New mexican submitted for review": "New mexican enviado a revisión",
+ // Misc small UI strings
+ "Show": "Mostrar",
+ "Hide": "Ocultar",
+ "Required": "Obligatorio",
+ "Optional": "Opcional",
+ "Directions": "Cómo llegar",
+ "Call": "Llamar",
+ "Website": "Web",
+ "Demo cred filled. Sign in.": "Datos demo rellenados. Inicia sesión.",
+ "Welcome back, Maria. Sign in.": "Bienvenida, Maria. Inicia sesión.",
+ "Welcome back, Joan. Sign in.": "Bienvenido, Joan. Inicia sesión.",
+ // Additional single-word strings used in split text nodes
+ "reviews": "reseñas",
+ "review": "reseña",
+ "ratings": "valoraciones",
+ "rating": "valoración",
+ "photos": "fotos",
+ "photo": "foto",
+ "redemptions": "canjes",
+ "redemption": "canje",
+ "visit": "visita",
+ "visits": "visitas",
+ "active booking": "reserva activa",
+ "active bookings": "reservas activas",
+ "booking": "reserva",
+ "bookings": "reservas",
+ "last 30 days": "últimos 30 días",
+ "last 7 days": "últimos 7 días",
+ "last 28 days": "últimos 28 días",
+ "Last 12 weeks": "Últimas 12 semanas",
+ "Last 7 days": "Últimos 7 días",
+ "all-time": "todo el tiempo",
+ "since approval": "desde la aprobación",
+ "since signup": "desde el alta",
+ "Visits": "Visitas",
+ "Cuisines": "Cocinas",
+ "Barrios": "Barrios",
+ "Cuisine": "Cocina",
+ "Member rating": "Valoración de miembros",
+ "Days listed": "Días publicado",
+ "Redemptions / week": "Canjes / semana",
+ "INCREMENTAL €  · THIS MONTH": "INGRESOS INCREMENTALES · ESTE MES",
+ // Member profile / bookings list
+ "Open redemption": "Abrir canje",
+ "No matches": "Sin coincidencias",
+ "No matches. Try a different search or filter.": "Sin coincidencias. Prueba otra búsqueda o filtro.",
+ "Clear filters": "Limpiar filtros",
+ "No member reviews yet": "Aún no hay reseñas",
+ "Members rate the experience after they redeem. Be one of the first.": "Los miembros valoran la experiencia después de canjear. Sé de los primeros.",
+ // Partner portal: weekday chart units
+ "Pause": "Pausar",
+ "Resume": "Reanudar",
+ // Misc UI
+ "Map": "Mapa",
+ "List": "Lista",
+ "active": "activo",
+ "paused": "pausado",
+ "approved": "aprobado",
+ "rejected": "rechazado"
 };
 function autoTranslate(root) {
  if (MV_LANG !== 'es' || !root) return;
