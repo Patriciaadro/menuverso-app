@@ -2132,7 +2132,13 @@ function AppShell(inner, opts={}) {
 // Slim sticky reminder when the member has an active booking. Single-line, ~36px tall.
 // On the Bookings tab the code is already prominent, show an even quieter
 // underline-style strip there.
+//
+// REMOVED per Patricia's feedback (May 2026): the sticky [code] · venue · timer
+// pill was distracting at the top of every page. Returning null disables it
+// without removing the rest of the function (kept for reference / quick revert).
 function ActiveCodeRibbon() {
+ return null;
+ // eslint-disable-next-line no-unreachable
  const u = currentUser();
  const all = getActiveBookings(u);
  if (all.length === 0) return null;
@@ -2272,7 +2278,8 @@ function BottomNav() {
  ),
  el('span',{class:'text-[10px] font-bold uppercase tracking-wider'}, label)
  );
- return el('div',{class:'md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-900/95 border-t border-slate2-50/10 backdrop-blur flex'},
+ return el('div',{class:'md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-900 border-t border-slate2-50/10 flex',
+ style:'padding-bottom: max(env(safe-area-inset-bottom), 6px);'},
  item('app','','Discover','app'),
  item('map','','Map','map'),
  item('bookings','','Bookings','bookings', null, activeCode),
@@ -3467,16 +3474,9 @@ function AppDiscover() {
  const activeCount = (filter !== 'all' ? 1 : 0) + activeBarrios.size + (activeMood ? 1 : 0);
  // NOTE: native DOM .append() stringifies null/false to "null"/"false",
  // so we must filter falsy values out before spreading.
+ // NOTE: "Más filtros" button removed per Patricia's feedback (May 2026).
+ // Filter panel stays accessible via setting showMoreFilters elsewhere.
  const children = [
- el('button',{
- type:'button',
- class:'inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold cursor-pointer transition bg-slate2-50/5 text-slate2-300 border border-slate2-50/10 hover:bg-slate2-50/[0.1]',
- onclick:()=>{ showMoreFilters = !showMoreFilters; paintFilterToggle(); paintFilterPanel(); }
- },
- el('span',{},''),
- el('span',{}, t('discover.moreFilters') || 'More filters'),
- activeCount > 0 ? el('span',{class:'inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-mv-500 text-white text-[10px] font-extrabold'}, String(activeCount)) : null
- ),
  activeCount > 0 ? el('button',{
  type:'button',
  class:'text-xs underline text-slate2-400 hover:text-slate2-50 cursor-pointer bg-transparent border-0',
@@ -4904,11 +4904,11 @@ function Booking() {
  el('div',{class:'text-[10px] uppercase tracking-[0.28em] font-extrabold opacity-85'},'Redeeming at'),
  el('h1',{class:'mt-1 font-serif-display italic text-3xl font-extrabold leading-tight'}, v?.name ?? '?'),
  el('p',{class:'mt-2 text-sm font-bold opacity-85'}, b.slot),
- el('div',{class:'mt-7 mx-auto h-40 w-40 rounded-full grid place-items-center relative', style:'border: 2px dashed rgba(255,255,255,0.35);'},
+ el('div',{class:'mt-7 mx-auto h-40 w-40 rounded-full grid place-items-center relative animate-pulse', style:'border: 2px dashed rgba(255,255,255,0.35);'},
+ el('div',{class:'absolute inset-2 rounded-full animate-ping', style:'border: 1px solid rgba(255,255,255,0.55); animation-duration: 2.4s;'}),
  el('div',{class:'absolute inset-2 rounded-full', style:'border: 1px solid rgba(255,255,255,0.4);'}),
- el('div',{class:'text-center'},
- el('div',{class:'text-[9px] uppercase tracking-[0.25em] font-bold opacity-80'},'Verification'),
- el('div',{class:'mt-1 font-mono font-extrabold text-xl tracking-widest'}, token)
+ el('div',{class:'text-center relative'},
+ el('div',{class:'font-extrabold text-2xl md:text-3xl uppercase tracking-[0.08em] leading-tight'},'¡Canjeado!')
  )
  ),
  el('div',{class:'mt-6 font-mono font-bold text-sm opacity-90'}, ts, ' · BCN'),
@@ -4953,14 +4953,10 @@ function Booking() {
  )
  ];
  if (raterStars > 0) {
+ // Patricia (May 2026): drop the inline "Comentario rápido" textarea —
+ // just stars + submit. (A post-redemption popup will handle written
+ // reviews separately.)
  kids.push(
- el('textarea',{
- class:'mt-3 w-full bg-slate2-50/[0.04] border border-slate2-50/10 rounded-xl px-3 py-2 text-sm text-slate2-100 placeholder-slate2-500',
- rows:'2',
- placeholder: 'Comentario rápido (opcional)',
- ref: ta => { ta.value = raterNote; },
- onInput: e => { raterNote = e.target.value; }
- }),
  el('button',{
  class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer transition',
  onclick: ()=>{
@@ -4969,7 +4965,7 @@ function Booking() {
  memberId: u.id,
  venueSlug: b.venueSlug,
  stars: raterStars,
- note: raterNote.trim() || null,
+ note: null,
  createdAt: Date.now()
  });
  saveStore();
