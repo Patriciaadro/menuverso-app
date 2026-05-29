@@ -7824,7 +7824,10 @@ function Admin() {
  const card = ev.target.closest('.rounded-2xl');
  const existing = card.querySelector('[data-edit-form]');
  if (existing) { existing.remove(); return; }
- card.appendChild(buildEditForm(pv, false));
+ const form = buildEditForm(pv, false);
+ card.appendChild(form);
+ // Inline-injected DOM bypasses render()'s autoTranslate sweep; run it now.
+ if (typeof autoTranslate === 'function') autoTranslate(form);
  }},'Edit'),
  el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:pv.slug})},'View'),
  el('button',{class:'rounded-full bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
@@ -7921,7 +7924,10 @@ function Admin() {
  const card = ev.target.closest('.rounded-2xl');
  const existing = card.querySelector('[data-edit-form]');
  if (existing) { existing.remove(); return; }
- card.appendChild(buildEditForm(v, true));
+ const form = buildEditForm(v, true);
+ card.appendChild(form);
+ // Inline-injected DOM bypasses render()'s autoTranslate sweep; run it now.
+ if (typeof autoTranslate === 'function') autoTranslate(form);
  }},'Edit'),
  isEdited && el('button',{class:'rounded-full bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  delete store.seedOverrides[v.slug];
@@ -10957,6 +10963,28 @@ window.MV_TR_ES = {
  "awaiting review": "esperando revisión",
  "none yet": "ninguno aún",
  "No activity yet.": "Aún no hay actividad.",
+ // Admin Edit form sections + field labels
+ "BASICS": "BÁSICOS",
+ "NAME *": "NOMBRE *",
+ "CUISINE *": "COCINA *",
+ "BARRIO *": "BARRIO *",
+ "PRICE TIER (1–4)": "PRECIO (1–4)",
+ "RATING (0–5)": "VALORACIÓN (0–5)",
+ "REVIEWS COUNT": "Nº DE RESEÑAS",
+ "ADDRESS": "DIRECCIÓN",
+ "POSTCODE": "CÓDIGO POSTAL",
+ "PHONE": "TELÉFONO",
+ "WEBSITE": "WEB",
+ "DESCRIPTION": "DESCRIPCIÓN",
+ "TÍTULO DE LA OFERTA": "TÍTULO DE LA OFERTA",
+ "DESCRIPCIÓN": "DESCRIPCIÓN",
+ "Missing:": "Falta:",
+ "venues": "locales",
+ "4 venues": "4 locales",
+ // Sort labels
+ "DEFAULT ↑": "POR DEFECTO ↑",
+ "DEFAULT ↓": "POR DEFECTO ↓",
+ "Q ": "Q ",
  // Toast messages that bypass autoTranslate (rendered after render() sweep)
  "Signed out": "Sesión cerrada",
  "Signed out after 30 min idle. Sign in again to continue.": "Sesión cerrada por inactividad de 30 min. Inicia sesión de nuevo para continuar.",
