@@ -7060,11 +7060,17 @@ function Admin() {
  ),
  (() => {
  const events = [];
- store.redemptions.slice(0, 12).forEach(r => events.push({ t: r.redeemedAt, type:'redemption', text: 'Code redeemed at ' + (findVenueBySlug(r.venueSlug)?.name ?? r.venueSlug) }));
- store.bookings.slice(0, 12).forEach(b => events.push({ t: b.createdAt, type:'booking', text: 'Booking created at ' + (findVenueBySlug(b.venueSlug)?.name ?? b.venueSlug) + ' (code ' + b.code + ')' }));
+ // 2026-05-29: store template tokens (prefix/suffix/venueName) instead of a
+ // pre-concatenated string so the event line can be assembled with translated
+ // pieces at render time. autoTranslate can't match a concatenated text node
+ // like "Booking created at Bar Solete (code 238542)" because the venue name
+ // and code are embedded.
+ const ES = MV_LANG === 'es';
+ store.redemptions.slice(0, 12).forEach(r => events.push({ t: r.redeemedAt, type:'redemption', prefix: ES ? 'Código canjeado en ' : 'Code redeemed at ', venueName: (findVenueBySlug(r.venueSlug)?.name ?? r.venueSlug), suffix: '' }));
+ store.bookings.slice(0, 12).forEach(b => events.push({ t: b.createdAt, type:'booking', prefix: ES ? 'Reserva creada en ' : 'Booking created at ', venueName: (findVenueBySlug(b.venueSlug)?.name ?? b.venueSlug), suffix: ' (' + (ES ? 'código' : 'code') + ' ' + b.code + ')' }));
  store.partnerVenues.forEach(v => {
- if (v.submittedAt) events.push({ t: v.submittedAt, type:'submit', text: v.name + ' submitted for review' });
- if (v.approvedAt) events.push({ t: v.approvedAt, type:'approve', text: v.name + ' approved' });
+ if (v.submittedAt) events.push({ t: v.submittedAt, type:'submit', prefix: '', venueName: v.name, suffix: ES ? ' enviado a revisión' : ' submitted for review' });
+ if (v.approvedAt) events.push({ t: v.approvedAt, type:'approve', prefix: '', venueName: v.name, suffix: ES ? ' aprobado' : ' approved' });
  });
  events.sort((a,b) => (b.t||0) - (a.t||0));
  const recent = events.slice(0, 10);
@@ -7081,7 +7087,7 @@ function Admin() {
  return el('li',{class:'flex items-center justify-between gap-3 px-4 py-3 text-sm hover:bg-slate2-50/[0.02] transition-colors'},
  el('span',{class:'flex items-center gap-3 min-w-0'},
  el('span',{class:'inline-flex items-center justify-center h-7 w-7 rounded-md shrink-0 ' + ic.tone}, lucide(ic.name,{class:'h-3.5 w-3.5'})),
- el('span',{class:'text-slate2-200 truncate'}, e.text)
+ el('span',{class:'text-slate2-200 truncate'}, (e.prefix || '') + (e.venueName || '') + (e.suffix || ''))
  ),
  el('span',{class:'text-[11px] text-slate2-500 shrink-0 tabular-nums'}, e.t ? new Date(e.t).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '')
  );
@@ -10929,6 +10935,28 @@ window.MV_TR_ES = {
  "Members slide-to-confirm at the table and show an animated verification screen. The redemption pings here instantly. Acknowledge at the table, nothing to type.": "Los miembros confirman deslizando en la mesa y muestran una pantalla animada de verificación. La confirmación llega aquí al instante. Reconócela en la mesa, no hay que escribir nada.",
  "No redemptions yet today. They'll appear here instantly as members slide-to-confirm at the table.": "Aún no hay confirmaciones hoy. Aparecerán aquí al instante a medida que los miembros confirmen en la mesa.",
  "Need help?": "¿Necesitas ayuda?",
+ "After the 30-day commitment, you can request removal anytime. Admin reviews within 3 business days.": "Después del compromiso de 30 días, puedes solicitar la eliminación cuando quieras. El equipo de admin revisa en 3 días hábiles.",
+ "Remove this listing": "Eliminar este listado",
+ "Request removal": "Solicitar eliminación",
+ "Restaurant info": "Info del restaurante",
+ "RESTAURANT NAME": "NOMBRE DEL RESTAURANTE",
+ "awaiting decision": "esperando decisión",
+ "0 awaiting decision": "0 esperando decisión",
+ "Pending removals": "Eliminaciones pendientes",
+ "Pending edits": "Ediciones pendientes",
+ "No messages yet": "Sin mensajes aún",
+ "no owner": "sin propietario",
+ "Pick a partner on the left to view the thread.": "Selecciona un partner a la izquierda para ver el hilo.",
+ "Pick a venue on the left to view its notes.": "Selecciona un local a la izquierda para ver sus notas.",
+ "BORRADOR": "BORRADOR",
+ // Admin Resumen stat panels (StatPanel labels in sentence-case + CSS uppercase)
+ "Pending partners": "Locales pendientes",
+ "Live partner venues": "Locales publicados",
+ "Active bookings": "Reservas activas",
+ "Members": "Miembros",
+ "awaiting review": "esperando revisión",
+ "none yet": "ninguno aún",
+ "No activity yet.": "Aún no hay actividad.",
  // Toast messages that bypass autoTranslate (rendered after render() sweep)
  "Signed out": "Sesión cerrada",
  "Signed out after 30 min idle. Sign in again to continue.": "Sesión cerrada por inactividad de 30 min. Inicia sesión de nuevo para continuar.",
