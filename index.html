@@ -5078,6 +5078,10 @@ function Booking() {
  )
  )
  );
+ // Booking is repainted every second to refresh the rotating verification
+ // token. render()'s autoTranslate sweep only runs on initial route render,
+ // so we have to sweep inner after each paint or Stage B headers stay English.
+ if (typeof autoTranslate === 'function') autoTranslate(inner);
  }
  paint();
  // Repaint every second while on the animated verification screen, the
