@@ -1632,7 +1632,7 @@ window.MV_T = {
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
  'hero.subhead.tail': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas 2x1. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
- 'hero.tagline': 'El club 2x1 para cenar.',
+ 'hero.tagline': 'El club gastronómico 2x1.',
  'menu.eyebrow': 'EL MENÚ DE LA CIUDAD',
  'menu.flourish': '~  carta del día  ~',
  'menu.body': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas 2x1. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
@@ -2679,7 +2679,7 @@ function Landing() {
  currentUser()
  ? el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('app')}, t('hero.ctaApp'))
  : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')}, t('hero.ctaJoin')),
- el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}, t('hero.ctaHow'))
+ el('button',{class:'rounded-2xl bg-white px-7 py-3.5 font-extrabold cursor-pointer shadow-md transition',style:'color:#1D1D1B;text-shadow:none;', onmouseenter:(e)=>{e.currentTarget.style.background='#F3F4F6';}, onmouseleave:(e)=>{e.currentTarget.style.background='#FFFFFF';}, onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}, t('hero.ctaHow'))
  )
  )
  ),
