@@ -6653,11 +6653,15 @@ function PortalProfile() {
  // Demo-persistence banner is appended INSIDE paint() (below) so it
  // survives the wrap.innerHTML = '' that runs on every re-render.
  function demoBanner() {
- return el('div',{class:'rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm flex items-start gap-3'},
- el('div',{class:'mt-0.5 h-2 w-2 rounded-full bg-amber-400 shrink-0'}),
+ // Partner portal renders on a WHITE background, so the previous text-amber-100
+ // (cream) text was invisible. Forced dark-amber + black ink via inline styles
+ // to guarantee contrast regardless of theme tokens.
+ return el('div',{class:'rounded-2xl border p-4 text-sm flex items-start gap-3',
+ style:'background:#FFF7E0;border-color:#F59E0B;'},
+ el('div',{class:'mt-0.5 h-2 w-2 rounded-full shrink-0',style:'background:#D97706;'}),
  el('div',{class:'min-w-0'},
- el('div',{class:'font-bold text-amber-100'}, 'Modo demo: tus cambios solo se guardan en este dispositivo'),
- el('p',{class:'mt-1 text-xs text-amber-100/80 leading-relaxed'},
+ el('div',{class:'font-bold',style:'color:#78350F;'}, 'Modo demo: tus cambios solo se guardan en este dispositivo'),
+ el('p',{class:'mt-1 text-xs leading-relaxed',style:'color:#92400E;'},
  'La sincronización entre móvil y portátil (y la persistencia real en servidor) estará lista cuando conectemos la base de datos. Mientras tanto, lo que edites aquí seguirá visible en este navegador, pero no aparecerá en otros dispositivos. No te preocupes, no se pierde nada: cuando activemos el backend pasamos los datos guardados.'
  )
  )
