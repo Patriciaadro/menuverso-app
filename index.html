@@ -1959,7 +1959,17 @@ function localizeBarrio(s) {
  var key = String(s).trim();
  return TR[key] || key;
 }
-function setLang(l){ try{localStorage.setItem('mv_lang_v2', l);}catch(e){} try{document.documentElement.lang = l;}catch(e){} try{document.title = (l === 'en') ? 'Menuverso · Enjoy the best, save the rest' : 'Menuverso · Disfruta de lo mejor, ahorra en el resto';}catch(e){} location.reload(); }
+function setLang(l){
+ try{localStorage.setItem('mv_lang_v2', l);}catch(e){}
+ try{document.documentElement.lang = l;}catch(e){}
+ try{document.title = (l === 'en') ? 'Menuverso · Enjoy the best, save the rest' : 'Menuverso · Disfruta de lo mejor, ahorra en el resto';}catch(e){}
+ // Live language swap — flip the global MV_LANG and re-render the SPA
+ // in place. This preserves the current route, scroll, and any state
+ // the user had built up (previously this called location.reload() and
+ // threw the user back to the homepage on every toggle).
+ MV_LANG = l;
+ try { if (typeof render === 'function') render(); } catch(e){ location.reload(); }
+}
 
 /* ========================================================================
  LAYOUT, MARKETING HEADER + PHONE FRAME
