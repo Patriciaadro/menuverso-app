@@ -2655,7 +2655,7 @@ function Landing() {
  // to-white seam at the section boundary. Taller (h-48) than the
  // old feather so the cream→white handoff has room to breathe.
  el('div',{class:'absolute left-0 right-0 bottom-0 h-48 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.55) 35%, rgba(250,246,239,0.92) 68%, rgba(253,251,247,0.98) 85%, rgba(255,255,255,1) 100%);'}),
- el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-24 md:py-28 text-center'},
+ el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-14 md:py-20 text-center'},
  el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
  el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('hero.eyebrow')
  ),
@@ -2679,11 +2679,11 @@ function Landing() {
  // app-screenshot-led version (per neotaste / image reference). Phones
  // are inline SVG so they re-skin for free when the product UI moves.
  el('section',{id:'how', class:'relative overflow-hidden bg-ink-950'},
- el('div',{class:'mx-auto max-w-6xl px-4 py-24 md:px-6 md:py-28'},
+ el('div',{class:'mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20'},
  el('div',{class:'text-center max-w-3xl mx-auto'},
- el('h2',{class:'font-serif-display mt-6 text-5xl md:text-7xl font-extrabold leading-[0.95] text-slate2-50'}, t('how.heading'))
+ el('h2',{class:'font-serif-display text-5xl md:text-7xl font-extrabold leading-[0.95] text-slate2-50'}, t('how.heading'))
  ),
- el('div',{class:'mt-16 grid gap-12 md:gap-10 md:grid-cols-3'},
+ el('div',{class:'mt-10 grid gap-10 md:gap-8 md:grid-cols-3'},
  el('div',{class:'flex flex-col items-center'},
  el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="24" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="32" y="100" font-family="-apple-system, sans-serif" font-size="15" font-weight="800" fill="#1D1D1B">Barcelona</text><path d="M 116 94 L 121 99 L 126 94" stroke="#1D1D1B" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><clipPath id="mvHowMap1Clip"><rect x="20" y="116" width="240" height="336" rx="6"/></clipPath></defs><g clip-path="url(#mvHowMap1Clip)"><rect x="20" y="116" width="240" height="336" fill="#F3F4F6"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116 L 260 116 L 260 452 Z" fill="#BFD3CC" fill-opacity="0.55"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116" stroke="#8FA89C" stroke-width="0.8" fill="none"/><ellipse cx="62" cy="158" rx="22" ry="14" fill="#C4D3B0" fill-opacity="0.85"/><rect x="180" y="280" width="32" height="26" rx="4" fill="#C4D3B0" fill-opacity="0.78"/><ellipse cx="55" cy="408" rx="28" ry="18" fill="#C4D3B0" fill-opacity="0.72"/><g stroke="#404040" stroke-width="1.5" stroke-opacity="0.32" fill="none" stroke-linecap="round"><path d="M 22 235 Q 130 200 240 168"/><path d="M 22 295 Q 130 280 240 275"/><path d="M 130 118 Q 130 250 130 385"/><path d="M 178 118 Q 180 280 184 410"/><path d="M 145 200 Q 152 280 170 415"/></g><g stroke="#404040" stroke-width="0.6" stroke-opacity="0.20" fill="none"><line x1="50" y1="180" x2="50" y2="380"/><line x1="78" y1="160" x2="78" y2="395"/><line x1="108" y1="155" x2="108" y2="395"/><line x1="158" y1="140" x2="158" y2="410"/><line x1="202" y1="135" x2="202" y2="270"/><line x1="220" y1="125" x2="220" y2="250"/><line x1="40" y1="200" x2="225" y2="184"/><line x1="40" y1="225" x2="230" y2="208"/><line x1="40" y1="255" x2="235" y2="240"/><line x1="40" y1="325" x2="230" y2="318"/><line x1="40" y1="358" x2="228" y2="352"/><line x1="50" y1="392" x2="220" y2="385"/></g><g font-family="-apple-system, sans-serif" font-size="6" font-weight="800" letter-spacing="1.8" fill="#6E5D44"><text x="44" y="175">GRÀCIA</text><text x="92" y="248">EIXAMPLE</text><text x="160" y="330">EL BORN</text><text x="198" y="372" fill="#5A8A78">BARCELONETA</text><text x="34" y="405">MONTJUÏC</text></g><g><circle cx="118" cy="218" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="152" cy="186" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="178" cy="232" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="96" cy="276" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="200" cy="332" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="138" cy="348" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="170" cy="378" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="108" cy="395" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/><circle cx="84" cy="328" r="5" fill="#B5392D" stroke="white" stroke-width="1.5"/></g><g transform="translate(140 280)"><circle r="18" fill="#B5392D" fill-opacity="0.22"/><circle r="13" fill="#B5392D"/><text font-family="-apple-system, sans-serif" font-weight="800" font-size="11" fill="white" text-anchor="middle" y="4">5</text></g></g><g transform="translate(0 456)"><rect x="10" y="0" width="260" height="62" fill="#FFFFFF"/><line x1="20" y1="2" x2="260" y2="2" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="36" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="36" text-anchor="middle" fill="#B5392D">Discover</text><text x="220" y="36" text-anchor="middle" fill="#9CA3AF">Bookings</text></g><circle cx="140" cy="46" r="2.5" fill="#B5392D"/></g></svg>'}),
  el('div',{class:'mt-7 w-full max-w-[280px]'},
@@ -2764,10 +2764,10 @@ function Landing() {
  '</g>'+
  '</svg>'
  }),
- el('div',{class:'relative mx-auto max-w-3xl px-4 pb-24 pt-10 text-center'},
+ el('div',{class:'relative mx-auto max-w-3xl px-4 pb-14 pt-6 text-center'},
  // Thin Catalan-tile motif divider, section breath, brand-coherent.
- el('div',{class:'pt-12'}, ILLUS.tileStrip('h-2.5 w-40 mx-auto text-mv-500/30')),
- el('h2',{class:'font-serif-display text-4xl md:text-6xl font-extrabold pt-8'}, 'Your Next Meal is ',
+ el('div',{class:'pt-6'}, ILLUS.tileStrip('h-2.5 w-40 mx-auto text-mv-500/30')),
+ el('h2',{class:'font-serif-display text-4xl md:text-6xl font-extrabold pt-6'}, 'Your Next Meal is ',
  el('span',{class:'text-mv-500 italic'},'Half Off')),
 
  // === Annual / Monthly segmented toggle ===
@@ -2884,7 +2884,7 @@ function Landing() {
  // restricts reads (which Supabase does by default for `anon`).
  el('section',{class:'relative overflow-hidden bg-ink-950'},
  el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #B5392D 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
- el('div',{class:'relative mx-auto max-w-3xl px-4 py-20 md:py-24 text-center'},
+ el('div',{class:'relative mx-auto max-w-3xl px-4 py-12 md:py-16 text-center'},
  el('span',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 ring-1 ring-mv-500/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'},
  el('span',{class:'h-1.5 w-1.5 rounded-full bg-mv-500 animate-pulse'}),
  t('waitlist.eyebrow')
