@@ -1629,6 +1629,10 @@ window.MV_T = {
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
  'hero.subhead.tail': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas 2x1. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
+ 'hero.tagline': 'El club 2x1 para cenar.',
+ 'menu.eyebrow': 'EL MENÚ DE LA CIUDAD',
+ 'menu.flourish': '~  carta del día  ~',
+ 'menu.body': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas 2x1. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
  'hero.ctaJoin': 'Únete, desde 3,99 €/mes',
  'hero.ctaApp': 'Abrir la app →',
  'hero.ctaHow': 'Cómo funciona',
@@ -1795,6 +1799,10 @@ window.MV_T = {
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
  'hero.subhead.tail': 'Discover the city\u0027s best-kept secrets with exclusive 2-for-1 deals. From sunset rooftop cocktails and hidden gems to specialty coffee and gourmet bites. Indulge in endless gastronomic experiences, all in one app.',
+ 'hero.tagline': 'The 2x1 dining club.',
+ 'menu.eyebrow': 'THE CITY\u0027S MENU',
+ 'menu.flourish': '~  today\u0027s carte  ~',
+ 'menu.body': 'Discover the city\u0027s best-kept secrets with exclusive 2-for-1 deals. From sunset rooftop cocktails and hidden gems to specialty coffee and gourmet bites. Indulge in endless gastronomic experiences, all in one app.',
  'hero.ctaJoin': 'Join, from €3.99/mo',
  'hero.ctaApp': 'Open the app →',
  'hero.ctaHow': 'See How It Works',
@@ -2661,14 +2669,61 @@ function Landing() {
  t('hero.line1'), el('br'),
  el('span',{class:'text-mv-500 italic'}, t('hero.line2'))
  ),
- el('p',{class:'mx-auto mt-6 max-w-3xl text-base md:text-lg font-semibold',style:'color:#1D1D1B'},
- t('hero.subhead.tail')
+ el('p',{class:'hero-on-video mx-auto mt-5 max-w-3xl text-lg md:text-2xl font-bold tracking-wide'},
+ t('hero.tagline')
  ),
  el('div',{class:'mt-8 flex justify-center gap-3 flex-wrap'},
  currentUser()
  ? el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('app')}, t('hero.ctaApp'))
  : el('button',{class:'rounded-2xl bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer shadow-xl shadow-mv-500/30 transition', onclick:()=>go('signup')}, t('hero.ctaJoin')),
  el('button',{class:'rounded-2xl border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}, t('hero.ctaHow'))
+ )
+ )
+ ),
+ // ====== Menu card — Pase-Gastronómico aesthetic ======
+ // Off-white card with subtle diagonal hairline pattern, soft red glow
+ // beneath, brand-red eyebrow, gray sub-eyebrow, "m · 2×1" badge top-right.
+ el('section',{class:'relative bg-white'},
+ el('div',{class:'mx-auto max-w-4xl px-4 py-14 md:py-20'},
+ el('div',{class:'relative'},
+ // Soft red glow underneath the card
+ el('div',{class:'absolute -inset-6 rounded-[34px] pointer-events-none',
+ style:'background:radial-gradient(60% 60% at 50% 60%, rgba(228,34,38,0.22) 0%, rgba(228,34,38,0.0) 70%); filter:blur(24px);'}),
+ // The card itself
+ el('div',{class:'relative rounded-[22px] px-7 py-10 md:px-14 md:py-14',
+ style:'background:repeating-linear-gradient(45deg, transparent 0 14px, rgba(228,34,38,0.055) 14px 15px), #FCFAF7;'
+        +'box-shadow:0 30px 60px -22px rgba(228,34,38,0.28), 0 8px 22px rgba(228,34,38,0.12);'
+        +'border:1px solid rgba(228,34,38,0.18);'},
+ // Header row — eyebrow stack on left, "m·2×1" badge on right
+ el('div',{class:'flex items-start justify-between gap-4'},
+ el('div',{class:'text-left'},
+ el('div',{class:'font-extrabold tracking-[0.32em] text-[12px] md:text-sm',style:'color:#e42226;'},
+ t('menu.eyebrow')
+ ),
+ el('div',{class:'mt-2 font-bold tracking-[0.32em] text-[10px] md:text-xs',style:'color:#9CA3AF;'},
+ 'MENUVERSO · BARCELONA'
+ )
+ ),
+ el('div',{class:'flex flex-col items-center shrink-0'},
+ el('div',{class:'grid place-items-center h-11 w-11 md:h-12 md:w-12 rounded-full font-serif-display italic text-xl md:text-2xl font-extrabold text-white',
+ style:'background:#e42226;box-shadow:0 6px 16px rgba(228,34,38,0.35);'},'m'),
+ el('div',{class:'mt-1.5 font-extrabold tracking-[0.18em] text-[10px] md:text-[11px]',style:'color:#e42226;'},'2 × 1')
+ )
+ ),
+ // Body — bold serif, ink black, large (NOT italic - readability)
+ el('p',{class:'mt-7 md:mt-9 font-serif-display font-bold leading-[1.35] text-left md:text-center text-[20px] md:text-[28px]',
+ style:'color:#1D1D1B;'},
+ t('menu.body')
+ ),
+ // Bottom flourish row with hairlines
+ el('div',{class:'mt-8 md:mt-10 flex items-center gap-3 md:gap-5'},
+ el('div',{class:'h-px flex-1',style:'background:rgba(228,34,38,0.35);'}),
+ el('span',{class:'font-extrabold italic tracking-[0.30em] text-[11px] md:text-xs whitespace-nowrap',style:'color:#e42226;'},
+ t('menu.flourish')
+ ),
+ el('div',{class:'h-px flex-1',style:'background:rgba(228,34,38,0.35);'})
+ )
+ )
  )
  )
  ),
