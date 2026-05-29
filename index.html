@@ -84,8 +84,10 @@ tailwind.config = {
  h1,h2,h3 { letter-spacing: -0.015em; }
  /* Editorial display serif, pairs with sans body to give a culinary-magazine feel.
  Used on hero H1, section H2s, venue name, member name. Inter stays everywhere else. */
- /* TEMP PREVIEW: serif-display swapped to Inter/system sans for visual review */
+ /* Most "display" spots run on Inter sans for readability. Serif is reserved
+    for the hero H1 and the menu card body, applied via .font-display-serif. */
  .font-serif-display { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; letter-spacing: -0.022em; }
+ .font-display-serif { font-family: 'Fraunces', 'Source Serif Pro', 'Georgia', serif; font-optical-sizing: auto; letter-spacing: -0.022em; font-feature-settings: 'ss01'; }
  /* Hero text sits on the video and stays legible regardless of frame content, 
  light cream foreground with a soft dark halo. */
  .hero-on-video { color: #FFFFFF; text-shadow: 0 2px 18px rgba(29,29,27,0.55), 0 1px 3px rgba(29,29,27,0.4); }
@@ -2666,7 +2668,7 @@ function Landing() {
  el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
  el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('hero.eyebrow')
  ),
- el('h1',{class:'hero-on-video font-serif-display mx-auto mt-6 max-w-4xl text-4xl md:text-6xl font-extrabold leading-[1.05]'},
+ el('h1',{class:'hero-on-video font-display-serif mx-auto mt-6 max-w-4xl text-4xl md:text-6xl font-extrabold leading-[1.05]'},
  t('hero.line1'), el('br'),
  el('span',{class:'text-mv-500 italic'}, t('hero.line2'))
  ),
@@ -2712,7 +2714,7 @@ function Landing() {
  )
  ),
  // Body — bold serif, ink black, large (NOT italic - readability)
- el('p',{class:'mt-7 md:mt-9 font-serif-display font-bold leading-[1.35] text-left md:text-center text-[20px] md:text-[28px]',
+ el('p',{class:'mt-7 md:mt-9 font-display-serif font-bold leading-[1.35] text-left md:text-center text-[20px] md:text-[28px]',
  style:'color:#1D1D1B;'},
  t('menu.body')
  ),
