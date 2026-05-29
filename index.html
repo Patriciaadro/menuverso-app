@@ -2192,7 +2192,8 @@ function AppTopBar({ showNav }) {
  navItem('bookings','','Bookings','bookings'),
  (() => {
  const n = u ? validSavedSlugs(u).length : 0;
- return navItem('saved', n > 0 ? '' : '', 'Saved' + (n > 0 ? ` (${n})` : ''), 'saved');
+ const label = (MV_LANG === 'es' ? 'Guardados' : 'Saved') + (n > 0 ? ` (${n})` : '');
+ return navItem('saved', n > 0 ? '' : '', label, 'saved');
  })()
  ) : el('span',{}),
  u ? el('div',{class:'flex items-center gap-2'},
@@ -9063,7 +9064,7 @@ function Admin() {
  el('div',{class:'grid md:grid-cols-4 gap-4'},
  StatPanel('','Live venues', liveAll.length, 'currently active'),
  StatPanel('','Redemptions / week', redemptionsThisWeek, 'last 7 days'),
- StatPanel('','Avg rating', avgRating ? avgRating.toFixed(2) : ', ', allReviews.length + ' review' + (allReviews.length===1?'':'s')),
+ StatPanel('','Avg rating', avgRating ? avgRating.toFixed(2) : ', ', String(allReviews.length) + ' ' + (MV_LANG==='es' ? (allReviews.length===1?'reseña':'reseñas') : (allReviews.length===1?'review':'reviews'))),
  StatPanel('','Active subscriptions', activeSubs, 'paying members')
  )
  );
@@ -10609,6 +10610,7 @@ window.MV_TR_ES = {
  "avg recovered ticket.": "ticket medio recuperado.",
  "HISTÓRICO": "HISTÓRICO",
  "REDEMPTIONS (ALL-TIME)": "CANJES (TOTALES)",
+ "Redemptions (all-time)": "Canjes (totales)",
  "real": "reales",
  "MEMBER RATING": "VALORACIÓN DE MIEMBROS",
  "ratings": "valoraciones",
@@ -10909,6 +10911,14 @@ window.MV_TR_ES = {
  // Credit cap toast (saw English version on screen)
  "You've used your 3 credits at": "Has usado tus 3 créditos en",
  "this month. Come back": "este mes. Vuelve el",
+ // Partner portal Confirmar código tab
+ "Live redemptions · today": "Confirmaciones en vivo · hoy",
+ "Menuverso redemptions at": "Confirmaciones Menuverso en",
+ "live": "en vivo",
+ "No code entry.": "Sin códigos.",
+ "Members slide-to-confirm at the table and show an animated verification screen. The redemption pings here instantly. Acknowledge at the table, nothing to type.": "Los miembros confirman deslizando en la mesa y muestran una pantalla animada de verificación. La confirmación llega aquí al instante. Reconócela en la mesa, no hay que escribir nada.",
+ "No redemptions yet today. They'll appear here instantly as members slide-to-confirm at the table.": "Aún no hay confirmaciones hoy. Aparecerán aquí al instante a medida que los miembros confirmen en la mesa.",
+ "Need help?": "¿Necesitas ayuda?",
  // Toast messages that bypass autoTranslate (rendered after render() sweep)
  "Signed out": "Sesión cerrada",
  "Signed out after 30 min idle. Sign in again to continue.": "Sesión cerrada por inactividad de 30 min. Inicia sesión de nuevo para continuar.",
