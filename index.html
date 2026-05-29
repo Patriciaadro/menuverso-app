@@ -1596,6 +1596,10 @@ var MV_LANG = (function(){
 })();
 // Keep <html lang> in sync with the chosen language, helps screen readers and SEO.
 try { document.documentElement.lang = MV_LANG; } catch(e){}
+// Update document.title to match MV_LANG at boot. The <title> in HTML is always
+// Spanish (SEO default); after reload from setLang('en'), this overrides it to
+// match the actual UI language.
+try { if (MV_LANG === 'en') document.title = 'Menuverso · Enjoy the best, save the rest'; } catch(e){}
 window.MV_T = {
  es: {
  'banner.concept': 'Demo en desarrollo, los restaurantes mostrados son ilustrativos y no están afiliados con menuverso.',
@@ -4802,6 +4806,12 @@ function Booking() {
  if (!u || !b || b.memberId !== u.id) { go('app'); return el('div'); }
  const v = findVenueBySlug(b.venueSlug);
  const inner = el('div',{class:'pb-8'});
+ // 2026-05-28: hoist rater state OUT of paint() so it survives the 1Hz
+ // repaint that refreshes the rotating verification token on Stage B.
+ // Before this, every second paint() rebuilt the rater closure and reset
+ // stars=0/note='', making the rater unusable in practice.
+ var raterStars = 0;
+ var raterNote = '';
 
  function paint() {
  inner.innerHTML = '';
@@ -4859,29 +4869,30 @@ function Booking() {
  )
  );
  } else {
- let stars = 0; let note = '';
  const inner2 = el('div',{class:'text-center'});
  function paintRater() {
  inner2.innerHTML = '';
- // Build children array and filter falsy so `stars > 0 && el(...)`
- // doesn't leave "false" text nodes (Element.append coerces booleans to
- // text "false", unlike el() which filters them).
+ // raterStars / raterNote are hoisted onto the Booking() function scope
+ // so they survive the 1Hz paint() repaint that drives the rotating
+ // verification token. Without hoisting, the user's star selection
+ // gets wiped every second and the rater is unusable.
  const kids = [
  el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'¿Qué tal fue?'),
  el('div',{class:'mt-3 flex justify-center gap-1'},
  ...[1,2,3,4,5].map(n => el('button',{
- class:'text-3xl leading-none cursor-pointer bg-transparent border-0 transition ' + (n <= stars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
- onclick:()=>{ stars = n; paintRater(); }
- }, n <= stars ? '★' : '☆'))
+ class:'text-3xl leading-none cursor-pointer bg-transparent border-0 transition ' + (n <= raterStars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
+ onclick:()=>{ raterStars = n; paintRater(); }
+ }, n <= raterStars ? '★' : '☆'))
  )
  ];
- if (stars > 0) {
+ if (raterStars > 0) {
  kids.push(
  el('textarea',{
  class:'mt-3 w-full bg-slate2-50/[0.04] border border-slate2-50/10 rounded-xl px-3 py-2 text-sm text-slate2-100 placeholder-slate2-500',
  rows:'2',
  placeholder: 'Comentario rápido (opcional)',
- onInput: e => { note = e.target.value; }
+ ref: ta => { ta.value = raterNote; },
+ onInput: e => { raterNote = e.target.value; }
  }),
  el('button',{
  class:'mt-3 w-full rounded-full bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer transition',
@@ -4890,12 +4901,13 @@ function Booking() {
  store.reviews.push({
  memberId: u.id,
  venueSlug: b.venueSlug,
- stars,
- note: note.trim() || null,
+ stars: raterStars,
+ note: raterNote.trim() || null,
  createdAt: Date.now()
  });
  saveStore();
  toast('Gracias por tu valoración');
+ raterStars = 0; raterNote = '';
  paint();
  }
  },'Enviar valoración')
@@ -10863,6 +10875,30 @@ window.MV_TR_ES = {
  "Browse deals →": "Ver ofertas →",
  "Avg rating": "Val. media",
  "AVG RATING": "VAL. MEDIA",
+ // ---- Stage B redemption screen (source uses sentence-case + CSS uppercase) ----
+ "Redeeming at": "Canjeando en",
+ "Verification": "Verificación",
+ "Show this to your server": "Muéstraselo al camarero",
+ "Confirmed · partner notified": "Confirmado · local avisado",
+ "Done, back to profile": "Listo, volver al perfil",
+ // Stage A pre-confirm screen
+ "Before you order:": "Antes de pedir:",
+ "Tell your server you're redeeming with Menuverso.": "Avisa a tu camarero de que vas a confirmar con Menuverso.",
+ "Slide to confirm below, the animated screen proves it's real.": "Desliza abajo para confirmar, la pantalla animada lo verifica.",
+ "Your server acknowledges at the table. Order as normal.": "Tu camarero lo confirma en la mesa. Pide como siempre.",
+ "Slide to redeem →": "Desliza para confirmar →",
+ "Or": "O",
+ "Lunch · 13:00-15:30": "Comida · 13:00-15:30",
+ "Lunch · 13:30-16:00": "Comida · 13:30-16:00",
+ "Lunch": "Comida",
+ "Dinner": "Cena",
+ "Dinner · 19:30-22:00": "Cena · 19:30-22:00",
+ "Dinner · 20:00-22:30": "Cena · 20:00-22:30",
+ "Late Lunch": "Comida tardía",
+ "Weekday Lunch": "Comida entre semana",
+ // Credit cap toast (saw English version on screen)
+ "You've used your 3 credits at": "Has usado tus 3 créditos en",
+ "this month. Come back": "este mes. Vuelve el",
  // Toast messages that bypass autoTranslate (rendered after render() sweep)
  "Signed out": "Sesión cerrada",
  "Signed out after 30 min idle. Sign in again to continue.": "Sesión cerrada por inactividad de 30 min. Inicia sesión de nuevo para continuar.",
