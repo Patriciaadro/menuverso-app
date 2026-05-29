@@ -73,8 +73,7 @@ tailwind.config = {
  overlay default which has zero width and causes layout to jump). */
  html { scrollbar-gutter: stable; overflow-y: scroll; }
  html, body { margin: 0; padding: 0; }
- html, body { overflow-x: hidden; max-width: 100%; }
- body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #FFFFFF; color: #222222; }
+ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #FFFFFF; color: #222222; overflow-x: hidden; }
  /* Custom scrollbar, takes real width on macOS so layout stays stable. */
  ::-webkit-scrollbar { width: 12px; height: 12px; }
  ::-webkit-scrollbar-track { background: transparent; }
@@ -92,6 +91,18 @@ tailwind.config = {
  /* Hero text sits on the video and stays legible regardless of frame content, 
  light cream foreground with a soft dark halo. */
  .hero-on-video { color: #FFFFFF; text-shadow: 0 2px 18px rgba(29,29,27,0.55), 0 1px 3px rgba(29,29,27,0.4); }
+ /* Red headline on busy warm photo: needs more than a shadow on mobile.
+    Combines a heavier dark drop-shadow with a thin dark paint-stroke so the
+    red letterforms keep contrast against any background tone. */
+ .hero-red-on-video {
+  color: #e42226;
+  text-shadow:
+    0 2px 18px rgba(0,0,0,0.85),
+    0 1px 4px rgba(0,0,0,0.85),
+    0 0 1px rgba(0,0,0,0.6);
+  -webkit-text-stroke: 0.8px rgba(29,29,27,0.55);
+  paint-order: stroke fill;
+ }
  .hero-on-video strong { color: #FFFFFF; }
  /* Animated shimmer overlay for the redemption verification screen, defeats
  screenshots because the gradient is constantly moving. */
@@ -2681,7 +2692,7 @@ function Landing() {
  ),
  el('h1',{class:'hero-on-video font-display-serif mx-auto mt-6 max-w-4xl text-4xl md:text-6xl font-extrabold leading-[1.05]'},
  t('hero.line1'), el('br'),
- el('span',{class:'text-mv-500 italic'}, t('hero.line2'))
+ el('span',{class:'italic hero-red-on-video'}, t('hero.line2'))
  ),
  el('p',{class:'hero-on-video mx-auto mt-5 max-w-3xl text-lg md:text-2xl font-bold tracking-wide'},
  t('hero.tagline')
