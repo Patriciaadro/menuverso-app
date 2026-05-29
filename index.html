@@ -4463,6 +4463,20 @@ function Venue() {
  el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>'},''),
  el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Website')
  ));
+ // Instagram tile — partner editor or seed venue can set @handle / full URL.
+ // Normalise to just the handle so we always link to instagram.com/<handle>.
+ const igRaw = (pv?.instagram || v.instagram || '').trim();
+ if (igRaw) {
+ const igHandle = igRaw
+ .replace(/^@/, '')
+ .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
+ .replace(/\/.*$/, '')
+ .trim();
+ if (igHandle) tiles.push(el('a',{href: 'https://instagram.com/' + igHandle, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
+ el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'},''),
+ el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Instagram')
+ ));
+ }
  tiles.push(el('button',{class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center bg-transparent',
  onclick: () => {
  const url = location.origin + location.pathname + '#/venue/' + v.slug;
@@ -5121,15 +5135,13 @@ function Booking() {
  window.addEventListener('touchmove', onMove);
  window.addEventListener('pointerup', onUp);
  window.addEventListener('touchend', onUp);
- // Keyboard fallback, Enter or click commits.
- thumb.addEventListener('click', () => { if (!fired) { fired = true; commitRedeem(); } });
+ // Patricia (May 2026): no tap-to-confirm shortcut. Slide must be completed
+ // to prevent accidental redemptions.
  return track;
  })(),
 
  el('p',{class:'mt-4 text-center text-[11px] text-slate2-500'},
- 'Or ',
- el('button',{class:'underline hover:text-slate2-200 cursor-pointer bg-transparent border-0', onclick:()=>{ if (!fired) { fired = true; commitRedeem(); } }},'tap to confirm'),
- ', both work.'
+ 'Slide the bar all the way to redeem.'
  ),
  // Cancel link
  el('div',{class:'mt-6 text-center'},
