@@ -6225,7 +6225,8 @@ function PortalRedeem() {
  el('h2',{class:'font-bold text-xl'},'Live redemptions · today'),
  el('p',{class:'mt-1 text-sm text-slate2-400'},
  el('span',{class:'font-bold text-slate2-50 tabular-nums'}, String(rows.length)),
- ' Menuverso redemption', rows.length === 1 ? '' : 's', ' at ',
+ ' ', (MV_LANG === 'es' ? (rows.length === 1 ? 'confirmación Menuverso' : 'confirmaciones Menuverso') : ('Menuverso redemption' + (rows.length === 1 ? '' : 's'))),
+ ' ', (MV_LANG === 'es' ? 'en' : 'at'), ' ',
  el('span',{class:'font-bold text-slate2-50'}, venueName),
  ' · ',
  el('span',{class:'inline-flex items-center gap-1.5 text-accent-emer'},
@@ -6272,6 +6273,15 @@ function PortalRedeem() {
  )
  );
  }
+ // Wrap paint() so every 2s repaint also runs autoTranslate against
+ // the wrap node. Without this the "Live redemptions · today", empty-state
+ // paragraph etc. stay English even though they're in the dict, because
+ // render()'s autoTranslate sweep only runs on route entry.
+ const _origPaint = paint;
+ paint = function() {
+ _origPaint.apply(this, arguments);
+ if (typeof autoTranslate === 'function') autoTranslate(wrap);
+ };
  paint();
  // Lightweight realtime simulation, repaint every 2s so any new
  // redemption (created by a member sliding to confirm in another tab)
