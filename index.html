@@ -2660,8 +2660,8 @@ function Landing() {
  // bottom to merge with the new white page background, no cream-
  // to-white seam at the section boundary. Taller (h-48) than the
  // old feather so the cream→white handoff has room to breathe.
- el('div',{class:'absolute left-0 right-0 bottom-0 h-48 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.55) 35%, rgba(250,246,239,0.92) 68%, rgba(253,251,247,0.98) 85%, rgba(255,255,255,1) 100%);'}),
- el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-14 md:py-20 text-center'},
+ el('div',{class:'absolute left-0 right-0 bottom-0 h-24 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.55) 35%, rgba(250,246,239,0.92) 68%, rgba(253,251,247,0.98) 85%, rgba(255,255,255,1) 100%);'}),
+ el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-10 md:py-14 text-center'},
  el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
  el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('hero.eyebrow')
  ),
@@ -2684,7 +2684,7 @@ function Landing() {
  // Off-white card with subtle diagonal hairline pattern, soft red glow
  // beneath, brand-red eyebrow, gray sub-eyebrow, "m · 2×1" badge top-right.
  el('section',{class:'relative bg-white'},
- el('div',{class:'mx-auto max-w-4xl px-4 py-14 md:py-20'},
+ el('div',{class:'mx-auto max-w-4xl px-4 py-8 md:py-12'},
  el('div',{class:'relative'},
  // Soft red glow underneath the card
  el('div',{class:'absolute -inset-6 rounded-[34px] pointer-events-none',
