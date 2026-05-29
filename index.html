@@ -2660,7 +2660,7 @@ function Landing() {
  // bottom to merge with the new white page background, no cream-
  // to-white seam at the section boundary. Taller (h-48) than the
  // old feather so the cream→white handoff has room to breathe.
- el('div',{class:'absolute left-0 right-0 bottom-0 h-24 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.55) 35%, rgba(250,246,239,0.92) 68%, rgba(253,251,247,0.98) 85%, rgba(255,255,255,1) 100%);'}),
+ el('div',{class:'absolute left-0 right-0 bottom-0 h-48 pointer-events-none z-10', style:'background: linear-gradient(to bottom, rgba(250,246,239,0) 0%, rgba(250,246,239,0.55) 35%, rgba(250,246,239,0.92) 68%, rgba(253,251,247,0.98) 85%, rgba(255,255,255,1) 100%);'}),
  el('div',{class:'relative z-20 mx-auto max-w-6xl px-4 py-10 md:py-14 text-center'},
  el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500 px-4 py-1.5 text-xs font-bold text-white shadow-lg shadow-mv-500/30 ring-1 ring-mv-600/30'},
  el('span',{class:'h-2 w-2 rounded-full bg-white animate-pulse'}), t('hero.eyebrow')
@@ -2686,13 +2686,13 @@ function Landing() {
  el('section',{class:'relative bg-white'},
  el('div',{class:'mx-auto max-w-4xl px-4 py-8 md:py-12'},
  el('div',{class:'relative'},
- // Soft red glow underneath the card
- el('div',{class:'absolute -inset-6 rounded-[34px] pointer-events-none',
- style:'background:radial-gradient(60% 60% at 50% 60%, rgba(228,34,38,0.22) 0%, rgba(228,34,38,0.0) 70%); filter:blur(24px);'}),
- // The card itself
+ // Soft red glow underneath the card — diffuse, no hard edges
+ el('div',{class:'absolute -inset-16 md:-inset-24 rounded-full pointer-events-none',
+ style:'background:radial-gradient(closest-side, rgba(228,34,38,0.12) 0%, rgba(228,34,38,0.05) 45%, rgba(228,34,38,0) 80%); filter:blur(48px);'}),
+ // The card itself — gentler ambient shadow, no hard red ring
  el('div',{class:'relative rounded-[22px] px-7 py-10 md:px-14 md:py-14',
  style:'background:repeating-linear-gradient(45deg, transparent 0 14px, rgba(228,34,38,0.055) 14px 15px), #FCFAF7;'
-        +'box-shadow:0 30px 60px -22px rgba(228,34,38,0.28), 0 8px 22px rgba(228,34,38,0.12);'
+        +'box-shadow:0 24px 48px -28px rgba(29,29,27,0.18), 0 6px 18px -10px rgba(228,34,38,0.10);'
         +'border:1px solid rgba(228,34,38,0.18);'},
  // Header row — eyebrow stack on left, "m·2×1" badge on right
  el('div',{class:'flex items-start justify-between gap-4'},
