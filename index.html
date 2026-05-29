@@ -340,7 +340,8 @@ const DEFAULT_SLOTS = () => [
 // offer at one restaurant in a calendar month. Partners can request a different
 // number via the edit-approval flow (subject to admin approval, like any other
 // change to the deal itself).
-const DEFAULT_CREDITS_PER_USER = 3;
+// Patricia (May 2026): one redemption per user per venue per *year*, not 3 per month.
+const DEFAULT_CREDITS_PER_USER = 1;
 
 // 30-day minimum live commitment from when an offer is first approved LIVE.
 // Inside this window: partner cannot pause, cannot remove the offer
@@ -2337,10 +2338,15 @@ function PhotoVenueCard(v, opts = {}) {
  const compact = !!opts.compact;
  const widthClass = compact ? 'w-[260px]' : 'w-full';
  const heightClass = compact ? 'h-[160px]' : 'h-[200px]';
+ // Patricia (May 2026): once a member redeems at a venue this year, the
+ // venue card shows as muted with a "Ya canjeado" stamp so they know they
+ // can't redeem again until next year.
+ const _u = (typeof currentUser === 'function') ? currentUser() : null;
+ const alreadyRedeemed = !!(_u && typeof userHasRedeemedVenueThisYear === 'function' && userHasRedeemedVenueThisYear(_u.id, v.slug));
  const card = el('a',{
  href:'#venue/' + v.slug,
  class:'group block ' + widthClass + ' rounded-2xl bg-white border border-ink-900/8 overflow-hidden shadow-[0_2px_8px_rgba(29,29,27,0.04)] hover:shadow-[0_12px_28px_rgba(29,29,27,0.12)] hover:-translate-y-0.5 transition-all',
- style:'text-decoration:none;color:inherit;',
+ style:'text-decoration:none;color:inherit;' + (alreadyRedeemed ? 'opacity:0.55;filter:grayscale(0.25);' : ''),
  'data-slug': v.slug,
  onclick: (e) => { e.preventDefault(); go('venue', { slug: v.slug }); }
  },
@@ -2348,10 +2354,11 @@ function PhotoVenueCard(v, opts = {}) {
  // VenueArt renders a real-photo path when partner uploaded photos exist,
  // and falls back to the cuisine-matched Unsplash photo otherwise.
  VenueArt(v, { aspect: compact ? '16/10' : '16/9', radius:'rounded-none', cls:'absolute inset-0 w-full h-full' }),
- // Top-left badges (flash, closed).
+ // Top-left badges (flash, closed, already-redeemed).
  el('div',{class:'absolute top-3 left-3 flex flex-col gap-1.5 items-start z-10'},
- flash ? el('span',{class:'mv-flash-chip'}, t('discover.flashNow') || ' Flash · Hoy') : null,
- !live ? el('span',{class:'px-2 py-0.5 rounded-full bg-ink-900/70 text-white text-[10px] font-bold uppercase tracking-wider'}, t('discover.closed') || 'Cerrado') : null
+ flash && !alreadyRedeemed ? el('span',{class:'mv-flash-chip'}, t('discover.flashNow') || ' Flash · Hoy') : null,
+ !live ? el('span',{class:'px-2 py-0.5 rounded-full bg-ink-900/70 text-white text-[10px] font-bold uppercase tracking-wider'}, t('discover.closed') || 'Cerrado') : null,
+ alreadyRedeemed ? el('span',{class:'px-2.5 py-0.5 rounded-full text-white text-[10px] font-extrabold uppercase tracking-wider',style:'background:rgba(29,29,27,0.85);'}, (MV_LANG === 'es' ? '✓ Ya canjeado' : '✓ Already redeemed')) : null
  ),
  // Bottom-left title overlay.
  el('div',{class:'absolute bottom-3 left-3 right-3 z-10 text-white'},
@@ -4133,7 +4140,7 @@ function AppOnboardingPrefs() {
  el('div',{class:'inline-flex items-center gap-2 rounded-full bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
  el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Welcome, ', u.firstName || 'friend'
  ),
- el('h1',{class:'mt-4 text-3xl md:text-4xl font-extrabold leading-tight'},'Help us ', el('span',{class:'text-mv-500'},'tailor your feed')),
+ el('h1',{class:'mt-4 text-3xl md:text-4xl font-extrabold leading-tight'}, (MV_LANG === 'es' ? 'Ayúdanos a ' : 'Help us '), el('span',{class:'text-mv-500'}, (MV_LANG === 'es' ? 'personalizar tu feed' : 'tailor your feed'))),
  el('p',{class:'mt-3 text-sm text-slate2-300'},'Three quick taps. We use your picks to surface the right restaurants first, never to share with anyone.'),
  // Tiny tile motif under the intro, gives the screen a brand moment.
  el('div',{class:'mt-5'}, ILLUS.tileStrip('h-2 w-32 mx-auto text-mv-500/30'))
@@ -4450,21 +4457,19 @@ function Venue() {
  const mapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(address);
  const phone = pv?.phone;
  const website = pv?.website;
+ // Compact icon-only action row. Patricia (May 2026): keep just the icons,
+ // no labels, all in a single row so they don't wrap on phones.
+ const tileBase = 'flex items-center justify-center rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] h-11 cursor-pointer text-slate2-200';
  const tiles = [];
- tiles.push(el('a',{href: mapsUrl, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
- el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'},''),
- el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Directions')
+ tiles.push(el('a',{href: mapsUrl, target:'_blank', rel:'noopener', class: tileBase, title:'Cómo llegar', 'aria-label':'Directions'},
+ el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'})
  ));
- if (phone) tiles.push(el('a',{href: 'tel:' + phone.replace(/\s/g,''), class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
- el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>'},''),
- el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Call')
+ if (phone) tiles.push(el('a',{href: 'tel:' + phone.replace(/\s/g,''), class: tileBase, title:'Llamar', 'aria-label':'Call'},
+ el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.37 1.9.72 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0122 16.92z"/></svg>'})
  ));
- if (website) tiles.push(el('a',{href: website.startsWith('http') ? website : 'https://' + website, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
- el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>'},''),
- el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Website')
+ if (website) tiles.push(el('a',{href: website.startsWith('http') ? website : 'https://' + website, target:'_blank', rel:'noopener', class: tileBase, title:'Web', 'aria-label':'Website'},
+ el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>'})
  ));
- // Instagram tile — partner editor or seed venue can set @handle / full URL.
- // Normalise to just the handle so we always link to instagram.com/<handle>.
  const igRaw = (pv?.instagram || v.instagram || '').trim();
  if (igRaw) {
  const igHandle = igRaw
@@ -4472,22 +4477,19 @@ function Venue() {
  .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
  .replace(/\/.*$/, '')
  .trim();
- if (igHandle) tiles.push(el('a',{href: 'https://instagram.com/' + igHandle, target:'_blank', rel:'noopener', class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center text-slate2-200'},
- el('span',{class:'text-xl', html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'},''),
- el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Instagram')
+ if (igHandle) tiles.push(el('a',{href: 'https://instagram.com/' + igHandle, target:'_blank', rel:'noopener', class: tileBase, title:'Instagram', 'aria-label':'Instagram'},
+ el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>'})
  ));
  }
- tiles.push(el('button',{class:'flex flex-col items-center gap-1 rounded-xl bg-slate2-50/[0.04] border border-slate2-50/10 hover:bg-slate2-50/[0.08] py-3 cursor-pointer text-center bg-transparent',
+ tiles.push(el('button',{class: tileBase + ' bg-transparent border-0', title:'Compartir', 'aria-label':'Share',
  onclick: () => {
  const url = location.origin + location.pathname + '#/venue/' + v.slug;
  if (navigator.share) navigator.share({ title: v.name + ' on Menuverso', url }).catch(()=>{});
  else { navigator.clipboard?.writeText(url).catch(()=>{}); toast('Link copied'); }
  }},
- el('span',{class:'text-xl'},'↗'),
- el('span',{class:'text-[10px] font-bold uppercase tracking-wider text-slate2-300'},'Share')
+ el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>'})
  ));
- const cols = tiles.length === 2 ? 'grid-cols-2' : tiles.length === 3 ? 'grid-cols-3' : 'grid-cols-4';
- return el('div',{class:'mt-4 md:col-start-1 md:row-start-2 grid ' + cols + ' gap-2'}, ...tiles);
+ return el('div',{class:'mt-4 md:col-start-1 md:row-start-2 flex items-center gap-2'}, ...tiles.map(t => { t.classList.add('flex-1'); return t; }));
  })(),
  // ===== Right-column booking module (sticky on desktop) =====
  // Wraps the offer + slot picker so they stay visible while the diner
@@ -4529,15 +4531,16 @@ function Venue() {
  );
  const slotLabel = (bookable && (bookable.label || 'Slot') + ' · ' + bookable.timeStart + '-' + bookable.timeEnd) || fallbackStaticTime;
 
- // Optional inline status banner (open now / next opening).
+ // Optional inline status banner.
+ // Patricia (May 2026): the "open-now" green pill was misleading — diners
+ // thought tapping it would redeem. Removed; the offer card has its own CTA.
+ // Keeping the "next opening" amber hint for closed venues, since it's
+ // informational only.
  let banner = null;
  if (activeSlots.length) {
  const openSlot = activeSlots.find(s => isSlotBookableNow(pvForSlots, s));
  if (openSlot) {
- banner = el('div',{class:'rounded-xl bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 flex items-center gap-2.5'},
- el('span',{class:'h-2 w-2 rounded-full bg-accent-emer shrink-0 animate-pulse'}),
- el('div',{class:'text-[12px] text-accent-emer font-bold leading-tight'}, t('venue.openNowBanner') || 'Disponible ahora mismo')
- );
+ // Suppressed
  } else {
  const hint = activeSlots.map(s => nextOpenLabel(s)).find(Boolean);
  if (hint) {
@@ -4778,16 +4781,20 @@ function yearMonthOf(ts) {
  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
 }
 function currentYearMonth() { return yearMonthOf(Date.now()); }
+function yearOf(ts) { return new Date(ts).getFullYear(); }
+function currentYear() { return yearOf(Date.now()); }
+
 // How many credits has this member already committed at this restaurant
-// during the current calendar month? = past redemptions this month + any
-// active (unredeemed/uncancelled/unexpired) bookings created this month.
+// during the current calendar YEAR? = past redemptions this year + any
+// active (unredeemed/uncancelled/unexpired) bookings this year.
+// Patricia (May 2026): redemption cap is per-year, not per-month.
 function userCreditsForVenueThisMonth(userId, venueSlug) {
- const ym = currentYearMonth();
+ const yr = currentYear();
  const now = Date.now();
- const redeemedThisMonth = (store.redemptions || []).filter(r =>
+ const redeemedThisYear = (store.redemptions || []).filter(r =>
  r.memberId === userId &&
  r.venueSlug === venueSlug &&
- yearMonthOf(r.redeemedAt) === ym
+ yearOf(r.redeemedAt) === yr
  ).length;
  const activeBookings = (store.bookings || []).filter(b =>
  b.memberId === userId &&
@@ -4795,9 +4802,19 @@ function userCreditsForVenueThisMonth(userId, venueSlug) {
  !b.redeemed && !b.cancelled &&
  b.expiresAt > now
  ).length;
- return redeemedThisMonth + activeBookings;
+ return redeemedThisYear + activeBookings;
 }
-// Remaining credits this month. capOverride lets a UI override pull from
+// Has this member already redeemed (completed) this venue this year?
+// Used by venue cards to render a "Ya canjeado" faded state.
+function userHasRedeemedVenueThisYear(userId, venueSlug) {
+ const yr = currentYear();
+ return (store.redemptions || []).some(r =>
+ r.memberId === userId &&
+ r.venueSlug === venueSlug &&
+ yearOf(r.redeemedAt) === yr
+ );
+}
+// Remaining credits this YEAR. capOverride lets a UI override pull from
 // the partner venue without needing the full venue lookup.
 function userCreditsRemaining(userId, venueSlug, capOverride) {
  const v = findVenueBySlug(venueSlug);
@@ -4806,11 +4823,11 @@ function userCreditsRemaining(userId, venueSlug, capOverride) {
  ?? DEFAULT_CREDITS_PER_USER;
  return Math.max(0, cap - userCreditsForVenueThisMonth(userId, venueSlug));
 }
-// User-friendly label for when credits next refresh. Always the 1st of next month.
+// User-friendly label for when credits next refresh. Now: January 1 next year.
 function creditsRefreshLabel() {
  const now = new Date();
- const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
- return next.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+ const next = new Date(now.getFullYear() + 1, 0, 1);
+ return next.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function bookSlot(v, slot) {
