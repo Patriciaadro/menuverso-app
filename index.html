@@ -5078,11 +5078,17 @@ function Booking() {
  )
  )
  );
- // Booking is repainted every second to refresh the rotating verification
- // token. render()'s autoTranslate sweep only runs on initial route render,
- // so we have to sweep inner after each paint or Stage B headers stay English.
- if (typeof autoTranslate === 'function') autoTranslate(inner);
  }
+ // Wrap paint() so every invocation (whether it hit Stage A, Stage B, or
+ // the post-6-min branch — each has early returns) is followed by an
+ // autoTranslate sweep. Without this, Stage B headers stay English because
+ // render()'s root-level sweep only fires once on route entry, not on the
+ // 1Hz token repaint.
+ const _origPaint = paint;
+ paint = function() {
+ _origPaint.apply(this, arguments);
+ if (typeof autoTranslate === 'function') autoTranslate(inner);
+ };
  paint();
  // Repaint every second while on the animated verification screen, the
  // rotating token + ticking timestamp depend on it.
