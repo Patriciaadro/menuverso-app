@@ -4428,9 +4428,52 @@ function Venue() {
  const v = findVenueBySlug(state.params.slug);
  if (!v) { go('app'); return el('div'); }
  const saved = u ? (store.saved[u.id] || []).includes(v.slug) : false;
+ // Patricia (May 2026): the venue page header should show ALL admin-cover-gallery
+ // photos as a swipeable carousel, not just the first one. We pull `pv.photos`
+ // (the partner's main/cover gallery) and render each as a horizontal-snap slide
+ // when there are 2+ photos. Single-photo and seed venues fall back to VenueArt.
+ // Pull from partner-venue photos (LIVE partner) OR seed-override photos that
+ // admin uploaded for a seed venue. Either way these are the cover gallery.
+ const _heroPhotos = (v._pv?.photos || v.photos || []).filter(p => /^data:image|^https?:/i.test(p));
+ const heroEl = (_heroPhotos.length >= 1) ? (() => {
+ const wrap = el('div',{class:'relative'});
+ const scroller = el('div',{
+ class:'flex w-full snap-x snap-mandatory overflow-x-auto',
+ style:'aspect-ratio:21/9;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;'
+ });
+ // Hide WebKit scrollbar
+ scroller.style.cssText += '::-webkit-scrollbar{display:none;}';
+ _heroPhotos.forEach((src, i) => {
+ const slide = el('div',{class:'snap-center shrink-0 w-full h-full relative',style:'flex:0 0 100%;'},
+ el('img',{src, alt: v.name + ' ' + (i+1), class:'absolute inset-0 w-full h-full object-cover', style:'filter:brightness(0.92) saturate(1.05)'})
+ );
+ scroller.appendChild(slide);
+ });
+ wrap.appendChild(scroller);
+ // Dot indicators only when there's more than one slide
+ if (_heroPhotos.length >= 2) {
+ const dots = el('div',{class:'absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10'});
+ _heroPhotos.forEach((_, i) => {
+ dots.appendChild(el('span',{class:'h-1.5 rounded-full transition-all',
+ style:'width:' + (i === 0 ? '18px' : '6px') + ';background:rgba(255,255,255,' + (i === 0 ? '0.95' : '0.55') + ');box-shadow:0 1px 2px rgba(0,0,0,0.4);',
+ 'data-idx': String(i)
+ }));
+ });
+ wrap.appendChild(dots);
+ scroller.addEventListener('scroll', () => {
+ const i = Math.round(scroller.scrollLeft / scroller.clientWidth);
+ [...dots.children].forEach((d, idx) => {
+ d.style.width = idx === i ? '18px' : '6px';
+ d.style.background = 'rgba(255,255,255,' + (idx === i ? '0.95' : '0.55') + ')';
+ });
+ }, { passive: true });
+ }
+ return wrap;
+ })() : VenueArt(v, {aspect:'21/9', radius:'rounded-none'});
+
  const inner = el('div',{class:'pb-24'},
  el('div',{class:'relative'},
- VenueArt(v, {aspect:'21/9', radius:'rounded-none'}),
+ heroEl,
  el('button',{class:'absolute top-3 left-3 h-9 w-9 rounded-full bg-ink-900/80 grid place-items-center cursor-pointer bg-transparent z-10', onclick:()=>go('app')},'←'),
  u && el('button',{class:'absolute top-3 right-3 h-9 w-9 rounded-full bg-ink-900/80 grid place-items-center text-sm cursor-pointer z-10',
  onclick:()=>{ toggleSaved(v.slug); render(); }
