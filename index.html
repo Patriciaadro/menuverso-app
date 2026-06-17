@@ -2600,7 +2600,7 @@ function WaitlistForm(){
  );
  wrap.appendChild(form);
  if (state === 'error') {
- wrap.appendChild(el('div',{class:'mt-2 text-sm text-red-300'}, errorMsg));
+ wrap.appendChild(el('div',{class:'mt-2 text-sm text-red-600'}, errorMsg));
  }
  }
  paint();
@@ -3861,7 +3861,7 @@ function BookingHistoryRow(b, u) {
  let badge, badgeCls;
  if (b.redeemed) { badge = 'Redeemed'; badgeCls = 'bg-accent-emer/20 text-accent-emer border-accent-emer/40'; }
  else if (b.cancelled) { badge = 'Cancelled'; badgeCls = 'bg-slate2-50/[0.05] text-slate2-400 border-slate2-50/10'; }
- else { badge = 'Expired'; badgeCls = 'bg-red-500/10 text-red-300 border-red-500/30'; }
+ else { badge = 'Expired'; badgeCls = 'bg-red-500/10 text-red-600 border-red-500/30'; }
  const when = b.redeemedAt
  ? new Date(b.redeemedAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
  : new Date(b.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
@@ -4207,7 +4207,7 @@ function AppProfile() {
  // M-1: Resume renewal, gives the member a way back without contacting support.
  sub && sub.status === 'ACTIVE' && sub.cancelAtPeriodEnd && el('div',{class:'mt-3 rounded-[4px] bg-amber-500/10 border border-amber-500/30 px-3 py-2.5 flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
- el('div',{class:'text-amber-300 text-xs font-bold'},'Renewal cancelled'),
+ el('div',{class:'text-amber-700 text-xs font-bold'},'Renewal cancelled'),
  el('div',{class:'text-[11px] text-amber-200/70'},'Membership ends ' + new Date(sub.renewsAt).toLocaleDateString('en-GB') + '. Change your mind?')
  ),
  el('button',{class:'rounded-[4px] bg-accent-emer/20 text-accent-emer border border-accent-emer/40 px-4 py-2.5 text-sm font-extrabold cursor-pointer hover:bg-accent-emer/30 min-h-[44px]', onclick:()=>{
@@ -4297,7 +4297,7 @@ function Venue() {
  v._pv && v._pv.status === 'PAUSED' && el('div',{class:'rounded-[4px] bg-amber-500/10 border border-amber-500/30 p-4'},
  el('div',{class:'flex items-center gap-2'},
  el('span',{class:'h-2 w-2 rounded-full bg-amber-400 animate-pulse shrink-0'}),
- el('div',{class:'text-amber-300 font-bold'},'Currently paused, back soon')
+ el('div',{class:'text-amber-700 font-bold'},'Currently paused, back soon')
  ),
  el('p',{class:'mt-1 text-xs text-amber-200/70'},'This venue isn\'t accepting new bookings right now. Save it and check back.')
  ),
@@ -5440,7 +5440,7 @@ function PartnerPortal() {
  if (pv.status === 'PENDING_APPROVAL') {
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, portalHeader,
  el('div',{class:'mx-auto max-w-2xl px-4 py-16 text-center'},
- el('div',{class:'mx-auto h-16 w-16 rounded-[4px] bg-amber-500/15 grid place-items-center text-amber-300',
+ el('div',{class:'mx-auto h-16 w-16 rounded-[4px] bg-amber-500/15 grid place-items-center text-amber-700',
  html:'<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'}, ''),
  el('h1',{class:'mt-4 text-3xl font-extrabold'},'Under review'),
  el('p',{class:'mt-2 text-slate2-300'},'Thanks, we\'ll email you within one business day. You can keep editing your profile and photos in the meantime — offer details will be set by the menuverso team.'),
@@ -6388,7 +6388,7 @@ function PortalDeals() {
  },
  el('div',{class:`absolute top-0.5 ${s.active?'right-0.5':'left-0.5'} h-5 w-5 rounded-full bg-white transition`})
  ),
- el('button',{class:'text-xs text-red-300 underline cursor-pointer bg-transparent border-0 shrink-0', onclick:()=>{
+ el('button',{class:'text-xs text-red-600 underline cursor-pointer bg-transparent border-0 shrink-0', onclick:()=>{
  pv.dealSlots = pv.dealSlots.filter(x => x.id !== s.id); saveStore(); paint();
  }},'Remove')
  ),
@@ -6776,7 +6776,7 @@ function PortalProfile() {
  existingPendingRemoval.reviewedAt = Date.now();
  saveStore(); toast('Removal request withdrawn'); paint();
  }},'Withdraw request')
- : el('button',{class:'rounded-[4px] bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25 px-4 py-2 text-xs font-extrabold cursor-pointer', onclick:()=>{
+ : el('button',{class:'rounded-[4px] bg-red-500/15 text-red-600 border border-red-500/30 hover:bg-red-500/25 px-4 py-2 text-xs font-extrabold cursor-pointer', onclick:()=>{
  const earlyRemoval = inLockWindow;
  const prompt = earlyRemoval
  ? `EARLY REMOVAL REQUEST\n\nYou\'re still inside the 30-day commitment (lifts ${lockLiftDate}, ${daysLeft} day${daysLeft===1?'':'s'} remaining).\n\nIf you submit anyway, the admin team will review your reason and may still approve, but this will be recorded as a breach of your commitment on your partner record.\n\nReason for early removal:`
@@ -7293,7 +7293,7 @@ function Admin() {
  function statusBadgeClass(s) {
  if (s === 'PENDING') return 'bg-mv-500/20 text-mv-300 border-mv-500/40';
  if (s === 'APPROVED') return 'bg-accent-emer/20 text-accent-emer border-accent-emer/40';
- if (s === 'REJECTED') return 'bg-red-500/20 text-red-300 border-red-500/40';
+ if (s === 'REJECTED') return 'bg-red-500/20 text-red-600 border-red-500/40';
  if (s === 'WITHDRAWN') return 'bg-slate2-50/[0.05] text-slate2-400 border-slate2-50/10';
  return 'bg-slate2-50/[0.05] text-slate2-400 border-slate2-50/10';
  }
@@ -7310,14 +7310,14 @@ function Admin() {
  ...removals.map(cr => el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border ' + (cr.earlyRemoval ? 'border-amber-500/40' : 'border-slate2-50/10') + ' p-4'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
- el('div',{class:'font-bold'}, venueLabel(cr), cr.earlyRemoval && el('span',{class:'ml-2 text-[10px] uppercase tracking-widest font-extrabold text-amber-300 bg-amber-500/15 border border-amber-500/30 rounded-[4px] px-2 py-0.5'},' early')),
+ el('div',{class:'font-bold'}, venueLabel(cr), cr.earlyRemoval && el('span',{class:'ml-2 text-[10px] uppercase tracking-widest font-extrabold text-amber-700 bg-amber-500/15 border border-amber-500/30 rounded-[4px] px-2 py-0.5'},' early')),
  el('div',{class:'mt-0.5 text-xs text-slate2-400'},'Requested ', fmtDate(cr.submittedAt)),
  el('p',{class:'mt-2 text-sm text-slate2-300 leading-relaxed'}, el('span',{class:'font-bold text-slate2-50'},'Reason: '), cr.reason)
  )
  ),
  el('div',{class:'mt-3 flex flex-wrap gap-2'},
  el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-4 py-1.5 text-xs font-extrabold cursor-pointer hover:bg-accent-emer/90', onclick:()=>approveRemovalSoft(cr)},'Approve removal'),
- el('button',{class:'rounded-[4px] bg-red-500/20 text-red-300 border border-red-500/40 px-4 py-1.5 text-xs font-extrabold cursor-pointer hover:bg-red-500/30', onclick:()=>approveRemovalHard(cr)},'Approve + hard delete'),
+ el('button',{class:'rounded-[4px] bg-red-500/20 text-red-600 border border-red-500/40 px-4 py-1.5 text-xs font-extrabold cursor-pointer hover:bg-red-500/30', onclick:()=>approveRemovalHard(cr)},'Approve + hard delete'),
  el('button',{class:'rounded-[4px] bg-slate2-50/10 border border-slate2-50/10 px-4 py-1.5 text-xs font-bold cursor-pointer hover:bg-slate2-50/[0.15]', onclick:()=>rejectRequest(cr)},'Reject')
  )
  ))
@@ -7865,9 +7865,9 @@ function Admin() {
  const activeBks = store.bookings.filter(b => b.venueSlug === pv.slug && !b.redeemed && !b.cancelled && b.expiresAt > Date.now()).length;
  let statusBadge;
  if (pv.status === 'LIVE') statusBadge = 'bg-accent-emer/20 text-accent-emer border-accent-emer/40';
- else if (pv.status === 'PAUSED') statusBadge = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+ else if (pv.status === 'PAUSED') statusBadge = 'bg-amber-500/20 text-amber-700 border-amber-500/40';
  else if (pv.status === 'PENDING_APPROVAL') statusBadge = 'bg-mv-500/20 text-mv-400 border-mv-500/40';
- else if (pv.status === 'REJECTED') statusBadge = 'bg-red-500/20 text-red-300 border-red-500/40';
+ else if (pv.status === 'REJECTED') statusBadge = 'bg-red-500/20 text-red-600 border-red-500/40';
  else statusBadge = 'bg-slate2-50/5 text-slate2-400 border-slate2-50/10';
 
  const quality = qualityFor(pv, false);
@@ -7938,7 +7938,7 @@ function Admin() {
  if (typeof autoTranslate === 'function') autoTranslate(form);
  }}, aT('Editar','Edit')),
  el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:pv.slug})}, aT('Ver','View')),
- el('button',{class:'rounded-[4px] bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ el('button',{class:'rounded-[4px] bg-red-500/20 text-red-600 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  confirmDo('Permanently DELETE ' + pv.name + '? This removes the venue, all its bookings, redemptions, and reviews. Owner account is kept. This cannot be undone.', ()=>{
  deleteVenue(pv.id); toast(aT('Eliminado ','Deleted ') + pv.name); render();
  });
@@ -8024,7 +8024,7 @@ function Admin() {
  el('span',{class:'rounded-[4px] bg-slate2-50/5 text-slate2-400 border border-slate2-50/10 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest'}, 'Seed')
  ),
  el('div',{class:'text-xs text-slate2-400 mt-1'}, (live.barrio || ', '), ' · ', (live.cuisine || ', '), ' · ', '€'.repeat(Math.max(1, Math.min(4, live.priceTier ?? 2)))),
- showSeedMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'},'Missing: ', sq.missing.join(', '))
+ showSeedMissing && el('div',{class:'text-xs text-amber-700 mt-0.5'},'Missing: ', sq.missing.join(', '))
  )
  ),
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
@@ -8049,7 +8049,7 @@ function Admin() {
  el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:v.slug})},'View'),
  // 2026-05-28 (Patricia): admin can now hide a seed venue. Mark as _hidden
  // in the override layer, sync via Supabase. "Revert" brings it back.
- el('button',{class:'rounded-[4px] bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ el('button',{class:'rounded-[4px] bg-red-500/20 text-red-600 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  confirmDo('¿Eliminar "' + v.name + '" de Discover? Se ocultará en todos los dispositivos. Puedes restaurarlo más tarde con "Revert".', ()=>{
  store.seedOverrides = store.seedOverrides || {};
  store.seedOverrides[v.slug] = { ...(store.seedOverrides[v.slug] || {}), _hidden: true };
@@ -8215,7 +8215,7 @@ function Admin() {
  if (draft.deals.length > 1) {
  const delBtn = document.createElement('button');
  delBtn.type = 'button';
- delBtn.className = 'text-xs font-bold text-red-300 hover:text-red-200 cursor-pointer bg-transparent border-0';
+ delBtn.className = 'text-xs font-bold text-red-600 hover:text-red-200 cursor-pointer bg-transparent border-0';
  delBtn.textContent = '× Eliminar';
  delBtn.onclick = () => {
  draft.deals.splice(idx, 1);
@@ -8525,7 +8525,7 @@ function Admin() {
 
  const rmBtn = document.createElement('button');
  rmBtn.type = 'button';
- rmBtn.className = 'rounded-[4px] bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer shrink-0';
+ rmBtn.className = 'rounded-[4px] bg-red-500/20 text-red-600 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer shrink-0';
  rmBtn.textContent = 'Remove';
  rmBtn.onclick = () => {
  draft.dealSlots.splice(idx, 1);
@@ -9016,12 +9016,12 @@ function Admin() {
  store.subscriptions[usr.id] = { status:'ACTIVE', startedAt:Date.now(), renewsAt:Date.now() + 30*86400000, city:'Barcelona', cancelAtPeriodEnd:false };
  saveStore(); toast('Granted free subscription'); render();
  }},'Grant sub'),
- usr.role === 'MEMBER' && sub && el('button',{class:'rounded-[4px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ usr.role === 'MEMBER' && sub && el('button',{class:'rounded-[4px] bg-amber-500/20 text-amber-700 border border-amber-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  confirmDo('Cancel ' + usr.email + '\'s subscription immediately?', ()=>{
  delete store.subscriptions[usr.id]; saveStore(); toast('Subscription removed'); render();
  });
  }},'Cancel sub'),
- el('button',{class:'rounded-[4px] bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ el('button',{class:'rounded-[4px] bg-red-500/20 text-red-600 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  if (usr.id === u.id) { toast('Can\'t delete the admin you\'re signed in as.', 'err'); return; }
  confirmDo('Permanently DELETE ' + usr.email + '? This removes the user, their subscription, bookings, redemptions, saved list, ' + (venue ? 'and their venue ' + venue.name : '') + '. This cannot be undone.', ()=>{
  if (deleteUser(usr.id)) { toast('Deleted ' + usr.email); render(); }
@@ -9101,7 +9101,7 @@ function Admin() {
  b.createdAt ? new Date(b.createdAt).toLocaleString('en-GB') : ', '
  ),
  el('td',{class:'text-xs'},
- isActive && el('button',{class:'underline text-red-300 cursor-pointer bg-transparent border-0', onclick:()=>{
+ isActive && el('button',{class:'underline text-red-600 cursor-pointer bg-transparent border-0', onclick:()=>{
  confirmDo('Cancel this active booking?', ()=>{
  b.cancelled = true; saveStore(); toast('Booking cancelled'); render();
  });
@@ -9400,7 +9400,7 @@ function Admin() {
  return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0 flex-1'},
- el('div',{class:'text-sm font-bold text-amber-300 tracking-widest'}, '★'.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
+ el('div',{class:'text-sm font-bold text-amber-700 tracking-widest'}, '★'.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
  el('p',{class:'mt-1 text-sm text-slate2-200'}, trimmed || el('em',{class:'text-slate2-400'},'(no note)')),
  el('div',{class:'mt-2 text-xs text-slate2-400'},
  (m ? ((m.name||'') + ' · ' + m.email) : 'unknown member'),
@@ -9691,7 +9691,7 @@ function Admin() {
  el('span',{}, author ? ((author.name||'') + ' · ' + author.email) : 'unknown admin'),
  el('span',{class:'flex items-center gap-2'},
  el('span',{}, n.ts ? new Date(n.ts).toLocaleString('en-GB') : ', '),
- el('button',{class:'underline text-red-300 cursor-pointer bg-transparent border-0', onclick:()=>{
+ el('button',{class:'underline text-red-600 cursor-pointer bg-transparent border-0', onclick:()=>{
  confirmDo('Delete this note?', () => {
  store.adminNotes[selectedSlug] = (store.adminNotes[selectedSlug] || []).filter(x => x.id !== n.id);
  saveStore(); toast('Note deleted'); paintNotes();
@@ -9866,7 +9866,7 @@ function Admin() {
  el('tbody',{},
  ...rows.map(r => el('tr',{class:'border-t border-slate2-50/5 align-top'},
  el('td',{class:'py-2 pr-3 font-mono text-slate2-300 whitespace-nowrap'}, r.k),
- el('td',{class:'py-2 pr-3 text-red-300'}, fmt(r.a)),
+ el('td',{class:'py-2 pr-3 text-red-600'}, fmt(r.a)),
  el('td',{class:'py-2 text-accent-emer'}, fmt(r.b))
  ))
  )
