@@ -2,6 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /*.py$
-Disallow: /r/
-Disallow: /restaurants/
+
 Sitemap: https://patriciaadro.github.io/menuverso-app/sitemap.xml
