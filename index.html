@@ -7595,7 +7595,7 @@ function Admin() {
  wrap.append(
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap mb-2'},
  el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},
- store.partnerVenues.length + ' locales en total'
+ store.partnerVenues.length + ' ' + aT(store.partnerVenues.length===1?'local en total':'locales en total', store.partnerVenues.length===1?'venue total':'venues total')
  ),
  el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white font-extrabold px-4 py-2 text-sm cursor-pointer  shadow-mv-500/30',
  onclick:()=>{
@@ -7623,10 +7623,19 @@ function Admin() {
  };
  store.partnerVenues.push(newPv);
  saveStore();
- toast('Nuevo local creado en PENDING. Edita los detalles.');
+ toast(aT('Local creado. Completa los detalles abajo.','Venue created. Fill in the details below.'));
  paintPartners();
+ // Land the admin straight in the editor for the new venue instead of
+ // leaving a blank row behind a toast.
+ const newRow = wrap.querySelector('[data-slug="' + baseSlug + '"]');
+ if (newRow && !newRow.querySelector('[data-edit-form]')) {
+ const form = buildEditForm(newPv, false);
+ newRow.appendChild(form);
+ if (typeof autoTranslate === 'function') autoTranslate(form);
+ newRow.scrollIntoView({ behavior:'smooth', block:'center' });
  }
- }, '+ Añadir local')
+ }
+ }, aT('+ Añadir local','+ Add venue'))
  )
  );
  // ============== HEADER: search + status pills + selectAll ==============
@@ -7864,7 +7873,7 @@ function Admin() {
  const quality = qualityFor(pv, false);
  const showMissing = quality.score <= 6 && quality.missing.length > 0;
 
- return el('div',{'data-venue-row':'1', class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
+ return el('div',{'data-venue-row':'1', 'data-slug': pv.slug, class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'flex items-start gap-3 flex-1 min-w-[200px]'},
  el('input',{type:'checkbox', class:'mt-1.5 shrink-0', checked: selectedPartners.has(pv.slug),
