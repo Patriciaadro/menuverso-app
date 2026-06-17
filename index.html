@@ -2584,9 +2584,7 @@ function Landing() {
  btns.forEach(b => {
  const active = b.dataset.plan === plan;
  b.classList.toggle('bg-mv-500', active);
- b.classList.toggle('text-white', active);
- b.classList.toggle('', active);
- b.classList.toggle('shadow-mv-500/30', active);
+ b.classList.toggle('text-white', active); b.classList.toggle('shadow-mv-500/30', active);
  b.classList.toggle('text-slate2-300', !active);
  b.classList.toggle('hover:text-slate2-100', !active);
  });
