@@ -1130,8 +1130,13 @@ function el(tag, attrs={}, ...children) {
  }
  return e;
 }
-function go(route, params={}) {
+function go(route, params={}, _fromPop) {
  state.route = route; state.params = params;
+ // Record in-app navigation in browser history so Back/Forward work. When this
+ // call originates from a popstate (Back/Forward), don't push a new entry.
+ if (!_fromPop && typeof history !== 'undefined' && history.pushState) {
+ try { history.pushState({ mvRoute: route, mvParams: params }, ''); } catch (e) {}
+ }
  render();
  // Cross-fade transition on route change, makes the app feel like a real
  // SPA instead of an HTML page-reload. Render synchronously (so existing
@@ -11425,6 +11430,15 @@ if (state.session) {
  } catch(e){}
 })();
 render();
+// Wire browser Back/Forward to the SPA router: seed the first history entry with
+// the current route, then restore route/params on popstate (go(..., true) so it
+// doesn't push a duplicate entry).
+try { history.replaceState({ mvRoute: state.route, mvParams: state.params }, ''); } catch (e) {}
+window.addEventListener('popstate', function (e) {
+ var st = e && e.state;
+ if (st && st.mvRoute) go(st.mvRoute, st.mvParams || {}, true);
+ else go('landing', {}, true);
+});
 installIdleTimeout();
 // Phase 2: kick off cross-device venue pull right after first render so
 // the UI paints fast first, then upgrades to Supabase data when it arrives.
