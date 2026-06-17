@@ -2606,8 +2606,10 @@ function Landing() {
 
         function applyPlan(){
           const mon = plan === 'monthly', ann = plan === 'annual';
-          cardMonthly.style.opacity = mon ? '1' : '0.5';
-          cardAnnual.style.opacity = ann ? '1' : '0.5';
+          // Both cards stay full-colour; selection shown by ring + check + a
+          // subtle pop (no dimming, which muddied the dark best-value card).
+          cardMonthly.style.transform = mon ? 'scale(1.02)' : 'none';
+          cardAnnual.style.transform = ann ? 'scale(1.02)' : 'none';
           cardMonthly.classList.toggle('ring-2', mon);
           cardMonthly.classList.toggle('ring-mv-500', mon);
           cardMonthly.classList.toggle('ring-offset-2', mon);
@@ -2767,15 +2769,45 @@ function Landing() {
  REAL SIGN UP
  ======================================================================== */
 function Signup() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ // Plan chosen on the pricing cards, carried in via localStorage. Default annual.
+ let plan = (function(){ try { const p = localStorage.getItem('mv_plan'); return (p === 'monthly' || p === 'annual') ? p : 'annual'; } catch(e){ return 'annual'; } })();
+ try { localStorage.setItem('mv_plan', plan); } catch(e){}
+
+ // Plan summary that carries over from the pricing cards — switchable inline so
+ // signup feels continuous with the choice the member just made.
+ const planBox = el('div',{class:'mt-5 border-2 border-mv-500 bg-ink-900 p-4', style:'box-shadow:5px 5px 0 rgba(244,41,26,0.16);'});
+ function paintPlanBox(){
+ const ann = plan === 'annual';
+ planBox.innerHTML = '';
+ planBox.append(
+ el('div',{class:'flex items-center justify-between gap-2'},
+ el('div',{class:'kick text-mv-500', style:'font-size:10px;'}, ann ? (es?'Plan anual':'Annual plan') : (es?'Plan mensual':'Monthly plan')),
+ el('div',{class:'flex items-center gap-2'},
+ ann ? el('span',{class:'kick bg-mv-500 text-white px-2 py-0.5', style:'font-size:9px;'}, es?'Mejor valor':'Best value') : null,
+ el('button',{type:'button', class:'text-[11px] font-bold text-slate2-400 hover:text-mv-500 underline cursor-pointer bg-transparent border-0', onclick:()=>{ plan = ann ? 'monthly' : 'annual'; try { localStorage.setItem('mv_plan', plan); } catch(e){} paintPlanBox(); }}, es ? (ann?'Cambiar a mensual':'Cambiar a anual') : (ann?'Switch to monthly':'Switch to annual'))
+ )
+ ),
+ el('div',{class:'mt-2 flex items-baseline gap-1'},
+ el('span',{class:'disp text-slate2-50', style:'font-size:38px;white-space:nowrap;'}, ann ? (es?'47,88 €':'€47.88') : (es?'6,99 €':'€6.99')),
+ el('span',{class:'text-sm font-bold text-slate2-400'}, ann ? (es?'/año':'/yr') : (es?'/mes':'/mo'))
+ ),
+ el('div',{class:'text-[12px] text-slate2-400 mt-1'}, ann ? (es?'Equivale a 3,99 €/mes · ahorras 36 €':'Just €3.99/mo · save €36') : (es?'Cancela cuando quieras.':'Cancel any time.'))
+ );
+ }
+ paintPlanBox();
+
  const inner = el('div',{class:'p-6'},
  el('div',{class:'flex items-center justify-between'},
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Back'),
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('signin')},'Sign in')
  ),
- el('div',{class:'text-center mt-4'},
- el('h1',{class:'mt-3 text-2xl font-extrabold'},'Create your account'),
- el('p',{class:'text-slate2-400 text-sm mt-1'},'Then unlock 2-for-1 at our curated Barcelona venues')
+ el('div',{class:'mt-5'},
+ el('div',{class:'h-1.5 w-12 bg-mv-500'}),
+ el('h1',{class:'mt-3 disp text-4xl text-slate2-50'}, es?'CREA TU CUENTA':'CREATE YOUR ACCOUNT'),
+ el('p',{class:'text-slate2-400 text-sm mt-2'}, es?'Y desbloquea 2×1 en nuestros locales seleccionados de Barcelona.':'Then unlock 2-for-1 at our curated Barcelona venues.')
  ),
+ planBox,
  el('form',{class:'mt-6 space-y-3', onSubmit: async (e)=>{
  e.preventDefault();
  const btn = e.target.querySelector('button[type=submit]');
@@ -2784,7 +2816,7 @@ function Signup() {
  const confirm = String(fd.get('confirmPassword') || '');
  if (pw !== confirm) { toast('Passwords don\'t match.', 'err'); return; }
  if (pw.length < 8) { toast('Password must be at least 8 characters.', 'err'); return; }
- btn.disabled = true; btn.textContent = 'Creating account…';
+ btn.disabled = true; btn.textContent = es?'Creando cuenta…':'Creating account…';
  try {
  await registerUser({
  firstName: fd.get('firstName'),
@@ -2798,7 +2830,7 @@ function Signup() {
  go('onboarding-prefs');
  } catch (err) {
  toast(err.message, 'err');
- btn.disabled = false; btn.textContent = 'Create account';
+ btn.disabled = false; btn.textContent = es?'Crear cuenta':'Create account';
  }
  }},
  el('div',{class:'grid grid-cols-2 gap-3'},
@@ -2808,9 +2840,13 @@ function Signup() {
  InputField('Email','email','email','you@example.com', true, 'email'),
  PasswordField('Password','password','At least 8 characters', { helpText:'Tip: tap Show to verify you typed it correctly.' }),
  PasswordField('Confirm password','confirmPassword','Re-type to confirm'),
- el('button',{type:'submit', class:'mt-3 w-full rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer disabled:opacity-50'},'Create account')
+ el('button',{type:'submit', class:'mt-3 w-full rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white py-4 text-lg font-extrabold cursor-pointer disabled:opacity-50 transition', style:'box-shadow:5px 5px 0 var(--ink);'}, es?'Crear cuenta':'Create account')
  ),
- el('div',{class:'mt-4 text-[10px] text-center text-slate2-500'},'By signing up you agree to the Terms & Privacy.')
+ el('div',{class:'mt-4 flex items-center justify-center gap-4 text-[11px] text-slate2-500'},
+ el('span',{class:'inline-flex items-center gap-1.5'}, el('span',{class:'text-mv-500 font-extrabold'},'✓'), es?'Sin compromiso':'No commitment'),
+ el('span',{class:'inline-flex items-center gap-1.5'}, el('span',{class:'text-mv-500 font-extrabold'},'✓'), es?'Cancela cuando quieras':'Cancel any time')
+ ),
+ el('div',{class:'mt-3 text-[10px] text-center text-slate2-500'}, es?'Al registrarte aceptas los Términos y la Política de privacidad.':'By signing up you agree to the Terms & Privacy.')
  );
  return AppShell(inner, { narrow: true });
 }
