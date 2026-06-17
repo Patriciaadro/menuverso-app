@@ -9149,12 +9149,12 @@ function Admin() {
  // future agent seeds 'partner->admin' messages).
  function AdminMessages() {
  const TEMPLATES = [
- { id: 'welcome', label: 'Welcome', text: 'Welcome to Menuverso! Your venue is live and members can now book your 2-for-1 offer. Let us know if you need anything in the first week, we usually see the strongest pickup once your photos and deal terms are polished.' },
- { id: 'photos_good', label: 'Photos look great', text: 'Just a quick note, your photos look great. Members respond best to bright, well-framed shots like these, so thanks for putting in the effort.' },
- { id: 'photos_hr', label: 'Need higher-res photos', text: 'We took a look at your photos and the resolution is a bit low for our member-facing carousels. Could you upload a few higher-res shots (ideally 1600px+ on the long edge)? Happy to point at examples if useful.' },
- { id: 'approval', label: 'Approval reminder', text: 'Friendly nudge, your venue is still pending review on our side. We aim to clear the queue within 48h; if you have any questions in the meantime, just reply here.' },
- { id: 'reject', label: 'Generic rejection', text: 'Thanks for submitting your venue. We aren\'t able to approve it in its current form, most commonly this is because the deal terms, photos, or address details need a bit more work. Please revise and resubmit when ready.' },
- { id: 'rereview', label: 'Re-review needed', text: 'Heads up, we noticed some recent edits to your offer/deal terms and we\'re sending it back for a quick re-review. Members will continue to see the previously-approved version until we sign off on the new one.' }
+ { id: 'welcome', label: 'Bienvenida', text: 'Bienvenidos a Menuverso. Vuestro local ya está en directo y los miembros pueden reservar vuestra oferta 2x1. Avisadnos si necesitáis algo en la primera semana; el pickup más fuerte suele llegar cuando las fotos y los términos de la oferta están pulidos.' },
+ { id: 'photos_good', label: 'Las fotos quedan genial', text: 'Solo una nota rápida: las fotos quedan genial. Los miembros responden mejor a imágenes luminosas y bien enmarcadas como estas, así que gracias por el esfuerzo.' },
+ { id: 'photos_hr', label: 'Necesitamos fotos de más resolución', text: 'Hemos revisado vuestras fotos y la resolución es un poco baja para nuestros carruseles. ¿Podríais subir algunas en mayor resolución (idealmente 1600px o más en el lado largo)? Podemos enviaros ejemplos si os sirve.' },
+ { id: 'approval', label: 'Recordatorio de aprobación', text: 'Un aviso amistoso: vuestro local sigue pendiente de revisión por nuestra parte. Intentamos despejar la cola en 48 h. Si tenéis cualquier duda mientras tanto, respondednos por aquí.' },
+ { id: 'reject', label: 'Rechazo genérico', text: 'Gracias por enviar vuestro local. No podemos aprobarlo en su forma actual; lo más común es que los términos de la oferta, las fotos o los datos de dirección necesiten algo más de trabajo. Revisad y volved a enviarlo cuando esté listo.' },
+ { id: 'rereview', label: 'Necesita re-revisión', text: 'Atención: hemos detectado cambios recientes en vuestra oferta y la enviamos de vuelta a una revisión rápida. Los miembros seguirán viendo la versión aprobada anterior hasta que demos el OK a la nueva.' }
  ];
 
  let selectedSlug = null;
@@ -9165,8 +9165,13 @@ function Admin() {
  function paintMessages() {
  wrap.innerHTML = '';
  // Sidebar list: every partner-owned venue, ordered by most recent
- // message (or by name when there's no thread yet).
- const partners = store.partnerVenues.slice().sort((a,b) => {
+ // message (or by name when there's no thread yet). Venues without an
+ // assigned owner (orphan add-venue rows) are filtered out — there's
+ // nobody to message there, and they were showing up as ghost "Nuevo
+ // local · no owner" rows.
+ const partners = store.partnerVenues
+ .filter(pv => store.users.some(x => x.id === pv.ownerId))
+ .sort((a,b) => {
  const am = (store.partnerMessages[a.slug] || []).slice(-1)[0]?.ts || 0;
  const bm = (store.partnerMessages[b.slug] || []).slice(-1)[0]?.ts || 0;
  if (am !== bm) return bm - am;
@@ -9175,7 +9180,7 @@ function Admin() {
 
  const sidebar = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
  partners.length === 0
- ? el('p',{class:'p-4 text-sm text-slate2-400'},'No partners yet.')
+ ? el('p',{class:'p-4 text-sm text-slate2-400'},'Aún no hay partners.')
  : el('ul',{class:'divide-y divide-white/5'},
  ...partners.map(pv => {
  const msgs = store.partnerMessages[pv.slug] || [];
@@ -9187,9 +9192,9 @@ function Admin() {
  onclick:()=>{ selectedSlug = pv.slug; composer = ''; selectedTemplateId = ''; paintMessages(); }
  },
  el('div',{class:'font-bold text-slate2-50 truncate'}, pv.name),
- el('div',{class:'text-xs text-slate2-400 truncate'}, owner ? owner.email : 'no owner'),
+ el('div',{class:'text-xs text-slate2-400 truncate'}, owner ? owner.email : 'sin propietario'),
  el('div',{class:'mt-1 flex items-center justify-between gap-2'},
- el('span',{class:'text-xs text-slate2-400 truncate'}, last ? (last.text.slice(0, 60) + (last.text.length>60?'…':'')) : el('em',{},'No messages yet')),
+ el('span',{class:'text-xs text-slate2-400 truncate'}, last ? (last.text.slice(0, 60) + (last.text.length>60?'…':'')) : el('em',{},'Aún no hay mensajes')),
  msgs.length > 0 && el('span',{class:'text-[10px] text-slate2-400 shrink-0'}, String(msgs.length))
  )
  )
@@ -9201,7 +9206,7 @@ function Admin() {
  // Conversation pane
  let pane;
  if (!selectedSlug) {
- pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Pick a partner on the left to view the thread.');
+ pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Selecciona un partner a la izquierda para ver el hilo.');
  } else {
  const pv = store.partnerVenues.find(x => x.slug === selectedSlug);
  const owner = pv ? store.users.find(x => x.id === pv.ownerId) : null;
@@ -9211,27 +9216,27 @@ function Admin() {
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-slate2-50/10'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-slate2-50'}, pv ? pv.name : selectedSlug),
- el('div',{class:'text-xs text-slate2-400 truncate'}, owner ? owner.email : 'no owner')
+ el('div',{class:'text-xs text-slate2-400 truncate'}, owner ? owner.email : 'sin propietario')
  ),
- el('span',{class:'text-xs text-slate2-400 shrink-0'}, msgs.length + ' message' + (msgs.length===1?'':'s'))
+ el('span',{class:'text-xs text-slate2-400 shrink-0'}, msgs.length + ' ' + (msgs.length===1 ? 'mensaje' : 'mensajes'))
  ),
  // History
  msgs.length === 0
- ? el('p',{class:'text-sm text-slate2-400 italic'},'No messages yet, start the conversation below.')
+ ? el('p',{class:'text-sm text-slate2-400 italic'},'Aún no hay mensajes; empieza la conversación abajo.')
  : el('div',{class:'space-y-2 max-h-[360px] overflow-y-auto pr-1'},
  ...msgs.map(m => {
  const fromAdmin = m.dir === 'admin->partner';
  return el('div',{class:'rounded-[4px] border p-3 ' + (fromAdmin ? 'bg-mv-500/10 border-mv-500/30 ml-8' : 'bg-slate2-50/5 border-slate2-50/10 mr-8')},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400'}, fromAdmin ? 'Admin → Partner' : 'Partner → Admin'),
  el('p',{class:'mt-1 text-sm text-slate2-200 whitespace-pre-wrap'}, m.text),
- el('div',{class:'mt-1 text-[10px] text-slate2-400'}, m.ts ? new Date(m.ts).toLocaleString('en-GB') : '')
+ el('div',{class:'mt-1 text-[10px] text-slate2-400'}, m.ts ? new Date(m.ts).toLocaleString('es-ES') : '')
  );
  })
  ),
  // Composer
  el('div',{class:'pt-3 border-t border-slate2-50/10 space-y-2'},
  el('div',{class:'flex items-center gap-2 flex-wrap'},
- el('label',{class:'text-xs text-slate2-400'},'Template:'),
+ el('label',{class:'text-xs text-slate2-400'},'Plantilla:'),
  el('select',{class:'bg-slate2-50/5 border border-slate2-50/10 rounded-[4px] px-3 py-1 text-xs text-slate2-50 cursor-pointer',
  onChange: e => {
  selectedTemplateId = e.target.value;
@@ -9240,12 +9245,12 @@ function Admin() {
  paintMessages();
  }
  },
- el('option',{value:''}, ', Pick a template, '),
+ el('option',{value:''}, 'Elige una plantilla'),
  ...TEMPLATES.map(t => el('option',{value:t.id, selected: selectedTemplateId === t.id ? '' : false}, t.label))
  )
  ),
  (() => {
- const ta = el('textarea',{class:'w-full bg-slate2-50/5 border border-slate2-50/10 rounded-[4px] p-3 text-sm text-slate2-50 outline-none', rows:'4', placeholder:'Write a message to this partner…',
+ const ta = el('textarea',{class:'w-full bg-slate2-50/5 border border-slate2-50/10 rounded-[4px] p-3 text-sm text-slate2-50 outline-none', rows:'4', placeholder:'Escribe un mensaje a este partner…',
  onInput: e => { composer = e.target.value; }
  });
  ta.value = composer;
@@ -9254,7 +9259,7 @@ function Admin() {
  el('div',{class:'flex justify-end'},
  el('button',{class:'rounded-[4px] bg-mv-500 text-white px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
  const text = composer.trim();
- if (!text) { toast('Write something first', 'err'); return; }
+ if (!text) { toast('Escribe algo primero', 'err'); return; }
  if (!store.partnerMessages[selectedSlug]) store.partnerMessages[selectedSlug] = [];
  store.partnerMessages[selectedSlug].push({
  id: 'pm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6),
@@ -9264,11 +9269,11 @@ function Admin() {
  templateId: selectedTemplateId || null
  });
  saveStore();
- toast('Message sent');
+ toast('Mensaje enviado');
  composer = '';
  selectedTemplateId = '';
  paintMessages();
- }},'Send')
+ }},'Enviar')
  )
  )
  );
