@@ -6932,6 +6932,19 @@ function StatPanel(icon,label,value,sub) {
  re-review, booking cancellation, data export/import/reset. Confirmation
  dialogs for destructive actions. Search/filter on every table.
  ======================================================================== */
+// Admin label helper: pick ES/EN at call time (robust, independent of the dict).
+function aT(es, en){ return (typeof MV_LANG !== 'undefined' && MV_LANG === 'es') ? es : en; }
+// Friendly, colour-coded venue status: { label, badge classes, dot colour }.
+function venueStatusMeta(s){
+ switch (s) {
+ case 'PENDING_APPROVAL': return { label: aT('Pendiente','Pending'),  badge:'bg-amber-500/15 text-amber-300 border-amber-500/40',       dot:'#f59e0b' };
+ case 'LIVE':             return { label: aT('En vivo','Live'),       badge:'bg-accent-emer/15 text-accent-emer border-accent-emer/40', dot:'#34d399' };
+ case 'PAUSED':           return { label: aT('Pausado','Paused'),     badge:'bg-slate2-50/10 text-slate2-300 border-slate2-50/20',      dot:'#94a3b8' };
+ case 'REJECTED':         return { label: aT('Rechazado','Rejected'), badge:'bg-red-500/15 text-red-300 border-red-500/40',             dot:'#ef4444' };
+ case 'DRAFT':            return { label: aT('Borrador','Draft'),     badge:'bg-slate2-50/5 text-slate2-400 border-slate2-50/12',       dot:'#9ca3af' };
+ default:                 return { label: s,                          badge:'bg-slate2-50/5 text-slate2-400 border-slate2-50/12',       dot:'#9ca3af' };
+ }
+}
 function Admin() {
  const u = currentUser();
  if (!u || u.role !== 'ADMIN') { go('signin'); return el('div'); }
@@ -7591,7 +7604,7 @@ function Admin() {
  el('div',{class:'flex items-center gap-3 flex-wrap'},
  el('div',{class:'flex-1 min-w-[220px] flex items-center gap-2 bg-slate2-50/[0.06] rounded-[4px] px-3 h-9 border border-slate2-50/12 focus-within:border-mv-500/60 focus-within:bg-slate2-50/[0.08] transition-colors'},
  lucide('search',{class:'h-4 w-4 text-slate2-500 shrink-0'}),
- el('input',{class:'bg-transparent outline-none text-[13px] text-slate2-50 placeholder:text-slate2-500 flex-1', placeholder:'Search by name, cuisine, barrio, owner email', value:q,
+ el('input',{class:'bg-transparent outline-none text-[13px] text-slate2-50 placeholder:text-slate2-500 flex-1', placeholder: aT('Buscar por nombre, cocina, barrio, email del propietario','Search by name, cuisine, barrio, owner email'), value:q,
  onInput: e => { q = e.target.value; paintPartners(); }}),
  q ? el('button',{class:'text-slate2-500 hover:text-slate2-200 cursor-pointer bg-transparent border-0 shrink-0', onclick:()=>{ q=''; paintPartners(); }}, lucide('x',{class:'h-3.5 w-3.5'})) : null
  ),
@@ -7599,19 +7612,19 @@ function Admin() {
  ...['all','PENDING_APPROVAL','LIVE','PAUSED','REJECTED','DRAFT'].map(s =>
  el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (statusFilter === s ? 'bg-mv-500 text-white' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ statusFilter = s; paintPartners(); }
- }, s === 'all' ? 'All' : s)
+ }, s === 'all' ? aT('Todos','All') : venueStatusMeta(s).label)
  )
  ),
  el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (filtersOpen || anyFilterActive() ? 'bg-mv-500/20 text-mv-400 border border-mv-500/40' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ filtersOpen = !filtersOpen; paintPartners(); }
- }, (anyFilterActive() ? '● ' : '') + 'Filters')
+ }, (anyFilterActive() ? '● ' : '') + aT('Filtros','Filters'))
  )
  );
 
  // ============== Quick filter presets (D2) ==============
  wrap.append(
  el('div',{class:'flex items-center gap-2 flex-wrap'},
- el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Quick filters'),
+ el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'}, aT('Filtros rápidos','Quick filters')),
  el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 text-slate2-300 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
  onclick:()=>{
  statusFilter = 'PENDING_APPROVAL';
@@ -7622,7 +7635,7 @@ function Admin() {
  filters._pendingOver24h = true;
  paintPartners();
  wrap.scrollIntoView({behavior:'smooth', block:'start'});
- }}, 'Pending >24h'),
+ }}, aT('Pendientes >24h','Pending >24h')),
  el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 text-slate2-300 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
  onclick:()=>{
  statusFilter = 'all';
@@ -7630,7 +7643,7 @@ function Admin() {
  filters.photos = 'missing';
  paintPartners();
  wrap.scrollIntoView({behavior:'smooth', block:'start'});
- }}, 'No photos'),
+ }}, aT('Sin fotos','No photos')),
  el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 text-slate2-300 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-slate2-50/10',
  onclick:()=>{
  statusFilter = 'all';
@@ -7638,7 +7651,7 @@ function Admin() {
  filters._noRedemptions = true;
  paintPartners();
  wrap.scrollIntoView({behavior:'smooth', block:'start'});
- }}, 'No redemptions')
+ }}, aT('Sin canjes','No redemptions'))
  )
  );
 
@@ -7775,9 +7788,9 @@ function Admin() {
  else displayList.forEach(v => selectedPartners.delete(v.slug));
  paintPartners();
  }}),
- el('span',{}, 'Select all matching filter')
+ el('span',{}, aT('Seleccionar todos los del filtro','Select all matching filter'))
  ),
- el('div',{class:'ml-auto'}, displayList.length + ' venue' + (displayList.length===1?'':'s'))
+ el('div',{class:'ml-auto'}, displayList.length + ' ' + aT(displayList.length===1?'local':'locales', displayList.length===1?'venue':'venues'))
  )
  );
 
@@ -7794,13 +7807,13 @@ function Admin() {
  }
  wrap.append(
  el('div',{class:'flex items-center gap-1 flex-wrap'},
- el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mr-1'},'Sort'),
- sortBtn('default','Default'),
- sortBtn('name','Name'),
- sortBtn('status','Status'),
- sortBtn('rating','Rating'),
- sortBtn('redemptions','Redemptions'),
- sortBtn('submitted','Submitted')
+ el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mr-1'}, aT('Ordenar','Sort')),
+ sortBtn('default', aT('Por defecto','Default')),
+ sortBtn('name', aT('Nombre','Name')),
+ sortBtn('status', aT('Estado','Status')),
+ sortBtn('rating', aT('Valoración','Rating')),
+ sortBtn('redemptions', aT('Canjes','Redemptions')),
+ sortBtn('submitted', aT('Enviado','Submitted'))
  )
  );
 
@@ -7829,34 +7842,34 @@ function Admin() {
  el('div',{class:'flex-1 min-w-[200px]'},
  el('div',{class:'flex items-center gap-2 flex-wrap'},
  el('div',{class:'font-bold text-lg'}, pv.name),
- el('span',{class:'rounded-[4px] border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + statusBadge}, pv.status),
+ (function(){ const sm = venueStatusMeta(pv.status); return el('span',{class:'inline-flex items-center gap-1.5 rounded-[4px] border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + sm.badge}, el('span',{class:'inline-block h-1.5 w-1.5 rounded-full', style:'background:'+sm.dot}), sm.label); })(),
  qualityBadge(quality)
  ),
- el('div',{class:'text-xs text-slate2-400 mt-1'}, (localizeBarrio(pv.barrio) || ', '), ' · ', (localizeCuisine(pv.cuisine) || ', '), ' · ', owner?.email ?? 'no owner'),
- showMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'},'Missing: ', quality.missing.join(', ')),
- el('div',{class:'text-xs text-slate2-400'}, String((pv.photos||[]).length), ' ', 'photos', ' · ', String(reds), ' ', 'redemptions', ' · ', String(activeBks), ' ', activeBks===1?'active booking':'active bookings'),
- pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'},'Rejection reason: ', pv.rejectionReason)
+ el('div',{class:'text-xs text-slate2-400 mt-1'}, (localizeBarrio(pv.barrio) || ', '), ' · ', (localizeCuisine(pv.cuisine) || ', '), ' · ', owner?.email ?? aT('sin propietario','no owner')),
+ showMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'}, aT('Falta: ','Missing: '), quality.missing.join(', ')),
+ el('div',{class:'text-xs text-slate2-400'}, String((pv.photos||[]).length), ' ', aT('fotos','photos'), ' · ', String(reds), ' ', aT('canjes','redemptions'), ' · ', String(activeBks), ' ', activeBks===1?aT('reserva activa','active booking'):aT('reservas activas','active bookings')),
+ pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'}, aT('Motivo del rechazo: ','Rejection reason: '), pv.rejectionReason)
  )
  ),
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
  pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-3 py-1 text-xs font-extrabold cursor-pointer', onclick:()=>{
- pv.status='LIVE'; pv.approvedAt=Date.now(); saveStore(); toast('Approved'); render();
- }},' Approve'),
+ pv.status='LIVE'; pv.approvedAt=Date.now(); saveStore(); toast(aT('Aprobado','Approved')); render();
+ }}, aT('Aprobar','Approve')),
  pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-[4px] bg-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
- const reason = window.prompt('Reason:') || 'Requires more info.';
- pv.status='REJECTED'; pv.rejectionReason=reason; saveStore(); toast('Rejected'); render();
- }},'Reject'),
+ const reason = window.prompt(aT('Motivo:','Reason:')) || aT('Requiere más información.','Requires more info.');
+ pv.status='REJECTED'; pv.rejectionReason=reason; saveStore(); toast(aT('Rechazado','Rejected')); render();
+ }}, aT('Rechazar','Reject')),
  pv.status === 'LIVE' && el('button',{class:'rounded-[4px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
- pv.status='PAUSED'; saveStore(); toast('Paused'); render();
- }},' Pause'),
+ pv.status='PAUSED'; saveStore(); toast(aT('Pausado','Paused')); render();
+ }}, aT('Pausar','Pause')),
  pv.status === 'PAUSED' && el('button',{class:'rounded-[4px] bg-accent-emer/20 text-accent-emer border border-accent-emer/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
- pv.status='LIVE'; saveStore(); toast('Resumed'); render();
- }},'▶ Resume'),
+ pv.status='LIVE'; saveStore(); toast(aT('Reanudado','Resumed')); render();
+ }}, '▶ ' + aT('Reanudar','Resume')),
  (pv.status === 'LIVE' || pv.status === 'PAUSED') && el('button',{class:'rounded-[4px] bg-mv-500/20 text-mv-400 border border-mv-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  confirmDo('Re-review ' + pv.name + '? It will go back to PENDING and be hidden from members.', ()=>{
- pv.status='PENDING_APPROVAL'; pv.submittedAt=Date.now(); pv.approvedAt=null; saveStore(); toast('Sent back for review'); render();
+ pv.status='PENDING_APPROVAL'; pv.submittedAt=Date.now(); pv.approvedAt=null; saveStore(); toast(aT('Enviado de nuevo a revisión','Sent back for review')); render();
  });
- }},'Re-review'),
+ }}, aT('Re-revisar','Re-review')),
  // Inline Edit, opens a small form below the venue row.
  // Saves directly to store.partnerVenues (no admin-approval
  // gate; admins bypass the partner-side change-request flow).
@@ -7868,13 +7881,13 @@ function Admin() {
  card.appendChild(form);
  // Inline-injected DOM bypasses render()'s autoTranslate sweep; run it now.
  if (typeof autoTranslate === 'function') autoTranslate(form);
- }},'Edit'),
- el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:pv.slug})},'View'),
+ }}, aT('Editar','Edit')),
+ el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>go('venue',{slug:pv.slug})}, aT('Ver','View')),
  el('button',{class:'rounded-[4px] bg-red-500/20 text-red-300 border border-red-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  confirmDo('Permanently DELETE ' + pv.name + '? This removes the venue, all its bookings, redemptions, and reviews. Owner account is kept. This cannot be undone.', ()=>{
- deleteVenue(pv.id); toast('Deleted ' + pv.name); render();
+ deleteVenue(pv.id); toast(aT('Eliminado ','Deleted ') + pv.name); render();
  });
- }},'Delete')
+ }}, aT('Eliminar','Delete'))
  )
  )
  );
