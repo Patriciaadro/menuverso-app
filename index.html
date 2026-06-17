@@ -2174,7 +2174,7 @@ function ActiveCodeRibbon() {
  const m = Math.floor(msLeft / 60000), sec = Math.floor((msLeft / 1000) % 60);
  const urgent = msLeft < 5*60000;
  const bg = onBookingsTab
- ? 'bg-mv-500/15 border-b border-mv-500/40 text-mv-300'
+ ? 'bg-mv-500/15 border-b border-mv-500/40 text-mv-600'
  : (urgent ? 'bg-red-600 text-white' : 'bg-mv-500 text-white');
  return el('div',{
  class: 'sticky top-[57px] z-20 ' + bg + ' cursor-pointer hover:opacity-95 transition',
@@ -2200,7 +2200,7 @@ function ActiveCodeRibbon() {
  const urgent = msLeft < 5*60000;
  // Quieter on Bookings tab, the code is already loud below.
  const bg = onBookingsTab
- ? 'bg-mv-500/15 border-b border-mv-500/40 text-mv-300'
+ ? 'bg-mv-500/15 border-b border-mv-500/40 text-mv-600'
  : (urgent ? 'bg-red-600 text-white' : 'bg-mv-500 text-white');
  return el('div',{
  class: 'sticky top-[57px] z-20 ' + bg + ' cursor-pointer hover:opacity-95 transition',
@@ -3519,7 +3519,7 @@ function AppMap() {
  function chip(label, on, onclick, accent) {
  const cls = 'rounded-[4px] px-3 py-1 text-xs font-bold cursor-pointer transition border ' + (
  on
- ? (accent ? 'bg-accent-emer/15 text-accent-emer border-accent-emer/40' : 'bg-mv-500/15 text-mv-300 border-mv-500/40')
+ ? (accent ? 'bg-accent-emer/15 text-accent-emer border-accent-emer/40' : 'bg-mv-500/15 text-mv-600 border-mv-500/40')
  : 'bg-slate2-50/[0.04] text-slate2-300 border-slate2-50/10 hover:bg-slate2-50/[0.08]'
  );
  return el('button',{class:cls, onclick, type:'button'}, label);
@@ -5413,7 +5413,7 @@ function PartnerPortal() {
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'font-bold text-sm sm:text-base truncate'}, el('span',{class:'lowercase text-mv-500'},'menuverso'), ' · partner portal'),
  el('div',{class:'text-xs text-slate2-400 truncate'}, pv.name, ' · ',
- el('span',{class: pv.status === 'LIVE' ? 'text-accent-emer font-bold' : 'text-amber-400 font-bold'}, pv.status)
+ el('span',{class: pv.status === 'LIVE' ? 'text-accent-emer font-bold' : 'text-amber-700 font-bold'}, pv.status)
  )
  )
  ),
@@ -5724,7 +5724,7 @@ function PartnerOnboarding() {
  function reqLabel(label, key) {
  return el('label',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold flex items-center gap-1'},
  label, el('span',{class:'text-mv-500'},'*'),
- errors[key] && el('span',{class:'normal-case text-red-400 text-xs ml-2'}, errors[key])
+ errors[key] && el('span',{class:'normal-case text-red-600 text-xs ml-2'}, errors[key])
  );
  }
  function optLabel(label) {
@@ -5893,7 +5893,7 @@ function PartnerOnboarding() {
  el('div',{},
  el('div',{class:'flex items-center justify-between'},
  el('span',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'2×1 deal slots'),
- errors._slots && el('span',{class:'text-xs text-red-400'}, errors._slots)
+ errors._slots && el('span',{class:'text-xs text-red-600'}, errors._slots)
  ),
  el('p',{class:'mt-1 text-[11px] text-slate2-400 leading-relaxed'},
  'These are the windows when your 2×1 offer is active, a subset of your opening hours, not the opening hours themselves. Toggle the ones you want.'
@@ -5963,7 +5963,7 @@ function PartnerOnboarding() {
  accepted && el('div',{class:'mt-2 text-[10px] text-slate2-500'},'Accepted ' + new Date(pv.tncAcceptedAt).toLocaleString('en-GB') + ' · ' + TNC_VERSION)
  )
  ),
- errors._tnc && el('div',{class:'mt-2 text-xs text-red-400'}, errors._tnc)
+ errors._tnc && el('div',{class:'mt-2 text-xs text-red-600'}, errors._tnc)
  );
  }
 
@@ -6541,7 +6541,7 @@ function PortalDeals() {
  if (pending) {
  topBanner.append(el('div',{class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 p-4 flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
- el('div',{class:'flex items-center gap-2 text-mv-300 font-bold text-sm'},
+ el('div',{class:'flex items-center gap-2 text-mv-600 font-bold text-sm'},
  el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Changes pending admin review'
  ),
  el('p',{class:'mt-1 text-xs text-slate2-300'},'Submitted ' + new Date(pending.submittedAt).toLocaleString('en-GB') + '. Your members are still seeing the previously approved offer. You can keep editing, those edits won\'t enter the queue until you submit again.')
@@ -6566,7 +6566,7 @@ function PortalDeals() {
  const summary = changes.length === 1 ? changes[0] : changes.slice(0, -1).join(', ') + ' and ' + changes.slice(-1);
  bottomBar.append(el('div',{class:'sticky bottom-0 z-20 rounded-[4px] bg-mv-500/10 border border-mv-500/40 p-4 flex items-center justify-between gap-3 flex-wrap  shadow-mv-500/10 backdrop-blur'},
  el('div',{class:'min-w-0'},
- el('div',{class:'text-mv-300 font-bold text-sm'},'You have unsubmitted changes to ' + (summary || 'the deal')),
+ el('div',{class:'text-mv-600 font-bold text-sm'},'You have unsubmitted changes to ' + (summary || 'the deal')),
  el('p',{class:'mt-1 text-[11px] text-slate2-400'},'Edits to the deal go through admin approval. Live offer doesn\'t change until approved.')
  ),
  el('div',{class:'flex items-center gap-2 flex-wrap shrink-0'},
@@ -7291,7 +7291,7 @@ function Admin() {
  return out;
  }
  function statusBadgeClass(s) {
- if (s === 'PENDING') return 'bg-mv-500/20 text-mv-300 border-mv-500/40';
+ if (s === 'PENDING') return 'bg-mv-500/20 text-mv-600 border-mv-500/40';
  if (s === 'APPROVED') return 'bg-accent-emer/20 text-accent-emer border-accent-emer/40';
  if (s === 'REJECTED') return 'bg-red-500/20 text-red-600 border-red-500/40';
  if (s === 'WITHDRAWN') return 'bg-slate2-50/[0.05] text-slate2-400 border-slate2-50/10';
@@ -8153,7 +8153,7 @@ function Admin() {
  const required = !!(opts && opts.required);
  const wrap = document.createElement('label');
  wrap.className = 'block';
- const star = required ? ' <span class="text-red-400" aria-hidden="true">*</span>' : '';
+ const star = required ? ' <span class="text-red-600" aria-hidden="true">*</span>' : '';
  wrap.innerHTML = '<div class="text-[10px] uppercase tracking-widest text-slate2-400 font-bold mb-1">' + label + star + '</div>';
  const inp = document.createElement(type === 'textarea' ? 'textarea' : 'input');
  if (type !== 'textarea') inp.type = type || 'text';
