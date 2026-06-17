@@ -168,8 +168,12 @@ tailwind.config = {
  box-shadow: 0 6px 14px rgba(229,56,42,.45), 0 1px 0 rgba(255,255,255,.2) inset;
  display: grid; place-items: center;
  font-size: 18px; line-height: 1;
+ color: #FFFFFF;
  transition: transform .18s ease, box-shadow .18s ease;
  }
+ /* Brand monogram inside each pin — Anton "M", inherits pin color so it
+ flips to scarlet on the white active-state pin. */
+ .mv-pin-m { font-family:'Anton','Impact',sans-serif; font-size:21px; line-height:1; font-weight:400; color:inherit; transform:translateY(1px); }
  .mv-pin-tail {
  position: absolute; top: 33px; left: 50%;
  transform: translateX(-50%);
@@ -2439,7 +2443,7 @@ function MoodTile(mood, isActive, onClick) {
  class:'shrink-0 inline-flex items-center justify-center rounded-[4px] px-4 py-2 text-[13px] font-semibold whitespace-nowrap border transition-all cursor-pointer ' +
  (isActive
  ? 'bg-mv-500 text-white border-mv-500 '
- : 'bg-white text-ink-900 border-slate2-200 hover:border-mv-500/60 hover:text-mv-600'),
+ : 'bg-white text-slate2-50 border-slate2-200 hover:border-mv-500/60 hover:text-mv-600'),
  style: isActive ? '' : 'border-color:#E5E7EB;',
  onclick: onClick
  }, labelText);
@@ -3540,7 +3544,7 @@ function AppMap() {
  html:
  '<div class="mv-pin-wrap' + liveCls + flashCls + '" data-slug="' + v.slug + '">' +
  '<div class="mv-pin-name">' + escapeHtml(v.name) + '</div>' +
- '<div class="mv-pin">' + pinGlyph(v) + '</div>' +
+ '<div class="mv-pin"><span class="mv-pin-m">M</span></div>' +
  '<div class="mv-pin-tail"></div>' +
  '</div>',
  iconSize: [42, 50],
@@ -3677,8 +3681,11 @@ function AppMap() {
  ),
  tickerNode ? el('div',{class:'px-4 pt-4'}, tickerNode) : null,
  el('div',{class:'p-4 grid gap-4 lg:grid-cols-[340px_1fr]'},
- // LEFT: list, collapses below the map on narrow screens via CSS order tricks
- el('div',{class:'order-2 lg:order-1 space-y-3'}, listEl),
+ // LEFT: list, collapses below the map on narrow screens via CSS order tricks.
+ // Bottom fade signals the list scrolls (instead of a hard-sliced last card).
+ el('div',{class:'order-2 lg:order-1 relative'}, listEl,
+ el('div',{class:'pointer-events-none absolute bottom-0 left-0 right-0 h-10', style:'background:linear-gradient(to top, var(--paper), transparent);'})
+ ),
  // RIGHT: map
  el('div',{class:'order-1 lg:order-2'}, mapEl)
  )
@@ -5031,6 +5038,159 @@ function PartnerLanding() {
  )
  );
 
+ // ====== Partners FAQ ======
+ // Content from Patricia's ES FAQ doc (2026-06). Bilingual: rendered ES/EN
+ // off MV_LANG and re-runs on setLang() via the top-level render(), so it
+ // tracks the in-place language swap. Accordion toggles the 'hidden' class
+ // (non-empty string — safe from the empty-classList-toggle bug).
+ const faqLang = (typeof MV_LANG !== 'undefined' && MV_LANG === 'en') ? 'en' : 'es';
+ const faqChevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polyline points="6 9 12 15 18 9"/></svg>';
+ const faqData = [
+ { cat:{es:'Primeros pasos', en:'Getting started'}, items:[
+ { q:{es:'¿Cuáles son las ventajas de unirme a Menuverso?', en:'What are the advantages of joining Menuverso?'},
+ a:{ es:{ bullets:[
+ 'Visibilidad gratuita: te conectamos con una comunidad activa de foodies que buscan descubrir nuevos lugares. Como son los usuarios quienes pagan la suscripción, para tu local es totalmente gratis.',
+ 'El mejor marketing: no hay nada como el boca a boca. Damos a los usuarios el incentivo perfecto para que visiten tu local, prueben tu producto y te recomienden.',
+ 'Condiciones a tu medida: un nuevo canal de captación de clientes sin costes extra ni comisiones, ofreciendo solo promociones que se adapten a tu negocio.'
+ ]},
+ en:{ bullets:[
+ 'Free visibility: we connect you with an active community of foodies looking to discover new places. Since users pay the subscription, it is completely free for your venue.',
+ 'The best marketing: nothing beats word of mouth. We give users the perfect incentive to visit your venue, try your food and recommend you.',
+ 'Terms that fit you: a new customer-acquisition channel with no extra costs or commissions, offering only promotions that suit your business.'
+ ]} } },
+ { q:{es:'¿Quién puede convertirse en partner de Menuverso?', en:'Who can become a Menuverso partner?'},
+ a:{ es:{text:'Menuverso es para restaurantes, cafeterías y bares que quieren llegar a nuevos clientes y ganar visibilidad en la ciudad.'},
+ en:{text:'Menuverso is for restaurants, cafés and bars that want to reach new customers and gain visibility in the city.'} } },
+ { q:{es:'¿Cómo funciona ser partner de Menuverso en la práctica?', en:'How does being a Menuverso partner work in practice?'},
+ a:{ es:{ text:'Menuverso pone tu local frente a una comunidad creciente de amantes de la gastronomía que descubren la ciudad a través de la app. El proceso es sencillo:', bullets:[
+ 'Alta — creamos juntos la página de tu local. Tú eliges las ofertas que quieres lanzar (por ejemplo, un 2x1 en plato principal) y decides con qué frecuencia puede canjearse cada una.',
+ 'Descubrimiento y reserva — los usuarios te encuentran a través de la app y de nuestros canales de marketing. Eligen la oferta deseada y la presentan al pedir.',
+ 'En la mesa — la oferta se aplica al pedir la cuenta. El usuario solo tiene que validarla con un clic en su app y mostrarte la pantalla. ¡Así de fácil! Ya puedes entregarle la cuenta con el descuento aplicado.'
+ ]},
+ en:{ text:'Menuverso puts your venue in front of a growing community of food lovers who discover the city through the app. The process is simple:', bullets:[
+ 'Sign-up — together we build your venue page. You choose the offers you want to launch (for example, a 2-for-1 on mains) and decide how often each one can be redeemed.',
+ 'Discovery and booking — users find you through the app and our marketing channels. They pick the offer they want and present it when ordering.',
+ 'At the table — the offer is applied when the bill is requested. The user just validates it with one tap in their app and shows you the screen. That simple! You hand over the bill with the discount already applied.'
+ ]} } },
+ { q:{es:'¿Cómo es posible que sea gratis para locales?', en:'How can it be free for venues?'},
+ a:{ es:{text:'Nuestro modelo se basa en los usuarios: son ellos quienes pagan una suscripción para descubrir nuevos establecimientos en su ciudad, atraídos por las promociones exclusivas de nuestros locales asociados.'},
+ en:{text:'Our model is built on users: they pay a subscription to discover new venues in their city, drawn in by the exclusive promotions our partner venues offer.'} } }
+ ]},
+ { cat:{es:'Configuración y puesta en marcha', en:'Setup and going live'}, items:[
+ { q:{es:'¿Cómo se canjean las ofertas en mi local?', en:'How are offers redeemed at my venue?'},
+ a:{ es:{text:'¡Es súper fácil! El usuario abre tu perfil en la app, canjea la oferta con un clic y te enseña la pantalla. Tu equipo solo tiene que aplicar el descuento en vuestro propio sistema al cobrar. No hace falta instalar nada extra ni aprender a usar aparatos nuevos.'},
+ en:{text:'It is super easy! The user opens your profile in the app, redeems the offer with one tap and shows you the screen. Your team just applies the discount in your own system when charging. No extra software to install, no new devices to learn.'} } },
+ { q:{es:'¿En cuánto tiempo puede estar activo mi local?', en:'How quickly can my venue go live?'},
+ a:{ es:{text:'Máximo en una semana. Una vez firmado el acuerdo, recibidos tus materiales y con la confirmación de ambas partes, te activamos de inmediato o en la fecha que prefieras.'},
+ en:{text:'Within a week at most. Once the agreement is signed, your materials are received and both sides confirm, we activate you right away or on the date you prefer.'} } },
+ { q:{es:'¿Qué necesitáis de mí para empezar?', en:'What do you need from me to get started?'},
+ a:{ es:{ text:'Para dar de alta tu local te pediremos:', bullets:[
+ 'Un acuerdo de colaboración firmado',
+ 'Tus datos de contacto (teléfono, persona de contacto, email, etc.)',
+ 'Las ofertas que quieras lanzar, recogidas en el acuerdo',
+ 'De 6 a 8 fotos auténticas y de buena calidad de tu local o de tus platos'
+ ]},
+ en:{ text:'To list your venue we will ask you for:', bullets:[
+ 'A signed partnership agreement',
+ 'Your contact details (phone, contact person, email, etc.)',
+ 'The offers you want to launch, set out in the agreement',
+ '6 to 8 authentic, good-quality photos of your venue or your dishes'
+ ]} } },
+ { q:{es:'¿Puedo actualizar la información de mi local más adelante?', en:'Can I update my venue information later?'},
+ a:{ es:{text:'Sí. Tendrás un portal de partner donde podrás editar tu perfil, tu carta, tus fotos y tus horarios siempre que lo necesites. Para cuestiones más complejas, nuestro equipo está disponible en info@menuverso.com.'},
+ en:{text:'Yes. You will have a partner portal where you can edit your profile, menu, photos and opening hours whenever you need. For more complex matters, our team is available at info@menuverso.com.'} } },
+ { q:{es:'¿Puedo modificar mis ofertas?', en:'Can I change my offers?'},
+ a:{ es:{text:'Por supuesto. Si necesitas cambiar o actualizar tus promociones, solo tienes que ponerte en contacto con nosotros y nuestro equipo se encargará de gestionarlo.'},
+ en:{text:'Of course. If you ever need to change or update your promotions, just get in touch and our team will take care of it.'} } },
+ { q:{es:'¿Cómo le saco el máximo partido a Menuverso?', en:'How do I get the most out of Menuverso?'},
+ a:{ es:{ text:'Hay algunas cosas que marcan la diferencia:', bullets:[
+ 'Lanza ofertas que merezca la pena reservar — atractivas y fieles a lo que ofreces.',
+ 'Apuesta por buenas imágenes — fotos auténticas y bien iluminadas de tu espacio y tus platos.',
+ 'Completa todos los detalles — ofertas, horarios y fotos, para que los usuarios sepan qué esperar.',
+ 'Mantenlo al día — actualiza tu información con regularidad para que cada visita salga bien.'
+ ]},
+ en:{ text:'A few things make all the difference:', bullets:[
+ 'Launch offers worth booking — attractive and true to what you serve.',
+ 'Invest in good imagery — authentic, well-lit photos of your space and your dishes.',
+ 'Fill in every detail — offers, hours and photos, so users know exactly what to expect.',
+ 'Keep it current — update your information regularly so every visit goes well.'
+ ]} } }
+ ]},
+ { cat:{es:'Ofertas y día a día', en:'Offers and day-to-day'}, items:[
+ { q:{es:'¿Qué tipo de ofertas puedo lanzar?', en:'What kind of offers can I launch?'},
+ a:{ es:{ text:'Puedes tener hasta dos ofertas activas a la vez, diseñadas junto a nuestro equipo. Algunas de las más habituales:', bullets:[
+ '2x1 en principales — dos platos principales al precio de uno',
+ 'Postre o bebida de cortesía con un plato principal',
+ 'Un descuento fijo — por ejemplo, 10 € sobre el total de la cuenta'
+ ], outro:'Las ofertas se adaptan a tu carta y a tus objetivos, y suelen estar disponibles durante un periodo acordado (por ejemplo, una vez al mes, una vez cada 3 meses, cada día…).'},
+ en:{ text:'You can have up to two active offers at a time, designed together with our team. Some of the most common ones:', bullets:[
+ '2-for-1 on mains — two main courses for the price of one',
+ 'A free dessert or drink with a main course',
+ 'A fixed discount — for example, 10 € off the total bill'
+ ], outro:'Offers adapt to your menu and your goals, and are usually available for an agreed period (for example, once a month, once every 3 months, every day…).'} } },
+ { q:{es:'¿Pueden los usuarios usar una oferta tantas veces como quieran?', en:'Can users redeem an offer as often as they want?'},
+ a:{ es:{text:'Tú pones las reglas. Para cada oferta decides con qué frecuencia puede canjearla un comensal, de modo que mantienes el control sobre su uso.'},
+ en:{text:'You set the rules. For each offer you decide how often a diner can redeem it, so you stay in control of its use.'} } }
+ ]},
+ { cat:{es:'Condiciones para locales', en:'Terms for venues'}, items:[
+ { q:{es:'¿Qué ocurre si decido darme de baja de Menuverso?', en:'What if I decide to leave Menuverso?'},
+ a:{ es:{text:'Lo entendemos: las circunstancias de los negocios cambian. Para finalizar el contrato, solo necesitas notificárnoslo con 6 semanas de antelación.'},
+ en:{text:'We understand — business circumstances change. To end the contract, you only need to give us 6 weeks notice.'} } },
+ { q:{es:'¿Cuáles son las condiciones para unirse a Menuverso?', en:'What are the conditions for joining Menuverso?'},
+ a:{ es:{ bullets:[
+ 'Ofrecer promociones irresistibles — nosotros te ayudamos a crearlas. A mejor oferta, más clientes te conocerán.',
+ 'Exclusividad total — las ofertas deben crearse única y exclusivamente para los usuarios de nuestra app.'
+ ]},
+ en:{ bullets:[
+ 'Offer irresistible promotions — we help you create them. The better the offer, the more customers will discover you.',
+ 'Full exclusivity — offers must be created solely and exclusively for the users of our app.'
+ ]} } }
+ ]}
+ ];
+ const faqAnswer = (a) => {
+ const out = [];
+ if (a.text) out.push(el('p',{class:'text-[15px] text-slate2-300 leading-relaxed'}, a.text));
+ if (a.bullets) out.push(el('ul',{class:'mt-3 space-y-2.5'},
+ ...a.bullets.map(b => el('li',{class:'flex gap-3 text-[15px] text-slate2-300 leading-relaxed'},
+ el('span',{class:'mt-[9px] h-1.5 w-1.5 bg-mv-500 shrink-0'}),
+ el('span',{}, b)))
+ ));
+ if (a.outro) out.push(el('p',{class:'mt-3 text-[15px] text-slate2-400 leading-relaxed'}, a.outro));
+ return out;
+ };
+ const faqItem = (q, a) => {
+ const panel = el('div',{class:'hidden px-5 pb-5'}, ...faqAnswer(a));
+ const chev = el('span',{class:'shrink-0 h-4 w-4 text-mv-500 transition-transform duration-200', html: faqChevron});
+ const btn = el('button',{class:'w-full flex items-center justify-between gap-4 text-left px-5 py-4 cursor-pointer bg-transparent border-0',
+ onclick:()=>{ const nowHidden = panel.classList.toggle('hidden'); chev.style.transform = nowHidden ? 'none' : 'rotate(180deg)'; }},
+ el('span',{class:'font-bold text-[15px] md:text-base text-slate2-50 leading-snug'}, q),
+ chev
+ );
+ return el('div',{class:'bg-ink-900 border border-slate2-50/12'}, btn, panel);
+ };
+ const partnersFaq = el('section',{class:'mx-auto max-w-3xl px-4 py-14 md:py-20 border-t border-slate2-50/10'},
+ el('div',{class:'text-center max-w-3xl mx-auto'},
+ el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
+ el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
+ faqLang === 'en' ? 'FAQ' : 'Preguntas frecuentes',
+ el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
+ ),
+ el('h2',{class:'disp mt-6 text-4xl md:text-6xl text-slate2-50'},
+ 'Partners ', el('span',{class:'text-mv-500'},'FAQ')
+ )
+ ),
+ el('div',{class:'mt-12 space-y-8'},
+ ...faqData.map(group =>
+ el('div',{},
+ el('h3',{class:'kick text-mv-500 mb-3', style:'font-size:12px;'}, group.cat[faqLang]),
+ el('div',{class:'space-y-2'},
+ ...group.items.map(it => faqItem(it.q[faqLang], it.a[faqLang]))
+ )
+ )
+ )
+ )
+ );
+
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
  // Shared Concept banner (one across the whole app).
  ConceptBanner(),
@@ -5131,6 +5291,9 @@ function PartnerLanding() {
  })
  )
  ),
+
+ // Partners FAQ (Patricia's ES content, bilingual accordion).
+ partnersFaq,
 
  // FINAL CTA, large.
  el('section',{class:'relative overflow-hidden border-t border-slate2-50/5'},
@@ -8456,7 +8619,7 @@ function Admin() {
  overlay.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
  overlay.setAttribute('aria-label', (isChecked ? 'Deselect' : 'Select') + ' photo ' + (i+1));
  const tick = document.createElement('span');
- tick.className = 'absolute top-1.5 right-1.5 w-6 h-6 rounded-[4px] grid place-items-center text-xs font-extrabold border ' + (isChecked ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/90 text-ink-900 border-white');
+ tick.className = 'absolute top-1.5 right-1.5 w-6 h-6 rounded-[4px] grid place-items-center text-xs font-extrabold border ' + (isChecked ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/90 text-slate2-50 border-white');
  tick.textContent = isChecked ? '' : '';
  overlay.appendChild(tick);
  overlay.onclick = () => {
