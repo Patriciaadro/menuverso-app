@@ -6831,7 +6831,7 @@ function Admin() {
  el('div',{class:'mt-3 space-y-3'},
  ...pendingVenues.map(pv => {
  const owner = store.users.find(x => x.id === pv.ownerId);
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
  el('div',{class:'flex items-start justify-between flex-wrap gap-3'},
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'font-bold text-lg'}, pv.name),
@@ -7070,7 +7070,7 @@ function Admin() {
  const slotsDiff = diffs.find(d => d.field === 'Deal slots');
  const proposedSlots = cr.proposedDealSlots || [];
  const liveSlots = (v && v.liveDeal && v.liveDeal.dealSlots) || (v && v.dealSlots) || [];
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+ return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold'}, venueLabel(cr)),
@@ -7290,7 +7290,7 @@ function Admin() {
  // a new Supabase table, deferred to next session.
  if (!Array.isArray(store.adminMoodHidden)) store.adminMoodHidden = [];
  wrap.append(
- el('div',{class:'mb-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ el('div',{class:'mb-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{},
  el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-extrabold'},'Filtros de Descubre'),
@@ -7420,7 +7420,7 @@ function Admin() {
 
  // ============== Filter panel (D1) ==============
  if (filtersOpen) {
- const panel = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+ const panel = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'text-[11px] uppercase tracking-widest font-extrabold text-mv-500'},'Filters'),
  anyFilterActive() && el('button',{class:'rounded-[4px] bg-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer',
@@ -7596,7 +7596,7 @@ function Admin() {
  const quality = qualityFor(pv, false);
  const showMissing = quality.score <= 6 && quality.missing.length > 0;
 
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'flex items-start gap-3 flex-1 min-w-[200px]'},
  el('input',{type:'checkbox', class:'mt-1.5 shrink-0', checked: selectedPartners.has(pv.slug),
@@ -7869,7 +7869,7 @@ function Admin() {
  inp.value = draft[name] ?? '';
  if (placeholder) inp.placeholder = placeholder;
  if (required) inp.setAttribute('aria-required', 'true');
- inp.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ inp.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
  if (type === 'textarea') { inp.rows = 3; inp.className += ' resize-y'; }
  inp.oninput = () => {
  const v = inp.value;
@@ -7942,7 +7942,7 @@ function Admin() {
  titleInput.type = 'text';
  titleInput.value = d.title || '';
  titleInput.placeholder = 'ej. 2×1 en el menú principal';
- titleInput.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ titleInput.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
  titleInput.oninput = () => { d.title = titleInput.value; markDirty(); };
  card.appendChild(titleInput);
  // Description
@@ -7954,7 +7954,7 @@ function Admin() {
  descInput.rows = 2;
  descInput.value = d.description || '';
  descInput.placeholder = 'Explica brevemente la oferta. ej. "Compra un plato principal y llévate otro gratis."';
- descInput.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
+ descInput.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
  descInput.oninput = () => { d.description = descInput.value; markDirty(); };
  card.appendChild(descInput);
  // Active toggle
@@ -8112,7 +8112,7 @@ function Admin() {
  rows.className = 'mt-3 space-y-2';
  diffs.forEach(d => {
  const row = document.createElement('div');
- row.className = 'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-2';
+ row.className = 'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-2';
  const pre = d.multiline
  ? '<pre class="whitespace-pre-wrap break-words text-xs text-slate2-200 font-mono leading-snug">'
  : '<div class="text-xs text-slate2-200 break-words">';
@@ -8148,7 +8148,7 @@ function Admin() {
  const dealTermsTa = document.createElement('textarea');
  dealTermsTa.rows = 3;
  dealTermsTa.value = draft.dealTerms || '';
- dealTermsTa.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
+ dealTermsTa.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
  dealTermsTa.oninput = () => {
  draft.dealTerms = dealTermsTa.value;
  markDirty();
@@ -8201,7 +8201,7 @@ function Admin() {
  }
  draft.dealSlots.forEach((s, idx) => {
  const card = document.createElement('div');
- card.className = 'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-3';
+ card.className = 'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-3';
 
  // Top row: label + active toggle + remove
  const top = document.createElement('div');
@@ -8210,7 +8210,7 @@ function Admin() {
  labelInp.type = 'text';
  labelInp.value = s.label || '';
  labelInp.placeholder = 'Slot label (e.g. Lunch · 13:00-15:30)';
- labelInp.className = 'flex-1 min-w-[160px] bg-slate2-50/[0.04] border border-slate2-50/15 rounded-[4px] px-2 py-1 text-sm font-bold text-slate2-50 outline-none focus:border-mv-500/60';
+ labelInp.className = 'flex-1 min-w-[160px] bg-ink-900 border border-slate2-50/15 rounded-[4px] px-2 py-1 text-sm font-bold text-slate2-50 outline-none focus:border-mv-500/60';
  labelInp.oninput = () => { s.label = labelInp.value; markDirty(); paintDiff(); };
  top.appendChild(labelInp);
 
@@ -8257,7 +8257,7 @@ function Admin() {
  i.type = type || 'text';
  i.value = (val === undefined || val === null) ? '' : val;
  if (placeholder) i.placeholder = placeholder;
- i.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-2 py-1 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ i.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-2 py-1 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
  i.oninput = () => { onChange(i.value); markDirty(); paintDiff(); };
  w.appendChild(i);
  return w;
@@ -8304,7 +8304,7 @@ function Admin() {
  termsTa.rows = 2;
  termsTa.value = isUsingDefault() ? (draft.dealTerms || '') : (s.terms || '');
  termsTa.disabled = useDefaultCb.checked;
- termsTa.className = 'mt-1 w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y disabled:opacity-50';
+ termsTa.className = 'mt-1 w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y disabled:opacity-50';
  termsTa.oninput = () => { s.terms = termsTa.value; markDirty(); paintDiff(); };
  useDefaultCb.onchange = () => {
  if (useDefaultCb.checked) {
@@ -8685,7 +8685,7 @@ function Admin() {
  const venue = store.partnerVenues.find(v => v.ownerId === usr.id);
  const memberBks = store.bookings.filter(b => b.memberId === usr.id).length;
  const memberReds = store.redemptions.filter(r => r.memberId === usr.id).length;
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'flex-1 min-w-[200px]'},
  el('div',{class:'flex items-center gap-2 flex-wrap'},
@@ -8785,7 +8785,7 @@ function Admin() {
  )
  ),
  el('div',{class:'text-xs text-slate2-400'}, list.length + ' booking' + (list.length===1?'':'s')),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden'},
+ el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden'},
  el('table',{class:'w-full text-sm'},
  el('thead',{class:'text-slate2-400 text-left text-xs uppercase tracking-widest'}, el('tr',{}, el('th',{class:'p-3'},'Code'), el('th',{},'Venue'), el('th',{},'Member'), el('th',{},'Status'), el('th',{},'When'), el('th',{},'Actions'))),
  el('tbody',{},
@@ -8876,7 +8876,7 @@ function Admin() {
  poly.setAttribute('stroke-width','2');
  poly.setAttribute('points', points);
  svg.appendChild(poly);
- return el('div',{class:'mt-2 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-3'},
+ return el('div',{class:'mt-2 rounded-[4px] bg-ink-900 border border-slate2-50/12 p-3'},
  el('div',{class:'flex items-center justify-between text-xs text-slate2-400 mb-1'},
  el('span',{},'30-day redemptions'),
  el('span',{class:'font-bold text-slate2-50'}, String(total) + ' total · peak ' + max + '/day')
@@ -8924,7 +8924,7 @@ function Admin() {
  el('h2',{class:'disp text-2xl text-slate2-50'},'Top 5 venues, by redemption count'),
  byRedemptions.length === 0
  ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No redemptions yet.')
- : el('ul',{class:'mt-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
+ : el('ul',{class:'mt-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 divide-y divide-white/5'},
  ...byRedemptions.map(({v, n}, i) => {
  const rowChildren = [
  el('button',{
@@ -8971,7 +8971,7 @@ function Admin() {
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Minimum 5 reviews to qualify.'),
  byRating.length === 0
  ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No venues meet the threshold yet.')
- : el('ul',{class:'mt-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
+ : el('ul',{class:'mt-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 divide-y divide-white/5'},
  ...byRating.map(({v, avg, count}, i) => {
  const rowChildren = [
  el('button',{
@@ -9007,7 +9007,7 @@ function Admin() {
  el('h2',{class:'disp text-2xl text-slate2-50'},'Last 10 redemptions'),
  recent.length === 0
  ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No redemptions yet.')
- : el('ul',{class:'mt-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
+ : el('ul',{class:'mt-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 divide-y divide-white/5'},
  ...recent.map(r => {
  const m = store.users.find(x => x.id === r.memberId);
  const v = findVenueBySlug(r.venueSlug);
@@ -9105,7 +9105,7 @@ function Admin() {
  const note = r.note || '';
  const trimmed = note.length > 120 ? (note.slice(0, 120) + '…') : note;
  const flagged = !!r.flagged;
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
+ return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'text-sm font-bold text-amber-300 tracking-widest'}, '★'.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
@@ -9180,7 +9180,7 @@ function Admin() {
  return (a.name||'').localeCompare(b.name||'');
  });
 
- const sidebar = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
+ const sidebar = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
  partners.length === 0
  ? el('p',{class:'p-4 text-sm text-slate2-400'},'Aún no hay partners.')
  : el('ul',{class:'divide-y divide-white/5'},
@@ -9208,13 +9208,13 @@ function Admin() {
  // Conversation pane
  let pane;
  if (!selectedSlug) {
- pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Selecciona un partner a la izquierda para ver el hilo.');
+ pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-6 text-sm text-slate2-400'}, 'Selecciona un partner a la izquierda para ver el hilo.');
  } else {
  const pv = store.partnerVenues.find(x => x.slug === selectedSlug);
  const owner = pv ? store.users.find(x => x.id === pv.ownerId) : null;
  const msgs = (store.partnerMessages[selectedSlug] || []).slice();
 
- pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+ pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-slate2-50/10'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-slate2-50'}, pv ? pv.name : selectedSlug),
@@ -9319,7 +9319,7 @@ function Admin() {
  })
  .filter(Boolean);
 
- const sidebar = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
+ const sidebar = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
  el('ul',{class:'divide-y divide-white/5'},
  ...partners.map(pv => {
  const n = venueNoteCount(pv.slug);
@@ -9353,11 +9353,11 @@ function Admin() {
 
  let pane;
  if (!selectedSlug) {
- pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Pick a venue on the left to view its notes.');
+ pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-6 text-sm text-slate2-400'}, 'Pick a venue on the left to view its notes.');
  } else {
  const v = findVenueBySlug(selectedSlug);
  const notes = (store.adminNotes[selectedSlug] || []).slice().sort((a,b) => (b.ts||0) - (a.ts||0));
- pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
+ pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
  el('div',{class:'flex items-center justify-between gap-3 pb-3 border-b border-slate2-50/10'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-slate2-50'}, v ? v.name : selectedSlug),
@@ -9508,7 +9508,7 @@ function Admin() {
  );
 
  if (entries.length === 0) {
- wrap.append(el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'},
+ wrap.append(el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-6 text-sm text-slate2-400'},
  (store.auditLog || []).length === 0
  ? 'No audit entries yet, existing admin handlers can opt in by calling logAudit(...). See the helper comments in source for the recommended hooks.'
  : 'No entries match this filter.'
@@ -9542,7 +9542,7 @@ function Admin() {
  const author = store.users.find(usr => usr.id === e.adminId);
  const isOpen = expandedId === e.id;
  const rows = isOpen ? diffRows(e.before, e.after) : [];
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10'},
+ return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12'},
  el('button',{class:'w-full text-left px-4 py-3 cursor-pointer bg-transparent border-0',
  onclick:()=>{ expandedId = isOpen ? null : e.id; paintAudit(); }
  },
@@ -9601,7 +9601,7 @@ function Admin() {
  function AdminSystem() {
  const dataJson = (() => { try { return JSON.stringify(store, null, 2); } catch { return '{}'; } })();
  return el('div',{class:'space-y-6'},
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
+ el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-5'},
  el('h3',{class:'font-bold'},' Data export'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Full JSON dump of the demo store, useful for debugging or copying state.'),
  el('div',{class:'mt-3 flex flex-wrap gap-2'},
@@ -9623,7 +9623,7 @@ function Admin() {
  el('pre',{class:'mt-2 max-h-64 overflow-auto bg-ink-900/80 border border-slate2-50/10 rounded-[4px] p-3 text-[11px] font-mono'}, dataJson)
  )
  ),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
+ el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-5'},
  el('h3',{class:'font-bold'},' Data import'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Replace the entire store with a previously-exported JSON. Refreshes the app on success.'),
  (() => {
@@ -9654,7 +9654,7 @@ function Admin() {
  });
  }},'Wipe & reload')
  ),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
+ el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-5'},
  el('h3',{class:'font-bold'},' Catalog'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Read-only, the static seed catalog of placeholder venues used to populate Discover before real partners onboard.'),
  el('div',{class:'mt-3 text-xs text-slate2-300'},'Total: ', el('strong',{class:'text-slate2-50'}, String(VENUES.length)), ' placeholder venues')
