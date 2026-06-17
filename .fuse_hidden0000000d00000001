@@ -168,12 +168,8 @@ tailwind.config = {
  box-shadow: 0 6px 14px rgba(229,56,42,.45), 0 1px 0 rgba(255,255,255,.2) inset;
  display: grid; place-items: center;
  font-size: 18px; line-height: 1;
- color: #FFFFFF;
  transition: transform .18s ease, box-shadow .18s ease;
  }
- /* Brand monogram inside each pin — Anton "M", inherits pin color so it
- flips to scarlet on the white active-state pin. */
- .mv-pin-m { font-family:'Anton','Impact',sans-serif; font-size:21px; line-height:1; font-weight:400; color:inherit; transform:translateY(1px); }
  .mv-pin-tail {
  position: absolute; top: 33px; left: 50%;
  transform: translateX(-50%);
@@ -2443,7 +2439,7 @@ function MoodTile(mood, isActive, onClick) {
  class:'shrink-0 inline-flex items-center justify-center rounded-[4px] px-4 py-2 text-[13px] font-semibold whitespace-nowrap border transition-all cursor-pointer ' +
  (isActive
  ? 'bg-mv-500 text-white border-mv-500 '
- : 'bg-white text-slate2-50 border-slate2-200 hover:border-mv-500/60 hover:text-mv-600'),
+ : 'bg-white text-ink-900 border-slate2-200 hover:border-mv-500/60 hover:text-mv-600'),
  style: isActive ? '' : 'border-color:#E5E7EB;',
  onclick: onClick
  }, labelText);
@@ -2498,24 +2494,45 @@ function Landing() {
  // Replaces the previous magazine-style 4-step storyboard with a denser,
  // app-screenshot-led version (per neotaste / image reference). Phones
  // are inline SVG so they re-skin for free when the product UI moves.
-      // ====== Consumer 'How it works', full scarlet band + 3 white cards ======
-      el('section',{id:'how', class:'relative overflow-hidden', style:'background:var(--red);'},
-        el('div',{class:'mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24'},
-          el('div',{class:'text-center max-w-3xl mx-auto'},
-            el('div',{class:'mx-auto h-1.5 w-16 bg-white/70'}),
-            el('h2',{class:'disp text-white text-5xl md:text-7xl mt-6'}, t('how.heading'))
-          ),
-          el('div',{class:'mt-12 md:mt-16 grid gap-6 md:gap-8 md:grid-cols-3'},
-            ...[['1','how.step1.title','how.step1.body'],['2','how.step2.title','how.step2.body'],['3','how.step3.title','how.step3.body']].map(function(step){
-              return el('div',{class:'relative bg-ink-900 p-8 pt-9', style:'box-shadow:8px 8px 0 rgba(22,17,15,0.22);'},
-                el('div',{class:'disp text-mv-500 text-6xl md:text-7xl leading-none'}, step[0]),
-                el('h3',{class:'mt-3 text-xl md:text-2xl font-extrabold text-slate2-50 leading-tight'}, t(step[1])),
-                el('p',{class:'mt-3 text-[15px] text-slate2-300 leading-relaxed'}, t(step[2]))
-              );
-            })
-          )
-        )
-      ),
+ el('section',{id:'how', class:'relative overflow-hidden bg-ink-950'},
+ el('div',{class:'mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-20'},
+ el('div',{class:'text-center max-w-3xl mx-auto'},
+ el('h2',{class:'font-serif-display text-5xl md:text-7xl font-extrabold leading-[0.95] text-slate2-50'}, t('how.heading'))
+ ),
+ el('div',{class:'mt-10 grid gap-10 md:gap-8 md:grid-cols-3'},
+ el('div',{class:'flex flex-col items-center'},
+ el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="24" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="32" y="100" font-family="-apple-system, sans-serif" font-size="15" font-weight="800" fill="#1D1D1B">Barcelona</text><path d="M 116 94 L 121 99 L 126 94" stroke="#1D1D1B" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><clipPath id="mvHowMap1Clip"><rect x="20" y="116" width="240" height="336" rx="6"/></clipPath></defs><g clip-path="url(#mvHowMap1Clip)"><rect x="20" y="116" width="240" height="336" fill="#F3F4F6"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116 L 260 116 L 260 452 Z" fill="#BFD3CC" fill-opacity="0.55"/><path d="M 232 452 Q 248 360 245 280 Q 240 200 234 116" stroke="#8FA89C" stroke-width="0.8" fill="none"/><ellipse cx="62" cy="158" rx="22" ry="14" fill="#C4D3B0" fill-opacity="0.85"/><rect x="180" y="280" width="32" height="26" rx="4" fill="#C4D3B0" fill-opacity="0.78"/><ellipse cx="55" cy="408" rx="28" ry="18" fill="#C4D3B0" fill-opacity="0.72"/><g stroke="#404040" stroke-width="1.5" stroke-opacity="0.32" fill="none" stroke-linecap="round"><path d="M 22 235 Q 130 200 240 168"/><path d="M 22 295 Q 130 280 240 275"/><path d="M 130 118 Q 130 250 130 385"/><path d="M 178 118 Q 180 280 184 410"/><path d="M 145 200 Q 152 280 170 415"/></g><g stroke="#404040" stroke-width="0.6" stroke-opacity="0.20" fill="none"><line x1="50" y1="180" x2="50" y2="380"/><line x1="78" y1="160" x2="78" y2="395"/><line x1="108" y1="155" x2="108" y2="395"/><line x1="158" y1="140" x2="158" y2="410"/><line x1="202" y1="135" x2="202" y2="270"/><line x1="220" y1="125" x2="220" y2="250"/><line x1="40" y1="200" x2="225" y2="184"/><line x1="40" y1="225" x2="230" y2="208"/><line x1="40" y1="255" x2="235" y2="240"/><line x1="40" y1="325" x2="230" y2="318"/><line x1="40" y1="358" x2="228" y2="352"/><line x1="50" y1="392" x2="220" y2="385"/></g><g font-family="-apple-system, sans-serif" font-size="6" font-weight="800" letter-spacing="1.8" fill="#6E5D44"><text x="44" y="175">GRÀCIA</text><text x="92" y="248">EIXAMPLE</text><text x="160" y="330">EL BORN</text><text x="198" y="372" fill="#5A8A78">BARCELONETA</text><text x="34" y="405">MONTJUÏC</text></g><g><circle cx="118" cy="218" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="152" cy="186" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="178" cy="232" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="96" cy="276" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="200" cy="332" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="138" cy="348" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="170" cy="378" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="108" cy="395" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/><circle cx="84" cy="328" r="5" fill="#F4291A" stroke="white" stroke-width="1.5"/></g><g transform="translate(140 280)"><circle r="18" fill="#F4291A" fill-opacity="0.22"/><circle r="13" fill="#F4291A"/><text font-family="-apple-system, sans-serif" font-weight="800" font-size="11" fill="white" text-anchor="middle" y="4">5</text></g></g><g transform="translate(0 456)"><rect x="10" y="0" width="260" height="62" fill="#FFFFFF"/><line x1="20" y1="2" x2="260" y2="2" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="36" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="36" text-anchor="middle" fill="#F4291A">Discover</text><text x="220" y="36" text-anchor="middle" fill="#9CA3AF">Bookings</text></g><circle cx="140" cy="46" r="2.5" fill="#F4291A"/></g></svg>'}),
+ el('div',{class:'mt-7 w-full max-w-[280px]'},
+ el('div',{class:'flex items-center gap-2.5'},
+ el('span',{class:'grid place-items-center h-6 w-6 rounded-[4px] bg-mv-500 text-[11px] font-extrabold text-white'},'1'),
+ el('h3',{class:'font-extrabold text-lg text-slate2-50'}, t('how.step1.title'))
+ ),
+ el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, t('how.step1.body'))
+ )
+ ),
+ el('div',{class:'flex flex-col items-center'},
+ el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="24" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><defs><clipPath id="mvHowHero2Clip"><rect x="20" y="76" width="240" height="170" rx="6"/></clipPath></defs><g clip-path="url(#mvHowHero2Clip)"><rect x="20" y="76" width="240" height="170" fill="#F4291A"/><image style="mix-blend-mode:luminosity;opacity:0.9" href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" xlink:href="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=480&h=340&q=80&auto=format&fit=crop" x="20" y="76" width="240" height="170" preserveAspectRatio="xMidYMid slice"/></g><rect x="20" y="76" width="240" height="170" rx="6" fill="none" stroke="#1D1D1B" stroke-opacity="0.06"/><text x="32" y="278" font-family="Inter, system-ui, sans-serif" font-style="italic" font-size="22" font-weight="800" fill="#1D1D1B">Bar Solete</text><text x="32" y="298" font-family="-apple-system, sans-serif" font-size="11" font-weight="600" fill="#9CA3AF">Catalan tapas · Eixample</text><g transform="translate(32 312)" font-family="-apple-system, sans-serif" font-size="10" font-weight="700"><text fill="#FBBC04"></text><text x="10" fill="#1D1D1B">4.9</text><text x="32" fill="#9CA3AF">·</text><text x="42" fill="#1D1D1B">€€€</text><text x="68" fill="#9CA3AF">·</text><text x="78" fill="#10B981">Open</text></g><g transform="translate(20 340)"><rect width="240" height="68" rx="12" fill="#F4291A" fill-opacity="0.10" stroke="#F4291A" stroke-opacity="0.45" stroke-width="1.4"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#F4291A">STANDING DEAL</text><text x="14" y="40" font-family="Inter, system-ui, sans-serif" font-style="italic" font-size="15" font-weight="800" fill="#1D1D1B">2×1 full menu</text><text x="14" y="56" font-family="-apple-system, sans-serif" font-size="9" fill="#9CA3AF">Tue–Thu · Lunch + dinner · 6 seats</text><g transform="translate(186 22)"><rect width="42" height="22" rx="11" fill="#F4291A"/><text x="21" y="15" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" fill="white" text-anchor="middle">PICK</text></g></g><g transform="translate(20 416)"><rect width="240" height="48" rx="12" fill="#FBBC04" fill-opacity="0.16" stroke="#FBBC04" stroke-opacity="0.6" stroke-width="1.2"/><text x="14" y="20" font-family="-apple-system, sans-serif" font-size="9" font-weight="800" letter-spacing="1.8" fill="#C81C10">FLASH · TODAY</text><text x="14" y="38" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#1D1D1B">Free dessert with any main</text></g><g transform="translate(0 472)"><rect x="10" y="0" width="260" height="42" fill="#FFFFFF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="22" text-anchor="middle" fill="#F4291A">Discover</text><text x="220" y="22" text-anchor="middle" fill="#9CA3AF">Bookings</text></g></g></svg>'}),
+ el('div',{class:'mt-7 w-full max-w-[280px]'},
+ el('div',{class:'flex items-center gap-2.5'},
+ el('span',{class:'grid place-items-center h-6 w-6 rounded-[4px] bg-mv-500 text-[11px] font-extrabold text-white'},'2'),
+ el('h3',{class:'font-extrabold text-lg text-slate2-50'}, t('how.step2.title'))
+ ),
+ el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, t('how.step2.body'))
+ )
+ ),
+ el('div',{class:'flex flex-col items-center'},
+ el('div',{class:'w-full max-w-[280px] mx-auto', html: '<svg viewBox="0 0 280 540" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block"><rect x="0" y="0" width="280" height="540" rx="40" fill="#1D1D1B"/><rect x="8" y="10" width="264" height="520" rx="24" fill="#FFFFFF"/><rect x="110" y="22" width="60" height="14" rx="7" fill="#1D1D1B"/><text x="32" y="58" font-family="-apple-system, sans-serif" font-size="10" font-weight="700" fill="#1D1D1B">9:41</text><g transform="translate(220 50)" fill="#1D1D1B"><rect x="0" y="0" width="14" height="7" rx="1"/><rect x="18" y="-1" width="20" height="9" rx="2" fill-opacity="0.85"/></g><text x="140" y="98" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#9CA3AF" text-anchor="middle">REDEEMING AT</text><text x="140" y="132" font-family="Inter, system-ui, sans-serif" font-style="italic" font-size="26" font-weight="800" fill="#1D1D1B" text-anchor="middle">Bar Solete</text><text x="140" y="156" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" fill="#F4291A" text-anchor="middle">2×1 on the full menu</text><g transform="translate(28 200)"><text x="112" y="-14" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2.5" fill="#9CA3AF" text-anchor="middle">SLIDE TO REDEEM</text><rect x="0" y="0" width="224" height="56" rx="28" fill="#F9FAFB" stroke="#F4291A" stroke-opacity="0.5" stroke-width="2"/><defs><linearGradient id="slidegrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#F4291A"/><stop offset="100%" stop-color="#FF6A4F"/></linearGradient><clipPath id="slideclip"><rect x="0" y="0" width="224" height="56" rx="28"/></clipPath></defs><g clip-path="url(#slideclip)"><rect x="0" y="0" width="60" height="56" rx="28" fill="url(#slidegrad)"/></g><text x="124" y="34" font-family="-apple-system, sans-serif" font-size="12" font-weight="800" letter-spacing="2.5" fill="#404040" text-anchor="middle">SLIDE →</text><g><circle cx="28" cy="28" r="22" fill="white" stroke="#F4291A" stroke-opacity="0.5" stroke-width="1.5"/><path d="M 18 28 L 36 28 M 30 22 L 36 28 L 30 34" stroke="#F4291A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g></g><g transform="translate(28 300)"><rect width="224" height="118" rx="14" fill="#F4291A" fill-opacity="0.06" stroke="#F4291A" stroke-opacity="0.25"/><text x="112" y="26" font-family="-apple-system, sans-serif" font-size="10" font-weight="800" letter-spacing="2" fill="#404040" text-anchor="middle">DO THIS AT THE TABLE</text><text x="20" y="56" font-family="-apple-system, sans-serif" font-size="11" fill="#404040">1. Tell your server.</text><text x="20" y="78" font-family="-apple-system, sans-serif" font-size="11" fill="#404040">2. Slide the bar above.</text><text x="20" y="100" font-family="-apple-system, sans-serif" font-size="11" fill="#404040">3. Show the screen.</text></g><g transform="translate(0 472)"><rect x="10" y="0" width="260" height="42" fill="#FFFFFF"/><line x1="20" y1="0" x2="260" y2="0" stroke="#1D1D1B" stroke-opacity="0.08"/><g font-family="-apple-system, sans-serif" font-size="9" font-weight="700"><text x="60" y="22" text-anchor="middle" fill="#9CA3AF">Profile</text><text x="140" y="22" text-anchor="middle" fill="#9CA3AF">Discover</text><text x="220" y="22" text-anchor="middle" fill="#F4291A">Bookings</text></g></g></svg>'}),
+ el('div',{class:'mt-7 w-full max-w-[280px]'},
+ el('div',{class:'flex items-center gap-2.5'},
+ el('span',{class:'grid place-items-center h-6 w-6 rounded-[4px] bg-mv-500 text-[11px] font-extrabold text-white'},'3'),
+ el('h3',{class:'font-extrabold text-lg text-slate2-50'}, t('how.step3.title'))
+ ),
+ el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, t('how.step3.body'))
+ )
+ )
+ )
+ )
+ ),
  el('section',{id:'precios', class:'relative overflow-hidden'},
  // Final section sketch, Tibidabo silhouette on the horizon + city skyline curve.
  el('div',{class:'absolute inset-0 pointer-events-none', style:'mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 10%, rgba(0,0,0,1) 35%, rgba(0,0,0,1) 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 10%, rgba(0,0,0,1) 35%, rgba(0,0,0,1) 100%);', html:
@@ -2563,61 +2580,115 @@ function Landing() {
  '</g>'+
  '</svg>'
  }),
-      // ====== Pricing redesign: two plan cards (card-left / photo-right) ======
-      (function(){
-        const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
-        return el('div',{class:'relative mx-auto max-w-6xl px-4 pb-16 pt-8'},
-          el('div',{class:'grid md:grid-cols-2 gap-10 md:gap-12 items-center'},
-            // LEFT: headline + plan cards
-            el('div',{},
-              el('div',{class:'h-1.5 w-16 bg-mv-500'}),
-              el('h2',{class:'disp text-4xl md:text-6xl text-slate2-50 mt-5 leading-[0.9]'},
-                es ? 'UNA SUSCRIPCIÓN,' : 'ONE MEMBERSHIP,', el('br'),
-                el('span',{class:'text-mv-500'}, es ? 'MIL OFERTAS' : 'A THOUSAND DEALS')
-              ),
-              el('p',{class:'mt-4 text-base text-slate2-300 max-w-md'},
-                es ? 'Una sola cuota. Todas las ofertas 2x1 de la ciudad, cada vez que sales a comer.'
-                   : 'One flat fee. Every 2-for-1 deal in the city, every time you eat out.'),
-              el('div',{class:'mt-8 grid sm:grid-cols-2 gap-4'},
-                // Monthly, white card
-                el('div',{class:'bg-ink-900 border-2 border-slate2-50/15 p-6', style:'box-shadow:6px 6px 0 rgba(22,17,15,0.10);'},
-                  el('div',{class:'kick text-slate2-500', style:'font-size:11px;'}, es?'Mensual':'Monthly'),
-                  el('div',{class:'mt-3 flex items-baseline gap-1'},
-                    el('span',{class:'disp text-5xl text-slate2-50', style:'white-space:nowrap'}, es?'6,99 €':'€6.99'),
-                    el('span',{class:'text-sm font-bold text-slate2-400'}, es?'/mes':'/mo')
-                  ),
-                  el('p',{class:'mt-2 text-[13px] text-slate2-400'}, es?'Cancela cuando quieras.':'Cancel any time.')
-                ),
-                // Annual, dark best-value card
-                el('div',{class:'relative p-6 border-2 border-mv-500', style:'background:var(--ink); box-shadow:6px 6px 0 rgba(244,41,26,0.30);'},
-                  el('span',{class:'kick absolute -top-3 left-4 bg-mv-500 text-white px-2 py-1', style:'font-size:10px;'}, es?'Mejor valor':'Best value'),
-                  el('div',{class:'kick text-white/55', style:'font-size:11px;'}, es?'Anual':'Annual'),
-                  el('div',{class:'mt-3 flex items-baseline gap-1'},
-                    el('span',{class:'disp text-5xl text-white', style:'white-space:nowrap'}, es?'47,88 €':'€47.88'),
-                    el('span',{class:'text-sm font-bold text-white/55'}, es?'/año':'/yr')
-                  ),
-                  el('p',{class:'mt-2 text-[13px] text-white/70'}, es?'Equivale a 3,99 €/mes · Ahorras 36 €':'Just €3.99/mo · Save €36')
-                )
-              ),
-              el('ul',{class:'mt-6 space-y-2 text-sm text-slate2-200'},
-                ...(es?['Cancela cuando quieras','Acceso a todas las ofertas','Se amortiza en una sola visita']
-                      :['Cancel any time','Access to all the deals','Pays for itself in one visit']).map(function(s){
-                  return el('li',{class:'flex items-center gap-2.5'},
-                    el('span',{class:'inline-flex h-5 w-5 bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white'},'✓'),
-                    el('span',{class:'font-medium'}, s)
-                  );
-                })
-              ),
-              el('button',{class:'mt-8 inline-block rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-9 py-4 text-lg font-extrabold cursor-pointer transition', style:'box-shadow:6px 6px 0 var(--ink);', onclick:()=>currentUser()?go('checkout'):go('signup')}, es?'Hazte miembro →':'Get Your Pass →')
-            ),
-            // RIGHT: photo with hard scarlet offset shadow + 2×1 stamp
-            el('div',{class:'relative'},
-              el('div',{class:'relative overflow-hidden border-2 border-slate2-50', style:'box-shadow:10px 10px 0 rgba(244,41,26,0.22);', html:'<img src="hero-crowd-nm.jpg" alt="Amigos disfrutando de tapas y bebidas en Barcelona" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:4/5;">'}),
-              el('div',{class:'disp absolute left-4 bottom-3 text-white text-6xl', style:'text-shadow:0 2px 14px rgba(0,0,0,.55);'}, '2×1')
-            )
-          )
-        );
-      })()
+ el('div',{class:'relative mx-auto max-w-3xl px-4 pb-14 pt-6 text-center'},
+ // Thin Catalan-tile motif divider, section breath, brand-coherent.
+ el('div',{class:'pt-6'}, ILLUS.tileStrip('h-2.5 w-40 mx-auto text-mv-500/30')),
+ el('h2',{class:'font-serif-display text-4xl md:text-6xl font-extrabold pt-6'}, 'Your Next Meal is ',
+ el('span',{class:'text-mv-500 italic'},'Half Off')),
+
+ // === Annual / Monthly segmented toggle ===
+ // Lives between the H2 and the membership card. Pick a plan → the
+ // card's foil-stamp price + caption + sub-line update live. Annual is
+ // the default + carries a "save 43%" pill for the comparative cue.
+ el('div',{
+ class:'mt-10 inline-flex items-center p-1 rounded-[4px] bg-ink-900 ring-1 ring-mv-500/15 shadow-inner shadow-mv-500/[0.04]',
+ ref: toggleEl => {
+ queueMicrotask(() => {
+ const section = toggleEl.closest('section');
+ if (!section) return;
+ const btns = toggleEl.querySelectorAll('button[data-plan]');
+ const amount = section.querySelector('.mv-price-amount');
+ const label = section.querySelector('.mv-price-label');
+ const sub = section.querySelector('.mv-price-sub');
+ if (!amount || !label || !sub) return;
+ function setPlan(plan) {
+ btns.forEach(b => {
+ const active = b.dataset.plan === plan;
+ b.classList.toggle('bg-mv-500', active);
+ b.classList.toggle('text-white', active); b.classList.toggle('shadow-mv-500/30', active);
+ b.classList.toggle('text-slate2-300', !active);
+ b.classList.toggle('hover:text-slate2-100', !active);
+ });
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ if (plan === 'annual') {
+ amount.textContent = '€3.99';
+ label.textContent = es ? '/mes · anual' : '/mo · annual';
+ sub.textContent = es ? 'Se cobra una vez al año, 47,88 €. Ahorras 36 € frente al plan mensual.' : 'Billed once a year, €47.88 up front. Save €36 vs monthly.';
+ } else {
+ amount.textContent = '€6.99';
+ label.textContent = es ? '/mes · mensual' : '/mo · monthly';
+ sub.textContent = es ? 'Se cobra cada mes. Cancela cuando quieras.' : 'Billed each month. Cancel any month.';
+ }
+ }
+ btns.forEach(b => b.addEventListener('click', () => setPlan(b.dataset.plan)));
+ setPlan('annual'); // default
+ });
+ }
+ },
+ el('button',{'data-plan':'annual', class:'rounded-[4px] px-5 py-2 text-sm font-bold transition cursor-pointer flex items-center gap-2 bg-mv-500 text-white  shadow-mv-500/30'},
+ el('span',{},'Annual'),
+ el('span',{class:'inline-flex items-center justify-center text-[9px] font-extrabold uppercase tracking-wider bg-white/25 px-1.5 py-0.5 rounded-[4px]'},'Save 43%')
+ ),
+ el('button',{'data-plan':'monthly', class:'rounded-[4px] px-5 py-2 text-sm font-bold transition cursor-pointer text-slate2-300 hover:text-slate2-100'},
+ 'Monthly'
+ )
+ ),
+
+ // Membership card, re-skinned for the pastel palette. Was a saturated
+ // red-coral gradient that felt heavy against cream paper; now it's a
+ // tactile cream "club card" with a terracotta side-stripe, a foil-stamp
+ // italic price, and a terracotta "m" emblem in place of the cutlery emoji.
+ el('div',{class:'mt-10 relative mx-auto max-w-sm group [perspective:1200px]'},
+ // Outer warm bloom, cream + terracotta halo (replaces pink coral glow)
+ el('div',{class:'absolute -inset-4 bg-gradient-to-br from-mv-500/25 via-cream-100/50 to-mv-500/20 rounded-[2rem] blur-2xl opacity-70 group-hover:opacity-95 transition-opacity duration-700'}),
+ // The card itself, cream cardstock with warm gradient
+ el('div',{class:'relative rounded-[4px] overflow-hidden  shadow-mv-500/[0.12] ring-1 ring-mv-500/15 transition-transform duration-700 ease-out rotate-[-2deg] group-hover:rotate-0 group-hover:scale-[1.02]',
+ style:'background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 50%, #F9FAFB 100%); transform-style: preserve-3d;'},
+ // Subtle paper-grain pattern, soft terracotta wash + diagonal hairlines
+ el('div',{class:'absolute inset-0 opacity-60 pointer-events-none', style:'background-image: radial-gradient(circle at 22% 0%, rgba(229,56,42,0.10) 0, transparent 45%), repeating-linear-gradient(45deg, rgba(29,29,27,0.025) 0 6px, transparent 6px 12px);'}),
+ // Left-edge terracotta accent stripe, like a real club card bookmark
+ el('div',{class:'absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-mv-400 via-mv-500 to-mv-600 pointer-events-none'}),
+ // Card body
+ el('div',{class:'relative p-7 pt-6 pl-9 text-slate2-100 text-left'},
+ el('div',{class:'flex items-start justify-between'},
+ el('div',{},
+ el('div',{class:'text-[10px] uppercase tracking-[0.32em] font-extrabold text-mv-500'},'Dining Pass'),
+ el('div',{class:'mt-0.5 text-[10px] uppercase tracking-[0.25em] font-bold text-slate2-400'},'Menuverso · Barcelona')
+ ),
+ // Refined emblem: terracotta disc with italic serif "m"
+ el('div',{class:'text-right'},
+ el('div',{class:'inline-flex h-9 w-9 rounded-[4px] bg-mv-500 items-center justify-center  shadow-mv-500/30'},
+ el('span',{class:'font-serif-display italic font-extrabold text-white text-xl leading-none'},'m')
+ ),
+ el('div',{class:'mt-1.5 text-[9px] uppercase tracking-[0.25em] font-bold text-mv-500'},'2×1')
+ )
+ ),
+ // Price as foil-stamp display serif, italic terracotta.
+ // The Annual/Monthly toggle above the card live-updates these
+ // three text nodes via the class hooks (.mv-price-amount/label/sub).
+ el('div',{class:'mt-7'},
+ el('div',{class:'flex items-baseline gap-1'},
+ el('span',{class:'mv-price-amount font-serif-display italic text-7xl font-extrabold text-mv-500 drop- transition-colors'},'€3.99'),
+ el('span',{class:'mv-price-label text-sm font-bold text-slate2-400'},'/mo · annual')
+ ),
+ el('div',{class:'mv-price-sub mt-1 text-[11px] text-slate2-400'},'Billed once a year, €47.88 up front. Save €36 vs monthly.')
+ ),
+ // Inclusions, slate text with solid terracotta check pills
+ el('ul',{class:'mt-5 space-y-2 text-sm text-slate2-100'},
+ ...['Cancel any time','Access to all the deals','Pays for itself in one visit'].map(s =>
+ el('li',{class:'flex items-center gap-2.5'},
+ el('span',{class:'inline-flex h-5 w-5 rounded-full bg-mv-500 items-center justify-center text-[11px] font-extrabold text-white '},'✓'),
+ el('span',{class:'font-medium'}, s)
+ ))
+ ),
+ ),
+ // Bottom: thin warm terracotta strip (replaces the black magnetic strip)
+ el('div',{class:'absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-mv-400 via-mv-500 to-mv-400 opacity-85'})
+ ),
+ // CTA, terracotta to match the rest of the page (replaces black pill)
+ el('button',{class:'relative mt-10 mx-auto block rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-10 py-4 text-lg font-extrabold cursor-pointer  shadow-mv-500/30 transition', onclick:()=>currentUser()?go('checkout'):go('signup')},'Get Your Pass →')
+ ) // close membership-card outer div
+ ) // close the .relative mx-auto max-w-3xl wrapper
  ), // close section
  // ====== Waiting-list signup ============================================
  // Pre-launch email capture. Posts to Supabase REST API (table:
@@ -3469,7 +3540,7 @@ function AppMap() {
  html:
  '<div class="mv-pin-wrap' + liveCls + flashCls + '" data-slug="' + v.slug + '">' +
  '<div class="mv-pin-name">' + escapeHtml(v.name) + '</div>' +
- '<div class="mv-pin"><span class="mv-pin-m">M</span></div>' +
+ '<div class="mv-pin">' + pinGlyph(v) + '</div>' +
  '<div class="mv-pin-tail"></div>' +
  '</div>',
  iconSize: [42, 50],
@@ -3606,11 +3677,8 @@ function AppMap() {
  ),
  tickerNode ? el('div',{class:'px-4 pt-4'}, tickerNode) : null,
  el('div',{class:'p-4 grid gap-4 lg:grid-cols-[340px_1fr]'},
- // LEFT: list, collapses below the map on narrow screens via CSS order tricks.
- // Bottom fade signals the list scrolls (instead of a hard-sliced last card).
- el('div',{class:'order-2 lg:order-1 relative'}, listEl,
- el('div',{class:'pointer-events-none absolute bottom-0 left-0 right-0 h-10', style:'background:linear-gradient(to top, var(--paper), transparent);'})
- ),
+ // LEFT: list, collapses below the map on narrow screens via CSS order tricks
+ el('div',{class:'order-2 lg:order-1 space-y-3'}, listEl),
  // RIGHT: map
  el('div',{class:'order-1 lg:order-2'}, mapEl)
  )
@@ -4963,162 +5031,6 @@ function PartnerLanding() {
  )
  );
 
- // ====== Partners FAQ ======
- // Content from Patricia's ES FAQ doc (2026-06). Bilingual: rendered ES/EN
- // off MV_LANG and re-runs on setLang() via the top-level render(), so it
- // tracks the in-place language swap. Accordion toggles the 'hidden' class
- // (non-empty string — safe from the empty-classList-toggle bug).
- const faqLang = (typeof MV_LANG !== 'undefined' && MV_LANG === 'en') ? 'en' : 'es';
- const faqChevron = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polyline points="6 9 12 15 18 9"/></svg>';
- const faqData = [
- { cat:{es:'Primeros pasos', en:'Getting started'}, items:[
- { q:{es:'¿Cuáles son las ventajas de unirme a Menuverso?', en:'What are the advantages of joining Menuverso?'},
- a:{ es:{ bullets:[
- 'Visibilidad gratuita: te conectamos con una comunidad activa de foodies que buscan descubrir nuevos lugares. Como son los usuarios quienes pagan la suscripción, para tu local es totalmente gratis.',
- 'El mejor marketing: no hay nada como el boca a boca. Damos a los usuarios el incentivo perfecto para que visiten tu local, prueben tu producto y te recomienden.',
- 'Condiciones a tu medida: un nuevo canal de captación de clientes sin costes extra ni comisiones, ofreciendo solo promociones que se adapten a tu negocio.'
- ]},
- en:{ bullets:[
- 'Free visibility: we connect you with an active community of foodies looking to discover new places. Since users pay the subscription, it is completely free for your venue.',
- 'The best marketing: nothing beats word of mouth. We give users the perfect incentive to visit your venue, try your food and recommend you.',
- 'Terms that fit you: a new customer-acquisition channel with no extra costs or commissions, offering only promotions that suit your business.'
- ]} } },
- { q:{es:'¿Quién puede convertirse en partner de Menuverso?', en:'Who can become a Menuverso partner?'},
- a:{ es:{text:'Menuverso es para restaurantes, cafeterías y bares que quieren llegar a nuevos clientes y ganar visibilidad en la ciudad.'},
- en:{text:'Menuverso is for restaurants, cafés and bars that want to reach new customers and gain visibility in the city.'} } },
- { q:{es:'¿Cómo funciona ser partner de Menuverso en la práctica?', en:'How does being a Menuverso partner work in practice?'},
- a:{ es:{ text:'Menuverso pone tu local frente a una comunidad creciente de amantes de la gastronomía que descubren la ciudad a través de la app. El proceso es sencillo:', bullets:[
- 'Alta — creamos juntos la página de tu local. Tú eliges las ofertas que quieres lanzar (por ejemplo, un 2x1 en plato principal) y decides con qué frecuencia puede canjearse cada una.',
- 'Descubrimiento y reserva — los usuarios te encuentran a través de la app y de nuestros canales de marketing. Eligen la oferta deseada y la presentan al pedir.',
- 'En la mesa — la oferta se aplica al pedir la cuenta. El usuario solo tiene que validarla con un clic en su app y mostrarte la pantalla. ¡Así de fácil! Ya puedes entregarle la cuenta con el descuento aplicado.'
- ]},
- en:{ text:'Menuverso puts your venue in front of a growing community of food lovers who discover the city through the app. The process is simple:', bullets:[
- 'Sign-up — together we build your venue page. You choose the offers you want to launch (for example, a 2-for-1 on mains) and decide how often each one can be redeemed.',
- 'Discovery and booking — users find you through the app and our marketing channels. They pick the offer they want and present it when ordering.',
- 'At the table — the offer is applied when the bill is requested. The user just validates it with one tap in their app and shows you the screen. That simple! You hand over the bill with the discount already applied.'
- ]} } },
- { q:{es:'¿Cómo es posible que sea gratis para locales?', en:'How can it be free for venues?'},
- a:{ es:{text:'Nuestro modelo se basa en los usuarios: son ellos quienes pagan una suscripción para descubrir nuevos establecimientos en su ciudad, atraídos por las promociones exclusivas de nuestros locales asociados.'},
- en:{text:'Our model is built on users: they pay a subscription to discover new venues in their city, drawn in by the exclusive promotions our partner venues offer.'} } }
- ]},
- { cat:{es:'Configuración y puesta en marcha', en:'Setup and going live'}, items:[
- { q:{es:'¿Cómo se canjean las ofertas en mi local?', en:'How are offers redeemed at my venue?'},
- a:{ es:{text:'¡Es súper fácil! El usuario abre tu perfil en la app, canjea la oferta con un clic y te enseña la pantalla. Tu equipo solo tiene que aplicar el descuento en vuestro propio sistema al cobrar. No hace falta instalar nada extra ni aprender a usar aparatos nuevos.'},
- en:{text:'It is super easy! The user opens your profile in the app, redeems the offer with one tap and shows you the screen. Your team just applies the discount in your own system when charging. No extra software to install, no new devices to learn.'} } },
- { q:{es:'¿En cuánto tiempo puede estar activo mi local?', en:'How quickly can my venue go live?'},
- a:{ es:{text:'Máximo en una semana. Una vez firmado el acuerdo, recibidos tus materiales y con la confirmación de ambas partes, te activamos de inmediato o en la fecha que prefieras.'},
- en:{text:'Within a week at most. Once the agreement is signed, your materials are received and both sides confirm, we activate you right away or on the date you prefer.'} } },
- { q:{es:'¿Qué necesitáis de mí para empezar?', en:'What do you need from me to get started?'},
- a:{ es:{ text:'Para dar de alta tu local te pediremos:', bullets:[
- 'Un acuerdo de colaboración firmado',
- 'Tus datos de contacto (teléfono, persona de contacto, email, etc.)',
- 'Las ofertas que quieras lanzar, recogidas en el acuerdo',
- 'De 6 a 8 fotos auténticas y de buena calidad de tu local o de tus platos'
- ]},
- en:{ text:'To list your venue we will ask you for:', bullets:[
- 'A signed partnership agreement',
- 'Your contact details (phone, contact person, email, etc.)',
- 'The offers you want to launch, set out in the agreement',
- '6 to 8 authentic, good-quality photos of your venue or your dishes'
- ]} } },
- { q:{es:'¿Puedo actualizar la información de mi local más adelante?', en:'Can I update my venue information later?'},
- a:{ es:{text:'Sí. Tendrás un portal de partner donde podrás editar tu perfil, tu carta, tus fotos y tus horarios siempre que lo necesites. Para cuestiones más complejas, nuestro equipo está disponible en info@menuverso.com.'},
- en:{text:'Yes. You will have a partner portal where you can edit your profile, menu, photos and opening hours whenever you need. For more complex matters, our team is available at info@menuverso.com.'} } },
- { q:{es:'¿Puedo modificar mis ofertas?', en:'Can I change my offers?'},
- a:{ es:{text:'Por supuesto. Si necesitas cambiar o actualizar tus promociones, solo tienes que ponerte en contacto con nosotros y nuestro equipo se encargará de gestionarlo.'},
- en:{text:'Of course. If you ever need to change or update your promotions, just get in touch and our team will take care of it.'} } },
- { q:{es:'¿Cómo le saco el máximo partido a Menuverso?', en:'How do I get the most out of Menuverso?'},
- a:{ es:{ text:'Hay algunas cosas que marcan la diferencia:', bullets:[
- 'Lanza ofertas que merezca la pena reservar — atractivas y fieles a lo que ofreces.',
- 'Apuesta por buenas imágenes — fotos auténticas y bien iluminadas de tu espacio y tus platos.',
- 'Completa todos los detalles — ofertas, horarios y fotos, para que los usuarios sepan qué esperar.',
- 'Mantenlo al día — actualiza tu información con regularidad para que cada visita salga bien.'
- ]},
- en:{ text:'A few things make all the difference:', bullets:[
- 'Launch offers worth booking — attractive and true to what you serve.',
- 'Invest in good imagery — authentic, well-lit photos of your space and your dishes.',
- 'Fill in every detail — offers, hours and photos, so users know exactly what to expect.',
- 'Keep it current — update your information regularly so every visit goes well.'
- ]} } }
- ]},
- { cat:{es:'Ofertas y día a día', en:'Offers and day-to-day'}, items:[
- { q:{es:'¿Qué tipo de ofertas puedo lanzar?', en:'What kind of offers can I launch?'},
- a:{ es:{ text:'Puedes tener hasta dos ofertas activas a la vez, diseñadas junto a nuestro equipo. Algunas de las más habituales:', bullets:[
- '2x1 en principales — dos platos principales al precio de uno',
- 'Postre o bebida de cortesía con un plato principal',
- 'Un descuento fijo — por ejemplo, 10 € sobre el total de la cuenta'
- ], outro:'Las ofertas se adaptan a tu carta y a tus objetivos, y suelen estar disponibles durante un periodo acordado (por ejemplo, una vez al mes, una vez cada 3 meses, cada día…).'},
- en:{ text:'You can have up to two active offers at a time, designed together with our team. Some of the most common ones:', bullets:[
- '2-for-1 on mains — two main courses for the price of one',
- 'A free dessert or drink with a main course',
- 'A fixed discount — for example, 10 € off the total bill'
- ], outro:'Offers adapt to your menu and your goals, and are usually available for an agreed period (for example, once a month, once every 3 months, every day…).'} } },
- { q:{es:'¿Pueden los usuarios usar una oferta tantas veces como quieran?', en:'Can users redeem an offer as often as they want?'},
- a:{ es:{text:'Tú pones las reglas. Para cada oferta decides con qué frecuencia puede canjearla un comensal, de modo que mantienes el control sobre su uso.'},
- en:{text:'You set the rules. For each offer you decide how often a diner can redeem it, so you stay in control of its use.'} } }
- ]},
- { cat:{es:'Condiciones para locales', en:'Terms for venues'}, items:[
- { q:{es:'¿Qué ocurre si decido darme de baja de Menuverso?', en:'What if I decide to leave Menuverso?'},
- a:{ es:{text:'Lo entendemos: las circunstancias de los negocios cambian. Para finalizar el contrato, solo necesitas notificárnoslo con 6 semanas de antelación.'},
- en:{text:'We understand — business circumstances change. To end the contract, you only need to give us 6 weeks notice.'} } },
- { q:{es:'¿Cuáles son las condiciones para unirse a Menuverso?', en:'What are the conditions for joining Menuverso?'},
- a:{ es:{ bullets:[
- 'Ofrecer promociones irresistibles — nosotros te ayudamos a crearlas. A mejor oferta, más clientes te conocerán.',
- 'Exclusividad total — las ofertas deben crearse única y exclusivamente para los usuarios de nuestra app.'
- ]},
- en:{ bullets:[
- 'Offer irresistible promotions — we help you create them. The better the offer, the more customers will discover you.',
- 'Full exclusivity — offers must be created solely and exclusively for the users of our app.'
- ]} } }
- ]}
- ];
- const faqAnswer = (a) => {
- const out = [];
- if (a.text) out.push(el('p',{class:'text-[15px] text-slate2-300 leading-relaxed'}, a.text));
- if (a.bullets) out.push(el('ul',{class:'mt-3 space-y-2.5'},
- ...a.bullets.map(b => el('li',{class:'flex gap-3 text-[15px] text-slate2-300 leading-relaxed'},
- el('span',{class:'mt-[9px] h-1.5 w-1.5 bg-mv-500 shrink-0'}),
- el('span',{}, b)))
- ));
- if (a.outro) out.push(el('p',{class:'mt-3 text-[15px] text-slate2-400 leading-relaxed'}, a.outro));
- return out;
- };
- const faqItem = (q, a) => {
- const panel = el('div',{class:'hidden px-5 pb-5'}, ...faqAnswer(a));
- const chev = el('span',{class:'shrink-0 h-4 w-4 text-mv-500 transition-transform duration-200', html: faqChevron});
- const btn = el('button',{class:'w-full flex items-center justify-between gap-4 text-left px-5 py-4 cursor-pointer bg-transparent border-0',
- onclick:()=>{ const nowHidden = panel.classList.toggle('hidden'); chev.style.transform = nowHidden ? 'none' : 'rotate(180deg)'; }},
- el('span',{class:'font-bold text-[15px] md:text-base text-slate2-50 leading-snug'}, q),
- chev
- );
- return el('div',{class:'bg-ink-900 border border-slate2-50/12'}, btn, panel);
- };
- const partnersFaq = el('section',{class:'mx-auto max-w-3xl px-4 py-14 md:py-20 border-t border-slate2-50/10'},
- el('div',{class:'text-center max-w-3xl mx-auto'},
- el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
- el('span',{class:'inline-block h-px w-10 bg-mv-500/60'}),
- faqLang === 'en' ? 'FAQ' : 'Preguntas frecuentes',
- el('span',{class:'inline-block h-px w-10 bg-mv-500/60'})
- ),
- el('h2',{class:'disp mt-6 text-4xl md:text-6xl text-slate2-50'},
- // Uppercase literals dodge the existing autoTranslate keys
- // ("Partners"→"Locales", "FAQ"→"Preguntas frecuentes") so the brand
- // label stays "PARTNERS FAQs" in both languages.
- 'PARTNERS ', el('span',{class:'text-mv-500'},'FAQs')
- )
- ),
- el('div',{class:'mt-12 space-y-8'},
- ...faqData.map(group =>
- el('div',{},
- el('h3',{class:'kick text-mv-500 mb-3', style:'font-size:12px;'}, group.cat[faqLang]),
- el('div',{class:'space-y-2'},
- ...group.items.map(it => faqItem(it.q[faqLang], it.a[faqLang]))
- )
- )
- )
- )
- );
-
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
  // Shared Concept banner (one across the whole app).
  ConceptBanner(),
@@ -5219,9 +5131,6 @@ function PartnerLanding() {
  })
  )
  ),
-
- // Partners FAQ (Patricia's ES content, bilingual accordion).
- partnersFaq,
 
  // FINAL CTA, large.
  el('section',{class:'relative overflow-hidden border-t border-slate2-50/5'},
@@ -6922,7 +6831,7 @@ function Admin() {
  el('div',{class:'mt-3 space-y-3'},
  ...pendingVenues.map(pv => {
  const owner = store.users.find(x => x.id === pv.ownerId);
- return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
+ return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
  el('div',{class:'flex items-start justify-between flex-wrap gap-3'},
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'font-bold text-lg'}, pv.name),
@@ -7161,7 +7070,7 @@ function Admin() {
  const slotsDiff = diffs.find(d => d.field === 'Deal slots');
  const proposedSlots = cr.proposedDealSlots || [];
  const liveSlots = (v && v.liveDeal && v.liveDeal.dealSlots) || (v && v.dealSlots) || [];
- return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
+ return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold'}, venueLabel(cr)),
@@ -7381,7 +7290,7 @@ function Admin() {
  // a new Supabase table, deferred to next session.
  if (!Array.isArray(store.adminMoodHidden)) store.adminMoodHidden = [];
  wrap.append(
- el('div',{class:'mb-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
+ el('div',{class:'mb-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{},
  el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-extrabold'},'Filtros de Descubre'),
@@ -7511,7 +7420,7 @@ function Admin() {
 
  // ============== Filter panel (D1) ==============
  if (filtersOpen) {
- const panel = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
+ const panel = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'text-[11px] uppercase tracking-widest font-extrabold text-mv-500'},'Filters'),
  anyFilterActive() && el('button',{class:'rounded-[4px] bg-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer',
@@ -7687,7 +7596,7 @@ function Admin() {
  const quality = qualityFor(pv, false);
  const showMissing = quality.score <= 6 && quality.missing.length > 0;
 
- return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
+ return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'flex items-start gap-3 flex-1 min-w-[200px]'},
  el('input',{type:'checkbox', class:'mt-1.5 shrink-0', checked: selectedPartners.has(pv.slug),
@@ -7960,7 +7869,7 @@ function Admin() {
  inp.value = draft[name] ?? '';
  if (placeholder) inp.placeholder = placeholder;
  if (required) inp.setAttribute('aria-required', 'true');
- inp.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ inp.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
  if (type === 'textarea') { inp.rows = 3; inp.className += ' resize-y'; }
  inp.oninput = () => {
  const v = inp.value;
@@ -8033,7 +7942,7 @@ function Admin() {
  titleInput.type = 'text';
  titleInput.value = d.title || '';
  titleInput.placeholder = 'ej. 2×1 en el menú principal';
- titleInput.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ titleInput.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
  titleInput.oninput = () => { d.title = titleInput.value; markDirty(); };
  card.appendChild(titleInput);
  // Description
@@ -8045,7 +7954,7 @@ function Admin() {
  descInput.rows = 2;
  descInput.value = d.description || '';
  descInput.placeholder = 'Explica brevemente la oferta. ej. "Compra un plato principal y llévate otro gratis."';
- descInput.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
+ descInput.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
  descInput.oninput = () => { d.description = descInput.value; markDirty(); };
  card.appendChild(descInput);
  // Active toggle
@@ -8203,7 +8112,7 @@ function Admin() {
  rows.className = 'mt-3 space-y-2';
  diffs.forEach(d => {
  const row = document.createElement('div');
- row.className = 'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-2';
+ row.className = 'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-2';
  const pre = d.multiline
  ? '<pre class="whitespace-pre-wrap break-words text-xs text-slate2-200 font-mono leading-snug">'
  : '<div class="text-xs text-slate2-200 break-words">';
@@ -8239,7 +8148,7 @@ function Admin() {
  const dealTermsTa = document.createElement('textarea');
  dealTermsTa.rows = 3;
  dealTermsTa.value = draft.dealTerms || '';
- dealTermsTa.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
+ dealTermsTa.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
  dealTermsTa.oninput = () => {
  draft.dealTerms = dealTermsTa.value;
  markDirty();
@@ -8292,7 +8201,7 @@ function Admin() {
  }
  draft.dealSlots.forEach((s, idx) => {
  const card = document.createElement('div');
- card.className = 'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-3';
+ card.className = 'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-3';
 
  // Top row: label + active toggle + remove
  const top = document.createElement('div');
@@ -8301,7 +8210,7 @@ function Admin() {
  labelInp.type = 'text';
  labelInp.value = s.label || '';
  labelInp.placeholder = 'Slot label (e.g. Lunch · 13:00-15:30)';
- labelInp.className = 'flex-1 min-w-[160px] bg-ink-900 border border-slate2-50/15 rounded-[4px] px-2 py-1 text-sm font-bold text-slate2-50 outline-none focus:border-mv-500/60';
+ labelInp.className = 'flex-1 min-w-[160px] bg-slate2-50/[0.04] border border-slate2-50/15 rounded-[4px] px-2 py-1 text-sm font-bold text-slate2-50 outline-none focus:border-mv-500/60';
  labelInp.oninput = () => { s.label = labelInp.value; markDirty(); paintDiff(); };
  top.appendChild(labelInp);
 
@@ -8348,7 +8257,7 @@ function Admin() {
  i.type = type || 'text';
  i.value = (val === undefined || val === null) ? '' : val;
  if (placeholder) i.placeholder = placeholder;
- i.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-2 py-1 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ i.className = 'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-2 py-1 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
  i.oninput = () => { onChange(i.value); markDirty(); paintDiff(); };
  w.appendChild(i);
  return w;
@@ -8395,7 +8304,7 @@ function Admin() {
  termsTa.rows = 2;
  termsTa.value = isUsingDefault() ? (draft.dealTerms || '') : (s.terms || '');
  termsTa.disabled = useDefaultCb.checked;
- termsTa.className = 'mt-1 w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y disabled:opacity-50';
+ termsTa.className = 'mt-1 w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y disabled:opacity-50';
  termsTa.oninput = () => { s.terms = termsTa.value; markDirty(); paintDiff(); };
  useDefaultCb.onchange = () => {
  if (useDefaultCb.checked) {
@@ -8547,7 +8456,7 @@ function Admin() {
  overlay.setAttribute('aria-pressed', isChecked ? 'true' : 'false');
  overlay.setAttribute('aria-label', (isChecked ? 'Deselect' : 'Select') + ' photo ' + (i+1));
  const tick = document.createElement('span');
- tick.className = 'absolute top-1.5 right-1.5 w-6 h-6 rounded-[4px] grid place-items-center text-xs font-extrabold border ' + (isChecked ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/90 text-slate2-50 border-white');
+ tick.className = 'absolute top-1.5 right-1.5 w-6 h-6 rounded-[4px] grid place-items-center text-xs font-extrabold border ' + (isChecked ? 'bg-mv-500 text-white border-mv-500' : 'bg-white/90 text-ink-900 border-white');
  tick.textContent = isChecked ? '' : '';
  overlay.appendChild(tick);
  overlay.onclick = () => {
@@ -8776,7 +8685,7 @@ function Admin() {
  const venue = store.partnerVenues.find(v => v.ownerId === usr.id);
  const memberBks = store.bookings.filter(b => b.memberId === usr.id).length;
  const memberReds = store.redemptions.filter(r => r.memberId === usr.id).length;
- return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
+ return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'flex-1 min-w-[200px]'},
  el('div',{class:'flex items-center gap-2 flex-wrap'},
@@ -8876,7 +8785,7 @@ function Admin() {
  )
  ),
  el('div',{class:'text-xs text-slate2-400'}, list.length + ' booking' + (list.length===1?'':'s')),
- el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden'},
+ el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden'},
  el('table',{class:'w-full text-sm'},
  el('thead',{class:'text-slate2-400 text-left text-xs uppercase tracking-widest'}, el('tr',{}, el('th',{class:'p-3'},'Code'), el('th',{},'Venue'), el('th',{},'Member'), el('th',{},'Status'), el('th',{},'When'), el('th',{},'Actions'))),
  el('tbody',{},
@@ -8967,7 +8876,7 @@ function Admin() {
  poly.setAttribute('stroke-width','2');
  poly.setAttribute('points', points);
  svg.appendChild(poly);
- return el('div',{class:'mt-2 rounded-[4px] bg-ink-900 border border-slate2-50/12 p-3'},
+ return el('div',{class:'mt-2 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-3'},
  el('div',{class:'flex items-center justify-between text-xs text-slate2-400 mb-1'},
  el('span',{},'30-day redemptions'),
  el('span',{class:'font-bold text-slate2-50'}, String(total) + ' total · peak ' + max + '/day')
@@ -9015,7 +8924,7 @@ function Admin() {
  el('h2',{class:'disp text-2xl text-slate2-50'},'Top 5 venues, by redemption count'),
  byRedemptions.length === 0
  ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No redemptions yet.')
- : el('ul',{class:'mt-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 divide-y divide-white/5'},
+ : el('ul',{class:'mt-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
  ...byRedemptions.map(({v, n}, i) => {
  const rowChildren = [
  el('button',{
@@ -9062,7 +8971,7 @@ function Admin() {
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Minimum 5 reviews to qualify.'),
  byRating.length === 0
  ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No venues meet the threshold yet.')
- : el('ul',{class:'mt-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 divide-y divide-white/5'},
+ : el('ul',{class:'mt-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
  ...byRating.map(({v, avg, count}, i) => {
  const rowChildren = [
  el('button',{
@@ -9098,7 +9007,7 @@ function Admin() {
  el('h2',{class:'disp text-2xl text-slate2-50'},'Last 10 redemptions'),
  recent.length === 0
  ? el('p',{class:'mt-2 text-sm text-slate2-400'},'No redemptions yet.')
- : el('ul',{class:'mt-3 rounded-[4px] bg-ink-900 border border-slate2-50/12 divide-y divide-white/5'},
+ : el('ul',{class:'mt-3 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 divide-y divide-white/5'},
  ...recent.map(r => {
  const m = store.users.find(x => x.id === r.memberId);
  const v = findVenueBySlug(r.venueSlug);
@@ -9196,7 +9105,7 @@ function Admin() {
  const note = r.note || '';
  const trimmed = note.length > 120 ? (note.slice(0, 120) + '…') : note;
  const flagged = !!r.flagged;
- return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
+ return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 ' + (flagged ? 'border-l-4 border-l-red-500' : '')},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0 flex-1'},
  el('div',{class:'text-sm font-bold text-amber-300 tracking-widest'}, '★'.repeat(r.stars||0) + '☆'.repeat(Math.max(0,5-(r.stars||0)))),
@@ -9271,7 +9180,7 @@ function Admin() {
  return (a.name||'').localeCompare(b.name||'');
  });
 
- const sidebar = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
+ const sidebar = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
  partners.length === 0
  ? el('p',{class:'p-4 text-sm text-slate2-400'},'Aún no hay partners.')
  : el('ul',{class:'divide-y divide-white/5'},
@@ -9299,13 +9208,13 @@ function Admin() {
  // Conversation pane
  let pane;
  if (!selectedSlug) {
- pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-6 text-sm text-slate2-400'}, 'Selecciona un partner a la izquierda para ver el hilo.');
+ pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Selecciona un partner a la izquierda para ver el hilo.');
  } else {
  const pv = store.partnerVenues.find(x => x.slug === selectedSlug);
  const owner = pv ? store.users.find(x => x.id === pv.ownerId) : null;
  const msgs = (store.partnerMessages[selectedSlug] || []).slice();
 
- pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
+ pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap pb-3 border-b border-slate2-50/10'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-slate2-50'}, pv ? pv.name : selectedSlug),
@@ -9410,7 +9319,7 @@ function Admin() {
  })
  .filter(Boolean);
 
- const sidebar = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
+ const sidebar = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 overflow-hidden md:max-h-[600px] md:overflow-y-auto'},
  el('ul',{class:'divide-y divide-white/5'},
  ...partners.map(pv => {
  const n = venueNoteCount(pv.slug);
@@ -9444,11 +9353,11 @@ function Admin() {
 
  let pane;
  if (!selectedSlug) {
- pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-6 text-sm text-slate2-400'}, 'Pick a venue on the left to view its notes.');
+ pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'}, 'Pick a venue on the left to view its notes.');
  } else {
  const v = findVenueBySlug(selectedSlug);
  const notes = (store.adminNotes[selectedSlug] || []).slice().sort((a,b) => (b.ts||0) - (a.ts||0));
- pane = el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 space-y-3'},
+ pane = el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4 space-y-3'},
  el('div',{class:'flex items-center justify-between gap-3 pb-3 border-b border-slate2-50/10'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-slate2-50'}, v ? v.name : selectedSlug),
@@ -9599,7 +9508,7 @@ function Admin() {
  );
 
  if (entries.length === 0) {
- wrap.append(el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-6 text-sm text-slate2-400'},
+ wrap.append(el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-sm text-slate2-400'},
  (store.auditLog || []).length === 0
  ? 'No audit entries yet, existing admin handlers can opt in by calling logAudit(...). See the helper comments in source for the recommended hooks.'
  : 'No entries match this filter.'
@@ -9633,7 +9542,7 @@ function Admin() {
  const author = store.users.find(usr => usr.id === e.adminId);
  const isOpen = expandedId === e.id;
  const rows = isOpen ? diffRows(e.before, e.after) : [];
- return el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12'},
+ return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10'},
  el('button',{class:'w-full text-left px-4 py-3 cursor-pointer bg-transparent border-0',
  onclick:()=>{ expandedId = isOpen ? null : e.id; paintAudit(); }
  },
@@ -9692,7 +9601,7 @@ function Admin() {
  function AdminSystem() {
  const dataJson = (() => { try { return JSON.stringify(store, null, 2); } catch { return '{}'; } })();
  return el('div',{class:'space-y-6'},
- el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-5'},
+ el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
  el('h3',{class:'font-bold'},' Data export'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Full JSON dump of the demo store, useful for debugging or copying state.'),
  el('div',{class:'mt-3 flex flex-wrap gap-2'},
@@ -9714,7 +9623,7 @@ function Admin() {
  el('pre',{class:'mt-2 max-h-64 overflow-auto bg-ink-900/80 border border-slate2-50/10 rounded-[4px] p-3 text-[11px] font-mono'}, dataJson)
  )
  ),
- el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-5'},
+ el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
  el('h3',{class:'font-bold'},' Data import'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Replace the entire store with a previously-exported JSON. Refreshes the app on success.'),
  (() => {
@@ -9745,7 +9654,7 @@ function Admin() {
  });
  }},'Wipe & reload')
  ),
- el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-5'},
+ el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
  el('h3',{class:'font-bold'},' Catalog'),
  el('p',{class:'mt-1 text-xs text-slate2-400'},'Read-only, the static seed catalog of placeholder venues used to populate Discover before real partners onboard.'),
  el('div',{class:'mt-3 text-xs text-slate2-300'},'Total: ', el('strong',{class:'text-slate2-50'}, String(VENUES.length)), ' placeholder venues')
@@ -9753,7 +9662,7 @@ function Admin() {
  );
  }
 
- const adminRoot = el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
+ return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
  el('header',{class:'border-b-2 border-slate2-50 bg-ink-950/95 backdrop-blur-md sticky top-0 z-30'},
  el('div',{class:'mx-auto max-w-6xl px-4 h-[56px] flex items-center justify-between'},
  el('div',{class:'flex items-center gap-3'},
@@ -9782,19 +9691,6 @@ function Admin() {
  AdminOverview()
  )
  );
- // i18n: re-translate admin subtrees that paint() rebuilds via innerHTML —
- // those bypass the render()-level autoTranslate sweep. One observer on the
- // admin root covers every tab's re-paint plus the inline edit form.
- if (typeof MV_LANG !== 'undefined' && MV_LANG === 'es' && typeof autoTranslate === 'function' && typeof MutationObserver !== 'undefined') {
- const _mo = new MutationObserver(function(muts){
- for (const m of muts) for (const n of m.addedNodes) {
- if (n.nodeType === 1) autoTranslate(n);
- else if (n.nodeType === 3 && n.parentNode && n.parentNode.nodeType === 1) autoTranslate(n.parentNode);
- }
- });
- _mo.observe(adminRoot, {childList:true, subtree:true});
- }
- return adminRoot;
 }
 
 /* ========================================================================
@@ -9858,144 +9754,6 @@ const ROUTES = {
 // in markup is enough, as long as it's in this map. Add a translation =
 // add one line here.
 window.MV_TR_ES = {
- // ===== Admin i18n batch (ES) =====
- "unknown owner": "propietario desconocido",
- "No address yet": "Sin dirección todavía",
- "Submitted ": "Enviado ",
- "Reason to send the partner (optional):": "Motivo para enviar al partner (opcional):",
- "A reviewer asked for changes. Please refine your profile and resubmit.": "Un revisor ha pedido cambios. Mejora tu perfil y vuelve a enviarlo.",
- "(unknown venue)": "(local desconocido)",
- "Venue not found": "Local no encontrado",
- "Listing removed (soft). Partner retains portal access.": "Listado eliminado (temporal). El partner mantiene el acceso al portal.",
- "Why are you rejecting this request? (Shown to the partner)": "¿Por qué rechazas esta solicitud? (Se muestra al partner)",
- "A rejection reason is required": "Hace falta un motivo de rechazo",
- "Request rejected, partner will see the reason.": "Solicitud rechazada, el partner verá el motivo.",
- "Reason: ": "Motivo: ",
- "Requested ": "Solicitado ",
- "Conditions text": "Texto de condiciones",
- "Credits / member / month": "Créditos / miembro / mes",
- "(see slot list below)": "(ver lista de turnos abajo)",
- "(empty)": "(vacío)",
- "(none)": "(ninguno)",
- "(inactive)": "(inactivo)",
- "Proposed": "Propuesto",
- "All quality fields populated": "Todos los campos de calidad completados",
- "Quick filters": "Filtros rápidos",
- "Has photos": "Con fotos",
- "Missing photos": "Sin fotos",
- "Any": "Cualquiera",
- "Sort": "Ordenar",
- "Default": "Por defecto",
- "Status": "Estado",
- "Rating": "Valoración",
- "Redemptions": "Canjes",
- "Submitted": "Enviado",
- "Clear all": "Limpiar todo",
- "Clear selection": "Limpiar selección",
- "No LIVE venues in selection": "No hay locales EN VIVO en la selección",
- "No PAUSED venues in selection": "No hay locales PAUSADOS en la selección",
- "No LIVE/PAUSED venues in selection": "No hay locales EN VIVO/PAUSADOS en la selección",
- "Sent back for review": "Enviado de nuevo a revisión",
- "Catalog · seed venues": "Catálogo · locales de muestra",
- "Selected seeds have no overrides to delete": "Las muestras seleccionadas no tienen cambios que eliminar",
- "Catalog overrides cleared": "Cambios del catálogo borrados",
- "Edited": "Editado",
- "Seed": "Muestra",
- "no owner": "sin propietario",
- "Rejection reason: ": "Motivo del rechazo: ",
- "Missing: ": "Falta: ",
- "Basics": "Básicos",
- "Location": "Ubicación",
- "Contact": "Contacto",
- "Deal terms": "Condiciones de la oferta",
- "Admin edits propagate to members immediately, they do NOT go through partner-approval.": "Las ediciones de admin se aplican a los miembros al instante, NO pasan por la aprobación del partner.",
- "Rating (0–5)": "Valoración (0–5)",
- "Reviews count": "Nº de reseñas",
- "Latitude": "Latitud",
- "Longitude": "Longitud",
- "Hours": "Horario",
- "Photos": "Fotos",
- "Main · Cover gallery": "Principal · Galería de portada",
- "Food": "Comida",
- "Restaurant · interior & exterior": "Restaurante · interior y exterior",
- "Menu": "Menú",
- "Currently showing this stock photo": "Mostrando ahora esta foto de archivo",
- "Default deal terms (venue-wide)": "Condiciones por defecto (para todo el local)",
- "Proposed changes": "Cambios propuestos",
- "Apply draft to live now": "Aplicar borrador a producción ahora",
- "Pushed live": "Publicado",
- "Live (members see)": "En vivo (lo ven los miembros)",
- "Draft": "Borrador",
- "Default deal terms": "Condiciones por defecto",
- "+ Add slot": "+ Añadir turno",
- "New slot": "Nuevo turno",
- "Active": "Activo",
- "Seat cap": "Aforo",
- "Per-slot terms": "Condiciones del turno",
- "Use default": "Usar predeterminado",
- "Select": "Seleccionar",
- "Cover": "Portada",
- "First": "Primera",
- "Move up": "Subir",
- "Move down": "Bajar",
- "Move to front": "Mover al principio",
- "No changes": "Sin cambios",
- "First name:": "Nombre:",
- "Last name:": "Apellidos:",
- "Name updated": "Nombre actualizado",
- "Change role (MEMBER / PARTNER_OWNER / ADMIN):": "Cambiar rol (MEMBER / PARTNER_OWNER / ADMIN):",
- "Invalid role": "Rol no válido",
- "Role updated": "Rol actualizado",
- "Granted free subscription": "Suscripción gratuita concedida",
- "Subscription removed": "Suscripción eliminada",
- "(unknown)": "(desconocido)",
- "Booking cancelled": "Reserva cancelada",
- "Manually mark redeemed? (admin override)": "¿Marcar como canjeada manualmente? (anulación de admin)",
- "Marked redeemed": "Marcada como canjeada",
- "30-day redemptions": "Canjes de 30 días",
- "No redemptions yet.": "Aún no hay canjes.",
- "unknown member": "miembro desconocido",
- "Live venues": "Locales en vivo",
- "Avg rating": "Val. media",
- "No reviews match this filter.": "Ninguna reseña coincide con este filtro.",
- " Flag": " Marcar",
- " Flagged": " Marcada",
- "Review deleted": "Reseña eliminada",
- "Delete this review? Cannot be undone.": "¿Eliminar esta reseña? No se puede deshacer.",
- "platform seed": "muestra de la plataforma",
- "Add an internal note about this venue…": "Añade una nota interna sobre este local…",
- "Write something first": "Escribe algo primero",
- "Note saved": "Nota guardada",
- "Save note": "Guardar nota",
- "No notes yet.": "Aún no hay notas.",
- "unknown admin": "admin desconocido",
- "Delete this note?": "¿Eliminar esta nota?",
- "Note deleted": "Nota eliminada",
- "Nothing to revert": "Nada que revertir",
- "No entries match this filter.": "Ninguna entrada coincide con este filtro.",
- "Field": "Campo",
- "Before": "Antes",
- "After": "Después",
- "(no venue)": "(sin local)",
- "No field-level differences captured.": "No se capturaron diferencias a nivel de campo.",
- "↺ Revert to this state": "↺ Revertir a este estado",
- " Data export": " Exportar datos",
- " Data import": " Importar datos",
- " Reset all data": " Restablecer datos",
- " Catalog": " Catálogo",
- "Download JSON": "Descargar JSON",
- "Copy to clipboard": "Copiar al portapapeles",
- "Download started": "Descarga iniciada",
- "Copied to clipboard": "Copiado al portapapeles",
- "Copy failed": "Error al copiar",
- "Preview JSON": "Previsualizar JSON",
- "Import & overwrite": "Importar y sobrescribir",
- "Paste a JSON first": "Pega primero un JSON",
- "Replace ALL data with this JSON? Your current state will be overwritten.": "¿Reemplazar TODOS los datos con este JSON? Se sobrescribirá tu estado actual.",
- "Imported. Reloading…": "Importado. Recargando…",
- "Wipe ALL demo data and reload? This cannot be undone.": "¿Borrar TODOS los datos de la demo y recargar? No se puede deshacer.",
- "Wipe & reload": "Borrar y recargar",
- "placeholder venues": "locales de muestra",
  "Sign in": "Iniciar sesión",
  "Sign out": "Cerrar sesión",
  "Sign up": "Crear cuenta",
@@ -10584,7 +10342,6 @@ window.MV_TR_ES = {
  "Preview, how diners will see you": "Vista previa, cómo te verán los comensales",
  "Privacy Notice": "Aviso de Privacidad",
  "Terms of Service": "Términos del Servicio",
- "€3.99/month billed annually (€47.88 up front) or €6.99/month billed monthly, cancel any time from your account. Full refund within 14 days of first purchase if you have not redeemed any offer. Two diners required; cheaper item is the free one; dine-in; not combinable; partner-defined exclusions apply. Spanish law; Barcelona courts.": "3,99 €/mes con facturación anual (47,88 € por adelantado) o 6,99 €/mes con facturación mensual; cancela cuando quieras desde tu cuenta. Reembolso completo en los 14 días posteriores a la primera compra si no has canjeado ninguna oferta. Se requieren dos comensales; el plato más barato es el gratuito; solo en local; no acumulable; se aplican las exclusiones definidas por cada local. Legislación española; tribunales de Barcelona.",
  "Access, correction, deletion, restriction, portability. Self-service in your account; otherwise email hola@menuverso.com. You can complain to the AEPD.": "Acceso, rectificación, supresión, limitación, portabilidad. Autoservicio en tu cuenta; si no, escribe a hola@menuverso.com. Puedes reclamar ante la AEPD.",
  "Account: email, name, password (hashed). Subscription: Stripe customer/sub IDs and period dates. Redemptions: venue, deal, timestamps, verification token. We don't run third-party ad trackers.": "Cuenta: email, nombre, contraseña (hasheada). Suscripción: IDs de cliente/suscripción de Stripe y fechas de periodo. Confirmaciones: local, oferta, marcas de tiempo, token de verificación. No usamos rastreadores de anuncios de terceros.",
  "Last updated 2026-05-11. Menuverso S.L. (Barcelona, Spain). Contact: hola@menuverso.com": "Última actualización 2026-05-11. Menuverso S.L. (Barcelona, España). Contacto: hola@menuverso.com",
