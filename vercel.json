@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    { "source": "/privacidad", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/unete", "destination": "/index.html" },
+    { "source": "/alta", "destination": "/index.html" },
+    { "source": "/confirmar", "destination": "/index.html" }
+  ]
+}

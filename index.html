@@ -2498,6 +2498,110 @@ function LiveTicker() {
 /* ========================================================================
  LANDING (marketing)
  ======================================================================== */
+function WaitlistForm(){
+ const wrap = el('div',{class:'mt-8 max-w-md mx-auto'});
+ let state = 'idle'; // idle | submitting | done | error
+ let errorMsg = '';
+ let lastEmail = '';
+ let lastConsent = false; // GDPR consent checkbox state, preserved across re-paints
+ const CONSENT_VERSION = 'v1-june-2026'; // bump when the privacy policy materially changes
+ function paint() {
+ wrap.innerHTML = '';
+ if (state === 'done') {
+ wrap.appendChild(
+ el('div',{class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
+ el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓'),
+ el('div',{class:'font-bold text-slate2-50'}, t('waitlist.success.title')),
+ el('div',{class:'mt-1 text-sm text-slate2-300'}, t('waitlist.success.body'))
+ )
+ );
+ return;
+ }
+ const esW = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const supaInsert = (body) => fetch('https://qjrqnnrucdvpwrbkxean.supabase.co/rest/v1/Launch-waitlist', {
+ method: 'POST',
+ headers: {
+ 'apikey': 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
+ 'Authorization': 'Bearer sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
+ 'Content-Type': 'application/json',
+ 'Prefer': 'return=minimal'
+ },
+ body: JSON.stringify(body)
+ });
+ const form = el('form',{class:'space-y-3 text-left', onsubmit: async (ev) => {
+ ev.preventDefault();
+ const email = (ev.target.elements.email?.value || '').trim().toLowerCase();
+ const consent = !!(ev.target.elements.consent && ev.target.elements.consent.checked);
+ lastEmail = email; lastConsent = consent;
+ if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+ state = 'error'; errorMsg = t('waitlist.error.invalid'); paint(); return;
+ }
+ // GDPR (Art. 6.1.a): explicit consent is a HARD requirement — never submit
+ // to the waiting list without the box ticked. Do not remove this gate.
+ if (!consent) {
+ state = 'error'; errorMsg = esW ? 'Debes aceptar recibir novedades para unirte a la lista.' : 'You must agree to receive updates to join the list.'; paint(); return;
+ }
+ state = 'submitting'; paint();
+ // Consent record (consented_at + version captured at tick time). ip_address
+ // is captured server-side in the double-opt-in function, not here.
+ const consentRow = { email, consented_at: new Date().toISOString(), consent_version: CONSENT_VERSION, double_opt_in_confirmed: false };
+ // Local audit-trail safety net, never lose a consent record even if the POST fails.
+ try { const ls = JSON.parse(localStorage.getItem('mv_waitlist_consent') || '[]'); ls.push(consentRow); localStorage.setItem('mv_waitlist_consent', JSON.stringify(ls)); } catch (e) {}
+ try {
+ let r = await supaInsert(consentRow);
+ let txt = (r.ok || r.status === 201) ? '' : await r.text().catch(() => '');
+ // If the consent migration hasn't been applied yet (unknown columns), don't
+ // lose the signup — fall back to an email-only insert. Run the migration to
+ // persist consent fields in the DB.
+ if (!(r.ok || r.status === 201) && r.status !== 409 && /column|schema cache|PGRST204|does not exist/i.test(txt)) {
+ console.warn('Launch-waitlist consent columns missing — apply the consent migration. Falling back to email-only insert.');
+ r = await supaInsert({ email });
+ txt = (r.ok || r.status === 201) ? '' : await r.text().catch(() => '');
+ }
+ if (r.ok || r.status === 201 || r.status === 409 || /duplicate|23505|unique/i.test(txt)) { state = 'done'; paint(); return; }
+ state = 'error'; errorMsg = t('waitlist.error.server'); paint();
+ } catch (e) {
+ state = 'error'; errorMsg = t('waitlist.error.network'); paint();
+ }
+ }},
+ el('div',{class:'flex flex-col sm:flex-row gap-2'},
+ el('input',{ name:'email', type:'email', required: true,
+ placeholder: t('waitlist.placeholder'),
+ disabled: state === 'submitting',
+ value: lastEmail,
+ class:'flex-1 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition disabled:opacity-50'
+ }),
+ el('button',{ type:'submit',
+ disabled: state === 'submitting',
+ class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition shrink-0 disabled:opacity-60 disabled:cursor-wait'
+ }, state === 'submitting' ? t('waitlist.submitting') : t('waitlist.cta'))
+ ),
+ // GDPR consent — unchecked by default; submission is blocked above if unticked.
+ el('div',{},
+ el('label',{class:'flex items-start gap-2.5 cursor-pointer'},
+ el('input',{ name:'consent', type:'checkbox', checked: lastConsent, disabled: state === 'submitting',
+ class:'mt-0.5 h-4 w-4 shrink-0 cursor-pointer', style:'accent-color:#F4291A;' }),
+ el('span',{class:'text-[13px] text-slate2-300 leading-snug'},
+ esW ? 'Acepto recibir novedades sobre el lanzamiento de Menuverso y ofertas de acceso anticipado. Puedo darme de baja en cualquier momento.'
+ : "I agree to receive updates about Menuverso's launch and early access offers. I can unsubscribe at any time.")
+ ),
+ el('p',{class:'mt-1.5 text-[11px] text-slate2-500 leading-snug'},
+ esW ? 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. '
+ : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. ',
+ el('a',{class:'underline text-mv-500 hover:text-mv-600 cursor-pointer', onclick:(e)=>{ e.preventDefault(); go('privacy'); }},
+ esW ? 'Lee nuestra Política de Privacidad.' : 'Read our Privacy Policy.')
+ )
+ )
+ );
+ wrap.appendChild(form);
+ if (state === 'error') {
+ wrap.appendChild(el('div',{class:'mt-2 text-sm text-red-300'}, errorMsg));
+ }
+ }
+ paint();
+ return wrap;
+}
+
 function Landing() {
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
  // Shared Concept banner, same call as every other page so the header
@@ -2682,72 +2786,7 @@ function Landing() {
  el('p',{class:'mt-4 text-base text-slate2-300 max-w-xl mx-auto'}, t('waitlist.body')),
  // Form, controlled rendering via paint() so success / error states
  // swap inline without touching the rest of the page.
- (() => {
- const wrap = el('div',{class:'mt-8 max-w-md mx-auto'});
- let state = 'idle'; // idle | submitting | done | error
- let errorMsg = '';
- let lastEmail = '';
- function paint() {
- wrap.innerHTML = '';
- if (state === 'done') {
- wrap.appendChild(
- el('div',{class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
- el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓'),
- el('div',{class:'font-bold text-slate2-50'}, t('waitlist.success.title')),
- el('div',{class:'mt-1 text-sm text-slate2-300'}, t('waitlist.success.body'))
- )
- );
- return;
- }
- const form = el('form',{class:'flex flex-col sm:flex-row gap-2', onsubmit: async (ev) => {
- ev.preventDefault();
- const email = (ev.target.email?.value || '').trim().toLowerCase();
- if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
- state = 'error'; errorMsg = t('waitlist.error.invalid'); paint(); return;
- }
- state = 'submitting'; lastEmail = email; paint();
- try {
- const r = await fetch('https://qjrqnnrucdvpwrbkxean.supabase.co/rest/v1/Launch-waitlist', {
- method: 'POST',
- headers: {
- 'apikey': 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
- 'Authorization': 'Bearer sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
- 'Content-Type': 'application/json',
- 'Prefer': 'return=minimal'
- },
- body: JSON.stringify({ email })
- });
- if (r.ok || r.status === 201) { state = 'done'; paint(); return; }
- // Duplicate email, Postgres unique violation surfaces as 409
- // or 23505. Treat as success: user already on the list.
- const txt = await r.text().catch(() => '');
- if (r.status === 409 || /duplicate|23505|unique/i.test(txt)) {
- state = 'done'; paint(); return;
- }
- state = 'error'; errorMsg = t('waitlist.error.server'); paint();
- } catch (e) {
- state = 'error'; errorMsg = t('waitlist.error.network'); paint();
- }
- }},
- el('input',{ name:'email', type:'email', required: true,
- placeholder: t('waitlist.placeholder'),
- disabled: state === 'submitting',
- value: lastEmail,
- class:'flex-1 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition disabled:opacity-50'
- }),
- el('button',{ type:'submit',
- disabled: state === 'submitting',
- class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition shrink-0 disabled:opacity-60 disabled:cursor-wait'
- }, state === 'submitting' ? t('waitlist.submitting') : t('waitlist.cta'))
- );
- wrap.appendChild(form);
- if (state === 'error') {
- wrap.appendChild(el('div',{class:'mt-2 text-sm text-red-300'}, errorMsg));
- }
- }
- paint();
- return wrap;
- })()
+      WaitlistForm()
  )
  ),
  el('footer',{class:'border-t border-slate2-50/5 mt-4'},
@@ -4936,54 +4975,8 @@ function Booking() {
 /* ========================================================================
  PARTNER PORTAL, real code-redemption
  ======================================================================== */
-function PartnerLanding() {
- const me = currentUser();
- const isPartner = me?.role === 'PARTNER_OWNER';
- const isOtherRole = me && !isPartner;
-
- // Partner-page glyph library (Lucide-style icons), defined up-front
- // so every section can reference it regardless of layout order.
- if (!window.__partnerGlyphs) window.__partnerGlyphs = {
- users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/><circle cx="17" cy="8" r="2.5" opacity="0.5"/><path d="M19.5 20v-1a3.5 3.5 0 0 0-2.5-3.4" opacity="0.5"/></svg>',
- receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="2.5" opacity="0.9"/></svg>',
- heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 6 5.5 6c1.7 0 3.2 1 4 2.5C10.3 7 11.8 6 13.5 6c3 0 4.5 3 3 6-2.5 4.5-9.5 9-9.5 9z" fill="currentColor" fill-opacity="0.18"/></svg>',
- document:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="14" y2="18"/></svg>',
- check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><polyline points="7.5 12.5 10.5 15.5 16 9.5"/></svg>',
- calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/><circle cx="16" cy="14.5" r="1.1" fill="currentColor" fill-opacity="0.4"/></svg>',
- keypad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="currentColor" fill-opacity="0.22"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity="0.5"/></svg>',
- barChart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="13" width="3" height="7" fill="currentColor" fill-opacity="0.22"/><rect x="11" y="9" width="3" height="11"/><rect x="16" y="5" width="3" height="15" fill="currentColor" fill-opacity="0.22"/></svg>',
- profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="11" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 11-3"/><path d="M17 13l5 5-2 1-2 1 1-2 1-2-3-3z" fill="currentColor" fill-opacity="0.22"/></svg>',
- layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polygon points="12 3 21 8 12 13 3 8" fill="currentColor" fill-opacity="0.22"/><polyline points="3 13 12 18 21 13"/><polyline points="3 17 12 22 21 17" opacity="0.5"/></svg>',
- pause: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><line x1="10" y1="8.5" x2="10" y2="15.5" stroke-width="2"/><line x1="14" y1="8.5" x2="14" y2="15.5" stroke-width="2"/></svg>',
- phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="6" y="2" width="12" height="20" rx="2.5"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><text x="12" y="13" font-family="Courier, monospace" font-size="5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">842</text></svg>',
- chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M21 11.5a8.5 8.5 0 0 1-13 7.2L3 20.5l1.8-4.7A8.5 8.5 0 1 1 21 11.5z" fill="currentColor" fill-opacity="0.15"/><circle cx="8.5" cy="11.5" r="0.9" fill="currentColor"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor"/><circle cx="15.5" cy="11.5" r="0.9" fill="currentColor"/></svg>'
- };
-
- const primaryCtas = el('div',{class:'flex flex-wrap items-center gap-3'},
- // 2026-05-28 (Patricia): public partner sign-up is closed. New restaurants
- // onboard via the contact form below; menuverso reviews + creates the account.
- !me && el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition', onclick:()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }}, t('partner.hero.cta.list')),
- !me && el('button',{class:'rounded-[4px] border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>{
- setSession('u_demo_partner');
- toast('Signed in as demo partner'); go('partner-portal',{tab:'overview'});
- }}, t('partner.hero.cta.demo')),
- isPartner && el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30', onclick:()=>go('partner-portal',{tab:'overview'})}, t('partner.hero.cta.openPortal')),
- !isPartner && !me && el('button',{class:'text-sm text-slate2-300 underline hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')}, t('partner.hero.cta.alreadyPartner')),
- // Logged-in non-partner (member/admin), always show a clear next action.
- // No primary button works because their session blocks partner signup;
- // route them to sign out, which is the actual unblocker.
- // 2026-05-28 (Patricia): logged-in non-partner clicking the CTA gets sent
- // to the contact form (no public signup anymore).
- isOtherRole && el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition', onclick:()=>{ logout(); toast('Signed out, fill the form to get in touch.'); setTimeout(()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }, 200); }}, t('partner.hero.cta.signOut')),
- isOtherRole && el('button',{class:'rounded-[4px] border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>go(me.role === 'ADMIN' ? 'admin' : 'app')}, t('partner.hero.cta.backAccount'))
- );
-
- // Inline lead-capture form, the neotaste-style "Get in touch" pattern.
- // Posts to Supabase `partner_leads` (anon insert, same publishable key
- // pattern as Launch-waitlist). LocalStorage is kept as a safety net so
- // nothing is lost if the table or RLS isn't set up yet — the local copy
- // can be exported later via `localStorage.getItem('mv_partner_leads')`.
- const leadCapture = el('form',{id:'partner-contact', class:'mt-7 max-w-lg scroll-mt-28', onsubmit: async (ev)=>{
+function PartnerLeadForm(){
+  return el('form',{id:'partner-contact', class:'mt-7 max-w-lg scroll-mt-28', onsubmit: async (ev)=>{
  ev.preventDefault();
  const f = ev.target;
  const btn = f.querySelector('button[type=submit]');
@@ -5047,6 +5040,56 @@ function PartnerLanding() {
  )
  )
  );
+}
+
+function PartnerLanding() {
+ const me = currentUser();
+ const isPartner = me?.role === 'PARTNER_OWNER';
+ const isOtherRole = me && !isPartner;
+
+ // Partner-page glyph library (Lucide-style icons), defined up-front
+ // so every section can reference it regardless of layout order.
+ if (!window.__partnerGlyphs) window.__partnerGlyphs = {
+ users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1"/><circle cx="17" cy="8" r="2.5" opacity="0.5"/><path d="M19.5 20v-1a3.5 3.5 0 0 0-2.5-3.4" opacity="0.5"/></svg>',
+ receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M5 3v18l2.5-1.5L10 21l2-1.5L14 21l2.5-1.5L19 21V3z"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><line x1="8" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="2.5" opacity="0.9"/></svg>',
+ heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M12 21s-7-4.5-9.5-9C1 9 2.5 6 5.5 6c1.7 0 3.2 1 4 2.5C10.3 7 11.8 6 13.5 6c3 0 4.5 3 3 6-2.5 4.5-9.5 9-9.5 9z" fill="currentColor" fill-opacity="0.18"/></svg>',
+ document:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="14 3 14 9 20 9"/><line x1="8" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="14" y2="18"/></svg>',
+ check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><polyline points="7.5 12.5 10.5 15.5 16 9.5"/></svg>',
+ calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8" cy="14.5" r="1.1" fill="currentColor"/><circle cx="12" cy="14.5" r="1.1" fill="currentColor"/><circle cx="16" cy="14.5" r="1.1" fill="currentColor" fill-opacity="0.4"/></svg>',
+ keypad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="15" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5" fill="currentColor" fill-opacity="0.22"/><rect x="9" y="9" width="6" height="6" rx="1.5" opacity="0.5"/></svg>',
+ barChart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="13" width="3" height="7" fill="currentColor" fill-opacity="0.22"/><rect x="11" y="9" width="3" height="11"/><rect x="16" y="5" width="3" height="15" fill="currentColor" fill-opacity="0.22"/></svg>',
+ profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="11" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 11-3"/><path d="M17 13l5 5-2 1-2 1 1-2 1-2-3-3z" fill="currentColor" fill-opacity="0.22"/></svg>',
+ layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><polygon points="12 3 21 8 12 13 3 8" fill="currentColor" fill-opacity="0.22"/><polyline points="3 13 12 18 21 13"/><polyline points="3 17 12 22 21 17" opacity="0.5"/></svg>',
+ pause: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.15"/><line x1="10" y1="8.5" x2="10" y2="15.5" stroke-width="2"/><line x1="14" y1="8.5" x2="14" y2="15.5" stroke-width="2"/></svg>',
+ phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><rect x="6" y="2" width="12" height="20" rx="2.5"/><line x1="10" y1="18.5" x2="14" y2="18.5"/><text x="12" y="13" font-family="Courier, monospace" font-size="5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">842</text></svg>',
+ chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><path d="M21 11.5a8.5 8.5 0 0 1-13 7.2L3 20.5l1.8-4.7A8.5 8.5 0 1 1 21 11.5z" fill="currentColor" fill-opacity="0.15"/><circle cx="8.5" cy="11.5" r="0.9" fill="currentColor"/><circle cx="12" cy="11.5" r="0.9" fill="currentColor"/><circle cx="15.5" cy="11.5" r="0.9" fill="currentColor"/></svg>'
+ };
+
+ const primaryCtas = el('div',{class:'flex flex-wrap items-center gap-3'},
+ // 2026-05-28 (Patricia): public partner sign-up is closed. New restaurants
+ // onboard via the contact form below; menuverso reviews + creates the account.
+ !me && el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition', onclick:()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }}, t('partner.hero.cta.list')),
+ !me && el('button',{class:'rounded-[4px] border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>{
+ setSession('u_demo_partner');
+ toast('Signed in as demo partner'); go('partner-portal',{tab:'overview'});
+ }}, t('partner.hero.cta.demo')),
+ isPartner && el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30', onclick:()=>go('partner-portal',{tab:'overview'})}, t('partner.hero.cta.openPortal')),
+ !isPartner && !me && el('button',{class:'text-sm text-slate2-300 underline hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>go('partner-signin')}, t('partner.hero.cta.alreadyPartner')),
+ // Logged-in non-partner (member/admin), always show a clear next action.
+ // No primary button works because their session blocks partner signup;
+ // route them to sign out, which is the actual unblocker.
+ // 2026-05-28 (Patricia): logged-in non-partner clicking the CTA gets sent
+ // to the contact form (no public signup anymore).
+ isOtherRole && el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition', onclick:()=>{ logout(); toast('Signed out, fill the form to get in touch.'); setTimeout(()=>{ const f = document.getElementById('partner-contact'); if (f) { f.scrollIntoView({behavior:'smooth', block:'center'}); const first = f.querySelector('input'); if (first) setTimeout(()=>first.focus(), 400); } }, 200); }}, t('partner.hero.cta.signOut')),
+ isOtherRole && el('button',{class:'rounded-[4px] border border-slate2-50/15 bg-slate2-50/[0.02] px-7 py-3.5 font-extrabold hover:bg-slate2-50/[0.06] cursor-pointer transition', onclick:()=>go(me.role === 'ADMIN' ? 'admin' : 'app')}, t('partner.hero.cta.backAccount'))
+ );
+
+ // Inline lead-capture form, the neotaste-style "Get in touch" pattern.
+ // Posts to Supabase `partner_leads` (anon insert, same publishable key
+ // pattern as Launch-waitlist). LocalStorage is kept as a safety net so
+ // nothing is lost if the table or RLS isn't set up yet — the local copy
+ // can be exported later via `localStorage.getItem('mv_partner_leads')`.
+ const leadCapture = PartnerLeadForm();
 
  // ====== Partners FAQ ======
  // Content from Patricia's ES FAQ doc (2026-06). Bilingual: rendered ES/EN
@@ -9886,15 +9929,42 @@ function Admin() {
  LEGAL PAGES
  ======================================================================== */
 function Privacy() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ // GDPR/RGPD waitlist privacy policy (content from Patricia's June 2026 doc).
+ // Bilingual off MV_LANG; reachable at /privacidad (ES) and /privacy (EN).
+ const sections = es ? [
+ ['¿Quién es el responsable del tratamiento?', 'Patricia Adrover Gallego, con domicilio en Barcelona, España. Contacto: info@menuverso.com'],
+ ['¿Qué datos recogemos?', 'Únicamente tu dirección de correo electrónico, proporcionada voluntariamente al unirte a la lista de espera de Menuverso.'],
+ ['¿Para qué los usamos?', 'Para enviarte información sobre el lanzamiento de Menuverso, actualizaciones del proyecto y ofertas de acceso anticipado. No utilizaremos tu email para ningún otro fin sin tu consentimiento.'],
+ ['¿Cuál es la base legal?', 'Tu consentimiento explícito (art. 6.1.a RGPD), otorgado al marcar la casilla de suscripción y confirmar tu dirección de email mediante doble confirmación (double opt-in).'],
+ ['¿Dónde almacenamos tus datos?', 'Tu email se almacena de forma segura en Supabase (región UE – Frankfurt, Alemania), bajo contrato de protección de datos conforme al RGPD.'],
+ ['¿Cuánto tiempo conservamos tus datos?', 'Hasta que te das de baja o nos solicites su eliminación. Si Menuverso no entra en funcionamiento en un plazo de 2 años desde tu registro, eliminaremos todos los datos de la lista de espera.'],
+ ['¿Compartimos tus datos?', 'No vendemos ni cedemos tus datos a terceros. Supabase actúa como encargado del tratamiento bajo contrato de protección de datos conforme al RGPD.'],
+ ['¿Cuáles son tus derechos?', 'De acuerdo con el RGPD y la LOPDGDD, tienes derecho a: acceder a tus datos, rectificarlos si son incorrectos, solicitar su eliminación, limitar u oponerte a su tratamiento, y solicitar su portabilidad. Para ejercerlos, escríbenos a info@menuverso.com. Responderemos en un plazo máximo de 30 días. También puedes presentar una reclamación ante la Agencia Española de Protección de Datos en aepd.es.'],
+ ['¿Cómo darte de baja?', 'En cualquier momento, escribiendo a info@menuverso.com con el asunto "Baja lista de espera", o clicando el enlace de baja incluido en cualquier email que recibas de nosotros.']
+ ] : [
+ ['Who is responsible for your data?', 'Patricia Adrover Gallego, based in Barcelona, Spain. Contact: info@menuverso.com'],
+ ['What data do we collect?', "Only your email address, provided voluntarily when joining Menuverso's waiting list."],
+ ['Why do we collect it?', "To send you information about Menuverso's launch, project updates, and early access offers. We will not use your email for any other purpose without your consent."],
+ ['What is the legal basis?', 'Your explicit consent (Art. 6.1.a GDPR), given by ticking the subscription box and confirming your email address via double opt-in.'],
+ ['Where do we store your data?', 'Your email is stored securely in Supabase (EU region – Frankfurt, Germany), under a GDPR-compliant data processing agreement.'],
+ ['How long do we keep your data?', 'Until you unsubscribe or request deletion. If Menuverso does not launch within 2 years of your signup, we will delete all waiting list data.'],
+ ['Do we share your data?', 'We do not sell or share your data with third parties. Supabase acts as our data processor under a GDPR-compliant data processing agreement.'],
+ ['What are your rights?', "Under the GDPR and Spain's LOPDGDD, you have the right to: access your data, rectify it if incorrect, request its deletion, restrict or object to its processing, and request portability. To exercise any of these rights, write to info@menuverso.com. We will respond within 30 days. You may also lodge a complaint with Spain's data protection authority at aepd.es."],
+ ['How to unsubscribe?', 'At any time, by writing to info@menuverso.com with the subject "Unsubscribe waiting list", or by clicking the unsubscribe link included in any email you receive from us.']
+ ];
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, ConceptBanner(), MarketingHeader(),
  el('article',{class:'mx-auto max-w-3xl px-4 py-12'},
- el('button',{class:'text-slate2-400 text-sm underline cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Home'),
- el('h1',{class:'mt-3 text-3xl font-extrabold'},'Privacy Notice'),
- el('p',{class:'text-slate2-400 text-sm mt-1'},'Last updated 2026-05-11. Menuverso S.L. (Barcelona, Spain). Contact: hola@menuverso.com'),
- el('h2',{class:'mt-8 text-xl font-bold'},'What we collect'),
- el('p',{class:'mt-2 text-slate2-300 text-sm'},'Account: email, name, password (hashed). Subscription: Stripe customer/sub IDs and period dates. Redemptions: venue, deal, timestamps, verification token. We don\'t run third-party ad trackers.'),
- el('h2',{class:'mt-6 text-xl font-bold'},'Your rights'),
- el('p',{class:'mt-2 text-slate2-300 text-sm'},'Access, correction, deletion, restriction, portability. Self-service in your account; otherwise email hola@menuverso.com. You can complain to the AEPD.')
+ el('button',{class:'kick text-mv-500 hover:underline cursor-pointer bg-transparent border-0', style:'font-size:11px;', onclick:()=>go('landing')}, es?'← Inicio':'← Home'),
+ el('div',{class:'mt-4 h-1.5 w-12 bg-mv-500'}),
+ el('h1',{class:'mt-3 disp text-4xl md:text-5xl text-slate2-50'}, es?'Política de Privacidad':'Privacy Policy'),
+ el('p',{class:'text-slate2-500 text-sm mt-2'}, es?'Última actualización: junio de 2026':'Last updated: June 2026'),
+ ...sections.map(([q,a]) =>
+ el('section',{class:'mt-7'},
+ el('h2',{class:'font-extrabold text-lg text-slate2-50'}, q),
+ el('p',{class:'mt-1.5 text-slate2-300 text-[15px] leading-relaxed'}, a)
+ )
+ )
  )
  );
 }
@@ -9912,8 +9982,88 @@ function Terms() {
 /* ========================================================================
  ROUTER
  ======================================================================== */
+/* ========================================================================
+ QR LANDING PAGES — focused, no-scroll, brand-forward targets for QR codes.
+ /unete (users → waitlist) and /alta (partners → contact form). They reuse
+ the existing WaitlistForm() and PartnerLeadForm() so the live forms stay the
+ single source of truth (nothing forked).
+ ======================================================================== */
+function QrHeader() {
+ return el('header',{class:'border-b border-slate2-50/8'},
+ el('div',{class:'mx-auto max-w-5xl px-4 h-[56px] flex items-center justify-between'},
+ el('a',{class:'inline-flex items-center cursor-pointer', onclick:()=>go('landing'), html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:22px;width:auto;display:block">'}),
+ el('button',{class:'inline-flex items-center gap-1.5 rounded-[4px] border-2 border-mv-500/55 text-mv-500 font-extrabold px-3 py-1.5 text-xs cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, MV_LANG === 'es' ? 'EN' : 'ES')
+ )
+ );
+}
+function Unete() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50 grain flex flex-col'},
+ ConceptBanner(), QrHeader(),
+ el('main',{class:'flex-1 flex items-center justify-center px-4 py-10'},
+ el('div',{class:'w-full max-w-md'},
+ el('div',{class:'h-1.5 w-14 bg-mv-500'}),
+ el('div',{class:'kick text-mv-500 mt-4', style:'font-size:11px;'}, es?'Próximamente en Barcelona':'Coming soon to Barcelona'),
+ el('h1',{class:'disp mt-2 text-5xl md:text-6xl text-slate2-50 leading-[0.92]'},
+ es?'ÚNETE A LA':'JOIN THE', el('br'), el('span',{class:'text-mv-500'}, es?'LISTA':'LIST')),
+ el('p',{class:'mt-4 text-slate2-300'}, es?'Sé de los primeros en desbloquear 2×1 en los mejores locales de Barcelona.':'Be among the first to unlock 2-for-1 at the best spots in Barcelona.'),
+ WaitlistForm()
+ )
+ )
+ );
+}
+function Alta() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50 grain flex flex-col'},
+ ConceptBanner(), QrHeader(),
+ el('main',{class:'flex-1 flex items-center justify-center px-4 py-10'},
+ el('div',{class:'w-full max-w-lg'},
+ el('div',{class:'h-1.5 w-14 bg-mv-500'}),
+ el('div',{class:'kick text-mv-500 mt-4', style:'font-size:11px;'}, es?'Para locales':'For restaurants'),
+ el('h1',{class:'disp mt-2 text-5xl md:text-6xl text-slate2-50 leading-[0.92]'},
+ es?'DA DE ALTA':'LIST YOUR', el('br'), el('span',{class:'text-mv-500'}, es?'TU LOCAL':'RESTAURANT')),
+ el('p',{class:'mt-4 text-slate2-300'}, es?'Llega a nuevos clientes sin coste ni comisiones. Déjanos tus datos y te contactamos.':'Reach new diners with zero cost or commission. Leave your details and we will get in touch.'),
+ PartnerLeadForm()
+ )
+ )
+ );
+}
+
+function Confirmar() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const box = el('div',{class:'w-full max-w-md text-center'});
+ function show(kind, title, msg, extra) {
+ box.innerHTML = '';
+ const ring = kind === 'ok' ? 'border-accent-emer text-accent-emer' : kind === 'wait' ? 'border-slate2-50/20 text-slate2-400' : 'border-mv-500 text-mv-500';
+ box.append(
+ el('div',{class:'mx-auto h-16 w-16 grid place-items-center text-3xl font-extrabold border-2 '+ring}, kind === 'ok' ? '✓' : kind === 'wait' ? '…' : '!'),
+ el('h1',{class:'disp mt-5 text-4xl text-slate2-50'}, title),
+ el('p',{class:'mt-3 text-slate2-300'}, msg),
+ extra || null
+ );
+ }
+ show('wait', es?'Confirmando…':'Confirming…', es?'Un momento, validando tu enlace.':'One moment, validating your link.');
+ (async () => {
+ try {
+ const token = new URLSearchParams(location.search).get('token') || '';
+ if (!token) { show('err', es?'Enlace no válido':'Invalid link', es?'Falta el token de confirmación.':'The confirmation token is missing.'); return; }
+ const r = await fetch('/api/confirm?token=' + encodeURIComponent(token));
+ if (r.ok) { show('ok', es?'¡Estás dentro! 🎉':"You're in! 🎉", es?'Tu email está confirmado. Te avisaremos en cuanto Menuverso abra en Barcelona.':'Your email is confirmed. We will let you know the moment Menuverso opens in Barcelona.'); return; }
+ if (r.status === 410) { show('err', es?'Enlace caducado':'Link expired', es?'Este enlace ha caducado. Vuelve a registrarte para recibir uno nuevo.':'This link has expired. Sign up again to get a new one.', el('button',{class:'mt-6 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3 font-extrabold cursor-pointer', onclick:()=>go('unete')}, es?'Volver a registrarme':'Sign up again')); return; }
+ show('err', es?'No pudimos confirmar':'Could not confirm', es?'El enlace no es válido o ya se usó.':'The link is invalid or already used.');
+ } catch (e) { show('err', es?'Algo salió mal':'Something went wrong', es?'Inténtalo de nuevo en un momento.':'Please try again in a moment.'); }
+ })();
+ return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50 grain flex flex-col'},
+ ConceptBanner(), QrHeader(),
+ el('main',{class:'flex-1 flex items-center justify-center px-4 py-10'}, box)
+ );
+}
+
 const ROUTES = {
  landing: Landing,
+ unete: Unete,
+ alta: Alta,
+ confirmar: Confirmar,
  privacy: Privacy,
  terms: Terms,
  signup: Signup,
@@ -11259,6 +11409,21 @@ if (state.session) {
  clearSession();
  }
 }
+// URL aliases for the privacy policy: /privacidad (ES) and /privacy (EN),
+// plus their #hash equivalents, open the policy in the matching language even
+// on a direct hit or shared link (the SPA otherwise navigates via go()).
+(function(){
+ try {
+ var seg = ((location.pathname || '').toLowerCase().replace(/\/+$/,'').split('/').pop())
+ || ((location.hash || '').toLowerCase().replace(/^#\/?/,''));
+ if (seg === 'privacidad') { MV_LANG = 'es'; state.route = 'privacy'; }
+ else if (seg === 'privacy') { MV_LANG = 'en'; state.route = 'privacy'; }
+ else if (seg === 'unete' || seg === 'únete') { state.route = 'unete'; }
+ else if (seg === 'alta') { state.route = 'alta'; }
+ else if (seg === 'confirmar' || seg === 'confirm') { state.route = 'confirmar'; }
+ if (state.route === 'privacy') document.documentElement.setAttribute('lang', MV_LANG);
+ } catch(e){}
+})();
 render();
 installIdleTimeout();
 // Phase 2: kick off cross-device venue pull right after first render so
