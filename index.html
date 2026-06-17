@@ -6937,11 +6937,11 @@ function aT(es, en){ return (typeof MV_LANG !== 'undefined' && MV_LANG === 'es')
 // Friendly, colour-coded venue status: { label, badge classes, dot colour }.
 function venueStatusMeta(s){
  switch (s) {
- case 'PENDING_APPROVAL': return { label: aT('Pendiente','Pending'),  badge:'bg-amber-500/15 text-amber-300 border-amber-500/40',       dot:'#f59e0b' };
- case 'LIVE':             return { label: aT('En vivo','Live'),       badge:'bg-accent-emer/15 text-accent-emer border-accent-emer/40', dot:'#34d399' };
- case 'PAUSED':           return { label: aT('Pausado','Paused'),     badge:'bg-slate2-50/10 text-slate2-300 border-slate2-50/20',      dot:'#94a3b8' };
- case 'REJECTED':         return { label: aT('Rechazado','Rejected'), badge:'bg-red-500/15 text-red-300 border-red-500/40',             dot:'#ef4444' };
- case 'DRAFT':            return { label: aT('Borrador','Draft'),     badge:'bg-slate2-50/5 text-slate2-400 border-slate2-50/12',       dot:'#9ca3af' };
+ case 'PENDING_APPROVAL': return { label: aT('Pendiente','Pending'),  badge:'bg-amber-500/15 text-amber-700 border-amber-600/30',       dot:'#d97706' };
+ case 'LIVE':             return { label: aT('En vivo','Live'),       badge:'bg-accent-emer/15 text-accent-emer border-accent-emer/40', dot:'#1F9D63' };
+ case 'PAUSED':           return { label: aT('Pausado','Paused'),     badge:'bg-slate2-50/10 text-slate2-300 border-slate2-50/25',      dot:'#8A8073' };
+ case 'REJECTED':         return { label: aT('Rechazado','Rejected'), badge:'bg-red-500/15 text-red-600 border-red-500/30',             dot:'#dc2626' };
+ case 'DRAFT':            return { label: aT('Borrador','Draft'),     badge:'bg-slate2-50/8 text-slate2-400 border-slate2-50/15',       dot:'#9ca3af' };
  default:                 return { label: s,                          badge:'bg-slate2-50/5 text-slate2-400 border-slate2-50/12',       dot:'#9ca3af' };
  }
 }
@@ -7470,9 +7470,9 @@ function Admin() {
 
  function qualityBadge(q) {
  let cls;
- if (q.score >= 8) cls = 'bg-accent-emer/20 text-accent-emer border-accent-emer/40';
- else if (q.score >= 5) cls = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
- else cls = 'bg-red-500/20 text-red-300 border-red-500/40';
+ if (q.score >= 8) cls = 'bg-accent-emer/15 text-accent-emer border-accent-emer/40';
+ else if (q.score >= 5) cls = 'bg-amber-500/15 text-amber-700 border-amber-600/30';
+ else cls = 'bg-red-500/15 text-red-600 border-red-500/30';
  const title = q.missing.length ? ('Missing: ' + q.missing.join(', ')) : 'All quality fields populated';
  return el('span',{class:'rounded-[4px] border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + cls, title}, 'Q ' + q.score + '/10');
  }
@@ -7872,23 +7872,38 @@ function Admin() {
 
  const quality = qualityFor(pv, false);
  const showMissing = quality.score <= 6 && quality.missing.length > 0;
+ const cover = (pv.photos && pv.photos[0]) || null;
+ const bits = [localizeBarrio(pv.barrio), localizeCuisine(pv.cuisine), '€'.repeat(pv.priceTier || 0)].map(x => (x || '').trim()).filter(Boolean).join(' · ');
+ const metricPill = (n, label) => el('span',{class:'inline-flex items-baseline gap-1 rounded-[4px] bg-slate2-50/[0.05] px-2 py-1 text-[11px] text-slate2-500'}, el('strong',{class:'text-slate2-50 font-extrabold tabular-nums text-[12px]'}, String(n)), label);
 
- return el('div',{'data-venue-row':'1', 'data-slug': pv.slug, class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4'},
+ return el('div',{'data-venue-row':'1', 'data-slug': pv.slug, class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 p-4 transition-colors hover:border-slate2-50/25'},
  el('div',{class:'flex items-start justify-between gap-3 flex-wrap'},
- el('div',{class:'flex items-start gap-3 flex-1 min-w-[200px]'},
- el('input',{type:'checkbox', class:'mt-1.5 shrink-0', checked: selectedPartners.has(pv.slug),
+ el('div',{class:'flex items-start gap-3.5 flex-1 min-w-[220px]'},
+ el('input',{type:'checkbox', class:'mt-2 shrink-0', checked: selectedPartners.has(pv.slug),
  onChange:e=>{ if (e.target.checked) selectedPartners.add(pv.slug); else selectedPartners.delete(pv.slug); paintPartners(); }
  }),
- el('div',{class:'flex-1 min-w-[200px]'},
+ // Leading thumbnail (cover photo) or a brand monogram tile.
+ cover
+ ? el('div',{class:'shrink-0 h-12 w-12 rounded-[4px] overflow-hidden border border-slate2-50/10', html:'<img src="'+cover+'" alt="" style="height:100%;width:100%;object-fit:cover;display:block">'})
+ : el('div',{class:'shrink-0 h-12 w-12 rounded-[4px] grid place-items-center bg-mv-500/10 border border-mv-500/25'}, el('span',{class:'disp text-mv-500 text-2xl leading-none'}, ((pv.name||'?').trim()[0] || '?').toUpperCase())),
+ el('div',{class:'flex-1 min-w-[180px]'},
  el('div',{class:'flex items-center gap-2 flex-wrap'},
- el('div',{class:'font-bold text-lg'}, pv.name),
+ el('div',{class:'text-xl font-extrabold text-slate2-50 leading-tight'}, pv.name),
  (function(){ const sm = venueStatusMeta(pv.status); return el('span',{class:'inline-flex items-center gap-1.5 rounded-[4px] border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + sm.badge}, el('span',{class:'inline-block h-1.5 w-1.5 rounded-full', style:'background:'+sm.dot}), sm.label); })(),
  qualityBadge(quality)
  ),
- el('div',{class:'text-xs text-slate2-400 mt-1'}, (localizeBarrio(pv.barrio) || ', '), ' · ', (localizeCuisine(pv.cuisine) || ', '), ' · ', owner?.email ?? aT('sin propietario','no owner')),
- showMissing && el('div',{class:'text-xs text-amber-300 mt-0.5'}, aT('Falta: ','Missing: '), quality.missing.join(', ')),
- el('div',{class:'text-xs text-slate2-400'}, String((pv.photos||[]).length), ' ', aT('fotos','photos'), ' · ', String(reds), ' ', aT('canjes','redemptions'), ' · ', String(activeBks), ' ', activeBks===1?aT('reserva activa','active booking'):aT('reservas activas','active bookings')),
- pv.rejectionReason && el('div',{class:'mt-1 text-xs text-red-300 italic'}, aT('Motivo del rechazo: ','Rejection reason: '), pv.rejectionReason)
+ bits ? el('div',{class:'text-[13px] text-slate2-400 mt-1'}, bits) : null,
+ el('div',{class:'text-xs mt-0.5 ' + (owner ? 'text-slate2-500' : 'text-slate2-500 italic')}, owner ? owner.email : aT('Sin propietario','No owner')),
+ showMissing && el('div',{class:'inline-flex items-start gap-1.5 mt-2 rounded-[4px] bg-amber-500/12 border border-amber-600/30 px-2.5 py-1 text-[11px] leading-snug text-amber-700'},
+ el('span',{class:'font-extrabold shrink-0'},'⚠'),
+ el('span',{}, el('strong',{class:'font-bold'}, aT('Faltan ','Missing ') + quality.missing.length + ': '), quality.missing.join(', '))
+ ),
+ el('div',{class:'flex items-center gap-1.5 mt-2 flex-wrap'},
+ metricPill((pv.photos||[]).length, aT('fotos','photos')),
+ metricPill(reds, aT('canjes','redemptions')),
+ metricPill(activeBks, aT(activeBks===1?'reserva':'reservas', activeBks===1?'booking':'bookings'))
+ ),
+ pv.rejectionReason && el('div',{class:'mt-2 text-xs text-red-500 italic'}, aT('Motivo del rechazo: ','Rejection reason: '), pv.rejectionReason)
  )
  ),
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
@@ -7899,13 +7914,13 @@ function Admin() {
  const reason = window.prompt(aT('Motivo:','Reason:')) || aT('Requiere más información.','Requires more info.');
  pv.status='REJECTED'; pv.rejectionReason=reason; saveStore(); toast(aT('Rechazado','Rejected')); render();
  }}, aT('Rechazar','Reject')),
- pv.status === 'LIVE' && el('button',{class:'rounded-[4px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ pv.status === 'LIVE' && el('button',{class:'rounded-[4px] bg-amber-500/15 text-amber-700 border border-amber-600/30 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-amber-500/25', onclick:()=>{
  pv.status='PAUSED'; saveStore(); toast(aT('Pausado','Paused')); render();
  }}, aT('Pausar','Pause')),
  pv.status === 'PAUSED' && el('button',{class:'rounded-[4px] bg-accent-emer/20 text-accent-emer border border-accent-emer/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
  pv.status='LIVE'; saveStore(); toast(aT('Reanudado','Resumed')); render();
  }}, '▶ ' + aT('Reanudar','Resume')),
- (pv.status === 'LIVE' || pv.status === 'PAUSED') && el('button',{class:'rounded-[4px] bg-mv-500/20 text-mv-400 border border-mv-500/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ (pv.status === 'LIVE' || pv.status === 'PAUSED') && el('button',{class:'rounded-[4px] bg-mv-500/10 text-mv-600 border border-mv-500/40 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-mv-500/20', onclick:()=>{
  confirmDo('Re-review ' + pv.name + '? It will go back to PENDING and be hidden from members.', ()=>{
  pv.status='PENDING_APPROVAL'; pv.submittedAt=Date.now(); pv.approvedAt=null; saveStore(); toast(aT('Enviado de nuevo a revisión','Sent back for review')); render();
  });
