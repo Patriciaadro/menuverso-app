@@ -2808,7 +2808,7 @@ function Landing() {
  ),
  el('div',{class:'border-t border-slate2-50/5'},
  el('div',{class:'mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate2-500'},
- '© 2026 Menuverso · Barcelona, Spain · All rights reserved'
+ '© 2026 Menuverso · All rights reserved'
  )
  )
  )
@@ -5388,7 +5388,7 @@ function PartnerLanding() {
  ),
  el('div',{class:'border-t border-slate2-50/5'},
  el('div',{class:'mx-auto max-w-6xl px-4 py-5 text-center text-xs text-slate2-500'},
- '© 2026 Menuverso · Barcelona, Spain · All rights reserved'
+ '© 2026 Menuverso · All rights reserved'
  )
  )
  )
@@ -7057,6 +7057,37 @@ function Admin() {
  // ===== Tab: Overview =====
  function AdminOverview() {
  return el('div',{class:'space-y-8'},
+ // ===== Triage cockpit: what needs the admin right now =====
+ (function(){
+ const now = Date.now();
+ const overdue = pendingVenues.filter(v => v.submittedAt && (now - v.submittedAt) > 24*3600*1000).length;
+ const items = [
+ { n: pendingVenues.length, icon:'building-2', label: aT('Aprobaciones pendientes','Pending approvals'), urgent: overdue > 0, sub: overdue > 0 ? (overdue + ' ' + aT('llevan >24h','waiting >24h')) : null, onClick:()=>go('admin',{tab:'partners'}) },
+ { n: pendingRequests.length, icon:'inbox', label: aT('Solicitudes de cambio','Change requests'), urgent: pendingRequests.length > 0, sub: null, onClick:()=>go('admin',{tab:'requests'}) },
+ { n: flaggedReviewsCount, icon:'star', label: aT('Reseñas marcadas','Flagged reviews'), urgent: flaggedReviewsCount > 0, sub: null, onClick:()=>go('admin',{tab:'reviews'}) }
+ ];
+ const totalOpen = items.reduce((a,b)=>a + b.n, 0);
+ return el('div',{},
+ el('div',{class:'flex items-center gap-3 flex-wrap'},
+ el('div',{class:'h-1.5 w-10 bg-mv-500'}),
+ el('h2',{class:'disp text-2xl text-slate2-50'}, aT('Necesita tu atención','Needs your attention')),
+ totalOpen === 0 ? el('span',{class:'kick text-accent-emer', style:'font-size:10px;'}, '✓ ' + aT('Todo al día','All clear')) : null
+ ),
+ el('div',{class:'mt-3 grid sm:grid-cols-3 gap-3'},
+ ...items.map(it => {
+ const active = it.n > 0;
+ return el('button',{type:'button', class:'text-left rounded-[4px] border-2 p-4 cursor-pointer transition-all ' + (active ? (it.urgent ? 'border-mv-500 bg-mv-500/[0.06] hover:bg-mv-500/[0.10]' : 'border-slate2-50/15 bg-ink-900 hover:border-slate2-50/30') : 'border-slate2-50/10 bg-ink-900 opacity-60'), onclick: it.onClick},
+ el('div',{class:'flex items-center justify-between'},
+ el('span',{class:'kick text-slate2-500', style:'font-size:10px;'}, it.label),
+ lucide(it.icon, {class:'h-4 w-4 ' + (active && it.urgent ? 'text-mv-500' : 'text-slate2-500')})
+ ),
+ el('div',{class:'disp text-4xl mt-2 ' + (active && it.urgent ? 'text-mv-500' : 'text-slate2-50')}, String(it.n)),
+ el('div',{class:'text-[11px] mt-1 ' + (it.urgent ? 'text-mv-500 font-bold' : 'text-slate2-500')}, it.sub || (active ? aT('requiere acción →','needs action →') : aT('al día','all clear')))
+ );
+ })
+ )
+ );
+ })(),
  el('div',{class:'grid md:grid-cols-4 gap-3'},
  StatPanel(lucide('inbox',{class:'h-3.5 w-3.5'}),'Pending partners', pendingVenues.length, pendingVenues.length ? 'awaiting review' : 'queue empty'),
  StatPanel(lucide('check-circle-2',{class:'h-3.5 w-3.5'}),'Live partner venues', liveVenues.length, liveVenues.length ? 'real onboarded' : 'none yet'),
@@ -10514,7 +10545,7 @@ window.MV_TR_ES = {
  "restaurant owners,": "dueños de restaurante,",
  "not deal-hunters.": "no para cazadores de chollos.",
  "Three reasons restaurants list with us, each one a different way our model isn't the same as the other guys'.": "Tres razones por las que los restaurantes se listan con nosotros, cada una una forma distinta de demostrar que nuestro modelo no es como los demás.",
- "© 2026 Menuverso · Barcelona, Spain · All rights reserved": "© 2026 Menuverso · Barcelona, España · Todos los derechos reservados",
+ "© 2026 Menuverso · All rights reserved": "© 2026 Menuverso · Barcelona, España · Todos los derechos reservados",
  "Why partners join": "Por qué se unen los partners",
  "2×1 main": "2×1 principal",
  "For diners": "Para clientes",
@@ -10848,7 +10879,7 @@ window.MV_TR_ES = {
  "MV·000142": "MV·000142",
  "Menuverso · Barcelona": "Menuverso · Barcelona",
  "Menuverso SL · Barcelona": "Menuverso SL · Barcelona",
- "© 2026 Menuverso · Barcelona, Spain · All rights reserved": "© 2026 Menuverso · Barcelona, España · Todos los derechos reservados",
+ "© 2026 Menuverso · All rights reserved": "© 2026 Menuverso · Barcelona, España · Todos los derechos reservados",
  "Billed once a year, €47.88 up front. Save €36 vs monthly.": "Se cobra una vez al año, 47,88 €. Ahorras 36 € frente al plan mensual.",
  "or €6.99/mo billed monthly": "o 6,99 €/mes facturado mensualmente",
  "① Basics": "① Datos básicos",
