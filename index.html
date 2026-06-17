@@ -6852,7 +6852,7 @@ function PortalProfile() {
 
  // ---- Save ----
  wrap.append(el('div',{class:'flex items-center justify-between gap-3 sticky bottom-0 bg-ink-900/90 backdrop-blur p-3 rounded-[4px] border border-slate2-50/10'},
- el('span',{class:'text-xs text-slate2-400'},'Status: ', el('span',{class:'font-bold text-slate2-50'}, pv.status)),
+ el('span',{class:'text-xs text-slate2-400'}, aT('Estado: ','Status: '), el('span',{class:'font-bold text-slate2-50'}, venueStatusMeta(pv.status).label)),
  el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 px-6 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
  // B-3: lock the slug once the venue has been approved at least once.
  // Renaming the venue after approval would orphan every existing booking,
@@ -7061,7 +7061,7 @@ function Admin() {
  StatPanel(lucide('inbox',{class:'h-3.5 w-3.5'}),'Pending partners', pendingVenues.length, pendingVenues.length ? 'awaiting review' : 'queue empty'),
  StatPanel(lucide('check-circle-2',{class:'h-3.5 w-3.5'}),'Live partner venues', liveVenues.length, liveVenues.length ? 'real onboarded' : 'none yet'),
  StatPanel(lucide('users',{class:'h-3.5 w-3.5'}),'Members', store.users.filter(x=>x.role==='MEMBER').length, 'registered'),
- StatPanel(lucide('ticket',{class:'h-3.5 w-3.5'}),'Active bookings', activeBookings, totalRedemptions + ' redemptions total')
+ StatPanel(lucide('ticket',{class:'h-3.5 w-3.5'}),'Active bookings', activeBookings, totalRedemptions + ' ' + aT('canjes en total','redemptions total'))
  ),
  pendingVenues.length > 0 && el('div',{},
  el('h2',{class:'disp text-2xl text-slate2-50'},'Approval queue'),
@@ -7371,7 +7371,7 @@ function Admin() {
  el('div',{class:'mt-3 rounded-[4px] border border-slate2-50/10 overflow-hidden'},
  ...history.map(cr => el('div',{class:'flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate2-50/5 last:border-b-0 flex-wrap'},
  el('div',{class:'flex items-center gap-3 min-w-0 flex-wrap'},
- el('span',{class:'rounded-[4px] border px-2 py-0.5 text-[10px] uppercase tracking-widest font-extrabold ' + statusBadgeClass(cr.status)}, cr.status),
+ el('span',{class:'rounded-[4px] border px-2 py-0.5 text-[10px] uppercase tracking-widest font-extrabold ' + statusBadgeClass(cr.status)}, cr.status==='PENDING'?aT('Pendiente','Pending'):cr.status==='APPROVED'?aT('Aprobada','Approved'):cr.status==='REJECTED'?aT('Rechazada','Rejected'):cr.status),
  el('span',{class:'text-sm font-bold'}, venueLabel(cr)),
  el('span',{class:'text-xs text-slate2-400'}, cr.type),
  cr.reviewedAt && el('span',{class:'text-xs text-slate2-500'}, fmtDate(cr.reviewedAt))
@@ -7739,7 +7739,7 @@ function Admin() {
  onclick:()=>{
  const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && v.status === 'LIVE');
  if (targets.length === 0) { toast('No LIVE venues in selection'); return; }
- confirmDo('Pause ' + targets.length + ' venue' + (targets.length===1?'':'s') + '?', () => {
+ confirmDo(aT('¿Pausar ','Pause ') + targets.length + ' ' + aT(targets.length===1?'local':'locales', targets.length===1?'venue':'venues') + '?', () => {
  targets.forEach(v => { v.status = 'PAUSED'; });
  saveStore(); toast('Paused ' + targets.length); selectedPartners.clear(); render();
  });
@@ -7748,7 +7748,7 @@ function Admin() {
  onclick:()=>{
  const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && v.status === 'PAUSED');
  if (targets.length === 0) { toast('No PAUSED venues in selection'); return; }
- confirmDo('Resume ' + targets.length + ' venue' + (targets.length===1?'':'s') + '?', () => {
+ confirmDo(aT('¿Reanudar ','Resume ') + targets.length + ' ' + aT(targets.length===1?'local':'locales', targets.length===1?'venue':'venues') + '?', () => {
  targets.forEach(v => { v.status = 'LIVE'; });
  saveStore(); toast('Resumed ' + targets.length); selectedPartners.clear(); render();
  });
@@ -7757,7 +7757,7 @@ function Admin() {
  onclick:()=>{
  const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && (v.status === 'LIVE' || v.status === 'PAUSED'));
  if (targets.length === 0) { toast('No LIVE/PAUSED venues in selection'); return; }
- confirmDo('Send ' + targets.length + ' venue' + (targets.length===1?'':'s') + ' back for re-review?', () => {
+ confirmDo(aT('¿Enviar ','Send ') + targets.length + ' ' + aT(targets.length===1?'local':'locales', targets.length===1?'venue':'venues') + aT(' de nuevo a revisión?',' back for re-review?'), () => {
  targets.forEach(v => { v.status='PENDING_APPROVAL'; v.submittedAt=Date.now(); v.approvedAt=null; });
  saveStore(); toast('Sent ' + targets.length + ' for review'); selectedPartners.clear(); render();
  });
@@ -7766,7 +7766,7 @@ function Admin() {
  onclick:()=>{
  const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug));
  if (targets.length === 0) return;
- confirmDo('Permanently DELETE ' + targets.length + ' venue' + (targets.length===1?'':'s') + '? Bookings, redemptions, reviews are removed. Cannot be undone.', () => {
+ confirmDo(aT('¿ELIMINAR permanentemente ','Permanently DELETE ') + targets.length + ' ' + aT(targets.length===1?'local':'locales', targets.length===1?'venue':'venues') + aT('? Se eliminan reservas, canjes y reseñas. No se puede deshacer.','? Bookings, redemptions, reviews are removed. Cannot be undone.'), () => {
  targets.forEach(v => deleteVenue(v.id));
  toast('Deleted ' + targets.length); selectedPartners.clear(); render();
  });
@@ -7901,7 +7901,7 @@ function Admin() {
 
  // Seed bulk-actions bar (delete overrides only, seeds have no status).
  const seedBulkBar = selectedSeeds.size > 0 ? el('div',{class:'mt-4 rounded-[4px] bg-mv-500/20 border border-mv-500/50 px-4 py-3 flex items-center gap-2 flex-wrap'},
- el('div',{class:'text-sm font-extrabold text-mv-400'}, selectedSeeds.size + ' seed' + (selectedSeeds.size===1?'':'s') + ' selected'),
+ el('div',{class:'text-sm font-extrabold text-mv-400'}, selectedSeeds.size + ' ' + aT(selectedSeeds.size===1?'muestra':'muestras', selectedSeeds.size===1?'seed':'seeds') + ' ' + aT('seleccionadas','selected')),
  el('button',{class:'rounded-[4px] bg-red-500/30 text-red-200 border border-red-500/50 px-3 py-1 text-xs font-bold cursor-pointer',
  onclick:()=>{
  const slugs = Array.from(selectedSeeds);
@@ -8916,7 +8916,7 @@ function Admin() {
  )
  )
  ),
- el('div',{class:'text-xs text-slate2-400'}, filtered.length + ' user' + (filtered.length===1?'':'s')),
+ el('div',{class:'text-xs text-slate2-400'}, filtered.length + ' ' + aT(filtered.length===1?'usuario':'usuarios', filtered.length===1?'user':'users')),
  ...filtered.map(usr => {
  const sub = store.subscriptions[usr.id];
  const venue = store.partnerVenues.find(v => v.ownerId === usr.id);
@@ -9021,7 +9021,7 @@ function Admin() {
  )
  )
  ),
- el('div',{class:'text-xs text-slate2-400'}, list.length + ' booking' + (list.length===1?'':'s')),
+ el('div',{class:'text-xs text-slate2-400'}, list.length + ' ' + aT(list.length===1?'reserva':'reservas', list.length===1?'booking':'bookings')),
  el('div',{class:'rounded-[4px] bg-ink-900 border border-slate2-50/12 overflow-hidden'},
  el('table',{class:'w-full text-sm'},
  el('thead',{class:'text-slate2-400 text-left text-xs uppercase tracking-widest'}, el('tr',{}, el('th',{class:'p-3'},'Code'), el('th',{},'Venue'), el('th',{},'Member'), el('th',{},'Status'), el('th',{},'When'), el('th',{},'Actions'))),
@@ -9326,7 +9326,7 @@ function Admin() {
  }, l))
  )
  ),
- el('div',{class:'text-xs text-slate2-400'}, list.length + ' review' + (list.length===1?'':'s'))
+ el('div',{class:'text-xs text-slate2-400'}, list.length + ' ' + aT(list.length===1?'reseña':'reseñas', list.length===1?'review':'reviews'))
  );
 
  if (list.length === 0) {
@@ -9569,7 +9569,7 @@ function Admin() {
  el('span',{class:'font-bold text-slate2-50 truncate'}, pv.name),
  n > 0 && el('span',{class:'text-[10px] font-extrabold text-slate2-50 bg-mv-500 px-1.5 rounded-[4px] shrink-0'}, String(n))
  ),
- el('div',{class:'text-xs text-slate2-400 truncate'}, pv.status)
+ el('div',{class:'text-xs text-slate2-400 truncate'}, venueStatusMeta(pv.status).label)
  )
  );
  }),
@@ -9598,7 +9598,7 @@ function Admin() {
  el('div',{class:'flex items-center justify-between gap-3 pb-3 border-b border-slate2-50/10'},
  el('div',{class:'min-w-0'},
  el('div',{class:'font-bold text-slate2-50'}, v ? v.name : selectedSlug),
- el('div',{class:'text-xs text-slate2-400'}, notes.length + ' note' + (notes.length===1?'':'s'))
+ el('div',{class:'text-xs text-slate2-400'}, notes.length + ' ' + aT(notes.length===1?'nota':'notas', notes.length===1?'note':'notes'))
  )
  ),
  // Composer
@@ -9736,7 +9736,7 @@ function Admin() {
  ),
  el('div',{class:'flex items-center justify-between gap-3'},
  el('div',{class:'text-xs text-slate2-400'},
- totalMatching + ' entr' + (totalMatching===1?'y':'ies') + (totalMatching > HARD_CAP && !showAll ? ' · showing first ' + HARD_CAP : '')
+ totalMatching + ' ' + aT(totalMatching===1?'entrada':'entradas', totalMatching===1?'entry':'entries') + (totalMatching > HARD_CAP && !showAll ? ' · ' + aT('mostrando las primeras ','showing first ') + HARD_CAP : '')
  ),
  totalMatching > HARD_CAP && el('button',{class:'text-xs underline cursor-pointer bg-transparent border-0 text-slate2-300',
  onclick:()=>{ showAll = !showAll; paintAudit(); }
