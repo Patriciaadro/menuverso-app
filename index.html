@@ -7597,7 +7597,7 @@ function Admin() {
  ),
  el('div',{class:'flex gap-1 flex-wrap'},
  ...['all','PENDING_APPROVAL','LIVE','PAUSED','REJECTED','DRAFT'].map(s =>
- el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (statusFilter === s ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+ el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (statusFilter === s ? 'bg-mv-500 text-white' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ statusFilter = s; paintPartners(); }
  }, s === 'all' ? 'All' : s)
  )
@@ -8897,7 +8897,7 @@ function Admin() {
  ),
  el('div',{class:'flex gap-1 flex-wrap'},
  ...['all','MEMBER','PARTNER_OWNER','ADMIN'].map(r =>
- el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (roleFilter === r ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+ el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (roleFilter === r ? 'bg-mv-500 text-white' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ roleFilter = r; paintUsers(); }
  }, r === 'all' ? 'All' : r)
  )
@@ -9002,7 +9002,7 @@ function Admin() {
  ),
  el('div',{class:'flex gap-1 flex-wrap'},
  ...[['active','Active'],['redeemed','Redeemed'],['expired','Expired'],['cancelled','Cancelled'],['all','All']].map(([s,l]) =>
- el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (scope === s ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+ el('button',{class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (scope === s ? 'bg-mv-500 text-white' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ scope = s; paintActivity(); }
  }, l)
  )
@@ -9301,14 +9301,14 @@ function Admin() {
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'flex gap-1 flex-wrap'},
  ...chips.map(([k,l,n]) => el('button',{
- class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (filter===k ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+ class:'rounded-[4px] px-3 py-1.5 text-xs font-bold cursor-pointer ' + (filter===k ? 'bg-mv-500 text-white' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ filter = k; paintReviews(); }
  }, l + ' (' + n + ')'))
  ),
  el('div',{class:'flex items-center gap-2 text-xs text-slate2-400'},
  'Sort:',
  ...[['recency','Recent'],['rating','Rating'],['venue','Venue']].map(([k,l]) => el('button',{
- class:'rounded-[4px] px-3 py-1 cursor-pointer ' + (sortBy===k ? 'bg-slate2-50 text-ink-900' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
+ class:'rounded-[4px] px-3 py-1 cursor-pointer ' + (sortBy===k ? 'bg-mv-500 text-white' : 'bg-slate2-50/5 text-slate2-300 border border-slate2-50/10'),
  onclick:()=>{ sortBy = k; paintReviews(); }
  }, l))
  )
