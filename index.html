@@ -1956,7 +1956,17 @@ function localizeBarrio(s) {
  var key = String(s).trim();
  return TR[key] || key;
 }
-function setLang(l){ try{localStorage.setItem('mv_lang_v2', l);}catch(e){} try{document.documentElement.lang = l;}catch(e){} try{document.title = (l === 'en') ? 'Menuverso · Enjoy the best, save the rest' : 'Menuverso · Disfruta de lo mejor, ahorra en el resto';}catch(e){} location.reload(); }
+function setLang(l){
+ try{localStorage.setItem('mv_lang_v2', l);}catch(e){}
+ try{document.documentElement.lang = l;}catch(e){}
+ try{document.title = (l === 'en') ? 'Menuverso · Enjoy the best, save the rest' : 'Menuverso · Disfruta de lo mejor, ahorra en el resto';}catch(e){}
+ // Live in-place language swap (no page reload). Update the runtime MV_LANG
+ // variable that t() reads, then re-render the DOM with the new language.
+ // Replaces the prior location.reload() which lost scroll position and form
+ // state and could flip the language unexpectedly after async UI re-paints.
+ MV_LANG = l;
+ try { render(); } catch(e) { location.reload(); }
+}
 
 /* ========================================================================
  LAYOUT, MARKETING HEADER + PHONE FRAME
@@ -2044,12 +2054,23 @@ function HeroBackgroundVideo() {
 function MarketingHeader() {
  const u = currentUser();
  // navTo: smooth-scroll to a landing-page section, navigating there first if needed.
+ // Uses window.scrollTo with an explicit target Y rather than el.scrollIntoView
+ // because the rebrand's mobile overflow-x:hidden + sticky header was suppressing
+ // scrollIntoView({behavior:'smooth'}) on element refs (page stayed at scrollY=0).
+ // Computing the offset by hand from getBoundingClientRect + window.scrollY is the
+ // robust path, with a -24px headroom so the section title isn't tucked under the nav.
  const navTo = (id) => {
+ const doScroll = () => {
+ const target = document.getElementById(id);
+ if (!target) return;
+ const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 24);
+ window.scrollTo({ top, behavior: 'smooth' });
+ };
  if (state.route !== 'landing') {
  go('landing');
- setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth'}), 120);
+ setTimeout(doScroll, 120);
  } else {
- document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+ doScroll();
  }
  };
  const closeMenu = () => document.getElementById('mv-mmenu')?.classList.add('hidden');
