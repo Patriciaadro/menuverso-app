@@ -100,6 +100,9 @@ tailwind.config = {
  .vname{ font-family:'Anton',sans-serif; font-style:italic; text-transform:none; letter-spacing:.01em; line-height:.95; }
  /* Horizontal scroll-snap rows (Tonight hero, etc.) with hidden scrollbar. */
  .snaprow{ scrollbar-width:none; } .snaprow::-webkit-scrollbar{ display:none; }
+ /* Grid card hover-lift (Discover "Todos los planes" cards, concierge tile). */
+ .card-lift{ transition:transform .18s ease, box-shadow .18s ease; }
+ .card-lift:hover{ transform:translate(-2px,-2px); box-shadow:9px 9px 0 var(--ink); }
  /* "Drop" moment slam-in (member redeem + partner confirm); plus a gentle rise-in. */
  @keyframes mv-slam{ 0%{ transform:scale(1.6) rotate(-8deg); opacity:0; } 60%{ transform:scale(.94) rotate(-2deg); opacity:1; } 100%{ transform:scale(1) rotate(-2deg); } }
  @keyframes mv-in{ from{ opacity:0; transform:translateY(20px); } to{ opacity:1; transform:translateY(0); } }
@@ -3268,6 +3271,76 @@ function AppDiscover() {
  )
  );
  };
+ // --- "Todos los planes" grid card (Xibeca §7 reference). Three treatments for
+ // rhythm: white+duotone-photo (default), flat-ink (2×1 watermark), flat-scarlet
+ // (€€€€ watermark). Carries the per-card ♥ save + scarlet-outline deal chips +
+ // "ahorras ~€X" + circular →. ----
+ const venueIsSaved = (v) => { try { return (store.saved[u.id]||[]).includes(v.slug); } catch(e){ return false; } };
+ const toggleVenueSave = (v) => {
+ const arr = store.saved[u.id] || (store.saved[u.id] = []);
+ const i = arr.indexOf(v.slug);
+ if (i >= 0) arr.splice(i,1); else arr.push(v.slug);
+ saveStore(); paintGrid();
+ };
+ const discoverCard = (v, i, es) => {
+ const meta = [localizeBarrio(v.barrio), localizeCuisine(v.cuisine), '€'.repeat(Math.max(1, v.priceTier||2))].filter(Boolean).join(' · ');
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,2) : [];
+ const dealLabels = deals.length ? deals.map(d => d.title) : ['2×1'];
+ const saved = venueIsSaved(v);
+ const variant = (i % 5 === 1) ? 'ink' : (i % 5 === 4) ? 'scarlet' : 'photo';
+ const heart = el('button',{
+ 'aria-label': saved ? (es?'Quitar de guardados':'Remove from saved') : (es?'Guardar':'Save'),
+ style:'position:absolute;top:14px;right:14px;width:42px;height:42px;border:none;background:rgba(255,255,255,.92);border-radius:4px;font-size:20px;line-height:1;cursor:pointer;color:'+(saved?'#F4291A':'#16110F')+';',
+ onclick:(e)=>{ e.preventDefault(); e.stopPropagation(); toggleVenueSave(v); }
+ }, '♥');
+ let media;
+ if (variant === 'ink') {
+ media = el('div',{style:'height:230px;position:relative;padding:22px;overflow:hidden;'},
+ el('div',{style:"position:absolute;right:-30px;top:-50px;font-family:'Anton',sans-serif;font-size:230px;color:rgba(244,41,26,.2);line-height:.7;"}, '2×1'),
+ el('div',{style:'position:absolute;left:18px;bottom:14px;color:#F4EFE6;'},
+ el('div',{class:'vname', style:'font-size:34px;'}, v.name),
+ el('div',{style:'font-weight:700;font-size:14px;color:#cabfae;'}, meta)
+ ), heart);
+ } else if (variant === 'scarlet') {
+ media = el('div',{style:'height:230px;position:relative;padding:22px;overflow:hidden;'},
+ el('div',{style:"position:absolute;right:-20px;bottom:-30px;font-family:'Anton',sans-serif;font-style:italic;font-size:120px;color:rgba(255,255,255,.16);line-height:.7;"}, '€'.repeat(Math.max(2, v.priceTier||2))),
+ el('div',{style:'position:absolute;left:18px;bottom:14px;color:#fff;'},
+ el('div',{class:'vname', style:'font-size:34px;'}, v.name),
+ el('div',{style:'font-weight:700;font-size:14px;opacity:.92;'}, meta)
+ ), heart);
+ } else {
+ media = el('div',{style:'height:230px;position:relative;background:var(--red);overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+venuePhotoSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
+ el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(20,17,15,.7));'}),
+ el('div',{style:'position:absolute;left:18px;bottom:14px;color:#fff;'},
+ el('div',{class:'vname', style:'font-size:34px;'}, v.name),
+ el('div',{style:'font-weight:700;font-size:14px;opacity:.9;'}, meta)
+ ), heart);
+ }
+ const footerBg = (variant === 'photo') ? '' : 'background:#fff;';
+ const cardBg = variant === 'ink' ? 'var(--ink)' : variant === 'scarlet' ? 'var(--red)' : '#fff';
+ const cardShadow = variant === 'ink' ? '6px 6px 0 var(--red)' : '6px 6px 0 var(--ink)';
+ return el('div',{class:'card-lift', style:'background:'+cardBg+';border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:'+cardShadow+';cursor:pointer;', onclick:()=>go('venue',{slug:v.slug})},
+ media,
+ el('div',{style:'padding:18px 20px;'+footerBg},
+ el('div',{class:'flex flex-wrap gap-2'},
+ ...dealLabels.map(lbl => el('span',{style:'border:2px solid var(--red);color:var(--red);font-weight:800;font-size:13px;padding:6px 11px;border-radius:4px;'}, lbl))
+ ),
+ el('div',{class:'flex items-center justify-between', style:'margin-top:16px;'},
+ el('span',{class:'disp', style:'font-size:24px;color:var(--ink);'}, (es?'ahorras ~€':'save ~€')+estVenueSavings(v)),
+ el('button',{'aria-label':es?'Ver local':'View venue', style:'width:48px;height:48px;background:var(--red);color:#fff;border:none;font-family:Anton;font-size:22px;border-radius:4px;cursor:pointer;', onclick:(e)=>{ e.stopPropagation(); go('venue',{slug:v.slug}); }}, '→')
+ )
+ )
+ );
+ };
+ const conciergeTile = (es) => el('div',{class:'card-lift', style:'background:var(--ink);border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:6px 6px 0 #F2B100;display:flex;flex-direction:column;justify-content:space-between;padding:24px;min-height:312px;'},
+ el('div',{},
+ el('div',{class:'kick', style:'color:#F2B100;font-size:13px;'}, '✦ menuverso IA'),
+ el('div',{class:'disp', style:'font-size:34px;color:#F4EFE6;margin-top:12px;'}, es?'¿No sabes':'Not sure', el('br'), es?'dónde ir?':'where to go?'),
+ el('p',{style:'color:#cabfae;font-size:16px;font-weight:500;line-height:1.4;margin:14px 0 0;'}, es?'Dime con quién vas y qué te apetece. Te doy 3 sitios y el plan, al instante.':'Tell me who you\'re with and what you fancy — 3 spots and a plan, instantly.')
+ ),
+ el('div',{style:'background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);border-radius:4px;padding:13px 16px;color:#cabfae;font-weight:600;font-size:15px;'}, es?'"Cena barata en Gràcia, somos 4…"':'"Cheap dinner in Gràcia, 4 of us…"', ' ', el('span',{style:'color:#F2B100;'},'→'))
+ );
  const heroScroll = { rail:null };
  function paintHero() {
  heroRail.innerHTML = '';
@@ -3394,19 +3467,22 @@ function AppDiscover() {
  // ====================================================================
  // 5) Photo-first results grid, every venue is now a PhotoVenueCard.
  // ====================================================================
- const summary = el('div',{class:'text-sm text-slate2-400 flex items-center justify-between mt-4'});
- const grid = el('div',{class:'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-4'});
+ const summary = el('div',{class:'mt-12 mb-5'});
+ const grid = el('div',{class:'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 mt-4'});
  function paintGrid() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const list = getAllVenues().filter(matches);
  summary.innerHTML = '';
  const hasActiveFilter = q || filter !== 'all' || activeMood || activeBarrios.size > 0;
- const dealsWord = list.length === 1 ? (t('discover.deal') || 'deal') : (t('discover.deals') || 'deals');
- const suffix = hasActiveFilter ? (t('discover.matchYourSearch') || 'match your search') : (t('discover.inBarcelona') || 'in Barcelona');
- const subRow = [
- el('span',{}, ' ', el('span',{class:'text-slate2-50 font-bold'}, list.length + ' ' + dealsWord), ' ', suffix),
- !hasSub() ? el('button',{class:'text-mv-500 text-xs font-bold underline cursor-pointer bg-transparent border-0', onclick:()=>go('checkout')}, t('discover.subscribe') || 'Subscribe →') : null
- ].filter(Boolean);
- summary.append(...subRow);
+ const spotsWord = list.length === 1 ? (es?'sitio':'spot') : (es?'sitios':'spots');
+ const suffix = hasActiveFilter ? (es?'· según tu búsqueda':'· match your search') : (es?'· abiertos ahora':'· open now');
+ summary.append(
+ el('div',{class:'flex items-baseline gap-4 flex-wrap'},
+ el('h2',{class:'disp', style:'font-size:clamp(30px,5vw,44px);color:var(--ink);margin:0;'}, es?'Todos los planes':'All the plans'),
+ el('span',{style:'font-weight:700;color:#7A7164;font-size:17px;'}, list.length + ' ' + spotsWord + ' ' + suffix),
+ !hasSub() ? el('button',{class:'cursor-pointer bg-transparent border-0', style:'font-weight:800;color:var(--red);font-size:15px;text-decoration:underline;', onclick:()=>go('checkout')}, es?'Hazte miembro →':'Subscribe →') : null
+ )
+ );
  grid.innerHTML = '';
  if (list.length === 0) {
  grid.appendChild(el('div',{class:'col-span-full text-center py-12 text-slate2-400'},
@@ -3416,7 +3492,8 @@ function AppDiscover() {
  el('button',{class:'mt-4 text-sm text-mv-500 underline cursor-pointer bg-transparent border-0', onclick:()=>{ q=''; filter='all'; activeMood=null; activeBarrios.clear(); paintMoods(); paintFilterToggle(); paintFilterPanel(); paintGrid(); }},'Clear filters')
  ));
  } else {
- list.forEach(v => grid.appendChild(PhotoVenueCard(v)));
+ list.forEach((v, i) => grid.appendChild(discoverCard(v, i, es)));
+ grid.appendChild(conciergeTile(es));
  }
  }
 
@@ -3540,6 +3617,27 @@ function AppMap() {
  return '';
  }
  function priceTier(v) { return '€'.repeat(Math.max(1, Math.min(4, v.priceTier ?? 2))); }
+ // Xibeca list card (matches Portal §7 Map reference): white card, 3px ink
+ // border, hard shadow, scarlet-duotone photo, italic vname, scarlet-outline
+ // deal chip. Replaces the old PhotoVenueCard in the map's side list.
+ const vpSrc = (v) => { try { return venueHasRealPhoto(v) ? venueRealPhotoSrc(v) : cuisinePhotoFor(v); } catch(e){ try { return cuisinePhotoFor(v); } catch(_) { return ''; } } };
+ function mapListCard(v) {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,1) : [];
+ const dealLbl = deals.length ? deals[0].title : '2×1';
+ const live = isVenueAvailableNow(v);
+ return el('div',{class:'card-lift', style:'background:#fff;border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:5px 5px 0 var(--ink);cursor:pointer;'},
+ el('div',{style:'height:150px;position:relative;background:var(--red);overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+vpSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
+ el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(20,17,15,.7));'}),
+ el('div',{style:'position:absolute;left:14px;bottom:10px;color:#fff;'}, el('div',{class:'vname', style:'font-size:26px;'}, v.name)),
+ live ? el('div',{style:'position:absolute;top:10px;right:10px;background:#F2B100;color:#16110F;font-weight:900;font-size:11px;text-transform:uppercase;padding:4px 8px;border-radius:4px;'}, (es?'Abierto':'Open')) : null
+ ),
+ el('div',{style:'padding:12px 14px;'},
+ el('span',{style:'border:2px solid var(--red);color:var(--red);font-weight:800;font-size:13px;padding:5px 9px;border-radius:4px;'}, dealLbl)
+ )
+ );
+ }
 
  // -----------------------------------------------------------------------
  // Layout: filters on top, split list/map below.
@@ -3555,21 +3653,21 @@ function AppMap() {
  function paintFilters() {
  filterBarEl.innerHTML = '';
  const cuisineRow = el('div',{class:'flex items-center gap-2 flex-wrap'},
- el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-500 font-bold mr-1'},'Cuisine'),
+ el('span',{class:'kick mr-1', style:'font-size:13px;color:#7A7164;'}, aT('Cocina','Cuisine')),
  ...allCuisines.map(c => chip(c, state2.cuisines.has(c), () => {
  state2.cuisines.has(c) ? state2.cuisines.delete(c) : state2.cuisines.add(c);
  repaint();
  }))
  );
  const barrioRow = el('div',{class:'flex items-center gap-2 flex-wrap'},
- el('span',{class:'text-[10px] uppercase tracking-widest text-slate2-500 font-bold mr-1'},'Barrio'),
+ el('span',{class:'kick mr-1', style:'font-size:13px;color:#7A7164;'}, aT('Barrio','Barrio')),
  ...allBarrios.map(b => chip(b, state2.barrios.has(b), () => {
  state2.barrios.has(b) ? state2.barrios.delete(b) : state2.barrios.add(b);
  repaint();
  }))
  );
  const toggleRow = el('div',{class:'flex items-center gap-2 flex-wrap'},
- chip(' Open right now', state2.onlyAvailable, () => { state2.onlyAvailable = !state2.onlyAvailable; repaint(); }, true),
+ chip(aT('Abierto ahora ✓','Open right now ✓'), state2.onlyAvailable, () => { state2.onlyAvailable = !state2.onlyAvailable; repaint(); }, true),
  (state2.barrios.size + state2.cuisines.size > 0 || state2.onlyAvailable)
  ? el('button',{class:'text-xs underline text-slate2-400 hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>{
  state2.barrios.clear(); state2.cuisines.clear(); state2.onlyAvailable = false; repaint();
@@ -3579,12 +3677,12 @@ function AppMap() {
  filterBarEl.appendChild(el('div',{class:'space-y-2'}, toggleRow, cuisineRow, barrioRow));
  }
  function chip(label, on, onclick, accent) {
- const cls = 'rounded-[4px] px-3 py-1 text-xs font-bold cursor-pointer transition border ' + (
- on
- ? (accent ? 'bg-accent-emer/15 text-accent-emer border-accent-emer/40' : 'bg-mv-500/15 text-mv-600 border-mv-500/40')
- : 'bg-slate2-50/[0.04] text-slate2-300 border-slate2-50/10 hover:bg-slate2-50/[0.08]'
- );
- return el('button',{class:cls, onclick, type:'button'}, label);
+ const pad = 'padding:7px 13px;font-weight:800;font-size:14px;border-radius:4px;cursor:pointer;line-height:1;';
+ let style;
+ if (on && accent) style = 'background:#1F9D63;color:#fff;border:2px solid #1F9D63;' + pad;
+ else if (on) style = 'background:var(--red);color:#fff;border:2px solid var(--red);' + pad;
+ else style = 'background:transparent;color:var(--ink);border:2px solid var(--ink);' + pad;
+ return el('button',{style, onclick, type:'button'}, label);
  }
 
  // -----------------------------------------------------------------------
@@ -3609,10 +3707,8 @@ function AppMap() {
  // click-to-flyTo machinery still works. The card itself navigates to
  // the venue page on click, we intercept that here for the map page so
  // a click flies the map instead of leaving the screen.
- const card = PhotoVenueCard(v, { compact:false });
- // Replace the card's onclick (navigate-to-venue) with map-fly behaviour
- // by stopping the normal handler. PhotoVenueCard's anchor uses
- // preventDefault() + go(), so replace onclick wholesale.
+ const card = mapListCard(v);
+ // Card click flies the map to the pin instead of leaving the screen.
  card.onclick = (e) => { e.preventDefault(); flyTo(v.slug, true); };
  const row = el('div',{
  'data-slug': v.slug,
@@ -3786,14 +3882,10 @@ function AppMap() {
  // page feels alive even before the user touches a filter.
  const tickerNode = LiveTicker();
  const inner = el('div',{class:'pb-24'},
- el('div',{class:'px-5 pt-5 pb-3 border-b border-slate2-50/5'},
- el('div',{class:'flex items-baseline justify-between gap-3 flex-wrap'},
- el('div',{},
- el('h1',{class:'text-2xl font-extrabold'},'Map'),
- countEl
- )
- ),
- el('div',{class:'mt-4'}, filterBarEl)
+ el('div',{class:'px-5 pt-6 pb-3'},
+ el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,64px);color:var(--ink);margin:0;line-height:.92;'}, ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'El mapa':'The map')),
+ (function(){ countEl.className='mt-1'; countEl.style.cssText='font-weight:700;color:#7A7164;font-size:17px;'; return countEl; })(),
+ el('div',{class:'mt-5'}, filterBarEl)
  ),
  tickerNode ? el('div',{class:'px-4 pt-4'}, tickerNode) : null,
  el('div',{class:'p-4 grid gap-4 lg:grid-cols-[340px_1fr]'},
@@ -3814,23 +3906,94 @@ function AppMap() {
 }
 function AppSaved() {
  const u = currentUser(); if (!u) { go('signin'); return el('div'); }
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  // Use validated list so the count in the header matches what renders, and
  // stale slugs from older localStorage get cleaned up silently.
  const savedSlugs = validSavedSlugs(u);
  const list = getAllVenues().filter(v => savedSlugs.includes(v.slug));
- const inner = el('div',{class:'pb-24'},
- el('div',{class:'p-5 pb-3 border-b border-slate2-50/5'},
- el('h1',{class:'text-2xl font-extrabold'},'Saved'),
- el('p',{class:'text-xs text-slate2-400'}, String(list.length), ' ', list.length===1?'restaurant':'restaurants')
- ),
- list.length === 0
- ? el('div',{class:'p-10 text-center text-slate2-400'},
- ILLUS.emptyPlate('h-20 w-20 text-mv-500/70'),
- el('p',{class:'mt-4 text-sm font-medium text-slate2-300'},'No saved restaurants yet.'),
- el('p',{class:'mt-1 text-xs text-slate2-500 max-w-xs mx-auto'},'Tap the heart on any venue to keep it handy for later.'),
- el('button',{class:'mt-5 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-5 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>go('app')},'Browse deals →')
+ const spSrc = (v) => { try { return venueHasRealPhoto(v) ? venueRealPhotoSrc(v) : cuisinePhotoFor(v); } catch(e){ try { return cuisinePhotoFor(v); } catch(_) { return ''; } } };
+
+ // --- Passport: barrios "conquered" = barrios with a saved venue ---
+ const totalBarrios = Array.from(new Set(getAllVenues().map(v => v.barrio).filter(Boolean))).sort();
+ const savedBarrios = new Set(list.map(v => v.barrio).filter(Boolean));
+ const pct = totalBarrios.length ? Math.round(savedBarrios.size / totalBarrios.length * 100) : 0;
+ let redeemed = 0; try { redeemed = (memberBookings(u) || []).filter(b => b.redeemed).length; } catch(e){}
+
+ if (list.length === 0) {
+ const empty = el('div',{class:'px-5 pt-10 pb-24 text-center'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:15px;'}, es?'Tu pasaporte':'Your passport'),
+ el('h1',{class:'disp', style:'font-size:clamp(40px,8vw,64px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, es?'Conquista la ciudad':'Conquer the city'),
+ ILLUS.emptyPlate('h-20 w-20 text-mv-500/70 mx-auto mt-8'),
+ el('p',{class:'mt-4 text-sm font-medium', style:'color:#574F47;'}, es?'Aún no has guardado restaurantes.':'No saved restaurants yet.'),
+ el('p',{class:'mt-1 text-xs max-w-xs mx-auto', style:'color:#7A7164;'}, es?'Toca el corazón en cualquier local para guardarlo y empezar tu pasaporte.':'Tap the heart on any venue to start your passport.'),
+ el('button',{class:'mt-5 cursor-pointer', style:'background:var(--red);color:#fff;border:none;font-weight:800;padding:12px 22px;border-radius:4px;box-shadow:5px 5px 0 var(--ink);', onclick:()=>go('app')}, es?'Ver planes →':'Browse deals →')
+ );
+ return AppShell(empty);
+ }
+
+ // Barrio chips: visited (scarlet ✓) first, then a few locked (dashed 🔒) + "+N más".
+ const visited = totalBarrios.filter(b => savedBarrios.has(b));
+ const locked = totalBarrios.filter(b => !savedBarrios.has(b));
+ const shownLocked = locked.slice(0, Math.max(0, 7 - visited.length));
+ const moreCount = locked.length - shownLocked.length;
+ const visitedStyle = 'background:var(--red);color:#fff;font-weight:800;text-transform:uppercase;font-size:14px;padding:9px 15px;border-radius:4px;';
+ const lockedStyle = 'border:2px dashed #ABA399;color:#ABA399;font-weight:800;text-transform:uppercase;font-size:14px;padding:9px 15px;border-radius:4px;';
+
+ const badge = (icon, title, desc, on, shadow) => el('div',{style:(on?'background:var(--ink);color:#F4EFE6;border:3px solid var(--ink);box-shadow:5px 5px 0 '+shadow+';':'background:var(--paper);color:#ABA399;border:3px dashed #ABA399;')+'border-radius:4px;padding:22px;'},
+ el('div',{style:'font-size:38px;'+(on?'':'filter:grayscale(1);opacity:.5;')}, icon),
+ el('div',{class:'disp', style:'font-size:22px;margin-top:10px;'+(on?'color:'+shadow+';':'')}, title),
+ el('div',{style:'font-weight:600;font-size:13px;margin-top:4px;'+(on?'color:#cabfae;':'')}, desc)
+ );
+
+ const savedCard = (v) => {
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,2) : [];
+ const labels = deals.length ? deals.map(d => d.title) : ['2×1'];
+ const live = isVenueAvailableNow(v);
+ const meta = [localizeBarrio(v.barrio), '€'.repeat(Math.max(1, v.priceTier||2))].filter(Boolean).join(' · ');
+ return el('div',{class:'card-lift', style:'background:#fff;border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:6px 6px 0 var(--ink);cursor:pointer;', onclick:()=>go('venue',{slug:v.slug})},
+ el('div',{style:'height:200px;position:relative;background:var(--red);overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+spSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
+ el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(20,17,15,.7));'}),
+ live ? el('div',{style:'position:absolute;top:12px;left:12px;background:#1F9D63;color:#fff;font-weight:900;font-size:12px;text-transform:uppercase;padding:5px 10px;border-radius:4px;'}, es?'● Ahora':'● Now') : null,
+ el('div',{style:'position:absolute;left:16px;bottom:12px;color:#fff;'},
+ el('div',{class:'vname', style:'font-size:32px;'}, v.name),
+ el('div',{style:'font-weight:700;font-size:14px;opacity:.9;'}, meta)
  )
- : el('div',{class:'p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'}, ...list.map(DealCard))
+ ),
+ el('div',{style:'padding:16px 18px;'},
+ el('div',{class:'flex gap-2 flex-wrap'}, ...labels.map(l => el('span',{style:'border:2px solid var(--red);color:var(--red);font-weight:800;font-size:13px;padding:6px 10px;border-radius:4px;'}, l)))
+ )
+ );
+ };
+
+ const inner = el('div',{class:'px-5 pt-6 pb-24', style:'max-width:1320px;margin:0 auto;'},
+ el('div',{class:'flex items-end justify-between gap-3 flex-wrap'},
+ el('div',{},
+ el('div',{class:'kick', style:'color:var(--red);font-size:15px;'}, es?'Tu pasaporte':'Your passport'),
+ el('h1',{class:'disp', style:'font-size:clamp(38px,7vw,64px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, es?'Conquista la ciudad':'Conquer the city')
+ ),
+ el('div',{style:'text-align:right;'},
+ el('div',{class:'disp', style:'font-size:clamp(40px,8vw,64px);color:var(--ink);line-height:.8;'}, String(savedBarrios.size), el('span',{style:'color:#7A7164;font-size:.62em;'}, '/'+totalBarrios.length)),
+ el('div',{style:'font-weight:700;color:#7A7164;font-size:15px;'}, es?'barrios visitados':'barrios visited')
+ )
+ ),
+ el('div',{style:'margin-top:22px;height:26px;background:#fff;border:3px solid var(--ink);border-radius:6px;overflow:hidden;'},
+ el('div',{style:'width:'+pct+'%;height:100%;background:var(--red);transition:width .4s ease;'})
+ ),
+ el('div',{class:'flex flex-wrap gap-3', style:'margin-top:24px;'},
+ ...visited.map(b => el('span',{style:visitedStyle}, '✓ ' + (localizeBarrio(b)||b))),
+ ...shownLocked.map(b => el('span',{style:lockedStyle}, '🔒 ' + (localizeBarrio(b)||b))),
+ moreCount > 0 ? el('span',{style:lockedStyle}, '🔒 +' + moreCount + (es?' más':' more')) : null
+ ),
+ el('h2',{class:'disp', style:'font-size:clamp(28px,5vw,36px);color:var(--ink);margin:46px 0 18px;'}, es?'Tus medallas':'Your badges'),
+ el('div',{class:'grid gap-5', style:'grid-template-columns:repeat(auto-fit,minmax(180px,1fr));'},
+ badge('🍺', es?'Primera ronda':'First round', es?'Canjeaste tu primer 2×1.':'Redeemed your first 2×1.', redeemed >= 1, '#F2B100'),
+ badge('🗺️', es?'Explorador':'Explorer', es?'3 barrios distintos.':'3 different barrios.', savedBarrios.size >= 3, '#F4291A'),
+ badge('🔥', es?'Racha x5':'Streak x5', es?'Visita 5 semanas seguidas.':'Visit 5 weeks running.', false, '#F4291A'),
+ badge('👑', es?'Rey del Born':'King of El Born', es?'10 sitios en El Born.':'10 spots in El Born.', false, '#F2B100')
+ ),
+ el('h2',{class:'disp', style:'font-size:clamp(28px,5vw,36px);color:var(--ink);margin:46px 0 18px;'}, (es?'Guardados · ':'Saved · ') + list.length),
+ el('div',{class:'grid gap-6', style:'grid-template-columns:repeat(auto-fill,minmax(280px,1fr));'}, ...list.map(savedCard))
  );
  return AppShell(inner);
 }
@@ -3859,19 +4022,20 @@ function AppBookings() {
  const redeemedCount = past.filter(b => b.redeemed).length;
  const savedEur = memberSavingsEur(u);
 
- const inner = el('div',{class:'pb-24'},
- el('div',{class:'p-5 pb-3 border-b border-slate2-50/5 flex items-end justify-between gap-3 flex-wrap'},
+ const esB = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const inner = el('div',{class:'px-5 pt-6 pb-24', style:'max-width:1100px;margin:0 auto;'},
+ el('div',{class:'flex items-start justify-between gap-4 flex-wrap'},
  el('div',{},
- el('h1',{class:'text-2xl font-extrabold'},'Bookings'),
- el('p',{class:'text-xs text-slate2-400 mt-1'}, String(redeemedCount), ' ', 'redeemed', ' · ', String(all.length), ' ', 'total')
+ el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,64px);color:var(--ink);margin:0;line-height:.92;'}, esB?'Tu reserva':'Your booking'),
+ el('div',{style:'font-weight:700;color:#7A7164;font-size:17px;margin-top:4px;'}, redeemedCount + ' ' + (esB?'canjeados · ':'redeemed · ') + all.length + ' ' + (esB?'en total':'total'))
  ),
- el('div',{class:'text-right'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'You\'ve saved'),
- el('div',{class:'text-2xl font-extrabold text-mv-500'},'€' + savedEur),
- el('div',{class:'text-[10px] text-slate2-500'}, 'est. lifetime')
+ el('div',{style:'text-align:right;'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esB?'Has ahorrado':'You\'ve saved'),
+ el('div',{class:'disp', style:'font-size:clamp(56px,11vw,88px);color:var(--red);line-height:.8;'}, '€' + savedEur),
+ el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, esB?'estimado · de por vida':'est. · lifetime')
  )
  ),
- el('div',{class:'p-5 space-y-6'},
+ el('div',{class:'pt-8 space-y-6'},
  // ---- Active code section ----
  active ? (() => {
  const v = findVenueBySlug(active.venueSlug);
@@ -4113,7 +4277,7 @@ function AppProfile() {
  (u.firstName?.[0] ?? u.email[0]).toUpperCase()
  ),
  el('div',{class:'flex-1 min-w-0'},
- el('h1',{class:'font-serif-display text-3xl md:text-4xl font-extrabold truncate leading-tight'}, fullName(u)),
+ el('h1',{class:'disp truncate', style:'font-size:clamp(28px,5vw,40px);color:var(--ink);line-height:.95;'}, fullName(u)),
  el('div',{class:'mt-1 text-sm text-slate2-400 truncate'}, u.email),
  el('div',{class:'mt-2 flex items-center gap-2 flex-wrap text-xs'},
  el('span',{class:'inline-flex items-center rounded-[4px] ' + tier.bg + ' px-2.5 py-1 font-bold uppercase tracking-wider ' + tier.color}, tier.label),
@@ -4126,24 +4290,24 @@ function AppProfile() {
 
  // ===== STAT TILES, visits, savings, cuisines, neighborhoods =====
  el('div',{class:'px-5 mt-5 grid grid-cols-2 md:grid-cols-4 gap-3'},
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ el('div',{class:'rounded-[4px] bg-white border-[3px] border-[#16110F] shadow-[4px_4px_0_#16110F] p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Saved'),
- el('div',{class:'mt-1 text-3xl font-extrabold text-mv-500'},'€' + totalSaved.toLocaleString()),
+ el('div',{class:'mt-1 disp text-4xl', style:'color:var(--red);'},'€' + totalSaved.toLocaleString()),
  el('div',{class:'text-[10px] text-slate2-500 mt-0.5'}, multiple >= 1 && totalPaid > 0 ? multiple.toFixed(1) + '× your sub' : 'all-time')
  ),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ el('div',{class:'rounded-[4px] bg-white border-[3px] border-[#16110F] shadow-[4px_4px_0_#16110F] p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Visits'),
- el('div',{class:'mt-1 text-3xl font-extrabold'}, myReds.length),
+ el('div',{class:'mt-1 disp text-4xl', style:'color:var(--ink);'}, myReds.length),
  el('div',{class:'text-[10px] text-slate2-500 mt-0.5'}, recentReds.length > 0 ? el('span',{},'+', String(recentReds.length), ' ', 'last 30 days') : 'all-time')
  ),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ el('div',{class:'rounded-[4px] bg-white border-[3px] border-[#16110F] shadow-[4px_4px_0_#16110F] p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Cuisines'),
- el('div',{class:'mt-1 text-3xl font-extrabold'}, uniqueCuisines),
+ el('div',{class:'mt-1 disp text-4xl', style:'color:var(--ink);'}, uniqueCuisines),
  el('div',{class:'text-[10px] text-slate2-500 mt-0.5'},'tried')
  ),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-4'},
+ el('div',{class:'rounded-[4px] bg-white border-[3px] border-[#16110F] shadow-[4px_4px_0_#16110F] p-4'},
  el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'},'Barrios'),
- el('div',{class:'mt-1 text-3xl font-extrabold'}, uniqueBarrios),
+ el('div',{class:'mt-1 disp text-4xl', style:'color:var(--ink);'}, uniqueBarrios),
  el('div',{class:'text-[10px] text-slate2-500 mt-0.5'},'explored')
  )
  ),
