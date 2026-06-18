@@ -5624,6 +5624,7 @@ function PartnerLanding() {
 function PartnerPortal() {
  const u = currentUser();
  if (!u || u.role !== 'PARTNER_OWNER') { go('signin'); return el('div'); }
+ const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const pv = currentPartnerVenue();
 
  // No venue yet? Push to onboarding.
@@ -5709,19 +5710,24 @@ function PartnerPortal() {
  const unread = partnerUnreadBookings(pv);
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, portalHeader,
  el('div',{class:'mx-auto max-w-6xl px-4 mt-6 overflow-x-auto'},
- // No flex-wrap, let the tab pill row scroll horizontally on narrow
- // screens instead of breaking onto a second row. Tab labels also
- // shorten on small screens so they fit more often without scrolling.
- el('div',{class:'inline-flex bg-slate2-50/[0.04] border border-slate2-50/10 rounded-[4px] p-1 whitespace-nowrap'},
- // 2026-05-28 (Patricia / Pass B step 4): the "Deals" tab is removed from
- // partner-side nav. Deal changes are admin-managed (the partner can edit
- // hours + photos via the Profile tab, but offers / slots are off-limits).
- ...[['overview','Overview','Overview', 0],['redeem','Redeem code','Redeem', unread],['profile','Profile','Profile', 0]].map(([k,fullLabel,shortLabel,n]) =>
- el('button',{class: 'rounded-[4px] px-4 py-1.5 text-sm font-bold cursor-pointer bg-transparent border-0 relative shrink-0 ' + (tab===k ? 'bg-slate2-50 text-ink-900' : 'text-slate2-300 hover:text-slate2-50'),
+ // Xibeca tab bar: ink-bordered pills, active = scarlet with a hard offset
+ // shadow. Five tabs matching the partner-portal reference (Panel · Mis
+ // ofertas · Escanear · Clientes · Perfil). Internal keys are unchanged
+ // (overview/redeem/profile) so existing go() calls + the unread badge work.
+ el('div',{class:'inline-flex gap-2 whitespace-nowrap pb-1'},
+ ...[['overview', esP?'Panel':'Panel', 0],
+ ['ofertas', esP?'Mis ofertas':'My offers', 0],
+ ['redeem', esP?'Escanear':'Scan', unread],
+ ['clientes', esP?'Clientes':'Customers', 0],
+ ['profile', esP?'Perfil':'Profile', 0]].map(([k,label,n]) =>
+ el('button',{
+ style: (tab===k
+ ? 'background:var(--red);color:#fff;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);'
+ : 'background:#fff;color:var(--ink);border:2px solid var(--ink);')
+ + 'font-weight:800;font-size:14px;padding:9px 16px;border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;',
  onclick: ()=>go('partner-portal',{tab:k})},
- el('span',{class:'hidden sm:inline'}, fullLabel),
- el('span',{class:'sm:hidden'}, shortLabel),
- n > 0 ? el('span',{class:'ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-[4px] bg-mv-500 text-white text-[10px] font-extrabold animate-pulse'}, String(n)) : null
+ label,
+ n > 0 ? el('span',{class:'animate-pulse', style:'margin-left:7px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:4px;background:#F2B100;color:#16110F;font-size:10px;font-weight:900;'}, String(n)) : null
  )
  )
  )
@@ -5729,12 +5735,8 @@ function PartnerPortal() {
  el('div',{class:'mx-auto max-w-6xl px-4 py-6'},
  tab==='overview' ? PortalOverview()
  : tab==='redeem' ? PortalRedeem()
- : tab==='deals' ? (el('div',{class:'max-w-2xl mx-auto rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-center'},
- el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold'},'Ofertas'),
- el('h3',{class:'mt-3 font-bold text-lg'},'Las ofertas se gestionan desde menuverso'),
- el('p',{class:'mt-2 text-sm text-slate2-300 max-w-md mx-auto'},'Cualquier cambio en las ofertas (título, descripción, condiciones) lo hace el equipo de Menuverso para mantener una experiencia consistente. Escríbenos a hola@menuverso.com para proponer cambios.'),
- el('a',{class:'mt-4 inline-block rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-sm font-extrabold cursor-pointer', href:'mailto:hola@menuverso.com?subject=Cambio en oferta'},'Contactar equipo')
- ))
+ : tab==='clientes' ? PortalClientes()
+ : (tab==='ofertas' || tab==='deals') ? PortalOfertas()
  : PortalProfile()
  ),
  // Support footer, every partner page surfaces a way to ask for help.
@@ -6322,98 +6324,102 @@ function PortalOverview() {
  );
  }
 
- // Established partners get the real dashboard, every number derived from
- // actual store data. No invented baselines, no synthetic deltas.
+ // Established partners get the real dashboard (Xibeca "Panel" reference).
+ // Every number derives from actual store data — no invented baselines.
+ const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const monthRevenue = partnerMonthRevenueEur(pv);
  const allTimeRevenue = partnerAllTimeRevenueEur(pv);
- const totalReds = reds.length;
  const unread = partnerUnreadBookings(pv);
- // Compute per-weekday redemption counts (last 28 days) for the chart.
- const dayBuckets = [0,0,0,0,0,0,0];
- const cutoff = Date.now() - 28*86400000;
- reds.forEach(r => { if (r.redeemedAt >= cutoff) { const d = new Date(r.redeemedAt).getDay(); dayBuckets[(d+6)%7]++; } });
- const maxBucket = Math.max(1, ...dayBuckets);
- // Compute member ratings count for THIS venue (not pv.reviews placeholder).
- const reviewsForVenue = venueReviews(pv.slug);
- const avgRating = reviewsForVenue.length ? (reviewsForVenue.reduce((s,r)=>s+r.stars,0) / reviewsForVenue.length) : null;
+ const AVG = (typeof AVG_TICKET_EUR === 'number') ? AVG_TICKET_EUR : 22;
 
- // ---- Headline revenue card, what the partner most wants to see ----
- const moneyCard = el('div',{class:'rounded-[4px] bg-gradient-to-br from-mv-500/25 via-mv-500/10 to-transparent border border-mv-500/40 p-6'},
- el('div',{class:'flex items-center justify-between flex-wrap gap-3'},
+ // Merge redeemed bookings + redemption rows into one activity stream.
+ const startOfDay = new Date(); startOfDay.setHours(0,0,0,0); const dayCut = startOfDay.getTime();
+ const rows = [];
+ store.bookings.filter(b => b.venueSlug === pv.slug && b.redeemed && !b.cancelled)
+ .forEach(b => rows.push({ at: b.redeemedAt, memberId: b.memberId, slot: b.slot }));
+ (store.redemptions || []).filter(r => r.venueSlug === pv.slug)
+ .forEach(r => rows.push({ at: r.redeemedAt, memberId: r.memberId, slot: null }));
+ { const seen = new Set(); for (let i = rows.length-1; i >= 0; i--) { const k = rows[i].memberId + ':' + Math.floor((rows[i].at||0)/60000); if (seen.has(k)) rows.splice(i,1); else seen.add(k); } }
+ rows.sort((a,b) => (b.at||0) - (a.at||0));
+ const todayCount = rows.filter(r => r.at >= dayCut).length;
+ const uniqueClients = new Set(rows.map(r => r.memberId)).size;
+ const dealTitle = (typeof getVenueDeals === 'function' && getVenueDeals(pv)[0]) ? getVenueDeals(pv)[0].title : '2×1';
+ const initials = (mid) => { const m = store.users.find(x => x.id === mid); if (!m) return '··'; return ((m.firstName||'?')[0] + (m.lastName||' ')[0]).toUpperCase(); };
+ const memberName = (mid) => { const m = store.users.find(x => x.id === mid); return m ? fullName(m) : (esP?'(socio)':'(member)'); };
+ const ago = (t) => { const mn = Math.floor((Date.now()-t)/60000); if (mn < 1) return esP?'ahora':'now'; if (mn < 60) return (esP?'hace ':'')+mn+' min'+(esP?'':' ago'); const h = Math.floor(mn/60); if (h < 24) return (esP?'hace ':'')+h+' h'+(esP?'':' ago'); return (esP?'hace ':'')+Math.floor(h/24)+'d'+(esP?'':' ago'); };
+ // Peak hours: redemptions bucketed by hour of day.
+ const hourB = {}; rows.forEach(r => { const h = new Date(r.at).getHours(); hourB[h] = (hourB[h]||0)+1; });
+ const hours = Object.keys(hourB).map(Number).sort((a,b)=>a-b);
+ const maxH = Math.max(1, ...Object.values(hourB), 1);
+ const peakHour = hours.length ? hours.reduce((a,b)=> hourB[b] > (hourB[a]||0) ? b : a, hours[0]) : null;
+
+ // ---- Header: greeting + big Escanear CTA ----
+ const dateStr = new Date().toLocaleDateString(esP?'es-ES':'en-GB', { weekday:'long', day:'numeric', month:'short' });
+ const panelHeader = el('div',{class:'flex items-end justify-between gap-4 flex-wrap'},
  el('div',{},
- el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'},' ', 'Incremental revenue · this month'),
- el('div',{class:'mt-1 flex items-baseline gap-2'},
- el('span',{class:'text-5xl font-extrabold text-mv-500'},'€', monthRevenue.toLocaleString('en-GB')),
- el('span',{class:'text-xs text-slate2-400'},'est.')
+ el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, (esP?'Hoy · ':'Today · ') + dateStr),
+ el('h1',{class:'disp', style:'font-size:clamp(36px,6vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, (esP?'Buenas, ':'Hi, ') + (pv.name.split(' ')[0]) + '.')
  ),
- el('div',{class:'mt-1 text-xs text-slate2-300'},
- 'Based on', ' ', el('strong',{class:'text-slate2-50'}, String(Math.round(monthRevenue / AVG_TICKET_EUR)), ' ', 'redemptions'),
- ' × €', String(AVG_TICKET_EUR), ' ', 'avg recovered ticket.'
+ el('button',{style:'background:var(--red);color:#fff;border:none;font-family:Anton;font-size:clamp(18px,3vw,24px);padding:14px 26px;border-radius:4px;cursor:pointer;box-shadow:6px 6px 0 var(--ink);', onclick:()=>go('partner-portal',{tab:'redeem'})}, (esP?'⊞ ESCANEAR CANJE':'⊞ SCAN REDEMPTION'))
+ );
+
+ // ---- Scoreboard ----
+ const scoreCard = (bg, color, kickColor, kickText, big, sub, subColor, shadow) => el('div',{style:'background:'+bg+';color:'+color+';border:3px solid var(--ink);border-radius:4px;padding:26px;box-shadow:7px 7px 0 '+shadow+';overflow:hidden;'},
+ el('div',{class:'kick', style:'font-size:13px;color:'+kickColor+';'}, kickText),
+ el('div',{class:'disp', style:'font-size:clamp(48px,8vw,68px);line-height:.82;margin-top:12px;white-space:nowrap;'}, big),
+ el('div',{style:'font-weight:700;font-size:15px;margin-top:10px;color:'+subColor+';'}, sub)
+ );
+ const scoreboard = el('div',{class:'grid gap-5', style:'grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:28px;'},
+ scoreCard('var(--red)','#fff','#16110F', (esP?'Ingresos generados · este mes':'Revenue generated · this month'), '€'+monthRevenue.toLocaleString(esP?'es-ES':'en-GB'), '€'+allTimeRevenue.toLocaleString(esP?'es-ES':'en-GB')+(esP?' en total':' all-time'), '#16110F', 'var(--ink)'),
+ scoreCard('#fff','#16110F','var(--red)', (esP?'Clientes traídos':'Customers brought'), String(uniqueClients), (esP?'socios únicos':'unique members'), '#7A7164', 'var(--ink)'),
+ scoreCard('var(--ink)','#F4EFE6','#F2B100', (esP?'Canjes hoy':'Redemptions today'), String(todayCount), (esP?'mesas llenadas':'tables filled'), '#cabfae', 'var(--red)')
+ );
+
+ // ---- Live activity + peak hours ----
+ const activityCard = el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:24px 26px;'},
+ el('div',{class:'flex items-center justify-between'},
+ el('h2',{class:'disp', style:'font-size:28px;color:var(--ink);margin:0;'}, esP?'Actividad en vivo':'Live activity'),
+ el('span',{style:'display:flex;align-items:center;gap:7px;font-weight:800;color:#1F9D63;font-size:13px;'}, el('span',{class:'animate-pulse', style:'width:10px;height:10px;background:#1F9D63;border-radius:50%;'}), (esP?'EN DIRECTO':'LIVE'))
+ ),
+ rows.length === 0
+ ? el('p',{style:'margin-top:16px;color:#7A7164;font-weight:600;'}, esP?'Aún no hay canjes. Aparecerán aquí al instante.':'No redemptions yet. They appear here instantly.')
+ : el('div',{class:'flex flex-col', style:'margin-top:12px;'},
+ ...rows.slice(0,6).map((r,i) => el('div',{class:'flex items-center gap-4', style:'padding:14px 0;border-top:2px solid #ECE5D6;'},
+ el('span',{style:'width:44px;height:44px;background:'+(i%2?'var(--ink)':'var(--red)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:4px;font-family:Anton;'}, initials(r.memberId)),
+ el('div',{style:'flex:1;min-width:0;'},
+ el('div',{style:'font-weight:800;font-size:16px;'}, memberName(r.memberId) + (esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealTitle)),
+ el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot ? r.slot + ' · ' : '') + ago(r.at))
+ ),
+ el('span',{class:'disp', style:'font-size:24px;color:var(--ink);'}, '+€'+AVG)
+ ))
  )
+ );
+ const peakCard = el('div',{style:'background:var(--ink);color:#F4EFE6;border:3px solid var(--ink);border-radius:4px;padding:24px 26px;'},
+ el('h2',{class:'disp', style:'font-size:28px;color:#fff;margin:0;'}, esP?'Horas punta':'Peak hours'),
+ el('div',{style:'font-weight:600;color:#cabfae;font-size:13px;margin-bottom:18px;'}, esP?'canjes por franja':'redemptions by hour'),
+ hours.length === 0
+ ? el('p',{style:'color:#cabfae;font-weight:600;'}, esP?'Sin datos todavía.':'No data yet.')
+ : el('div',{},
+ el('div',{class:'flex items-end gap-2', style:'height:180px;'},
+ ...hours.map(h => el('div',{style:'flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;justify-content:flex-end;height:100%;'},
+ el('div',{style:'width:100%;height:'+Math.max(8,(hourB[h]/maxH)*100)+'%;background:'+(h===peakHour?'#F2B100':'var(--red)')+';border-radius:3px;', title:hourB[h]+''}),
+ el('span',{style:'font-size:12px;font-weight:700;color:'+(h===peakHour?'#fff':'#cabfae')+';'}, h+'h')
+ ))
  ),
- el('div',{class:'text-right'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-extrabold'},'All-time'),
- el('div',{class:'mt-1 text-2xl font-extrabold text-slate2-50'},'€', allTimeRevenue.toLocaleString('en-GB'))
- )
- ),
- unread > 0 && el('div',{class:'mt-5 rounded-[4px] bg-slate2-50/[0.08] border border-slate2-50/15 p-3 flex items-center justify-between gap-3 flex-wrap'},
- el('div',{class:'flex items-center gap-2 min-w-0'},
- el('span',{class:'inline-flex h-6 w-6 rounded-[4px] bg-mv-500 items-center justify-center text-xs font-extrabold animate-pulse'}, unread),
- el('span',{class:'text-sm font-bold'}, unread, ' new booking', unread===1?'':'s', ' waiting to redeem')
- ),
- el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 px-4 py-1.5 text-xs font-extrabold cursor-pointer shrink-0', onclick:()=>go('partner-portal',{tab:'redeem'})},'Open redeem →')
+ peakHour != null ? el('div',{style:'margin-top:18px;background:rgba(242,177,0,.16);border:2px solid #F2B100;border-radius:4px;padding:12px 14px;font-weight:600;font-size:14px;'}, '💡 ' + (esP?('Tu hora punta son las '+peakHour+'h. Activa un 2×1 antes para llenar mesas.'):('Your peak is '+peakHour+'h. Run a 2×1 earlier to fill tables.'))) : null
  )
  );
 
- const grid = el('div',{class:'grid lg:grid-cols-[2fr_1fr] gap-6'},
- el('div',{class:'space-y-6'},
- moneyCard,
- el('div',{class:'grid grid-cols-3 gap-3'},
- // Real counters. Subtitles describe the timeframe truthfully.
- StatPanel('','Redemptions (all-time)', totalReds, 'real'),
- StatPanel('','Member rating', avgRating ? avgRating.toFixed(1) : ', ', String(reviewsForVenue.length) + ' ' + (MV_LANG==='es' ? (reviewsForVenue.length===1?'valoración':'valoraciones') : (reviewsForVenue.length===1?'rating':'ratings'))),
- StatPanel('','Days listed', Math.max(1, Math.floor((Date.now() - (pv.approvedAt ?? pv.submittedAt ?? Date.now())) / 86400000)), 'since approval')
- ),
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
- el('h3',{class:'font-bold flex items-center gap-2'},' Redemptions by weekday', el('span',{class:'text-[10px] text-slate2-500 font-normal'},'·', ' ', 'last 28 days')),
- reds.length === 0
- ? el('p',{class:'mt-3 text-sm text-slate2-400'},'No redemptions yet, the chart will populate as your code redemptions come in.')
- : el('div',{class:'mt-4 flex items-end gap-2 h-32'},
- ...dayBuckets.map((v,i)=>
- el('div',{class:'flex-1 flex flex-col items-center gap-1'},
- el('div',{class:'w-full rounded-t bg-gradient-to-t from-mv-500 to-mv-400', style:`height: ${Math.max(8, (v/maxBucket)*100)}%; min-height:8px;`, title: v + ' redemption' + (v===1?'':'s')}),
- el('div',{class:'text-[10px] text-slate2-500 font-bold uppercase'}, ['M','T','W','T','F','S','S'][i])
- )
- )
- )
- )
- ),
- el('div',{class:'space-y-6'},
- // Redeem-screen entry, only show as a hint when there's setup work left.
- // The unread-bookings callout inside the money card + the Redeem tab in
- // the nav already cover the day-to-day case. We only show a Tip when
- // there's something actionable to improve.
- (() => {
- if ((pv.photos || []).length < 6) {
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-extrabold'},' Tip'),
- el('p',{class:'mt-2 text-sm text-slate2-200 leading-relaxed'},'Listings with more photos tend to convert better. You currently have ' + ((pv.photos||[]).length) + '. Aim for at least 6 so diners can see the room, the food, and the vibe.'),
- el('button',{class:'mt-3 text-xs underline text-mv-400 cursor-pointer bg-transparent border-0', onclick:()=>go('partner-portal',{tab:'profile'})},'Edit photos →')
+ const panelInner = el('div',{class:'space-y-7', style:'max-width:1200px;'},
+ panelHeader,
+ scoreboard,
+ unread > 0 ? el('div',{style:'background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:4px;padding:14px 18px;box-shadow:4px 4px 0 var(--ink);', class:'flex items-center justify-between gap-3 flex-wrap'},
+ el('span',{style:'font-weight:800;'}, unread + ' ' + (esP ? (unread===1?'reserva nueva esperando canje':'reservas nuevas esperando canje') : ('new booking'+(unread===1?'':'s')+' waiting to redeem'))),
+ el('button',{style:'background:#fff;color:var(--ink);border:none;font-weight:800;padding:8px 16px;border-radius:4px;cursor:pointer;', onclick:()=>go('partner-portal',{tab:'redeem'})}, esP?'Abrir Escanear →':'Open Scan →')
+ ) : null,
+ el('div',{class:'grid gap-6', style:'grid-template-columns:repeat(auto-fit,minmax(300px,1fr));'}, activityCard, peakCard)
  );
- }
- if ((pv.dealSlots || []).filter(s => s.active).length < 3) {
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-extrabold'},' Tip'),
- el('p',{class:'mt-2 text-sm text-slate2-200 leading-relaxed'},'You have ' + ((pv.dealSlots||[]).filter(s=>s.active).length) + ' active slot' + ((pv.dealSlots||[]).filter(s=>s.active).length===1?'':'s') + '. Most partners run a few across the week (lunch, dinner, weekend) to spread bookings.'),
- el('button',{class:'mt-3 text-xs underline text-mv-400 cursor-pointer bg-transparent border-0', onclick:()=>go('partner-portal',{tab:'deals'})},'Add a slot →')
- );
- }
- // Nothing actionable → don't fill the column with platitudes.
- return null;
- })()
- )
- );
- return el('div',{class:'space-y-6'}, headerLinks, grid);
+ return panelInner;
 }
 /**
  * PortalRedeem, partner staff's live redemption feed.
@@ -6487,7 +6493,8 @@ function PortalRedeem() {
  wrap.append(
  el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
  el('div',{},
- el('h2',{class:'font-bold text-xl'},'Live redemptions · today'),
+ el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, (MV_LANG==='es'?'En mesa · canje rápido':'At the table · quick redeem')),
+ el('h2',{class:'disp', style:'font-size:clamp(34px,6vw,52px);color:var(--ink);margin:2px 0 0;line-height:.92;'}, (MV_LANG==='es'?'Escanear':'Scan')),
  el('p',{class:'mt-1 text-sm text-slate2-400'},
  el('span',{class:'font-bold text-slate2-50 tabular-nums'}, String(rows.length)),
  ' ', (MV_LANG === 'es' ? (rows.length === 1 ? 'confirmación Menuverso' : 'confirmaciones Menuverso') : ('Menuverso redemption' + (rows.length === 1 ? '' : 's'))),
@@ -6557,7 +6564,7 @@ function PortalRedeem() {
  paint();
  }, 2000);
  return el('div',{},
- el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6'}, wrap)
+ el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:6px 6px 0 var(--ink);padding:26px;'}, wrap)
  );
 }
 function PortalDeals() {
@@ -6835,6 +6842,84 @@ function PortalDeals() {
  root.append(topBanner, wrap, bottomBar);
  paint();
  return root;
+}
+
+// Partner "Clientes" tab — audience scoreboard (Xibeca reference). Real-ish
+// metrics derived from this venue's redemptions + reviews.
+function PortalClientes() {
+ const pv = currentPartnerVenue();
+ const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ if (!pv) return el('div',{class:'text-sm', style:'color:#7A7164;'}, esP?'Sin local.':'No venue.');
+ const reds = (store.redemptions || []).filter(r => r.venueSlug === pv.slug);
+ const byMember = {}; reds.forEach(r => { byMember[r.memberId] = (byMember[r.memberId]||0)+1; });
+ const uniq = Object.keys(byMember).length;
+ const returning = Object.values(byMember).filter(n => n >= 2).length;
+ const pctReturn = uniq ? Math.round(returning / uniq * 100) : 0;
+ const monthCut = Date.now() - 30*86400000;
+ const newThisMonth = new Set(reds.filter(r => r.redeemedAt >= monthCut).map(r => r.memberId)).size;
+ const AVG = (typeof AVG_TICKET_EUR === 'number') ? AVG_TICKET_EUR : 18;
+ const revs = (typeof venueReviews === 'function') ? venueReviews(pv.slug) : [];
+ const avg = revs.length ? (revs.reduce((s,r)=>s+r.stars,0)/revs.length) : null;
+
+ const card = (bg, color, kc, kick, big, sub, subC, shadow) => el('div',{style:'background:'+bg+';color:'+color+';border:3px solid var(--ink);border-radius:4px;padding:24px;box-shadow:6px 6px 0 '+shadow+';'},
+ el('div',{class:'kick', style:'font-size:12px;color:'+kc+';'}, kick),
+ el('div',{class:'disp', style:'font-size:clamp(44px,7vw,60px);margin-top:8px;color:'+color+';'}, big),
+ el('div',{style:'font-weight:700;font-size:14px;color:'+subC+';'}, sub)
+ );
+
+ return el('div',{style:'max-width:1200px;'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'Tu público':'Your audience'),
+ el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 22px;line-height:.92;'}, esP?'Clientes':'Customers'),
+ el('div',{class:'grid gap-5', style:'grid-template-columns:repeat(auto-fit,minmax(200px,1fr));'},
+ card('#fff','#16110F','var(--red)', esP?'Recurrentes':'Returning', pctReturn+'%', esP?'vuelven 2+ veces':'come back 2+ times', '#7A7164', 'var(--ink)'),
+ card('#fff','#16110F','var(--red)', esP?'Ticket medio':'Avg ticket', '€'+AVG, esP?'por mesa':'per table', '#7A7164', 'var(--ink)'),
+ card('#fff','#16110F','var(--red)', esP?'Nuevos':'New', String(newThisMonth), esP?'este mes':'this month', '#7A7164', 'var(--ink)'),
+ card('var(--ink)','#fff','#F2B100', esP?'Valoración':'Rating', avg ? avg.toFixed(1).replace('.', esP?',':'.') : '—', '★ ' + revs.length + ' ' + (esP?'reseñas':'reviews'), '#cabfae', 'var(--red)')
+ ),
+ el('div',{class:'flex items-center gap-7 flex-wrap', style:'margin-top:26px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px 32px;box-shadow:7px 7px 0 var(--ink);'},
+ el('div',{style:'flex:1;min-width:240px;'},
+ el('div',{class:'disp', style:'font-size:clamp(28px,5vw,40px);'}, esP?'El boca a boca funciona.':'Word of mouth works.'),
+ el('p',{style:'font-weight:600;font-size:16px;max-width:560px;margin:10px 0 0;'}, esP?('El '+pctReturn+'% de tus clientes Menuverso ya han vuelto. Mantén una oferta activa para llenar mesas en tus horas flojas.'):('Already '+pctReturn+'% of your Menuverso customers have returned. Keep an offer live to fill tables in your quiet hours.'))
+ ),
+ el('button',{style:'background:var(--ink);color:#fff;border:none;font-family:Anton;font-size:20px;padding:14px 24px;border-radius:4px;cursor:pointer;white-space:nowrap;', onclick:()=>go('partner-portal',{tab:'ofertas'})}, esP?'VER OFERTAS →':'VIEW OFFERS →')
+ )
+ );
+}
+
+// Partner "Mis ofertas" tab — offers shown read-only (offer content is
+// admin-managed per the business rule), styled to the Xibeca reference.
+function PortalOfertas() {
+ const pv = currentPartnerVenue();
+ const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ if (!pv) return el('div',{class:'text-sm', style:'color:#7A7164;'}, esP?'Sin local.':'No venue.');
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(pv) : [];
+ const paused = pv.status === 'PAUSED';
+ const offerCard = (d) => {
+ const on = !paused;
+ return el('div',{style:'background:'+(on?'#fff':'var(--paper)')+';border:3px '+(on?'solid var(--ink)':'dashed #ABA399')+';border-radius:4px;padding:22px 26px;'+(on?'box-shadow:5px 5px 0 var(--ink);':'')+'',  class:'flex items-center gap-6 flex-wrap'},
+ el('div',{style:'flex:1;min-width:220px;'},
+ el('div',{class:'disp', style:'font-size:clamp(26px,4vw,34px);color:'+(on?'var(--ink)':'#7A7164')+';'}, d.title || '2×1'),
+ d.description ? el('div',{style:'font-weight:600;color:#574F47;font-size:15px;margin-top:6px;'}, d.description) : null
+ ),
+ el('span',{style:(on?'background:#1F9D63;color:#fff;border:2px solid #1F9D63;':'border:2px dashed #ABA399;color:#7A7164;')+'font-weight:800;text-transform:uppercase;font-size:13px;padding:8px 14px;border-radius:4px;'}, on ? (esP?'Activa':'Active') : (esP?'Pausada':'Paused'))
+ );
+ };
+ return el('div',{style:'max-width:980px;'},
+ el('div',{class:'flex items-end justify-between gap-3 flex-wrap'},
+ el('div',{},
+ el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'A tu manera':'Your way'),
+ el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, esP?'Mis ofertas':'My offers')
+ )
+ ),
+ el('p',{style:'font-weight:600;color:#574F47;font-size:17px;max-width:640px;margin-top:10px;'}, esP?'Estas son tus ofertas activas en Menuverso.':'These are your live offers on Menuverso.'),
+ deals.length === 0
+ ? el('div',{style:'margin-top:24px;background:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px;text-align:center;font-weight:600;color:#574F47;'}, esP?'Aún no hay ofertas configuradas.':'No offers configured yet.')
+ : el('div',{class:'flex flex-col gap-4', style:'margin-top:24px;'}, ...deals.map(offerCard)),
+ el('div',{style:'margin-top:22px;background:rgba(242,177,0,.14);border:2px solid #F2B100;border-radius:4px;padding:14px 18px;font-weight:600;font-size:14px;color:#574F47;'},
+ '💡 ' + (esP?'El contenido de las ofertas lo gestiona el equipo de Menuverso para mantener una experiencia consistente. ':'Offer content is managed by the Menuverso team for a consistent experience. '),
+ el('a',{style:'color:var(--red);font-weight:800;text-decoration:underline;', href:'mailto:hola@menuverso.com?subject='+encodeURIComponent(esP?'Cambio en oferta':'Offer change')}, esP?'Proponer un cambio →':'Suggest a change →')
+ )
+ );
 }
 
 function PortalProfile() {
