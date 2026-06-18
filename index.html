@@ -92,7 +92,9 @@ tailwind.config = {
  /* Xibeca grain — global fixed texture overlay, core to the deck look. */
  body::after { content:""; position:fixed; inset:0; pointer-events:none; z-index:60; opacity:0.07; mix-blend-mode:multiply; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='gr'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23gr)'/%3E%3C/svg%3E"); background-size:180px 180px; }
  :root{ --red:#F4291A; --hot:#FF4326; --ink:#16110F; --paper:#FAF6EE; --bone:#F1E9DA; }
- .disp{ font-family:'Anton',sans-serif; text-transform:uppercase; line-height:.86; letter-spacing:-.015em; font-weight:400; }
+ /* line-height .94 so multi-line Anton headings don't overlap when they WRAP on
+    mobile (the big single-line numbers/headlines set a tighter line-height inline). */
+ .disp{ font-family:'Anton',sans-serif; text-transform:uppercase; line-height:.94; letter-spacing:-.015em; font-weight:400; }
  .script{ font-family:'Kaushan Script',cursive; }
  .kick{ font-family:'Archivo',sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:.28em; font-size:14px; }
  /* ===== Xibeca portals foundation (member + partner reskin, per spec §1) ===== */
@@ -3388,7 +3390,7 @@ function AppDiscover() {
  const conciergeTile = (es) => el('div',{class:'card-lift', style:'background:var(--ink);border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:6px 6px 0 #F2B100;display:flex;flex-direction:column;justify-content:space-between;padding:24px;min-height:312px;'},
  el('div',{},
  el('div',{class:'kick', style:'color:#F2B100;font-size:13px;'}, '✦ menuverso IA'),
- el('div',{class:'disp', style:'font-size:34px;color:#F4EFE6;margin-top:12px;'}, es?'¿No sabes':'Not sure', el('br'), es?'dónde ir?':'where to go?'),
+ el('div',{class:'disp', style:'font-size:clamp(28px,7vw,38px);line-height:.96;color:#F4EFE6;margin-top:12px;'}, es?'¿No sabes':'Not sure', el('br'), es?'dónde ir?':'where to go?'),
  el('p',{style:'color:#cabfae;font-size:16px;font-weight:500;line-height:1.4;margin:14px 0 0;'}, es?'Dime con quién vas y qué te apetece. Te doy 3 sitios y el plan, al instante.':'Tell me who you\'re with and what you fancy — 3 spots and a plan, instantly.')
  ),
  el('div',{style:'background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);border-radius:4px;padding:13px 16px;color:#cabfae;font-weight:600;font-size:15px;'}, es?'"Cena barata en Gràcia, somos 4…"':'"Cheap dinner in Gràcia, 4 of us…"', ' ', el('span',{style:'color:#F2B100;'},'→'))
