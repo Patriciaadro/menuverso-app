@@ -106,6 +106,10 @@ tailwind.config = {
  /* "Drop" moment slam-in (member redeem + partner confirm); plus a gentle rise-in. */
  @keyframes mv-slam{ 0%{ transform:scale(1.6) rotate(-8deg); opacity:0; } 60%{ transform:scale(.94) rotate(-2deg); opacity:1; } 100%{ transform:scale(1) rotate(-2deg); } }
  @keyframes mv-in{ from{ opacity:0; transform:translateY(20px); } to{ opacity:1; transform:translateY(0); } }
+ /* §1 motion: pulsing countdown / live dot on the drop screens. */
+ @keyframes mv-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.5; } }
+ /* §3.3 Escanear: scanline sweeping the scanner frame. */
+ @keyframes mv-scan{ 0%{ top:6%; } 100%{ top:94%; } }
  /* Hero headline uses one shared clamp for EN + ES. It's deliberately modest
  so the longer Spanish copy still fits ~2 lines and both languages render at
  the same size/height (no push-down, no EN-too-big mismatch). */
@@ -1161,6 +1165,54 @@ function el(tag, attrs={}, ...children) {
  else e.appendChild(c);
  }
  return e;
+}
+
+// ---------------------------------------------------------------------------
+// Xibeca delight helpers (spec §1 Motion + the two "drop" screens).
+// ---------------------------------------------------------------------------
+// animatedNumber: returns a <span> that counts 0→`to` on mount (ease-out cubic,
+// ~1.2s). prefix/suffix wrap the number; `locale` formats thousands. Honors
+// prefers-reduced-motion (renders the final value immediately).
+function animatedNumber(to, opts = {}) {
+ const { prefix = '', suffix = '', dur = 1200, locale = 'es-ES', cls = '', style = '' } = opts;
+ const span = el('span', cls ? { class: cls, style } : { style });
+ const fmt = (n) => prefix + Math.round(n).toLocaleString(locale) + suffix;
+ const reduce = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+ span.textContent = reduce ? fmt(to) : fmt(0);
+ if (!reduce) {
+ const start = () => {
+ const t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+ const step = (t) => {
+ const k = Math.min(1, ((t || Date.now()) - t0) / dur);
+ const e = 1 - Math.pow(1 - k, 3);
+ span.textContent = fmt(to * e);
+ if (k < 1) requestAnimationFrame(step);
+ };
+ requestAnimationFrame(step);
+ };
+ // Defer so the node is in the document before animating.
+ setTimeout(start, 30);
+ }
+ return span;
+}
+
+// mvDrop: full-screen celebration overlay used by the member redemption drop
+// (scarlet) and the partner scan-confirm drop (green). Appends to <body>,
+// grain texture, slam-in ticket. `opts.onClose` fires after fade-out.
+function mvDrop(opts = {}) {
+ const { bg = '#F4291A', grainBlend = 'overlay', kickColor = '#16110F', kick = '', ticket = null,
+ below = null, closeLabel = 'OK', onClose = null } = opts;
+ const grain = "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22160%22 height=%22160%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%222%22/%3E%3CfeColorMatrix type=%22saturate%22 values=%220%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E')";
+ const overlay = el('div', { role:'dialog', 'aria-modal':'true', style: 'position:fixed;inset:0;z-index:80;background:'+bg+';display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:24px;text-align:center;transition:opacity .25s ease;' },
+ el('div', { style: 'position:absolute;inset:0;pointer-events:none;background-image:'+grain+';background-size:170px;opacity:.12;mix-blend-mode:'+grainBlend+';' }),
+ kick ? el('div', { class:'kick', style:'color:'+kickColor+';font-size:18px;animation:mv-in .5s both;position:relative;' }, kick) : null,
+ ticket,
+ below,
+ el('button', { style:'margin-top:30px;position:relative;background:#16110F;color:#fff;border:none;font-family:Anton;font-size:24px;padding:16px 40px;border-radius:4px;cursor:pointer;box-shadow:6px 6px 0 rgba(0,0,0,.3);animation:mv-in .6s .3s both;',
+ onclick: () => { overlay.style.opacity = '0'; setTimeout(() => { overlay.remove(); if (onClose) onClose(); }, 240); } }, closeLabel)
+ );
+ document.body.appendChild(overlay);
+ return overlay;
 }
 function go(route, params={}, _fromPop) {
  state.route = route; state.params = params;
@@ -4031,7 +4083,7 @@ function AppBookings() {
  ),
  el('div',{style:'text-align:right;'},
  el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esB?'Has ahorrado':'You\'ve saved'),
- el('div',{class:'disp', style:'font-size:clamp(56px,11vw,88px);color:var(--red);line-height:.8;'}, '€' + savedEur),
+ el('div',{class:'disp', style:'font-size:clamp(56px,11vw,88px);color:var(--red);line-height:.8;'}, animatedNumber(savedEur, { prefix:'€' })),
  el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, esB?'estimado · de por vida':'est. · lifetime')
  )
  ),
@@ -5100,9 +5152,33 @@ function Booking() {
  let fired = false;
 
  function commitRedeem() {
+ // §2.3 REDEMPTION DROP — full-screen scarlet celebration with a bone ticket
+ // (slam-in), giant 2×1, venue name, deal, and a live MM:SS countdown. The
+ // actual redeem (mark redeemed + savings) happens when the member closes it.
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(v)[0]) ? getVenueDeals(v)[0].title : null) || (b.dealTitle) || '2×1';
+ const mmss = (t) => { const m = Math.floor(t/60), s = t%60; return m + ':' + (s<10?'0':'') + s; };
+ let countdown = 900, iv = null;
+ const cdNode = el('div',{class:'disp', style:'font-size:clamp(48px,13vw,72px);color:#16110F;margin-top:6px;animation:mv-pulse 1.4s ease-in-out infinite;'}, mmss(countdown));
+ const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:8px;padding:clamp(22px,6vw,40px) clamp(26px,8vw,64px);margin:24px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
+ el('div',{class:'disp', style:'font-size:clamp(90px,28vw,200px);color:#F4291A;line-height:.78;'}, '2×1'),
+ el('div',{class:'vname', style:'font-size:clamp(28px,7vw,48px);color:#16110F;margin-top:8px;'}, v?.name || ''),
+ el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:6px;'}, dealTitle)
+ );
+ const below = el('div',{style:'position:relative;color:#16110F;animation:mv-in .6s .2s both;'},
+ el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.06em;font-size:18px;'}, es?'Enséñalo a tu camarero':'Show this to your server'),
+ cdNode
+ );
+ mvDrop({ bg:'#F4291A', kickColor:'#16110F', kick:'menuverso · ' + (es?'canje confirmado':'redemption confirmed'),
+ ticket, below, closeLabel:(es?'HECHO · LISTO ✓':'DONE · READY ✓'),
+ onClose: () => {
+ if (iv) clearInterval(iv);
  b.redeemed = true; b.redeemedAt = Date.now();
  store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
  saveStore(); paint();
+ }
+ });
+ iv = setInterval(() => { countdown = Math.max(0, countdown-1); cdNode.textContent = mmss(countdown); if (countdown === 0) clearInterval(iv); }, 1000);
  }
 
  inner.append(
@@ -5677,10 +5753,8 @@ function PartnerPortal() {
  )
  ),
  el('div',{class:'mx-auto max-w-6xl px-4 pb-12'},
- // Still allow Profile and Deals editing during review.
- (state.params.tab === 'profile' || state.params.tab === 'deals') ? null : null,
  state.params.tab === 'profile' ? PortalProfile() :
- state.params.tab === 'deals' ? PortalDeals() : null
+ state.params.tab === 'deals' ? PortalOfertas() : null
  )
  );
  }
@@ -5708,45 +5782,57 @@ function PartnerPortal() {
  // Mark as read whenever the partner opens the redeem tab, clears the badge.
  if (tab === 'redeem') markPartnerRedemptionsSeen(pv);
  const unread = partnerUnreadBookings(pv);
- return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, portalHeader,
- el('div',{class:'mx-auto max-w-6xl px-4 mt-6 overflow-x-auto'},
- // Xibeca tab bar: ink-bordered pills, active = scarlet with a hard offset
- // shadow. Five tabs matching the partner-portal reference (Panel · Mis
- // ofertas · Escanear · Clientes · Perfil). Internal keys are unchanged
- // (overview/redeem/profile) so existing go() calls + the unread badge work.
- el('div',{class:'inline-flex gap-2 whitespace-nowrap pb-1'},
- ...[['overview', esP?'Panel':'Panel', 0],
- ['ofertas', esP?'Mis ofertas':'My offers', 0],
- ['redeem', esP?'Escanear':'Scan', unread],
- ['clientes', esP?'Clientes':'Customers', 0],
- ['profile', esP?'Perfil':'Profile', 0]].map(([k,label,n]) =>
- el('button',{
- style: (tab===k
- ? 'background:var(--red);color:#fff;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);'
- : 'background:#fff;color:var(--ink);border:2px solid var(--ink);')
- + 'font-weight:800;font-size:14px;padding:9px 16px;border-radius:4px;cursor:pointer;position:relative;flex-shrink:0;',
- onclick: ()=>go('partner-portal',{tab:k})},
- label,
- n > 0 ? el('span',{class:'animate-pulse', style:'margin-left:7px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:4px;background:#F2B100;color:#16110F;font-size:10px;font-weight:900;'}, String(n)) : null
- )
- )
- )
- ),
- el('div',{class:'mx-auto max-w-6xl px-4 py-6'},
- tab==='overview' ? PortalOverview()
- : tab==='redeem' ? PortalRedeem()
- : tab==='clientes' ? PortalClientes()
- : (tab==='ofertas' || tab==='deals') ? PortalOfertas()
- : PortalProfile()
- ),
- // Support footer, every partner page surfaces a way to ask for help.
- el('footer',{class:'border-t border-slate2-50/5 mt-8'},
- el('div',{class:'mx-auto max-w-6xl px-4 py-5 flex items-center justify-between flex-wrap gap-2 text-xs text-slate2-400'},
- el('span',{},'Need help? ', el('a',{class:'underline hover:text-slate2-50 cursor-pointer', href:'mailto:hola@menuverso.com'},'hola@menuverso.com')),
- el('span',{},'Menuverso Partner Portal · Barcelona')
- )
- )
- );
+   const navItems = [['overview', esP?'Panel':'Panel', 0],
+    ['ofertas', esP?'Mis ofertas':'My offers', 0],
+    ['redeem', esP?'Escanear':'Scan', unread],
+    ['clientes', esP?'Clientes':'Customers', 0],
+    ['profile', esP?'Perfil':'Profile', 0]];
+  const sidebar = el('aside',{class:'md:w-[270px] md:shrink-0 md:min-h-screen md:sticky md:top-0', style:'background:var(--ink);color:#F4EFE6;display:flex;flex-direction:column;'},
+    el('div',{class:'p-5', style:'border-bottom:2px solid rgba(255,255,255,.08);'},
+      el('div',{html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:26px;width:auto;display:block;">'}),
+      el('div',{class:'kick', style:'color:#cabfae;font-size:12px;margin-top:8px;'}, esP?'Panel para locales':'Partner portal')
+    ),
+    el('nav',{class:'p-3 flex md:flex-col gap-1.5 overflow-x-auto', style:'flex:1;'},
+      ...navItems.map(([k,label,n]) => el('button',{
+        style:'text-align:left;font-weight:800;font-size:16px;padding:12px 14px;border:none;cursor:pointer;border-radius:4px;white-space:nowrap;flex-shrink:0;'+(tab===k?'background:var(--red);color:#fff;':'background:transparent;color:#F4EFE6;'),
+        onclick:()=>go('partner-portal',{tab:k})},
+        label,
+        n>0 ? el('span',{class:'animate-pulse', style:'margin-left:8px;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:4px;background:#F2B100;color:#16110F;font-size:10px;font-weight:900;'}, String(n)) : null
+      ))
+    ),
+    el('div',{class:'p-4', style:'border-top:2px solid rgba(255,255,255,.08);'},
+      el('div',{class:'flex items-center gap-2', style:'min-width:0;'},
+        el('span',{style:'width:34px;height:34px;border-radius:4px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Anton;font-size:16px;flex:0 0 auto;'}, ((pv.name||'?').trim()[0]||'?').toUpperCase()),
+        el('div',{style:'min-width:0;'},
+          el('div',{class:'truncate', style:'font-weight:800;font-size:14px;'}, pv.name),
+          el('div',{style:'font-size:11px;font-weight:800;text-transform:uppercase;color:'+(pv.status==='LIVE'?'#1F9D63':'#F2B100')+';'}, pv.status)
+        )
+      ),
+      el('div',{class:'flex gap-4 mt-3 flex-wrap'},
+        pv.status==='LIVE' ? el('button',{class:'cursor-pointer', style:'background:transparent;border:none;color:#cabfae;font-size:12px;text-decoration:underline;', onclick:()=>go('venue',{slug:pv.slug})}, esP?'Ver página →':'View page →') : null,
+        el('button',{class:'cursor-pointer', style:'background:transparent;border:none;color:#cabfae;font-size:12px;text-decoration:underline;', onclick:logout}, esP?'Cerrar sesión':'Log out')
+      )
+    )
+  );
+  const content = tab==='overview' ? PortalOverview()
+    : tab==='redeem' ? PortalRedeem()
+    : tab==='clientes' ? PortalClientes()
+    : (tab==='ofertas' || tab==='deals') ? PortalOfertas()
+    : PortalProfile();
+  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'},
+    el('div',{class:'md:flex md:items-stretch'},
+      sidebar,
+      el('div',{class:'flex-1 min-w-0'},
+        el('div',{class:'mx-auto max-w-6xl px-4 md:px-8 py-6 md:py-10'}, content),
+        el('footer',{class:'border-t border-slate2-50/5 mt-8'},
+          el('div',{class:'mx-auto max-w-6xl px-4 md:px-8 py-5 flex items-center justify-between flex-wrap gap-2 text-xs text-slate2-400'},
+            el('span',{}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es'?'¿Necesitas ayuda? ':'Need help? '), el('a',{class:'underline hover:text-slate2-50 cursor-pointer', href:'mailto:hola@menuverso.com'},'hola@menuverso.com')),
+            el('span',{},'Menuverso · Barcelona')
+          )
+        )
+      )
+    )
+  );
 }
 
 /* Partner signup, creates a partner account + a DRAFT venue. */
@@ -6370,9 +6456,9 @@ function PortalOverview() {
  el('div',{style:'font-weight:700;font-size:15px;margin-top:10px;color:'+subColor+';'}, sub)
  );
  const scoreboard = el('div',{class:'grid gap-5', style:'grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:28px;'},
- scoreCard('var(--red)','#fff','#16110F', (esP?'Ingresos generados · este mes':'Revenue generated · this month'), '€'+monthRevenue.toLocaleString(esP?'es-ES':'en-GB'), '€'+allTimeRevenue.toLocaleString(esP?'es-ES':'en-GB')+(esP?' en total':' all-time'), '#16110F', 'var(--ink)'),
- scoreCard('#fff','#16110F','var(--red)', (esP?'Clientes traídos':'Customers brought'), String(uniqueClients), (esP?'socios únicos':'unique members'), '#7A7164', 'var(--ink)'),
- scoreCard('var(--ink)','#F4EFE6','#F2B100', (esP?'Canjes hoy':'Redemptions today'), String(todayCount), (esP?'mesas llenadas':'tables filled'), '#cabfae', 'var(--red)')
+ scoreCard('var(--red)','#fff','#16110F', (esP?'Ingresos generados · este mes':'Revenue generated · this month'), animatedNumber(monthRevenue, { prefix:'€', locale:(esP?'es-ES':'en-GB') }), '€'+allTimeRevenue.toLocaleString(esP?'es-ES':'en-GB')+(esP?' en total':' all-time'), '#16110F', 'var(--ink)'),
+ scoreCard('#fff','#16110F','var(--red)', (esP?'Clientes traídos':'Customers brought'), animatedNumber(uniqueClients), (esP?'socios únicos':'unique members'), '#7A7164', 'var(--ink)'),
+ scoreCard('var(--ink)','#F4EFE6','#F2B100', (esP?'Canjes hoy':'Redemptions today'), animatedNumber(todayCount), (esP?'mesas llenadas':'tables filled'), '#cabfae', 'var(--red)')
  );
 
  // ---- Live activity + peak hours ----
@@ -6435,137 +6521,79 @@ function PortalOverview() {
  * acknowledges. There's nothing to type.
  */
 function PortalRedeem() {
- const wrap = el('div',{class:'max-w-2xl mx-auto'});
+ // §3.3 ESCANEAR — scanner frame + 6-digit code entry → real booking redeem →
+ // GREEN scan-confirm drop. (Keeps the deliberate color split: member redeem =
+ // scarlet celebration, partner confirm = green verified.)
  const pv = currentPartnerVenue();
+ const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  if (!pv || pv.status !== 'LIVE') {
- return el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-6 text-center'},
- el('div',{class:'mx-auto h-12 w-12 rounded-[4px] bg-slate2-50/[0.06] grid place-items-center text-slate2-400',
- html:'<svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'}, ''),
- el('h2',{class:'mt-3 text-xl font-bold'},'Live feed unavailable'),
- el('p',{class:'mt-2 text-sm text-slate2-400'},'Your venue isn\'t live yet, so members can\'t redeem here yet.')
+ return el('div',{style:'max-width:760px;margin:0 auto;background:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:6px 6px 0 var(--ink);padding:32px;text-align:center;'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, esP?'Escáner no disponible':'Scanner unavailable'),
+ el('h2',{class:'disp', style:'font-size:36px;color:var(--ink);margin-top:6px;'}, esP?'Escanear':'Scan'),
+ el('p',{style:'color:#574F47;font-weight:600;margin-top:10px;'}, esP?'Tu local aún no está activo, los socios no pueden canjear todavía.':'Your venue isn\'t live yet, so members can\'t redeem here yet.')
  );
  }
- const venueSlug = pv.slug;
- const venueName = pv.name;
- // Track which redemption ids we've already "popped a toast" for, so the
- // page doesn't spam toasts after every repaint.
- if (!window.__portalRedeemAck) window.__portalRedeemAck = new Set();
- function todaysRedemptions() {
- const startOfDay = new Date(); startOfDay.setHours(0,0,0,0);
- const cutoff = startOfDay.getTime();
- // Pull from store.bookings (where the slide-to-confirm marks redeemed=true).
- // Falls back to store.redemptions for any rows seeded without a booking.
- const fromBookings = store.bookings
- .filter(b => b.venueSlug === venueSlug && b.redeemed && b.redeemedAt >= cutoff && !b.cancelled)
- .map(b => ({ id: 'b:' + b.id, at: b.redeemedAt, memberId: b.memberId, slot: b.slot }));
- const fromRedemptions = (store.redemptions || [])
- .filter(r => r.venueSlug === venueSlug && r.redeemedAt >= cutoff)
- .map((r,i) => ({ id: 'r:' + r.redeemedAt + ':' + i, at: r.redeemedAt, memberId: r.memberId, slot: null }));
- // Merge + de-dupe by minute+memberId to avoid showing the same redemption twice.
- const seen = new Set();
- const all = [];
- for (const row of [...fromBookings, ...fromRedemptions]) {
- const key = row.memberId + ':' + Math.floor(row.at / 60000);
- if (seen.has(key)) continue;
- seen.add(key);
- all.push(row);
- }
- return all.sort((a,b) => b.at - a.at);
- }
- function memberLabel(memberId) {
- const m = store.users.find(u => u.id === memberId);
- return m ? fullName(m) : '(member)';
- }
- function paint() {
- const rows = todaysRedemptions();
- wrap.innerHTML = '';
+ const root = el('div',{});
+ const msg = el('div',{style:'min-height:24px;margin-top:14px;text-align:center;font-weight:800;'});
+ const input = el('input',{ maxlength:'6', inputmode:'numeric', autocomplete:'off',
+ placeholder: esP?'código de 6 dígitos':'6-digit code',
+ style:'flex:1;border:3px solid var(--ink);border-radius:4px;padding:14px 16px;font-family:Anton;font-size:24px;letter-spacing:.1em;text-align:center;background:#fff;color:var(--ink);text-transform:uppercase;' });
 
- // Toast on any never-seen-before redemption, simulates the realtime push.
- rows.forEach(r => {
- if (!window.__portalRedeemAck.has(r.id) && Date.now() - r.at < 30 * 1000) {
- window.__portalRedeemAck.add(r.id);
- toast(`${memberLabel(r.memberId)} just redeemed`);
- } else {
- window.__portalRedeemAck.add(r.id);
- }
+ function confirmCode() {
+ const code = (input.value || '').trim().toUpperCase();
+ let bk = code ? store.bookings.find(b => (b.code||'').toUpperCase() === code && b.venueSlug === pv.slug && !b.cancelled) : null;
+ // demo convenience: empty field → most recent live unredeemed booking here.
+ if (!bk && !code) bk = store.bookings.find(b => b.venueSlug === pv.slug && !b.cancelled && !b.redeemed && b.expiresAt > Date.now());
+ if (!bk) { msg.style.color = 'var(--red)'; msg.textContent = esP?'⚠ Código no válido.':'⚠ Invalid code.'; return; }
+ if (bk.redeemed) { msg.style.color = 'var(--red)'; msg.textContent = esP?'⚠ Este código ya se canjeó.':'⚠ This code was already redeemed.'; return; }
+ // Real redeem.
+ bk.redeemed = true; bk.redeemedAt = Date.now();
+ store.redemptions.unshift({ memberId: bk.memberId, venueSlug: pv.slug, redeemedAt: Date.now(), method:'PARTNER_SCAN' });
+ if (typeof markPartnerRedemptionsSeen === 'function') markPartnerRedemptionsSeen(pv);
+ saveStore();
+ const m = store.users.find(x => x.id === bk.memberId);
+ const who = m ? fullName(m) : (esP?'Socio':'Member');
+ const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(pv)[0]) ? getVenueDeals(pv)[0].title : null) || '2×1';
+ const AVG = (typeof AVG_TICKET_EUR === 'number') ? AVG_TICKET_EUR : 18;
+ const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:10px;padding:clamp(22px,6vw,36px) clamp(26px,8vw,60px);margin:22px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
+ el('div',{class:'disp', style:'font-size:clamp(80px,22vw,130px);color:#1F9D63;line-height:.8;'}, '✓'),
+ el('div',{class:'disp', style:'font-size:clamp(36px,9vw,54px);color:#16110F;margin-top:6px;'}, esP?'2×1 aplicado':'2×1 applied'),
+ el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:8px;'}, dealTitle + ' · ' + who + (bk.slot?(' · '+bk.slot):''))
+ );
+ const below = el('div',{style:'position:relative;color:#0b3d27;animation:mv-in .6s .2s both;'},
+ el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.05em;font-size:18px;'}, esP?'Descuento aplicado a la cuenta':'Discount applied to the bill'),
+ el('div',{class:'disp', style:'font-size:clamp(48px,12vw,64px);color:#16110F;margin-top:4px;'}, '−€'+AVG)
+ );
+ mvDrop({ bg:'#1F9D63', grainBlend:'overlay', kickColor:'#0b3d27', kick:'menuverso · '+(esP?'canje verificado':'redemption verified'),
+ ticket, below, closeLabel:(esP?'SIGUIENTE CLIENTE →':'NEXT CUSTOMER →'),
+ onClose:()=>{ input.value=''; msg.textContent=''; if (state.route==='partner-portal') render(); }
  });
-
- wrap.append(
- el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
- el('div',{},
- el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, (MV_LANG==='es'?'En mesa · canje rápido':'At the table · quick redeem')),
- el('h2',{class:'disp', style:'font-size:clamp(34px,6vw,52px);color:var(--ink);margin:2px 0 0;line-height:.92;'}, (MV_LANG==='es'?'Escanear':'Scan')),
- el('p',{class:'mt-1 text-sm text-slate2-400'},
- el('span',{class:'font-bold text-slate2-50 tabular-nums'}, String(rows.length)),
- ' ', (MV_LANG === 'es' ? (rows.length === 1 ? 'confirmación Menuverso' : 'confirmaciones Menuverso') : ('Menuverso redemption' + (rows.length === 1 ? '' : 's'))),
- ' ', (MV_LANG === 'es' ? 'en' : 'at'), ' ',
- el('span',{class:'font-bold text-slate2-50'}, venueName),
- ' · ',
- el('span',{class:'inline-flex items-center gap-1.5 text-accent-emer'},
- el('span',{class:'inline-block h-2 w-2 rounded-full bg-accent-emer animate-pulse'}),
- 'live'
- )
- )
- )
- ),
-
- // Explainer card
- el('div',{class:'mt-5 rounded-[4px] border border-mv-500/25 bg-mv-500/5 p-4 text-xs text-slate2-300 leading-relaxed'},
- el('span',{class:'font-bold text-slate2-50'},'No code entry. '),
- 'Members slide-to-confirm at the table and show an animated verification screen. The redemption pings here instantly. Acknowledge at the table, nothing to type.'
- ),
-
- rows.length === 0
- ? el('div',{class:'mt-6 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-8 text-center text-sm text-slate2-400'},
- 'No redemptions yet today. They\'ll appear here instantly as members slide-to-confirm at the table.'
- )
- : el('ul',{class:'mt-6 divide-y divide-slate2-50/[0.05] rounded-[4px] border border-slate2-50/10 bg-slate2-50/[0.04]'},
- ...rows.map(r => {
- const ackKey = '__ack:' + r.id;
- const acked = window.__portalRedeemAck.has(ackKey);
- return el('li',{class:'flex items-center justify-between gap-3 px-4 py-3 text-sm'},
- el('div',{class:'min-w-0'},
- el('div',{class:'truncate font-bold'}, memberLabel(r.memberId)),
- el('div',{class:'text-xs text-slate2-400'},
- new Date(r.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
- r.slot ? ' · ' + r.slot : ''
- )
- ),
- acked
- ? el('span',{class:'shrink-0 inline-flex items-center gap-1 text-xs font-bold text-accent-emer'},
- el('span',{html:'<svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l4 4L20 6"/></svg>'}),
- 'Acknowledged'
- )
- : el('button',{
- class:'shrink-0 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-4 py-1.5 text-xs font-extrabold cursor-pointer',
- onclick: () => { window.__portalRedeemAck.add(ackKey); paint(); }
- },'Acknowledge')
- );
- })
- )
- );
  }
- // Wrap paint() so every 2s repaint also runs autoTranslate against
- // the wrap node. Without this the "Live redemptions · today", empty-state
- // paragraph etc. stay English even though they're in the dict, because
- // render()'s autoTranslate sweep only runs on route entry.
- const _origPaint = paint;
- paint = function() {
- _origPaint.apply(this, arguments);
- if (typeof autoTranslate === 'function') autoTranslate(wrap);
- };
- paint();
- // Lightweight realtime simulation, repaint every 2s so any new
- // redemption (created by a member sliding to confirm in another tab)
- // appears here without a refresh.
- if (window.__portalRedeemTimer) clearInterval(window.__portalRedeemTimer);
- window.__portalRedeemTimer = setInterval(() => {
- if (!document.body.contains(wrap)) { clearInterval(window.__portalRedeemTimer); return; }
- paint();
- }, 2000);
- return el('div',{},
- el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:6px 6px 0 var(--ink);padding:26px;'}, wrap)
+
+ const scanner = el('div',{style:'position:relative;width:min(360px,82vw);height:min(360px,82vw);margin:0 auto;background:var(--ink);border:3px solid var(--ink);border-radius:8px;overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;background-image:linear-gradient(rgba(244,41,26,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(244,41,26,.12) 1px,transparent 1px);background-size:30px 30px;'}),
+ el('div',{style:'position:absolute;left:0;right:0;height:3px;background:var(--red);box-shadow:0 0 16px var(--red);animation:mv-scan 2s ease-in-out infinite alternate;'}),
+ el('div',{style:'position:absolute;top:24px;left:24px;width:46px;height:46px;border-top:5px solid #F2B100;border-left:5px solid #F2B100;'}),
+ el('div',{style:'position:absolute;top:24px;right:24px;width:46px;height:46px;border-top:5px solid #F2B100;border-right:5px solid #F2B100;'}),
+ el('div',{style:'position:absolute;bottom:24px;left:24px;width:46px;height:46px;border-bottom:5px solid #F2B100;border-left:5px solid #F2B100;'}),
+ el('div',{style:'position:absolute;bottom:24px;right:24px;width:46px;height:46px;border-bottom:5px solid #F2B100;border-right:5px solid #F2B100;'}),
+ el('div',{style:"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Kaushan Script',cursive;color:rgba(255,255,255,.25);font-size:60px;"}, 'm')
  );
+
+ root.append(
+ el('div',{style:'max-width:760px;margin:0 auto;text-align:center;'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'En mesa · canje rápido':'At the table · quick redeem'),
+ el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, esP?'Escanear código':'Scan code'),
+ el('p',{style:'font-weight:600;color:#574F47;font-size:17px;margin:10px auto 26px;max-width:520px;'}, esP?'Pide al cliente que abra su 2×1. Escanea el QR o introduce el código de 6 dígitos.':'Ask the guest to open their 2×1. Scan the QR or enter the 6-digit code.'),
+ scanner,
+ el('div',{class:'flex items-center gap-3', style:'max-width:360px;margin:24px auto 0;'}, input),
+ el('button',{style:'margin-top:16px;background:var(--red);color:#fff;border:none;font-family:Anton;font-size:24px;padding:16px 40px;border-radius:4px;cursor:pointer;box-shadow:6px 6px 0 var(--ink);', onclick:confirmCode}, esP?'CONFIRMAR CANJE →':'CONFIRM REDEMPTION →'),
+ msg,
+ el('div',{style:'font-weight:600;color:#7A7164;font-size:13px;margin-top:6px;'}, esP?'(demo · deja el campo vacío y pulsa para simular un escaneo)':'(demo · leave blank and tap to simulate a scan)')
+ )
+ );
+ input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmCode(); });
+ return root;
 }
 function PortalDeals() {
  const pv = currentPartnerVenue();
@@ -6871,9 +6899,9 @@ function PortalClientes() {
  el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'Tu público':'Your audience'),
  el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 22px;line-height:.92;'}, esP?'Clientes':'Customers'),
  el('div',{class:'grid gap-5', style:'grid-template-columns:repeat(auto-fit,minmax(200px,1fr));'},
- card('#fff','#16110F','var(--red)', esP?'Recurrentes':'Returning', pctReturn+'%', esP?'vuelven 2+ veces':'come back 2+ times', '#7A7164', 'var(--ink)'),
- card('#fff','#16110F','var(--red)', esP?'Ticket medio':'Avg ticket', '€'+AVG, esP?'por mesa':'per table', '#7A7164', 'var(--ink)'),
- card('#fff','#16110F','var(--red)', esP?'Nuevos':'New', String(newThisMonth), esP?'este mes':'this month', '#7A7164', 'var(--ink)'),
+ card('#fff','#16110F','var(--red)', esP?'Recurrentes':'Returning', animatedNumber(pctReturn, { suffix:'%' }), esP?'vuelven 2+ veces':'come back 2+ times', '#7A7164', 'var(--ink)'),
+ card('#fff','#16110F','var(--red)', esP?'Ticket medio':'Avg ticket', animatedNumber(AVG, { prefix:'€' }), esP?'por mesa':'per table', '#7A7164', 'var(--ink)'),
+ card('#fff','#16110F','var(--red)', esP?'Nuevos':'New', animatedNumber(newThisMonth), esP?'este mes':'this month', '#7A7164', 'var(--ink)'),
  card('var(--ink)','#fff','#F2B100', esP?'Valoración':'Rating', avg ? avg.toFixed(1).replace('.', esP?',':'.') : '—', '★ ' + revs.length + ' ' + (esP?'reseñas':'reviews'), '#cabfae', 'var(--red)')
  ),
  el('div',{class:'flex items-center gap-7 flex-wrap', style:'margin-top:26px;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px 32px;box-shadow:7px 7px 0 var(--ink);'},
@@ -6892,33 +6920,48 @@ function PortalOfertas() {
  const pv = currentPartnerVenue();
  const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  if (!pv) return el('div',{class:'text-sm', style:'color:#7A7164;'}, esP?'Sin local.':'No venue.');
- const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(pv) : [];
- const paused = pv.status === 'PAUSED';
- const offerCard = (d) => {
- const on = !paused;
- return el('div',{style:'background:'+(on?'#fff':'var(--paper)')+';border:3px '+(on?'solid var(--ink)':'dashed #ABA399')+';border-radius:4px;padding:22px 26px;'+(on?'box-shadow:5px 5px 0 var(--ink);':'')+'',  class:'flex items-center gap-6 flex-wrap'},
+ pv.offerDisabled = Array.isArray(pv.offerDisabled) ? pv.offerDisabled : [];
+ pv.partnerOffers = Array.isArray(pv.partnerOffers) ? pv.partnerOffers : [];
+ const adminDeals = (typeof getVenueDeals === 'function') ? getVenueDeals(pv) : [];
+ const items = [];
+ adminDeals.forEach(d => items.push({ title:d.title, desc:d.description||null,
+ on: pv.status!=='PAUSED' && !pv.offerDisabled.includes(d.title),
+ toggle:()=>{ const i=pv.offerDisabled.indexOf(d.title); if(i>=0) pv.offerDisabled.splice(i,1); else pv.offerDisabled.push(d.title); saveStore(); go('partner-portal',{tab:'ofertas'}); } }));
+ pv.partnerOffers.forEach((o,idx) => items.push({ title:o.title, desc:(esP?'Oferta propuesta · en revisión':'Proposed offer · in review'),
+ on:o.active!==false,
+ toggle:()=>{ pv.partnerOffers[idx].active = !(o.active!==false); saveStore(); go('partner-portal',{tab:'ofertas'}); } }));
+
+ const sw = (on, onToggle) => el('button',{'aria-label': on?(esP?'Desactivar oferta':'Turn off'):(esP?'Activar oferta':'Turn on'), style:'position:relative;width:74px;height:40px;border:3px solid #16110F;border-radius:40px;cursor:pointer;flex:0 0 auto;transition:background .2s;background:'+(on?'#1F9D63':'#D9CDB6')+';', onclick:(e)=>{ e.stopPropagation(); onToggle(); }},
+ el('span',{style:'position:absolute;top:2px;left:2px;width:30px;height:30px;background:#16110F;border-radius:50%;transition:transform .2s cubic-bezier(.2,.7,.3,1);transform:translateX('+(on?'30px':'0')+');'}));
+
+ const offerCard = (it) => el('div',{style:'background:'+(it.on?'#fff':'var(--paper)')+';border:3px '+(it.on?'solid var(--ink)':'dashed #ABA399')+';border-radius:4px;padding:22px 26px;'+(it.on?'box-shadow:5px 5px 0 var(--ink);':''), class:'flex items-center gap-6 flex-wrap'},
  el('div',{style:'flex:1;min-width:220px;'},
- el('div',{class:'disp', style:'font-size:clamp(26px,4vw,34px);color:'+(on?'var(--ink)':'#7A7164')+';'}, d.title || '2×1'),
- d.description ? el('div',{style:'font-weight:600;color:#574F47;font-size:15px;margin-top:6px;'}, d.description) : null
+ el('div',{class:'disp', style:'font-size:clamp(26px,4vw,34px);color:'+(it.on?'var(--ink)':'#7A7164')+';'}, it.title || '2×1'),
+ it.desc ? el('div',{style:'font-weight:600;color:#574F47;font-size:14px;margin-top:6px;'}, it.desc) : null,
+ el('div',{style:'font-weight:800;font-size:13px;color:'+(it.on?'#1F9D63':'#ABA399')+';margin-top:8px;text-transform:uppercase;letter-spacing:.04em;'}, it.on?(esP?'Activa':'Active'):(esP?'Pausada':'Paused'))
  ),
- el('span',{style:(on?'background:#1F9D63;color:#fff;border:2px solid #1F9D63;':'border:2px dashed #ABA399;color:#7A7164;')+'font-weight:800;text-transform:uppercase;font-size:13px;padding:8px 14px;border-radius:4px;'}, on ? (esP?'Activa':'Active') : (esP?'Pausada':'Paused'))
+ sw(it.on, it.toggle)
  );
+
+ const addOffer = () => {
+ const title = (typeof prompt === 'function') ? prompt(esP?'Título de la nueva oferta (p. ej. 2×1 en postres):':'New offer title (e.g. 2×1 desserts):') : null;
+ if (title && title.trim()) { pv.partnerOffers.push({ title:title.trim(), active:true }); saveStore(); toast(esP?'Oferta propuesta · en revisión':'Offer proposed · in review'); go('partner-portal',{tab:'ofertas'}); }
  };
+
  return el('div',{style:'max-width:980px;'},
  el('div',{class:'flex items-end justify-between gap-3 flex-wrap'},
  el('div',{},
  el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'A tu manera':'Your way'),
  el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, esP?'Mis ofertas':'My offers')
- )
  ),
- el('p',{style:'font-weight:600;color:#574F47;font-size:17px;max-width:640px;margin-top:10px;'}, esP?'Estas son tus ofertas activas en Menuverso.':'These are your live offers on Menuverso.'),
- deals.length === 0
- ? el('div',{style:'margin-top:24px;background:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px;text-align:center;font-weight:600;color:#574F47;'}, esP?'Aún no hay ofertas configuradas.':'No offers configured yet.')
- : el('div',{class:'flex flex-col gap-4', style:'margin-top:24px;'}, ...deals.map(offerCard)),
+ el('button',{style:'background:var(--ink);color:#fff;border:none;font-family:Anton;font-size:20px;padding:13px 24px;border-radius:4px;cursor:pointer;box-shadow:5px 5px 0 var(--red);', onclick:addOffer}, esP?'+ NUEVA OFERTA':'+ NEW OFFER')
+ ),
+ el('p',{style:'font-weight:600;color:#574F47;font-size:17px;max-width:640px;margin-top:10px;'}, esP?'Tú decides qué está activo y cuándo. Cámbialo cuando quieras.':'You decide what is live and when. Change it any time.'),
+ items.length===0
+ ? el('div',{style:'margin-top:24px;background:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px;text-align:center;font-weight:600;color:#574F47;'}, esP?'Aún no hay ofertas. Pulsa "+ Nueva oferta".':'No offers yet. Tap "+ New offer".')
+ : el('div',{class:'flex flex-col gap-4', style:'margin-top:24px;'}, ...items.map(offerCard)),
  el('div',{style:'margin-top:22px;background:rgba(242,177,0,.14);border:2px solid #F2B100;border-radius:4px;padding:14px 18px;font-weight:600;font-size:14px;color:#574F47;'},
- '💡 ' + (esP?'El contenido de las ofertas lo gestiona el equipo de Menuverso para mantener una experiencia consistente. ':'Offer content is managed by the Menuverso team for a consistent experience. '),
- el('a',{style:'color:var(--red);font-weight:800;text-decoration:underline;', href:'mailto:hola@menuverso.com?subject='+encodeURIComponent(esP?'Cambio en oferta':'Offer change')}, esP?'Proponer un cambio →':'Suggest a change →')
- )
+ '💡 ' + (esP?'Las ofertas nuevas que propongas pasan una revisión rápida del equipo antes de salir a los socios.':'New offers you propose get a quick team review before going live to members.'))
  );
 }
 
