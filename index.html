@@ -3184,35 +3184,42 @@ function Checkout() {
  // Plan chosen on the landing pricing cards (localStorage), default annual.
  const plan = (function(){ try { const p = localStorage.getItem('mv_plan'); return (p === 'monthly' || p === 'annual') ? p : 'annual'; } catch(e){ return 'annual'; } })();
  const esC = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
- const inner = el('div',{class:'p-6'},
- el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('app')},'Skip for now →'),
- el('div',{class:'text-center mt-4'},
- el('div',{class:'mx-auto h-16 w-16 rounded-[4px] bg-mv-500/15 grid place-items-center text-mv-500',
- html:'<svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'}, ''),
- el('h1',{class:'mt-3 text-2xl font-extrabold'},'Unlock 2×1 across the menu'),
- el('p',{class:'text-slate2-300 text-sm mt-2'},'Curated Barcelona restaurants. Cancel anytime.')
- ),
- el('div',{class:'mt-6 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
- el('div',{class:'flex items-baseline justify-center gap-2'},
- el('span',{class:'text-5xl font-extrabold', style:'white-space:nowrap'}, plan==='annual' ? (esC?'3,99 €':'€3.99') : (esC?'6,99 €':'€6.99')),
- el('span',{class:'text-slate2-400'}, plan==='annual' ? (esC?'/mes · anual':'/mo · annual') : (esC?'/mes':'/mo'))
- ),
- el('p',{class:'text-center text-xs text-slate2-400 mt-1'},
- plan==='annual'
- ? (esC?'Se cobra 47,88 € una vez al año. Ahorras 36 €.':'Billed €47.88 once a year. Save €36.')
- : (esC?'Facturado cada mes. Cancela cuando quieras.':'Billed monthly. Cancel anytime.')),
- el('ul',{class:'mt-5 space-y-2 text-sm'},
- ...['2-for-1 on whatever each partner offers','Standing deals + flash deals','Cancel anytime','Instant activation']
- .map(s => el('li',{class:'flex items-center gap-2'}, el('span',{class:'text-accent-emer font-extrabold'},'✓'), s))
- ),
- el('button',{class:'mt-6 w-full rounded-[4px] bg-slate2-50 text-ink-900 hover:bg-slate2-200 py-3.5 font-extrabold cursor-pointer', onclick:()=>{
+ const setPlan = (p) => { try { localStorage.setItem('mv_plan', p); } catch(e){} go('checkout'); };
+ const subscribe = () => {
  const days = plan==='annual' ? 365 : 30;
  store.subscriptions[u.id] = { status:'ACTIVE', billingPeriod: plan, startedAt: Date.now(), renewsAt: Date.now()+days*86400000, city:'Barcelona', cancelAtPeriodEnd:false };
- saveStore();
- toast('Subscription active');
- go('app');
- }}, plan==='annual' ? (esC?'Suscribirme · 47,88 €/año':'Subscribe · €47.88/yr') : (esC?'Suscribirme · 6,99 €/mes':'Subscribe · €6.99/mo')),
- el('p',{class:'mt-3 text-[10px] text-center text-slate2-500'},'Demo mode, no real charge.')
+ saveStore(); toast(esC?'Suscripción activa':'Subscription active'); go('app');
+ };
+ const priceCard = (which) => {
+ const on = plan === which;
+ const ink = which === 'annual';
+ return el('button',{type:'button', 'aria-label': which==='annual'?(esC?'Plan anual':'Annual plan'):(esC?'Plan mensual':'Monthly plan'),
+ style:'text-align:left;position:relative;border:3px solid var(--ink);border-radius:4px;padding:18px;cursor:pointer;'+(ink?'background:var(--ink);color:#fff;':'background:#F4EFE6;color:#16110F;')+(on?('box-shadow:5px 5px 0 '+(ink?'var(--red)':'var(--ink)')+';'):''),
+ onclick:()=>setPlan(which)},
+ ink ? el('span',{style:'position:absolute;top:-12px;right:14px;background:#F2B100;color:#16110F;font-weight:900;font-size:11px;padding:4px 9px;border-radius:4px;transform:rotate(-2deg);'}, esC?'MEJOR VALOR':'BEST VALUE') : null,
+ el('div',{class:'kick', style:'font-size:12px;color:'+(ink?'#F2B100':'#7A7164')+';'}, ink?(esC?'Anual':'Annual'):(esC?'Mensual':'Monthly')),
+ el('div',{style:'display:flex;align-items:flex-start;gap:3px;margin-top:6px;'},
+ el('span',{class:'disp', style:'font-size:20px;margin-top:8px;'+(ink?'color:#FF4326;':'')}, '€'),
+ el('span',{class:'disp', style:'font-size:clamp(36px,11vw,58px);'+(ink?'color:#FF4326;':'color:#16110F;')}, ink?(esC?'47,88':'47.88'):(esC?'6,99':'6.99'))
+ ),
+ el('div',{style:'font-weight:700;font-size:13px;margin-top:4px;color:'+(ink?'#cabfae':'#574F47')+';'}, ink?(esC?'Recupera el valor en 3–4 usos':'Pays back in 3–4 uses'):(esC?'Recupera el valor en 1 uso':'Pays for itself in 1 use'))
+ );
+ };
+ const inner = el('div',{class:'p-4 md:p-6'},
+ el('button',{class:'text-sm cursor-pointer bg-transparent border-0', style:'color:#7A7164;', onclick:()=>go('app')}, esC?'Saltar por ahora →':'Skip for now →'),
+ el('div',{style:'margin-top:12px;background:var(--red);border:3px solid var(--ink);border-radius:4px;box-shadow:8px 8px 0 var(--ink);overflow:hidden;'},
+ el('div',{style:'padding:clamp(22px,6vw,38px) clamp(18px,5vw,40px);'},
+ el('div',{class:'script', style:'font-size:clamp(30px,8vw,40px);color:#fff;'}, 'menuverso'),
+ el('div',{class:'disp', style:'font-size:clamp(34px,9vw,60px);color:var(--ink);margin-top:12px;line-height:.96;'}, esC?'Una suscripción.':'One membership.', el('br'), esC?'Mil ofertas.':'A thousand deals.'),
+ el('p',{style:'font-size:clamp(15px,4vw,19px);font-weight:600;color:#fff;margin:12px 0 22px;'}, esC?'Desbloquea todos los 2×1 de la ciudad. Úsala una vez y ya se ha pagado sola.':'Unlock every 2×1 in the city. Use it once and it has paid for itself.'),
+ el('div',{class:'grid gap-3', style:'grid-template-columns:1fr 1fr;'}, priceCard('monthly'), priceCard('annual')),
+ el('button',{style:'margin-top:18px;width:100%;background:#F2B100;color:#16110F;border:none;font-family:Anton,sans-serif;font-size:clamp(17px,5vw,24px);padding:16px;border-radius:4px;cursor:pointer;box-shadow:5px 5px 0 var(--ink);', onclick:subscribe}, esC?'EMPEZAR →':'START →'),
+ el('div',{class:'flex gap-5 justify-center flex-wrap', style:'margin-top:14px;font-weight:700;color:var(--ink);font-size:13px;'},
+ el('span',{}, esC?'✓ Cancela cuando quieras':'✓ Cancel anytime'),
+ el('span',{}, esC?'✓ Todas las ofertas':'✓ All deals')
+ ),
+ el('p',{style:'margin-top:10px;text-align:center;font-size:10px;color:rgba(255,255,255,.85);'}, esC?'Modo demo · sin cargo real.':'Demo mode · no real charge.')
+ )
  )
  );
  return AppShell(inner, { narrow: true });
@@ -4510,26 +4517,34 @@ function Venue() {
  const v = findVenueBySlug(state.params.slug);
  if (!v) { go('app'); return el('div'); }
  const saved = u ? (store.saved[u.id] || []).includes(v.slug) : false;
+ const esV = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const vpSrcV = (vn) => { try { return venueHasRealPhoto(vn) ? venueRealPhotoSrc(vn) : cuisinePhotoFor(vn); } catch(e){ try { return cuisinePhotoFor(vn); } catch(_) { return ''; } } };
+ const liveNowV = (typeof isVenueAvailableNow === 'function') ? isVenueAvailableNow(v) : true;
  const inner = el('div',{class:'pb-24'},
- el('div',{class:'relative'},
- VenueArt(v, {aspect:'21/9', radius:'rounded-none'}),
- el('button',{class:'absolute top-3 left-3 h-9 w-9 rounded-[4px] bg-ink-900/80 grid place-items-center cursor-pointer bg-transparent z-10', onclick:()=>go('app')},'←'),
- u && el('button',{class:'absolute top-3 right-3 h-9 w-9 rounded-[4px] bg-ink-900/80 grid place-items-center text-sm cursor-pointer z-10',
- onclick:()=>{ toggleSaved(v.slug); render(); }
- }, saved ? '' : '')
+ // §6 Restaurant-detail hero: red-duotone photo, bone ink-bordered back/♥
+ // buttons, green open status + giant italic venue name (matches reference).
+ el('div',{class:'relative', style:'height:clamp(220px,42vw,300px);background:var(--red);overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+vpSrcV(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.9;filter:contrast(1.15);">'}),
+ el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,41,26,.1),rgba(20,17,15,.6));'}),
+ el('button',{'aria-label':esV?'Volver':'Back', style:'position:absolute;top:16px;left:16px;z-index:3;background:#F4EFE6;border:3px solid var(--ink);border-radius:4px;width:44px;height:44px;font-size:20px;line-height:1;cursor:pointer;', onclick:()=>go('app')}, '←'),
+ u ? el('button',{'aria-label': saved?(esV?'Quitar de guardados':'Remove from saved'):(esV?'Guardar':'Save'), style:'position:absolute;top:16px;right:16px;z-index:3;background:#F4EFE6;border:3px solid var(--ink);border-radius:4px;width:44px;height:44px;font-size:20px;line-height:1;cursor:pointer;color:'+(saved?'#F4291A':'#16110F')+';',
+ onclick:()=>{ toggleSaved(v.slug); render(); } }, '♥') : null,
+ el('div',{style:'position:absolute;left:20px;right:20px;bottom:18px;z-index:3;color:#fff;'},
+ liveNowV ? el('span',{style:'background:#1F9D63;color:#fff;font-weight:800;font-size:12px;padding:5px 11px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em;'}, esV?'● Abierto':'● Open') : el('span',{style:'background:rgba(20,17,15,.7);color:#fff;font-weight:800;font-size:12px;padding:5px 11px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em;'}, esV?'● Cerrado':'● Closed'),
+ el('div',{class:'vname', style:'font-size:clamp(38px,11vw,74px);color:#fff;margin-top:10px;'}, v.name)
+ )
  ),
  // Desktop 2-col layout: main column scrolls (title + action + reviews),
  // right column holds offer + slot picker sticky so booking is always
  // one click away. Mobile keeps everything stacked in source order.
  el('div',{class:'p-5 md:grid md:grid-cols-[minmax(0,1fr)_360px] md:gap-8 md:items-start'},
- el('div',{class:'md:col-start-1 md:row-start-1 flex items-start justify-between gap-3'},
- el('div',{class:'min-w-0'},
- el('h1',{class:'font-serif-display text-3xl md:text-4xl font-extrabold'}, v.name),
- el('div',{class:'text-xs text-slate2-400 mt-1'}, localizeBarrio(v.barrio),' · ', localizeCuisine(v.cuisine),' · ','€'.repeat(v.priceTier))
- ),
- el('div',{class:'text-right'},
- el('div',{class:'text-accent-amber text-sm'},' ', v.rating.toFixed(1)),
- el('div',{class:'text-[10px] text-slate2-500'}, String(v.reviews), ' ', 'reviews')
+ el('div',{class:'md:col-start-1 md:row-start-1'},
+ el('div',{class:'flex items-center gap-x-3 gap-y-1 flex-wrap', style:'font-weight:700;color:#574F47;font-size:15px;'},
+ el('span',{style:'color:#16110F;'}, '★ ' + v.rating.toFixed(1).replace('.', esV?',':'.')),
+ el('span',{}, '· ' + String(v.reviews) + ' ' + (esV?'reseñas':'reviews')),
+ el('span',{}, '· ' + localizeCuisine(v.cuisine)),
+ el('span',{}, '· ' + '€'.repeat(Math.max(1, v.priceTier||2))),
+ el('span',{}, '· ' + localizeBarrio(v.barrio))
  )
  ),
  // Action row, only renders tiles that have data. No greyed-out shells.
@@ -4642,16 +4657,22 @@ function Venue() {
  ? (t('venue.redeemThisOffer') || 'Canjear esta oferta →')
  : (t('venue.notAvailableNow') || 'No disponible ahora');
 
+ const savV = ([0,16,24,38,72][Math.max(1, Math.min(4, v.priceTier||2))]) || 22;
  return el('div',{class:'space-y-3'},
+ el('div',{class:'disp', style:'font-size:26px;color:var(--ink);'}, esV?'Ofertas activas':'Active offers'),
  banner,
- ...dealsForCard.map(d => el('div',{class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 p-4'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'Oferta'),
- el('div',{class:'mt-1 font-bold'}, d.title),
- el('p',{class:'mt-2 text-xs text-slate2-300 leading-relaxed'}, d.description || venueDefault),
+ ...dealsForCard.map(d => el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:18px 20px;box-shadow:4px 4px 0 var(--ink);'},
+ el('div',{class:'flex items-start justify-between gap-3'},
+ el('div',{style:'flex:1;min-width:0;'},
+ el('div',{class:'disp', style:'font-size:clamp(20px,5vw,26px);color:var(--ink);'}, d.title),
+ el('p',{style:'margin-top:6px;font-weight:600;color:#574F47;font-size:13px;line-height:1.45;'}, d.description || venueDefault)
+ ),
+ el('div',{class:'disp', style:'font-size:clamp(22px,6vw,30px);color:var(--red);white-space:nowrap;'}, '~€'+savV)
+ ),
  el('button',{
- class: canRedeemNow
- ? 'mt-3 w-full rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-5 py-3 text-sm font-extrabold cursor-pointer  shadow-mv-500/30 transition'
- : 'mt-3 w-full rounded-[4px] bg-slate2-50/[0.05] border border-slate2-50/10 px-5 py-3 text-sm font-bold text-slate2-400 cursor-not-allowed opacity-70',
+ style: canRedeemNow
+ ? 'margin-top:14px;width:100%;background:var(--red);color:#fff;border:none;font-family:Anton,sans-serif;font-size:18px;padding:13px;border-radius:4px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);'
+ : 'margin-top:14px;width:100%;background:#F4EFE6;border:2px solid #ABA399;color:#7A7164;font-weight:800;padding:13px;border-radius:4px;cursor:not-allowed;',
  disabled: !canRedeemNow,
  onclick: canRedeemNow ? (() => redeemDeal(d)) : null
  }, buttonLabel)

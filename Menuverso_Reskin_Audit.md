@@ -46,11 +46,24 @@ verified (jsdom render + the drops actually firing into `document.body`):
 **Verification after round 2:** `node --check` pass · all member + partner routes render with **0
 errors** · both drops fire correctly · adversarial harness **236 passed / 0 failed**.
 
-**Still open (the larger §6/§7 scope, not yet done):** §6 gap-screen *reskins* (restaurant detail,
-paywall, auth/waitlist, search/AI results, booking detail+rate, create/edit-offer editor, venue editor,
-onboarding, billing — most exist functionally but aren't restyled to the gap-screen boards) · §7
-mobile/responsive pass · dedicated WCAG-AA a11y pass on the new screens · real-time (still 2s poll).
-Token nits remain (`--gold`/`--green` hardcoded; `--bone` value).
+## ✅ ROUND 3 — mobile + first §6 gap screens
+
+- **Mobile: Anton heading overlap fixed** — `.disp` line-height `.86 → .94` (wrapped headings on
+  phones no longer collide, e.g. "¿No sabes dónde ir?", "2×1 en cervezas Estrella Damm"); concierge
+  heading made responsive (`clamp`). Big single-line numbers keep their tighter inline line-height. ✅
+- **§6 Restaurant detail (`Venue`)** — reskinned to the board: red-duotone hero, bone ink-bordered
+  back/♥ buttons, green "● Abierto" status + giant italic venue name, rating·cuisine·€·barrio line,
+  "Ofertas activas" white ink-bordered cards with scarlet "~€X" + Anton redeem button. **Bug fixed:**
+  the save ♥ button was rendering an empty string. ✅
+- **§6 Paywall (`Checkout`)** — reskinned to the scarlet board: Kaushan wordmark, Anton "Una
+  suscripción. Mil ofertas.", two selectable price cards (Mensual bone / Anual ink + "MEJOR VALOR"),
+  gold CTA, ✓ reassurances. Plan selection persists + drives the subscribe. ✅
+
+**Still open (rest of §6/§7):** §6 — auth/waitlist, search/AI results, booking detail+rate reskins;
+admin gap screens (create/edit-offer editor, venue editor, onboarding, billing, scanner fail-states
+[partial: invalid/already-redeemed done], empty states). §7 — full mobile/responsive sweep on every
+screen, WCAG-AA a11y pass, real-time feed (still 2s poll). Token nits (`--gold`/`--green` hardcoded;
+`--bone` value). **All changes remain committed-locally / not yet pushed.**
 
 ---
 
