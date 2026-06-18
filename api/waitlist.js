@@ -1,7 +1,7 @@
 // Menuverso · waiting-list signup with double opt-in (GDPR/RGPD step 4).
 // Vercel Serverless Function (Node). POST { email, consent }.
 //
-// Flow: validate -> upsert into Launch-waitlist (double_opt_in_confirmed=false,
+// Flow: validate -> upsert into launch_waitlist (double_opt_in_confirmed=false,
 // consent fields + IP captured server-side) -> store a hashed token ->
 // send a confirmation email via Resend with a unique link. The signup is saved
 // even if the email send fails (best-effort), so a lead is never lost.
@@ -44,7 +44,7 @@ module.exports = async function handler(req, res) {
     }, opts));
 
     // Upsert the signup (merge on email so re-signup just refreshes consent).
-    await sb('Launch-waitlist?on_conflict=email', {
+    await sb('launch_waitlist?on_conflict=email', {
       method: 'POST',
       headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify({ email, consented_at: new Date().toISOString(), consent_version: CONSENT_VERSION, ip_address: ip, double_opt_in_confirmed: false })

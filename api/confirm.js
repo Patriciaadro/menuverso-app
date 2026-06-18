@@ -1,7 +1,7 @@
 // Menuverso · double opt-in confirmation endpoint (GDPR/RGPD step 4).
 // Vercel Serverless Function (Node). GET/POST ?token=...
 //
-// Verifies the token server-side, then flips Launch-waitlist.double_opt_in_confirmed
+// Verifies the token server-side, then flips launch_waitlist.double_opt_in_confirmed
 // to true (+ confirmed_at) and marks the token used. Idempotent: re-clicking a
 // used token still reports success.
 //
@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
     if (new Date(row.expires_at) < new Date()) { res.status(410).json({ error: 'expired' }); return; }
 
     const now = new Date().toISOString();
-    await sb('Launch-waitlist?email=eq.' + encodeURIComponent(row.email), {
+    await sb('launch_waitlist?email=eq.' + encodeURIComponent(row.email), {
       method: 'PATCH',
       headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ double_opt_in_confirmed: true, confirmed_at: now })

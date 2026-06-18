@@ -2531,7 +2531,7 @@ function WaitlistForm(){
  return;
  }
  const esW = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
- const supaInsert = (body) => fetch('https://qjrqnnrucdvpwrbkxean.supabase.co/rest/v1/Launch-waitlist', {
+ const supaInsert = (body) => fetch('https://qjrqnnrucdvpwrbkxean.supabase.co/rest/v1/launch_waitlist', {
  method: 'POST',
  headers: {
  'apikey': 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA',
@@ -2567,7 +2567,7 @@ function WaitlistForm(){
  // lose the signup — fall back to an email-only insert. Run the migration to
  // persist consent fields in the DB.
  if (!(r.ok || r.status === 201) && r.status !== 409 && /column|schema cache|PGRST204|does not exist/i.test(txt)) {
- console.warn('Launch-waitlist consent columns missing — apply the consent migration. Falling back to email-only insert.');
+ console.warn('launch_waitlist consent columns missing — apply the consent migration. Falling back to email-only insert.');
  r = await supaInsert({ email });
  txt = (r.ok || r.status === 201) ? '' : await r.text().catch(() => '');
  }
@@ -2782,7 +2782,7 @@ function Landing() {
  ), // close section
  // ====== Waiting-list signup ============================================
  // Pre-launch email capture. Posts to Supabase REST API (table:
- // Launch-waitlist, column: email). Inline success/error states; no
+ // launch_waitlist, column: email). Inline success/error states; no
  // page-reload. The publishable key is a public anon key, safe to ship
  // client-side as long as the table's RLS allows anonymous inserts and
  // restricts reads (which Supabase does by default for `anon`).
@@ -5133,7 +5133,7 @@ function PartnerLanding() {
 
  // Inline lead-capture form, the neotaste-style "Get in touch" pattern.
  // Posts to Supabase `partner_leads` (anon insert, same publishable key
- // pattern as Launch-waitlist). LocalStorage is kept as a safety net so
+ // pattern as launch_waitlist). LocalStorage is kept as a safety net so
  // nothing is lost if the table or RLS isn't set up yet — the local copy
  // can be exported later via `localStorage.getItem('mv_partner_leads')`.
  const leadCapture = PartnerLeadForm();
