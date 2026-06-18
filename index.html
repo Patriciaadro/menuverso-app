@@ -5025,12 +5025,13 @@ function PartnerLeadForm(){
   return el('form',{id:'partner-contact', class:'mt-7 max-w-lg scroll-mt-28', onsubmit: async (ev)=>{
  ev.preventDefault();
  const f = ev.target;
+ const el2 = f.elements;
  const btn = f.querySelector('button[type=submit]');
- const venue = (f.venue && f.venue.value || '').trim();
- const contact = (f.contact && f.contact.value || '').trim();
- const phone = (f.phone && f.phone.value || '').trim();
+ const venue = (el2.venue && el2.venue.value || '').trim();
+ const contact = (el2.contact && el2.contact.value || '').trim();
+ const phone = (el2.phone && el2.phone.value || '').trim();
  const phoneDigits = phone.replace(/[^0-9]/g, '');
- const email = (f.email && f.email.value || '').trim().toLowerCase();
+ const email = (el2.email && el2.email.value || '').trim().toLowerCase();
  if (!venue || !contact || !phone || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
  toast(t('lead.invalidFields'));
  return;
