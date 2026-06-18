@@ -3221,30 +3221,63 @@ function AppDiscover() {
  // then fall back to "open right now" sorted by recent redemption volume.
  // ====================================================================
  const heroRail = el('div',{class:'px-5 pt-5'});
+ // --- helpers for the "Esta noche" hero (and reused by the grid restyle) ---
+ const venuePhotoSrc = (v) => { try { return venueHasRealPhoto(v) ? venueRealPhotoSrc(v) : cuisinePhotoFor(v); } catch(e){ try { return cuisinePhotoFor(v); } catch(_) { return ''; } } };
+ const estVenueSavings = (v) => { const m=[0,16,24,38,72]; return m[Math.max(1, Math.min(4, v.priceTier||2))] || 22; };
+ const venueCloseTime = (v) => { try { const n=new Date(); const hhmm=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); for (const s of (v.dealSlots||[])) { if (s.active===false) continue; if (hhmm >= (s.timeStart||'00:00') && hhmm <= (s.timeEnd||'23:59')) return s.timeEnd; } } catch(e){} return null; };
+ const tonightCard = (v, es) => {
+ const deals = getVenueDeals(v);
+ const dealTitle = (deals[0] && deals[0].title) || '2×1';
+ const open = isVenueAvailableNow(v);
+ const close = venueCloseTime(v);
+ const sticker = (es?'● Abierto':'● Open') + (close ? (es?' · cierra '+close:' · closes '+close) : '');
+ const meta = [localizeBarrio(v.barrio), localizeCuisine(v.cuisine), '€'.repeat(v.priceTier||2)].filter(Boolean).join(' · ');
+ return el('div',{style:'scroll-snap-align:start;flex:0 0 min(760px,86vw);height:420px;position:relative;background:var(--red);border:3px solid var(--ink);border-radius:4px;overflow:hidden;cursor:pointer;', onclick:()=>go('venue',{slug:v.slug})},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+venuePhotoSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
+ el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,41,26,.05),rgba(20,17,15,.78));'}),
+ open ? el('div',{style:'position:absolute;top:20px;left:20px;background:#F2B100;color:#16110F;padding:7px 13px;font-weight:900;text-transform:uppercase;font-size:13px;border-radius:4px;'}, sticker) : null,
+ el('div',{style:'position:absolute;left:28px;right:28px;bottom:24px;color:#fff;'},
+ el('div',{class:'vname', style:'font-size:clamp(38px,7vw,60px);'}, v.name),
+ el('div',{style:'font-weight:700;font-size:17px;opacity:.92;margin-top:2px;'}, meta),
+ el('div',{class:'flex items-center gap-3 flex-wrap', style:'margin-top:16px;'},
+ el('span',{style:'background:#fff;color:#16110F;font-weight:900;text-transform:uppercase;font-size:14px;padding:11px 16px;border-radius:4px;'}, dealTitle),
+ el('span',{class:'disp', style:'font-size:20px;color:#F2B100;'}, (es?'ahorras ~€':'save ~€')+estVenueSavings(v)),
+ el('button',{style:'margin-left:auto;background:var(--red);color:#fff;border:none;font-family:Anton;font-size:20px;padding:11px 22px;cursor:pointer;border-radius:4px;box-shadow:5px 5px 0 var(--ink);', onclick:(e)=>{ e.stopPropagation(); go('venue',{slug:v.slug}); }}, (es?'RESERVAR →':'BOOK →'))
+ )
+ )
+ );
+ };
+ const heroScroll = { rail:null };
  function paintHero() {
  heroRail.innerHTML = '';
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const all = getAllVenues();
+ const redByVenue = (store.redemptions || []).reduce((acc, r) => { acc[r.venueSlug] = (acc[r.venueSlug] || 0) + 1; return acc; }, {});
  let pool = all.filter(v => venueHasFlashNow(v) || venueSlotsLeftToday(v) != null);
  if (pool.length < 4) {
- // Top up with live-now venues sorted by redemption volume (proxy for "hot").
- const redByVenue = (store.redemptions || []).reduce((acc, r) => {
- acc[r.venueSlug] = (acc[r.venueSlug] || 0) + 1; return acc;
- }, {});
- const liveOnes = all
- .filter(v => isVenueAvailableNow(v) && !pool.includes(v))
- .sort((a,b) => (redByVenue[b.slug]||0) - (redByVenue[a.slug]||0));
+ const liveOnes = all.filter(v => isVenueAvailableNow(v) && !pool.includes(v)).sort((a,b) => (redByVenue[b.slug]||0) - (redByVenue[a.slug]||0));
  pool = pool.concat(liveOnes).slice(0, 6);
- } else {
- pool = pool.slice(0, 6);
- }
+ } else { pool = pool.slice(0, 6); }
+ // Never blank the top of Discover: if nothing's open right now, anchor with top venues.
+ if (pool.length === 0) pool = all.slice().sort((a,b) => (redByVenue[b.slug]||0) - (redByVenue[a.slug]||0)).slice(0, 6);
  if (pool.length === 0) return;
- heroRail.appendChild(el('div',{class:'flex items-baseline justify-between gap-3'},
- el('div',{class:'text-[10px] uppercase tracking-[0.18em] font-extrabold text-mv-600'}, t('discover.rightNow') || 'Right now in Barcelona'),
- el('span',{class:'text-[11px] text-slate2-400'}, pool.length + '')
- ));
- const rail = el('div',{class:'mv-rail mt-3'});
- pool.forEach(v => rail.appendChild(PhotoVenueCard(v, { compact:true })));
- heroRail.appendChild(rail);
+ const anyOpen = pool.some(v => isVenueAvailableNow(v));
+ const rail = el('div',{class:'snaprow', style:'display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;'});
+ heroScroll.rail = rail;
+ pool.forEach(v => rail.appendChild(tonightCard(v, es)));
+ heroRail.append(
+ el('div',{class:'flex items-end justify-between gap-3 mb-5 flex-wrap'},
+ el('div',{},
+ el('div',{class:'kick text-mv-500', style:'font-size:13px;'}, anyOpen ? (es?'● Cerca de ti · abierto ahora':'● Near you · open now') : (es?'● Cerca de ti · los mejores planes':'● Near you · top picks')),
+ el('h1',{class:'disp text-slate2-50 mt-2', style:'font-size:clamp(38px,6vw,72px);line-height:.9;'}, es?'Esta noche cenas':'Tonight you eat', el('br'), es?'en uno de estos.':'at one of these.')
+ ),
+ el('div',{class:'flex gap-2.5 shrink-0'},
+ el('button',{'aria-label':'prev', class:'grid place-items-center cursor-pointer', style:'width:52px;height:52px;border:3px solid var(--ink);background:var(--paper);font-family:Anton;font-size:24px;border-radius:4px;', onclick:()=>{ heroScroll.rail && heroScroll.rail.scrollBy({left:-740,behavior:'smooth'}); }}, '‹'),
+ el('button',{'aria-label':'next', class:'grid place-items-center cursor-pointer', style:'width:52px;height:52px;border:3px solid var(--ink);background:var(--ink);color:#fff;font-family:Anton;font-size:24px;border-radius:4px;', onclick:()=>{ heroScroll.rail && heroScroll.rail.scrollBy({left:740,behavior:'smooth'}); }}, '›')
+ )
+ ),
+ rail
+ );
  }
 
  // ====================================================================
