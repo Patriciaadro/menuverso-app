@@ -469,7 +469,14 @@ function loadStore() {
  localStorage.setItem(STORE_KEY, JSON.stringify(initialStore));
  return JSON.parse(JSON.stringify(initialStore));
  }
- return JSON.parse(raw);
+ const parsed = JSON.parse(raw);
+ // Hostile-audit hardening: JSON.parse('null'|'123'|'"x"'|'[]') succeeds but
+ // returns a non-object. A persisted 'null' (if store ever went null and
+ // saveStore ran) would otherwise white-screen every future boot. Reseed.
+ if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+ return JSON.parse(JSON.stringify(initialStore));
+ }
+ return parsed;
  } catch { return JSON.parse(JSON.stringify(initialStore)); }
 }
 function saveStore() {
@@ -698,6 +705,20 @@ async function hashPassword(plain) { return await safeHash(plain); }
 const store = loadStore();
 // Defensive: ensure new fields exist on stores loaded from earlier versions.
 if (!store.partnerVenues) store.partnerVenues = JSON.parse(JSON.stringify(initialStore.partnerVenues));
+// Hostile-audit hardening: these collections are accessed unguarded as
+// store.subscriptions[uid] / store.saved[uid] / store.reviews etc. A store
+// persisted by an older schema (the same drift that needed partnerVenues,
+// reviews, seedOverrides, email + lastName backfills) would crash a logged-in
+// user on profile/checkout/saved. Backfill every expected shape, once, here.
+if (!store.subscriptions || typeof store.subscriptions !== 'object') store.subscriptions = {};
+if (!store.saved || typeof store.saved !== 'object') store.saved = {};
+if (!store.seedOverrides || typeof store.seedOverrides !== 'object') store.seedOverrides = {};
+if (!Array.isArray(store.users)) store.users = JSON.parse(JSON.stringify(initialStore.users));
+if (!Array.isArray(store.reviews)) store.reviews = [];
+if (!Array.isArray(store.bookings)) store.bookings = [];
+if (!Array.isArray(store.redemptions)) store.redemptions = [];
+if (!Array.isArray(store.changeRequests)) store.changeRequests = [];
+if (!Array.isArray(store.tncVersions)) store.tncVersions = [];
 // Migrate legacy @menuverso.app emails → @menuverso.com so demo sign-in works
 // for users whose localStorage was seeded before the domain change.
 let _emailMigrated = 0;
