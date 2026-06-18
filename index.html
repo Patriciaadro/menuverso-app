@@ -95,6 +95,14 @@ tailwind.config = {
  .disp{ font-family:'Anton',sans-serif; text-transform:uppercase; line-height:.86; letter-spacing:-.015em; font-weight:400; }
  .script{ font-family:'Kaushan Script',cursive; }
  .kick{ font-family:'Archivo',sans-serif; font-weight:800; text-transform:uppercase; letter-spacing:.28em; font-size:14px; }
+ /* ===== Xibeca portals foundation (member + partner reskin, per spec §1) ===== */
+ /* Venue/restaurant names: Anton ITALIC, not uppercase — the distinctive treatment. */
+ .vname{ font-family:'Anton',sans-serif; font-style:italic; text-transform:none; letter-spacing:.01em; line-height:.95; }
+ /* Horizontal scroll-snap rows (Tonight hero, etc.) with hidden scrollbar. */
+ .snaprow{ scrollbar-width:none; } .snaprow::-webkit-scrollbar{ display:none; }
+ /* "Drop" moment slam-in (member redeem + partner confirm); plus a gentle rise-in. */
+ @keyframes mv-slam{ 0%{ transform:scale(1.6) rotate(-8deg); opacity:0; } 60%{ transform:scale(.94) rotate(-2deg); opacity:1; } 100%{ transform:scale(1) rotate(-2deg); } }
+ @keyframes mv-in{ from{ opacity:0; transform:translateY(20px); } to{ opacity:1; transform:translateY(0); } }
  /* Hero headline uses one shared clamp for EN + ES. It's deliberately modest
  so the longer Spanish copy still fits ~2 lines and both languages render at
  the same size/height (no push-down, no EN-too-big mismatch). */
