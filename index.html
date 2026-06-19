@@ -5292,6 +5292,7 @@ function Booking() {
  // actual redeem (mark redeemed + savings) happens when the member closes it.
  const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(v)[0]) ? getVenueDeals(v)[0].title : null) || (b.dealTitle) || '2×1';
+ const dealSav = (function(){ try { const ds = getVenueDeals(v); const d = ds.find(x => x.id === (b.dealId || state.pendingDealId)) || ds[0]; return (d && typeof d.savingsEur === 'number') ? d.savingsEur : ((typeof AVG_TICKET_EUR === 'number') ? AVG_TICKET_EUR : 18); } catch(e){ return 18; } })();
  const mmss = (t) => { const m = Math.floor(t/60), s = t%60; return m + ':' + (s<10?'0':'') + s; };
  // 1-hour window, consistent with the booking validity shown on the screen
  // before (no more 15-min vs 1-hour mismatch).
@@ -5308,6 +5309,31 @@ function Booking() {
  cdNode,
  cdNote
  );
+ // Step 2 (brief 19/06): after the red unlock, an animated GREEN "2×1 aplicado
+ // · −€X" screen the waiter sees, with a star rating (no points).
+ function showGreenConfirm() {
+ let stars = 0, noteVal = '';
+ const starsRow = el('div',{style:'font-size:42px;letter-spacing:10px;margin:14px 0;line-height:1;'});
+ const renderStars = () => { starsRow.innerHTML=''; for (let i=1;i<=5;i++){ (function(n){ starsRow.appendChild(el('span',{style:'cursor:pointer;color:'+(n<=stars?'#F2B100':'rgba(255,255,255,.30)')+';', onclick:()=>{ stars=n; renderStars(); }}, '★')); })(i); } };
+ renderStars();
+ const note = el('textarea',{rows:'2', placeholder:(es?'Cuéntale al resto de foodies… (opcional)':'Tell other foodies… (optional)'), style:'width:100%;max-width:340px;margin:0 auto;display:block;border:3px solid #16110F;border-radius:4px;padding:10px 12px;font-family:Archivo,sans-serif;font-size:14px;resize:none;background:#F4EFE6;color:#16110F;', onInput:(e)=>{ noteVal = e.target.value; }});
+ const gticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:10px;padding:clamp(20px,5vw,32px) clamp(24px,7vw,56px);margin:18px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
+ el('div',{class:'disp', style:'font-size:clamp(68px,18vw,120px);color:#1F9D63;line-height:.8;'}, '✓'),
+ el('div',{class:'disp', style:'font-size:clamp(30px,8vw,48px);color:#16110F;margin-top:4px;'}, es?'2×1 aplicado':'2×1 applied'),
+ el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:14px;margin-top:6px;'}, dealTitle + ' · ' + (v?.name||''))
+ );
+ const gbelow = el('div',{style:'position:relative;color:#0b3d27;animation:mv-in .6s .2s both;text-align:center;'},
+ el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.05em;font-size:16px;'}, es?'Descuento aplicado a la cuenta':'Discount applied to the bill'),
+ el('div',{class:'disp', style:'font-size:clamp(44px,11vw,60px);color:#16110F;margin-top:2px;'}, '−€'+dealSav),
+ el('div',{class:'kick', style:'color:#0b3d27;font-size:12px;margin-top:18px;'}, es?'¿Qué tal fue?':'How was it?'),
+ starsRow,
+ note
+ );
+ mvDrop({ bg:'#1F9D63', grainBlend:'overlay', kickColor:'#0b3d27', kick:'menuverso · ' + (es?'canje verificado':'redemption verified'),
+ ticket: gticket, below: gbelow, closeLabel:(es?'HECHO ✓':'DONE ✓'),
+ onClose: () => { if (stars > 0) { if (!store.reviews) store.reviews = []; store.reviews.push({ memberId: u.id, venueSlug: b.venueSlug, stars: stars, note: (noteVal||'').trim() || null, createdAt: Date.now() }); saveStore(); } paint(); }
+ });
+ }
  mvDrop({ bg:'#F4291A', kickColor:'#16110F', kick:'menuverso · ' + (es?'canje confirmado':'redemption confirmed'),
  ticket, below, closeLabel:(es?'HECHO · LISTO ✓':'DONE · READY ✓'),
  onClose: () => {
@@ -5316,9 +5342,11 @@ function Booking() {
  // keep the booking valid for the full 1-hour window shown to the member
  b.expiresAt = Math.max(b.expiresAt || 0, Date.now() + 3600*1000);
  store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, dealId: b.dealId || state.pendingDealId || null, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
- saveStore(); paint();
+ saveStore();
  // Push to Supabase so the partner's live feed sees it cross-device.
  if (typeof pushRedemptionToSupabase === 'function') pushRedemptionToSupabase({ venueSlug: b.venueSlug, memberId: u.id, memberName: (typeof fullName==='function'?fullName(u):''), dealTitle, redeemedAt: Date.now() });
+ // Chain the green "aplicado + rating" screen.
+ showGreenConfirm();
  }
  });
  iv = setInterval(() => { countdown = Math.max(0, countdown-1); cdNode.textContent = mmss(countdown); if (countdown === 0) { clearInterval(iv); cdNode.style.color = '#C81C10'; cdNote.textContent = es?'Caducado · vuelve a deslizar para confirmar.':'Expired · slide to confirm again.'; } }, 1000);
