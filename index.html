@@ -402,7 +402,7 @@ const TNC_BODY = [
  ['Liability', 'Menuverso provides the booking platform and the membership relationship; we are not party to the actual meal you serve. Disputes over food quality or service are between you and the diner. Menuverso may mediate but is not financially liable for restaurant-side outcomes.'],
  ['Termination', 'Menuverso may terminate your listing at any time for repeated breaches of these terms, persistent member complaints, or activity that risks our brand or other partners. We will give you reasonable notice and the opportunity to respond before termination.'],
  ['Governing law', 'These terms are governed by Spanish law. Disputes will be resolved by the competent courts of Barcelona, Catalonia, Spain.'],
- ['Contact', 'For any questions about these terms, contact hola@menuverso.com. To request an exception or escalate a decision, mark the email subject "Partner T&C".']
+ ['Contact', 'For any questions about these terms, contact info@menuverso.com. To request an exception or escalate a decision, mark the email subject "Partner T&C".']
 ];
 
 const initialStore = {
@@ -2223,17 +2223,17 @@ function MarketingHeader() {
  const closeMenu = () => document.getElementById('mv-mmenu')?.classList.add('hidden');
  const mItem = (label, fn) => el('button',{class:'block w-full text-left px-5 py-3.5 text-sm font-bold text-slate2-200 hover:bg-slate2-50/5 hover:text-slate2-50 cursor-pointer bg-transparent border-0 transition', onclick:()=>{ closeMenu(); fn(); }}, label);
  return el('header',{class:'sticky top-0 z-30 bg-ink-950/85 backdrop-blur border-b border-slate2-50/5'},
- el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-4'},
+ el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-2 md:gap-4'},
  el('a',{class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go('landing')},
  el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:24px;width:auto;display:block">'})
  ),
- el('nav',{class:'flex items-center gap-4 text-sm text-slate2-300'},
+ el('nav',{class:'flex items-center gap-2 md:gap-4 text-sm text-slate2-300'},
  el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('how')}, t('nav.howItWorks')),
  el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
  el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('precios')}, t('nav.pricing')),
  el('button',{class:'inline-flex items-center gap-1.5 rounded-[4px] border-2 border-mv-500/55 text-mv-500 font-extrabold px-3.5 py-1.5 text-sm cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, el('span',{class:'inline-flex shrink-0', style:'width:14px;height:14px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}), el('span',{class:'tracking-wider'}, t('lang.switchLabel'))),
  u
- ? el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white font-bold px-4 py-1.5 text-sm cursor-pointer  shadow-mv-500/20', onclick:()=>{ if (u.role==='ADMIN') go('admin'); else if (u.role==='PARTNER_OWNER') go('partner-portal',{tab:'overview'}); else go('app'); }}, 'Open App →')
+ ? el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white font-bold px-3.5 md:px-4 py-1.5 text-sm cursor-pointer shadow-mv-500/20 whitespace-nowrap shrink-0', onclick:()=>{ if (u.role==='ADMIN') go('admin'); else if (u.role==='PARTNER_OWNER') go('partner-portal',{tab:'overview'}); else go('app'); }}, 'Open App →')
  : el('button',{class:'hidden md:inline-flex rounded-[4px] border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')}, t('nav.signIn')),
  el('button',{class:'md:hidden inline-flex items-center justify-center rounded-[4px] border border-slate2-50/15 text-slate2-50 hover:bg-slate2-50/10 cursor-pointer bg-transparent transition', style:'width:38px;height:38px', title:'Menu', onclick:()=>document.getElementById('mv-mmenu')?.classList.toggle('hidden')},
  el('span',{class:'inline-flex', style:'width:18px;height:18px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:100%;height:100%"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>'})
@@ -2267,7 +2267,7 @@ function AppShell(inner, opts={}) {
  // "Back to landing" footer link only makes sense pre-signup or during auth/checkout, 
  // a logged-in member has no reason to be tossed back to marketing. Hide for them.
  const showBackToLanding = !u || opts.showBackToLanding === true;
- return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50 grain'},
+ return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50' + (opts.noGrain ? '' : ' grain')},
  // Same banner as marketing pages so the header sits at the same vertical
  // position on every route, no jump when going landing → signin.
  ConceptBanner(),
@@ -2929,7 +2929,7 @@ function Landing() {
  el('nav',{class:'flex items-center gap-5'},
  el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
  el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('terms')},'Terms'),
- el('a',{class:'hover:text-slate2-50 cursor-pointer', href:'mailto:hola@menuverso.com'},'Contact'),
+ el('a',{class:'hover:text-slate2-50 cursor-pointer', href:'mailto:info@menuverso.com'},'Contact'),
  el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')},'For Restaurants')
  )
  ),
@@ -3265,7 +3265,7 @@ function Checkout() {
  )
  )
  );
- return AppShell(inner, { narrow: true });
+ return AppShell(inner, { narrow: true, noGrain: true });
 }
 
 /* ========================================================================
@@ -3370,7 +3370,7 @@ function AppDiscover() {
  el('div',{class:'flex items-center gap-3 flex-wrap', style:'margin-top:16px;'},
  el('span',{style:'background:#fff;color:#16110F;font-weight:900;text-transform:uppercase;font-size:14px;padding:11px 16px;border-radius:4px;'}, dealTitle),
  el('span',{class:'disp', style:'font-size:20px;color:#F2B100;'}, (es?'ahorras ~€':'save ~€')+estVenueSavings(v)),
- el('button',{style:'margin-left:auto;background:var(--red);color:#fff;border:none;font-family:Anton;font-size:20px;padding:11px 22px;cursor:pointer;border-radius:4px;box-shadow:5px 5px 0 var(--ink);', onclick:(e)=>{ e.stopPropagation(); go('venue',{slug:v.slug}); }}, (es?'RESERVAR →':'BOOK →'))
+ el('button',{style:'margin-left:auto;background:var(--red);color:#fff;border:none;font-family:Anton;font-size:20px;padding:11px 22px;cursor:pointer;border-radius:4px;box-shadow:5px 5px 0 var(--ink);', onclick:(e)=>{ e.stopPropagation(); go('venue',{slug:v.slug}); }}, (es?'VER OFERTA →':'VIEW OFFER →'))
  )
  )
  );
@@ -5377,8 +5377,11 @@ function PartnerLeadForm(){
  toast(t('lead.invalidPhone'));
  return;
  }
+ // Privacy-policy consent (restaurant lead) — GDPR: capture before contacting them.
+ const consent = !!(el2.consent && el2.consent.checked);
+ if (!consent) { toast((typeof aT==='function'?aT('Acepta la política de privacidad para continuar.','Please accept the privacy policy to continue.'):'Please accept the privacy policy.')); return; }
  // Safety net first: never drop a lead even if the network/POST fails.
- const lead = { venue, contact, phone, email, ts: Date.now() };
+ const lead = { venue, contact, phone, email, consent: true, consented_at: new Date().toISOString(), ts: Date.now() };
  try {
  const leads = JSON.parse(localStorage.getItem('mv_partner_leads') || '[]');
  leads.push(lead);
@@ -5395,7 +5398,7 @@ function PartnerLeadForm(){
  'Content-Type': 'application/json',
  'Prefer': 'return=minimal'
  },
- body: JSON.stringify({ venue, contact, phone, email })
+ body: JSON.stringify({ venue, contact, phone, email })  /* consent captured client-side; add a consent column server-side if desired */
  });
  if (!(r.ok || r.status === 201 || r.status === 409)) {
  console.warn('partner_leads insert returned', r.status, await r.text().catch(()=>''));
@@ -5419,6 +5422,12 @@ function PartnerLeadForm(){
  el('input',{ name:'email', type:'email', required: true, placeholder: t('lead.placeholder'),
  class:'flex-1 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('button',{ type:'submit', class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition shrink-0'}, t('lead.submit'))
+ ),
+ el('label',{class:'flex items-start gap-2 text-xs text-slate2-400 mt-1 cursor-pointer'},
+ el('input',{ name:'consent', type:'checkbox', required:true, class:'mt-0.5 shrink-0', style:'accent-color:#F4291A;'}),
+ el('span',{}, (typeof aT==='function'?aT('He leído y acepto la ','I have read and accept the '):'I accept the '),
+ el('a',{href:'#privacidad', class:'underline text-mv-500', onclick:(e)=>{ e.preventDefault(); go('privacy'); }}, (typeof aT==='function'?aT('Política de privacidad','Privacy policy'):'Privacy policy')),
+ '.')
  )
  )
  );
@@ -5760,7 +5769,7 @@ function PartnerLanding() {
  el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('landing')},'For diners'),
  el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
  el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('terms')},'Terms'),
- el('a',{class:'hover:text-slate2-50 cursor-pointer', href:'mailto:hola@menuverso.com'},'Contact')
+ el('a',{class:'hover:text-slate2-50 cursor-pointer', href:'mailto:info@menuverso.com'},'Contact')
  )
  ),
  el('div',{class:'border-t border-slate2-50/5'},
@@ -5900,7 +5909,7 @@ function PartnerPortal() {
         el('div',{class:'mx-auto max-w-6xl px-4 md:px-8 py-6 md:py-10'}, content),
         el('footer',{class:'border-t border-slate2-50/5 mt-8'},
           el('div',{class:'mx-auto max-w-6xl px-4 md:px-8 py-5 flex items-center justify-between flex-wrap gap-2 text-xs text-slate2-400'},
-            el('span',{}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es'?'¿Necesitas ayuda? ':'Need help? '), el('a',{class:'underline hover:text-slate2-50 cursor-pointer', href:'mailto:hola@menuverso.com'},'hola@menuverso.com')),
+            el('span',{}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es'?'¿Necesitas ayuda? ':'Need help? '), el('a',{class:'underline hover:text-slate2-50 cursor-pointer', href:'mailto:info@menuverso.com'},'info@menuverso.com')),
             el('span',{},'Menuverso · Barcelona')
           )
         )
@@ -7015,7 +7024,6 @@ function PortalClientes() {
  el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 22px;line-height:.92;'}, esP?'Clientes':'Customers'),
  el('div',{class:'grid gap-5', style:'grid-template-columns:repeat(auto-fit,minmax(200px,1fr));'},
  card('#fff','#16110F','var(--red)', esP?'Recurrentes':'Returning', animatedNumber(pctReturn, { suffix:'%' }), esP?'vuelven 2+ veces':'come back 2+ times', '#7A7164', 'var(--ink)'),
- card('#fff','#16110F','var(--red)', esP?'Ticket medio':'Avg ticket', animatedNumber(AVG, { prefix:'€' }), esP?'por mesa':'per table', '#7A7164', 'var(--ink)'),
  card('#fff','#16110F','var(--red)', esP?'Nuevos':'New', animatedNumber(newThisMonth), esP?'este mes':'this month', '#7A7164', 'var(--ink)'),
  card('var(--ink)','#fff','#F2B100', esP?'Valoración':'Rating', avg ? avg.toFixed(1).replace('.', esP?',':'.') : '—', '★ ' + revs.length + ' ' + (esP?'reseñas':'reviews'), '#cabfae', 'var(--red)')
  ),
@@ -7035,48 +7043,39 @@ function PortalOfertas() {
  const pv = currentPartnerVenue();
  const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  if (!pv) return el('div',{class:'text-sm', style:'color:#7A7164;'}, esP?'Sin local.':'No venue.');
- pv.offerDisabled = Array.isArray(pv.offerDisabled) ? pv.offerDisabled : [];
- pv.partnerOffers = Array.isArray(pv.partnerOffers) ? pv.partnerOffers : [];
- const adminDeals = (typeof getVenueDeals === 'function') ? getVenueDeals(pv) : [];
- const items = [];
- adminDeals.forEach(d => items.push({ title:d.title, desc:d.description||null,
- on: pv.status!=='PAUSED' && !pv.offerDisabled.includes(d.title),
- toggle:()=>{ const i=pv.offerDisabled.indexOf(d.title); if(i>=0) pv.offerDisabled.splice(i,1); else pv.offerDisabled.push(d.title); saveStore(); go('partner-portal',{tab:'ofertas'}); } }));
- pv.partnerOffers.forEach((o,idx) => items.push({ title:o.title, desc:(esP?'Oferta propuesta · en revisión':'Proposed offer · in review'),
- on:o.active!==false,
- toggle:()=>{ pv.partnerOffers[idx].active = !(o.active!==false); saveStore(); go('partner-portal',{tab:'ofertas'}); } }));
-
- const sw = (on, onToggle) => el('button',{'aria-label': on?(esP?'Desactivar oferta':'Turn off'):(esP?'Activar oferta':'Turn on'), style:'position:relative;width:74px;height:40px;border:3px solid #16110F;border-radius:40px;cursor:pointer;flex:0 0 auto;transition:background .2s;background:'+(on?'#1F9D63':'#D9CDB6')+';', onclick:(e)=>{ e.stopPropagation(); onToggle(); }},
- el('span',{style:'position:absolute;top:2px;left:2px;width:30px;height:30px;background:#16110F;border-radius:50%;transition:transform .2s cubic-bezier(.2,.7,.3,1);transform:translateX('+(on?'30px':'0')+');'}));
-
- const offerCard = (it) => el('div',{style:'background:'+(it.on?'#fff':'var(--paper)')+';border:3px '+(it.on?'solid var(--ink)':'dashed #ABA399')+';border-radius:4px;padding:22px 26px;'+(it.on?'box-shadow:5px 5px 0 var(--ink);':''), class:'flex items-center gap-6 flex-wrap'},
- el('div',{style:'flex:1;min-width:220px;'},
- el('div',{class:'disp', style:'font-size:clamp(26px,4vw,34px);color:'+(it.on?'var(--ink)':'#7A7164')+';'}, it.title || '2×1'),
- it.desc ? el('div',{style:'font-weight:600;color:#574F47;font-size:14px;margin-top:6px;'}, it.desc) : null,
- el('div',{style:'font-weight:800;font-size:13px;color:'+(it.on?'#1F9D63':'#ABA399')+';margin-top:8px;text-transform:uppercase;letter-spacing:.04em;'}, it.on?(esP?'Activa':'Active'):(esP?'Pausada':'Paused'))
- ),
- sw(it.on, it.toggle)
- );
-
- const addOffer = () => {
- const title = (typeof prompt === 'function') ? prompt(esP?'Título de la nueva oferta (p. ej. 2×1 en postres):':'New offer title (e.g. 2×1 desserts):') : null;
- if (title && title.trim()) { pv.partnerOffers.push({ title:title.trim(), active:true }); saveStore(); toast(esP?'Oferta propuesta · en revisión':'Offer proposed · in review'); go('partner-portal',{tab:'ofertas'}); }
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(pv) : [];
+ const live = pv.status === 'LIVE';
+ // Recurrency label from the per-deal cooldown (set by admin). Falls back to
+ // "per agreement" until a recurrency is configured.
+ const recurLabel = (d) => {
+ const n = (typeof d.cooldownDays === 'number') ? d.cooldownDays : null;
+ if (n === null) return esP?'Frecuencia según acuerdo':'Frequency per agreement';
+ if (n <= 1) return esP?'Canjeable a diario':'Redeemable daily';
+ if (n % 30 === 0) { const m = n/30; return esP?('Canjeable cada '+m+' '+(m===1?'mes':'meses')):('Redeemable every '+m+' month'+(m===1?'':'s')); }
+ return esP?('Canjeable cada '+n+' días'):('Redeemable every '+n+' days');
  };
-
+ const offerCard = (d) => el('div',{style:'background:'+(live?'#fff':'var(--paper)')+';border:3px '+(live?'solid var(--ink)':'dashed #ABA399')+';border-radius:4px;padding:22px 26px;'+(live?'box-shadow:5px 5px 0 var(--ink);':''), class:'flex items-center gap-6 flex-wrap'},
+ el('div',{style:'flex:1;min-width:220px;'},
+ el('div',{class:'disp', style:'font-size:clamp(24px,4vw,32px);color:'+(live?'var(--ink)':'#7A7164')+';'}, d.title || '2×1'),
+ el('div',{class:'flex gap-2 flex-wrap', style:'margin-top:10px;'},
+ el('span',{style:'border:2px solid var(--ink);font-weight:800;font-size:12px;padding:5px 10px;border-radius:4px;'}, recurLabel(d)),
+ (typeof d.savingsEur === 'number') ? el('span',{style:'border:2px solid var(--red);color:var(--red);font-weight:800;font-size:12px;padding:5px 10px;border-radius:4px;'}, '~€'+d.savingsEur+(esP?' ahorro':' saved')) : null
+ )
+ ),
+ el('span',{style:(live?'background:#1F9D63;color:#fff;border:2px solid #1F9D63;':'border:2px dashed #ABA399;color:#7A7164;')+'font-weight:800;text-transform:uppercase;font-size:13px;padding:8px 14px;border-radius:4px;'}, live?(esP?'Activa':'Active'):(esP?'Pausada':'Paused'))
+ );
  return el('div',{style:'max-width:980px;'},
- el('div',{class:'flex items-end justify-between gap-3 flex-wrap'},
  el('div',{},
- el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'A tu manera':'Your way'),
+ el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'Tus ofertas':'Your offers'),
  el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, esP?'Mis ofertas':'My offers')
  ),
- el('button',{style:'background:var(--ink);color:#fff;border:none;font-family:Anton;font-size:20px;padding:13px 24px;border-radius:4px;cursor:pointer;box-shadow:5px 5px 0 var(--red);', onclick:addOffer}, esP?'+ NUEVA OFERTA':'+ NEW OFFER')
- ),
- el('p',{style:'font-weight:600;color:#574F47;font-size:17px;max-width:640px;margin-top:10px;'}, esP?'Tú decides qué está activo y cuándo. Cámbialo cuando quieras.':'You decide what is live and when. Change it any time.'),
- items.length===0
- ? el('div',{style:'margin-top:24px;background:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px;text-align:center;font-weight:600;color:#574F47;'}, esP?'Aún no hay ofertas. Pulsa "+ Nueva oferta".':'No offers yet. Tap "+ New offer".')
- : el('div',{class:'flex flex-col gap-4', style:'margin-top:24px;'}, ...items.map(offerCard)),
+ el('p',{style:'font-weight:600;color:#574F47;font-size:17px;max-width:640px;margin-top:10px;'}, esP?'Estas son tus ofertas activas, acordadas con el equipo de Menuverso.':'These are your live offers, agreed with the Menuverso team.'),
+ deals.length===0
+ ? el('div',{style:'margin-top:24px;background:#fff;border:3px solid var(--ink);border-radius:4px;padding:28px;text-align:center;font-weight:600;color:#574F47;'}, esP?'Aún no hay ofertas configuradas.':'No offers configured yet.')
+ : el('div',{class:'flex flex-col gap-4', style:'margin-top:24px;'}, ...deals.map(offerCard)),
  el('div',{style:'margin-top:22px;background:rgba(242,177,0,.14);border:2px solid #F2B100;border-radius:4px;padding:14px 18px;font-weight:600;font-size:14px;color:#574F47;'},
- '💡 ' + (esP?'Las ofertas nuevas que propongas pasan una revisión rápida del equipo antes de salir a los socios.':'New offers you propose get a quick team review before going live to members.'))
+ '💡 ' + (esP?'Las ofertas (alta, activar, pausar o quitar) las gestiona el equipo de Menuverso. ':'Offers (adding, activating, pausing or removing) are managed by the Menuverso team. '),
+ el('a',{style:'color:var(--red);font-weight:800;text-decoration:underline;', href:'mailto:info@menuverso.com?subject=' + encodeURIComponent(esP?'Cambio en mis ofertas':'Change my offers')}, esP?'Pídenos un cambio →':'Request a change →'))
  );
 }
 
@@ -7161,114 +7160,18 @@ function PortalProfile() {
  el('p',{class:'mt-2 text-[10px] text-slate2-500'},'Tip: 3–4 horizontal shots of dishes and your dining room work best.')
  ));
 
- // ---- Status toggle (Pause / Resume) + removal request (G3) ----
+  // ---- Pause / removal are ADMIN-MANAGED (brief 19/06) ----
+ // Partners can no longer self-pause or self-remove; they request it from the
+ // Menuverso team. (Offer activate/deactivate/remove is admin-only too.)
  if (pv.status === 'LIVE' || pv.status === 'PAUSED') {
- const isPaused = pv.status === 'PAUSED';
- // G3: inside the 30-day commitment, PAUSE is disabled. Resume is
- // always allowed (if currently paused). The clock starts from
- // offerPublishedAt set on first LIVE approval.
- const lockUntil = (pv.offerPublishedAt || 0) + OFFER_MIN_MS;
- const inLockWindow = !isPaused && Date.now() < lockUntil;
- const daysLeft = Math.max(0, Math.ceil((lockUntil - Date.now()) / 86400000));
- const lockLiftDate = new Date(lockUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
- wrap.append(el('div',{class:'rounded-[4px] ' + (isPaused ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-slate2-50/[0.04] border border-slate2-50/10') + ' p-5 flex items-center justify-between gap-3 flex-wrap'},
- el('div',{class:'min-w-0'},
- el('div',{class:'font-bold flex items-center gap-2'},
- el('span',{class:'h-2 w-2 rounded-full ' + (isPaused ? 'bg-amber-400' : 'bg-accent-emer animate-pulse')}),
- isPaused ? 'Listing paused' : 'Listing live'
- ),
- el('p',{class:'mt-1 text-sm text-slate2-400'},
- isPaused
- ? 'Members can\'t book new codes right now. Toggle on when you\'re ready to accept again.'
- : (inLockWindow
- ? `In your 30-day commitment window, ${daysLeft} day${daysLeft===1?'':'s'} left. You agreed to keep the offer live and bookable until ${lockLiftDate}. After that, pause is available anytime.`
- : 'New bookings open. Going on holiday or having an off night? Pause to stop accepting new bookings until you resume.')
- )
- ),
- el('button',{
- class:'rounded-[4px] ' + (inLockWindow ? 'bg-slate2-50/5 text-slate2-500 border border-slate2-50/10 cursor-not-allowed' : (isPaused ? 'bg-accent-emer text-ink-900 hover:bg-accent-emer/90 cursor-pointer' : 'bg-amber-500 text-ink-900 hover:bg-amber-400 cursor-pointer')) + ' px-4 py-2 text-sm font-extrabold',
- disabled: inLockWindow || undefined,
- 'aria-disabled': inLockWindow ? 'true' : 'false',
- title: inLockWindow ? `Pause locked until ${lockLiftDate} (30-day commitment)` : '',
- onclick: inLockWindow ? null : (()=>{
- if (!isPaused) {
- const now = Date.now();
- const pending = store.bookings.filter(b => b.venueSlug === pv.slug && !b.redeemed && !b.cancelled && b.expiresAt > now);
- if (pending.length > 0) {
- const latest = pending.reduce((m,b) => b.expiresAt > m ? b.expiresAt : m, 0);
- const minutes = Math.max(0, Math.ceil((latest - now) / 60000));
- const summary = pending.length + ' active booking' + (pending.length === 1 ? '' : 's') + ' at ' + (pv.name || 'this venue') + ' still good for ' + minutes + ' min.';
- const cancelThem = confirm(
- 'Pause new bookings at ' + (pv.name || 'this venue') + '?\n\n' +
- summary + '\n\n' +
- 'OK = also CANCEL the ' + pending.length + ' pending code' + (pending.length === 1 ? '' : 's') + ' (those diners won\'t be honored)\n' +
- 'Cancel = keep those codes valid, just stop new bookings'
- );
- store.partnerActions = store.partnerActions || [];
- if (cancelThem) {
- pending.forEach(b => { b.cancelled = true; b.cancelReason = 'PARTNER_PAUSE'; });
- store.partnerActions.unshift({ id:'pa_'+Math.random().toString(36).slice(2,10), venueSlug:pv.slug, action:'PAUSE_CANCEL_PENDING', count:pending.length, at:now });
- } else {
- store.partnerActions.unshift({ id:'pa_'+Math.random().toString(36).slice(2,10), venueSlug:pv.slug, action:'PAUSE_KEEP_PENDING', count:pending.length, at:now });
- }
- }
- }
- pv.status = isPaused ? 'LIVE' : 'PAUSED';
- saveStore(); toast(isPaused ? 'Listing is live' : 'Listing paused'); paint();
- })
- }, inLockWindow ? ' Pause locked' : (isPaused ? '▶ Resume listing' : ' Pause listing'))
- ));
-
- // ---- G3: Request removal, replaces partner-side delete entirely.
- // Inside the 30-day window the request is flagged "earlyRemoval"; the
- // admin can still approve at their discretion, but it's recorded as
- // a breach of the commitment.
- const existingPendingRemoval = (store.changeRequests || []).find(cr =>
- cr.venueId === pv.id && cr.type === 'REMOVAL' && cr.status === 'PENDING'
- );
+ const esPP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  wrap.append(el('div',{class:'rounded-[4px] border border-slate2-50/10 bg-slate2-50/[0.02] p-5'},
- el('div',{class:'flex items-center justify-between gap-3 flex-wrap'},
- el('div',{class:'min-w-0'},
- el('div',{class:'font-bold text-sm flex items-center gap-2'},
- el('span',{class:'text-slate2-400', html:'<svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>'}, ''), 'Remove this listing'
+ el('div',{class:'font-bold flex items-center gap-2'},
+ el('span',{class:'h-2 w-2 rounded-full ' + (pv.status==='PAUSED' ? 'bg-amber-400' : 'bg-accent-emer animate-pulse')}),
+ pv.status==='PAUSED' ? (esPP?'Local en pausa':'Listing paused') : (esPP?'Local en directo':'Listing live')
  ),
- el('p',{class:'mt-1 text-xs text-slate2-400 leading-relaxed'},
- existingPendingRemoval
- ? 'Your removal request is pending admin review. You can withdraw it below.'
- : (inLockWindow
- ? `You\'re inside the 30-day commitment. Removal is by request only, flagged as early. Admin may still approve in exceptional circumstances.`
- : 'After the 30-day commitment, you can request removal anytime. Admin reviews within 3 business days.')
- )
- ),
- existingPendingRemoval
- ? el('button',{class:'rounded-[4px] bg-slate2-50/10 border border-slate2-50/15 px-4 py-2 text-xs font-extrabold cursor-pointer hover:bg-slate2-50/[0.15]', onclick:()=>{
- existingPendingRemoval.status = 'WITHDRAWN';
- existingPendingRemoval.reviewedAt = Date.now();
- saveStore(); toast('Removal request withdrawn'); paint();
- }},'Withdraw request')
- : el('button',{class:'rounded-[4px] bg-red-500/15 text-red-600 border border-red-500/30 hover:bg-red-500/25 px-4 py-2 text-xs font-extrabold cursor-pointer', onclick:()=>{
- const earlyRemoval = inLockWindow;
- const prompt = earlyRemoval
- ? `EARLY REMOVAL REQUEST\n\nYou\'re still inside the 30-day commitment (lifts ${lockLiftDate}, ${daysLeft} day${daysLeft===1?'':'s'} remaining).\n\nIf you submit anyway, the admin team will review your reason and may still approve, but this will be recorded as a breach of your commitment on your partner record.\n\nReason for early removal:`
- : 'Why are you requesting removal? (e.g. closing, renovating, switching directions). The admin team reviews within 3 business days:';
- const reason = window.prompt(prompt) || '';
- if (!reason.trim()) { toast('A reason is required', 'err'); return; }
- const cr = {
- id: 'cr_' + Math.random().toString(36).slice(2,10),
- venueId: pv.id,
- type: 'REMOVAL',
- status: 'PENDING',
- submittedAt: Date.now(),
- submittedBy: u.id,
- reason: reason.trim(),
- earlyRemoval
- };
- store.changeRequests.unshift(cr);
- saveStore();
- toast(earlyRemoval ? 'Early-removal request submitted, admin will review.' : 'Removal request submitted. We\'ll respond within 3 business days.');
- paint();
- }},'Request removal')
- )
+ el('p',{class:'mt-2 text-sm text-slate2-400 leading-relaxed'}, esPP?'¿Necesitas pausar o dar de baja tu local? Lo gestiona el equipo de Menuverso para mantener una experiencia consistente. Escríbenos y lo hacemos por ti.':'Need to pause or remove your listing? The Menuverso team handles this to keep the experience consistent. Contact us and we\'ll take care of it.'),
+ el('a',{class:'mt-3 inline-block cursor-pointer', style:'background:var(--ink);color:#fff;font-weight:800;padding:10px 18px;border-radius:4px;text-decoration:none;', href:'mailto:info@menuverso.com?subject=' + encodeURIComponent((esPP?'Pausar/dar de baja: ':'Pause/remove: ') + (pv.name||''))}, esPP?'Contactar con el equipo →':'Contact the team →')
  ));
  }
 
@@ -10986,7 +10889,7 @@ window.MV_TR_ES = {
  "on the food they eat.": "sobre lo que comen.",
  "In return, you set the rules: which days, which slots, which seats. Pause for holidays in one click. We're onboarding the first venues now and we'd love yours to be one of them.": "A cambio, tú pones las reglas: qué días, qué turnos, cuántas mesas. Pausa por vacaciones con un clic. Estamos incorporando los primeros locales ahora mismo y nos encantaría que el tuyo fuera uno de ellos.",
  "The Menuverso team": "El equipo de Menuverso",
- "hola@menuverso.com →": "hola@menuverso.com →",
+ "info@menuverso.com →": "info@menuverso.com →",
  "Pricing": "Precios",
  "No commission.": "Sin comisión.",
  "No catch.": "Sin trampa.",
@@ -11363,9 +11266,9 @@ window.MV_TR_ES = {
  "Privacy Notice": "Aviso de Privacidad",
  "Terms of Service": "Términos del Servicio",
  "€3.99/month billed annually (€47.88 up front) or €6.99/month billed monthly, cancel any time from your account. Full refund within 14 days of first purchase if you have not redeemed any offer. Two diners required; cheaper item is the free one; dine-in; not combinable; partner-defined exclusions apply. Spanish law; Barcelona courts.": "3,99 €/mes con facturación anual (47,88 € por adelantado) o 6,99 €/mes con facturación mensual; cancela cuando quieras desde tu cuenta. Reembolso completo en los 14 días posteriores a la primera compra si no has canjeado ninguna oferta. Se requieren dos comensales; el plato más barato es el gratuito; solo en local; no acumulable; se aplican las exclusiones definidas por cada local. Legislación española; tribunales de Barcelona.",
- "Access, correction, deletion, restriction, portability. Self-service in your account; otherwise email hola@menuverso.com. You can complain to the AEPD.": "Acceso, rectificación, supresión, limitación, portabilidad. Autoservicio en tu cuenta; si no, escribe a hola@menuverso.com. Puedes reclamar ante la AEPD.",
+ "Access, correction, deletion, restriction, portability. Self-service in your account; otherwise email info@menuverso.com. You can complain to the AEPD.": "Acceso, rectificación, supresión, limitación, portabilidad. Autoservicio en tu cuenta; si no, escribe a info@menuverso.com. Puedes reclamar ante la AEPD.",
  "Account: email, name, password (hashed). Subscription: Stripe customer/sub IDs and period dates. Redemptions: venue, deal, timestamps, verification token. We don't run third-party ad trackers.": "Cuenta: email, nombre, contraseña (hasheada). Suscripción: IDs de cliente/suscripción de Stripe y fechas de periodo. Confirmaciones: local, oferta, marcas de tiempo, token de verificación. No usamos rastreadores de anuncios de terceros.",
- "Last updated 2026-05-11. Menuverso S.L. (Barcelona, Spain). Contact: hola@menuverso.com": "Última actualización 2026-05-11. Menuverso S.L. (Barcelona, España). Contacto: hola@menuverso.com",
+ "Last updated 2026-05-11. Menuverso S.L. (Barcelona, Spain). Contact: info@menuverso.com": "Última actualización 2026-05-11. Menuverso S.L. (Barcelona, España). Contacto: info@menuverso.com",
  "No QR codes, no staff codes, no end-of-day exports. Six scenes that play themselves, pick up at any one with the scrubber.": "Sin códigos QR, sin códigos de personal, sin exportaciones de fin de día. Seis escenas que se reproducen solas, salta a cualquiera con la barra.",
  "Save 43%": "Ahorra 43%",
  "Dining Pass": "Pase Gastronómico",

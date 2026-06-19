@@ -22,7 +22,7 @@ const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const CONSENT_VERSION = 'v1-june-2026';
 // FROM must be an address on your Resend-verified domain.
-const FROM = 'Menuverso <hola@menuverso.com>';
+const FROM = 'Menuverso <info@menuverso.com>';
 const CONFIRM_BASE = 'https://menuverso.com/confirmar';
 
 module.exports = async function handler(req, res) {
