@@ -619,6 +619,33 @@ function fetchVenuesFromSupabaseAndMerge() {
  return changed;
  }).catch(function(e){ console.warn('venue fetch failed', e && e.message); return 0; });
 }
+
+// ============================================================================
+// Cross-device redemption sync (member confirm → partner live feed).
+// The member's slide-to-confirm POSTs to /api/redeem (serverless, service-role
+// insert into the Supabase `redemptions` table). The partner's "Canjes en vivo"
+// feed polls /api/redemptions?venue=<slug> and merges remote rows with local
+// ones, so a redemption on the member's phone shows on the partner's device
+// within a few seconds. Both calls are best-effort: if the API isn't wired yet
+// the app falls back to the local-only demo behaviour with no errors.
+// ============================================================================
+function pushRedemptionToSupabase(row) {
+ try {
+ fetch('/api/redeem', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify(row)
+ }).catch(function(){ /* best-effort */ });
+ } catch (e) { /* best-effort */ }
+}
+window.__remoteRedemptions = window.__remoteRedemptions || {};
+function fetchRedemptionsFromSupabase(venueSlug) {
+ if (!venueSlug) return Promise.resolve(null);
+ return fetch('/api/redemptions?venue=' + encodeURIComponent(venueSlug))
+ .then(function(r){ return r.ok ? r.json() : null; })
+ .then(function(rows){ if (Array.isArray(rows)) window.__remoteRedemptions[venueSlug] = rows; return rows; })
+ .catch(function(){ return null; });
+}
 function loadSession() {
  try {
  const raw = localStorage.getItem(SESSION_KEY);
@@ -5181,8 +5208,11 @@ function Booking() {
  const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(v)[0]) ? getVenueDeals(v)[0].title : null) || (b.dealTitle) || '2×1';
  const mmss = (t) => { const m = Math.floor(t/60), s = t%60; return m + ':' + (s<10?'0':'') + s; };
- let countdown = 900, iv = null;
- const cdNode = el('div',{class:'disp', style:'font-size:clamp(48px,13vw,72px);color:#16110F;margin-top:6px;animation:mv-pulse 1.4s ease-in-out infinite;'}, mmss(countdown));
+ // 1-hour window, consistent with the booking validity shown on the screen
+ // before (no more 15-min vs 1-hour mismatch).
+ let countdown = 3600, iv = null;
+ const cdNode = el('div',{class:'disp', style:'font-size:clamp(44px,12vw,68px);color:#16110F;margin-top:6px;animation:mv-pulse 1.4s ease-in-out infinite;'}, mmss(countdown));
+ const cdNote = el('div',{style:'font-weight:600;color:#574F47;font-size:13px;margin-top:8px;max-width:320px;margin-left:auto;margin-right:auto;'}, es?'Válido 1 h. Si caduca, vuelve a deslizar para confirmar.':'Valid for 1 h. If it runs out, just slide to confirm again.');
  const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:8px;padding:clamp(22px,6vw,40px) clamp(26px,8vw,64px);margin:24px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
  el('div',{class:'disp', style:'font-size:clamp(90px,28vw,200px);color:#F4291A;line-height:.78;'}, '2×1'),
  el('div',{class:'vname', style:'font-size:clamp(28px,7vw,48px);color:#16110F;margin-top:8px;'}, v?.name || ''),
@@ -5190,18 +5220,23 @@ function Booking() {
  );
  const below = el('div',{style:'position:relative;color:#16110F;animation:mv-in .6s .2s both;'},
  el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.06em;font-size:18px;'}, es?'Enséñalo a tu camarero':'Show this to your server'),
- cdNode
+ cdNode,
+ cdNote
  );
  mvDrop({ bg:'#F4291A', kickColor:'#16110F', kick:'menuverso · ' + (es?'canje confirmado':'redemption confirmed'),
  ticket, below, closeLabel:(es?'HECHO · LISTO ✓':'DONE · READY ✓'),
  onClose: () => {
  if (iv) clearInterval(iv);
  b.redeemed = true; b.redeemedAt = Date.now();
+ // keep the booking valid for the full 1-hour window shown to the member
+ b.expiresAt = Math.max(b.expiresAt || 0, Date.now() + 3600*1000);
  store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
  saveStore(); paint();
+ // Push to Supabase so the partner's live feed sees it cross-device.
+ if (typeof pushRedemptionToSupabase === 'function') pushRedemptionToSupabase({ venueSlug: b.venueSlug, memberId: u.id, memberName: (typeof fullName==='function'?fullName(u):''), dealTitle, redeemedAt: Date.now() });
  }
  });
- iv = setInterval(() => { countdown = Math.max(0, countdown-1); cdNode.textContent = mmss(countdown); if (countdown === 0) clearInterval(iv); }, 1000);
+ iv = setInterval(() => { countdown = Math.max(0, countdown-1); cdNode.textContent = mmss(countdown); if (countdown === 0) { clearInterval(iv); cdNode.style.color = '#C81C10'; cdNote.textContent = es?'Caducado · vuelve a deslizar para confirmar.':'Expired · slide to confirm again.'; } }, 1000);
  }
 
  inner.append(
@@ -6566,18 +6601,25 @@ function PortalRedeem() {
  const rows = [];
  store.bookings.filter(b => b.venueSlug===venueSlug && b.redeemed && b.redeemedAt>=cut && !b.cancelled).forEach(b => rows.push({ id:'b:'+b.id, at:b.redeemedAt, memberId:b.memberId, slot:b.slot }));
  (store.redemptions||[]).filter(r => r.venueSlug===venueSlug && r.redeemedAt>=cut).forEach((r,i) => rows.push({ id:'r:'+r.redeemedAt+':'+i, at:r.redeemedAt, memberId:r.memberId, slot:null }));
+ // Remote (other-device) redemptions pulled from Supabase via /api/redemptions.
+ ((window.__remoteRedemptions && window.__remoteRedemptions[venueSlug]) || []).forEach(rr => {
+ const at = new Date(rr.redeemed_at || rr.redeemedAt || 0).getTime();
+ if (at >= cut) rows.push({ id:'sb:'+(rr.id||at), at: at, memberId: rr.member_id||rr.memberId||null, memberName: rr.member_name||rr.memberName||null, slot:null });
+ });
  const seen = new Set(); const out = [];
- for (const row of rows) { const k = row.memberId+':'+Math.floor(row.at/60000); if (seen.has(k)) continue; seen.add(k); out.push(row); }
+ for (const row of rows) { const k = (row.memberId||row.memberName||'?')+':'+Math.floor(row.at/60000); if (seen.has(k)) continue; seen.add(k); out.push(row); }
  return out.sort((a,b) => b.at - a.at);
  }
  const memberName = (id) => { const m = store.users.find(u => u.id===id); return m ? fullName(m) : (esP?'(socio)':'(member)'); };
  const initials = (id) => { const m = store.users.find(u => u.id===id); if (!m) return '··'; return ((m.firstName||'?')[0]+(m.lastName||' ')[0]).toUpperCase(); };
+ const nameOf = (r) => r.memberName || memberName(r.memberId);
+ const initialsOf = (r) => { if (r.memberName) { const p = r.memberName.trim().split(/\s+/); return ((p[0]||'?')[0] + (p[1]||' ')[0]).toUpperCase(); } return initials(r.memberId); };
  const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(pv)[0]) ? getVenueDeals(pv)[0].title : null) || '2×1';
  const ago = (t) => { const mn = Math.floor((Date.now()-t)/60000); if (mn<1) return esP?'ahora':'now'; if (mn<60) return (esP?'hace ':'')+mn+' min'+(esP?'':' ago'); const h=Math.floor(mn/60); return (esP?'hace ':'')+h+' h'+(esP?'':' ago'); };
 
  function acknowledge(r) {
  window.__portalAck.add(r.id);
- const who = memberName(r.memberId);
+ const who = nameOf(r);
  const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:10px;padding:clamp(22px,6vw,36px) clamp(26px,8vw,60px);margin:22px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
  el('div',{class:'disp', style:'font-size:clamp(80px,22vw,130px);color:#1F9D63;line-height:.8;'}, '✓'),
  el('div',{class:'disp', style:'font-size:clamp(36px,9vw,54px);color:#16110F;margin-top:6px;'}, esP?'2×1 aplicado':'2×1 applied'),
@@ -6611,9 +6653,9 @@ function PortalRedeem() {
  ...rows.map(r => {
  const acked = window.__portalAck.has(r.id);
  return el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:16px 18px;box-shadow:4px 4px 0 var(--ink);', class:'flex items-center gap-4'},
- el('span',{style:'width:46px;height:46px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Anton;font-size:18px;border-radius:4px;flex:0 0 auto;'}, initials(r.memberId)),
+ el('span',{style:'width:46px;height:46px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Anton;font-size:18px;border-radius:4px;flex:0 0 auto;'}, initialsOf(r)),
  el('div',{style:'flex:1;min-width:0;'},
- el('div',{style:'font-weight:800;font-size:16px;'}, memberName(r.memberId)+(esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealTitle)),
+ el('div',{style:'font-weight:800;font-size:16px;'}, nameOf(r)+(esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealTitle)),
  el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot?r.slot+' · ':'')+ago(r.at))
  ),
  acked
@@ -6626,8 +6668,14 @@ function PortalRedeem() {
  if (typeof autoTranslate === 'function') autoTranslate(wrap);
  }
  paint();
+ // Pull cross-device redemptions once on mount, then poll every 3s and repaint.
+ if (typeof fetchRedemptionsFromSupabase === 'function') fetchRedemptionsFromSupabase(venueSlug).then(function(rows){ if (rows) paint(); });
  if (window.__portalRedeemTimer) clearInterval(window.__portalRedeemTimer);
- window.__portalRedeemTimer = setInterval(() => { if (!document.body.contains(wrap)) { clearInterval(window.__portalRedeemTimer); return; } paint(); }, 2000);
+ window.__portalRedeemTimer = setInterval(() => {
+ if (!document.body.contains(wrap)) { clearInterval(window.__portalRedeemTimer); return; }
+ if (typeof fetchRedemptionsFromSupabase === 'function') fetchRedemptionsFromSupabase(venueSlug).then(function(){ paint(); });
+ else paint();
+ }, 3000);
  return el('div',{style:'max-width:760px;'}, wrap);
 }
 function PortalDeals() {
