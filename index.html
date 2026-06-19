@@ -29,6 +29,10 @@
 <!-- Marker clustering plugin, groups overlapping pins (the previous map had pile-ups in Eixample). -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" defer></script>
+<!-- Supabase JS client — used ONLY for Realtime Broadcast on the partner live
+     redemption feed (instant push). Everything else uses plain REST. Loaded
+     defer + feature-detected; if it fails to load the feed falls back to polling. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 <script>
 tailwind.config = {
  theme: {
@@ -637,6 +641,18 @@ function pushRedemptionToSupabase(row) {
  body: JSON.stringify(row)
  }).catch(function(){ /* best-effort */ });
  } catch (e) { /* best-effort */ }
+}
+// Lazy Supabase client, ONLY for Realtime Broadcast on the partner feed. Uses
+// the publishable (anon) key — Broadcast channels don't expose table data, so
+// the redemptions table stays locked to the service role. Returns null if the
+// supabase-js script hasn't loaded (feed then relies on polling).
+function mvRealtimeClient() {
+ if (window.__mvSb) return window.__mvSb;
+ try {
+ if (!window.supabase || typeof window.supabase.createClient !== 'function') return null;
+ window.__mvSb = window.supabase.createClient(MV_SUPABASE_URL, MV_SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 5 } } });
+ return window.__mvSb;
+ } catch (e) { return null; }
 }
 window.__remoteRedemptions = window.__remoteRedemptions || {};
 function fetchRedemptionsFromSupabase(venueSlug) {
@@ -6668,14 +6684,30 @@ function PortalRedeem() {
  if (typeof autoTranslate === 'function') autoTranslate(wrap);
  }
  paint();
- // Pull cross-device redemptions once on mount, then poll every 3s and repaint.
- if (typeof fetchRedemptionsFromSupabase === 'function') fetchRedemptionsFromSupabase(venueSlug).then(function(rows){ if (rows) paint(); });
+ const pull = () => {
+ if (typeof fetchRedemptionsFromSupabase === 'function') return fetchRedemptionsFromSupabase(venueSlug).then(function(){ if (document.body.contains(wrap)) paint(); });
+ paint(); return Promise.resolve();
+ };
+ pull();
+ // Realtime Broadcast: instant push the moment a member confirms (the
+ // /api/redeem function emits on channel "redeem:<slug>"). Best-effort —
+ // if supabase-js isn't loaded or the socket drops, the safety poll covers it.
+ try {
+ const sb = (typeof mvRealtimeClient === 'function') ? mvRealtimeClient() : null;
+ if (sb) {
+ if (window.__mvRedeemChannel) { try { sb.removeChannel(window.__mvRedeemChannel); } catch(e){} }
+ const ch = sb.channel('redeem:' + venueSlug);
+ ch.on('broadcast', { event: 'new' }, function(){ pull(); }).subscribe();
+ window.__mvRedeemChannel = ch;
+ }
+ } catch (e) { /* realtime optional */ }
+ // Safety-net poll (covers dropped sockets / supabase-js unavailable). Slow,
+ // because Realtime carries the live updates when it's connected.
  if (window.__portalRedeemTimer) clearInterval(window.__portalRedeemTimer);
  window.__portalRedeemTimer = setInterval(() => {
  if (!document.body.contains(wrap)) { clearInterval(window.__portalRedeemTimer); return; }
- if (typeof fetchRedemptionsFromSupabase === 'function') fetchRedemptionsFromSupabase(venueSlug).then(function(){ paint(); });
- else paint();
- }, 3000);
+ pull();
+ }, 15000);
  return el('div',{style:'max-width:760px;'}, wrap);
 }
 function PortalDeals() {

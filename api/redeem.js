@@ -30,6 +30,16 @@ module.exports = async function handler(req, res) {
     });
     if (!r.ok) { res.status(502).json({ error: 'insert_failed' }); return; }
     const out = await r.json().catch(() => null);
+    // Realtime Broadcast ping so the partner's "Canjes en vivo" feed updates
+    // instantly. Best-effort — the feed also polls as a safety net. The channel
+    // name must match the client's: "redeem:<venueSlug>".
+    try {
+      await fetch(SUPABASE_URL + '/realtime/v1/api/broadcast', {
+        method: 'POST',
+        headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ topic: 'redeem:' + venueSlug, event: 'new', payload: { redeemed_at: row.redeemed_at } }] })
+      });
+    } catch (e) { /* best-effort */ }
     res.status(200).json({ ok: true, id: (Array.isArray(out) && out[0] && out[0].id) || null });
   } catch (e) {
     res.status(500).json({ error: 'server_error' });
