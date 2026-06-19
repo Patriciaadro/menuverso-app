@@ -25,8 +25,25 @@ module.exports = async function handler(req, res) {
 
     const r = await sb('waitlist_confirmations?select=email,expires_at,used_at&token_hash=eq.' + encodeURIComponent(tokenHash));
     const rows = await r.json().catch(() => []);
-    const row = Array.isArray(rows) ? rows[0] : null;
-    if (!row) { res.status(404).json({ error: 'invalid' }); return; }
+    let row = Array.isArray(rows) ? rows[0] : null;
+
+    // Member sign-up confirmations live in a separate table; fall back to it so
+    // the shared /confirmar page works for both waitlist + member tokens.
+    if (!row) {
+      const mr = await sb('member_confirmations?select=email,expires_at,used_at&token_hash=eq.' + encodeURIComponent(tokenHash));
+      const mrows = await mr.json().catch(() => []);
+      const mrow = Array.isArray(mrows) ? mrows[0] : null;
+      if (!mrow) { res.status(404).json({ error: 'invalid' }); return; }
+      if (mrow.used_at) { res.status(200).json({ ok: true, already: true, kind: 'member' }); return; }
+      if (new Date(mrow.expires_at) < new Date()) { res.status(410).json({ error: 'expired' }); return; }
+      await sb('member_confirmations?token_hash=eq.' + encodeURIComponent(tokenHash), {
+        method: 'PATCH',
+        headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ used_at: new Date().toISOString() })
+      });
+      res.status(200).json({ ok: true, kind: 'member' });
+      return;
+    }
     if (row.used_at) { res.status(200).json({ ok: true, already: true }); return; }
     if (new Date(row.expires_at) < new Date()) { res.status(410).json({ error: 'expired' }); return; }
 

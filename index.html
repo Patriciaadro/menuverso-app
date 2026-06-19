@@ -654,6 +654,14 @@ function mvRealtimeClient() {
  return window.__mvSb;
  } catch (e) { return null; }
 }
+// Member sign-up confirmation email (double opt-in). Best-effort: fires the
+// Resend email via /api/member-confirm. If the API isn't live the sign-up still
+// works (the account is usable); the email simply doesn't send.
+function pushMemberConfirmation(email, name) {
+ try {
+ fetch('/api/member-confirm', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, name: name || null }) }).catch(function(){});
+ } catch (e) { /* best-effort */ }
+}
 window.__remoteRedemptions = window.__remoteRedemptions || {};
 function fetchRedemptionsFromSupabase(venueSlug) {
  if (!venueSlug) return Promise.resolve(null);
@@ -824,7 +832,9 @@ if (_emailMigrated > 0) console.log('Migrated', _emailMigrated, 'legacy emails t
  id: 'd_main',
  title: '2×1 en el menú principal',
  description: pv.dealTerms || 'Compra un plato principal y llévate otro gratis. Solo en sala, hasta 2 personas por mesa.',
- active: true
+ active: true,
+ savingsEur: 24,
+ cooldownDays: 90
  }
  ];
  // The seeded Cervecería gets a second example deal so the multi-deal
@@ -834,7 +844,9 @@ if (_emailMigrated > 0) console.log('Migrated', _emailMigrated, 'legacy emails t
  id: 'd_drink',
  title: '2×1 en cervezas Estrella Damm',
  description: 'Pide dos cervezas y solo pagas una. Válido en horario de tapas.',
- active: true
+ active: true,
+ savingsEur: 11,
+ cooldownDays: 1
  });
  }
  }
@@ -903,18 +915,51 @@ const VENUES = VENUE_SEEDS.map(([name,barrio,cuisine,priceTier,rating,reviews,la
 // Falls back to a sensible default so static catalog venues still render.
 function getVenueDeals(v) {
  if (!v) return [];
- // Real venue object (partner or member-shape)
+ // Per-deal redeem policy (brief 19/06): every deal carries its own savings (€)
+ // and recurrency/cooldown (days) — set in the admin tool. Normalize so any
+ // deal returned here always has both, falling back to a price-tier estimate
+ // and a 30-day cooldown when the admin hasn't set them yet.
+ const tierSav = [0,16,24,38,72][Math.max(1, Math.min(4, v.priceTier||2))] || 22;
+ const norm = (d) => Object.assign({}, d, {
+ savingsEur: (typeof d.savingsEur === 'number' && d.savingsEur > 0) ? d.savingsEur : tierSav,
+ cooldownDays: (typeof d.cooldownDays === 'number' && d.cooldownDays > 0) ? d.cooldownDays : 30
+ });
  const raw = Array.isArray(v.deals) ? v.deals : null;
  const active = raw ? raw.filter(d => d && d.active && d.title) : null;
- if (active && active.length > 0) return active.slice(0, 2);
+ if (active && active.length > 0) return active.slice(0, 2).map(norm);
  // Fallback: synthesize a single default deal so legacy/catalog rows
  // still display something on the discover card.
- return [{
+ return [ norm({
  id: 'd_default',
  title: '2×1 en el menú principal',
  description: v.dealTerms || 'Compra un plato principal y llévate otro gratis.',
  active: true
- }];
+ }) ];
+}
+// Recurrency label for a deal's cooldownDays (member-facing).
+function dealRecurrencyLabel(deal, es) {
+ const n = (deal && typeof deal.cooldownDays === 'number') ? deal.cooldownDays : 30;
+ if (n <= 1) return es ? 'Canjeable a diario' : 'Redeemable daily';
+ if (n % 30 === 0) { const m = n/30; return es ? ('Canjeable cada '+m+' '+(m===1?'mes':'meses')) : ('Redeemable every '+m+' month'+(m===1?'':'s')); }
+ return es ? ('Canjeable cada '+n+' días') : ('Redeemable every '+n+' days');
+}
+// Per-deal redeem eligibility for a member at a venue.
+// Rules (brief): a deal can't be re-redeemed until its cooldown elapses; and
+// no two deals at the same venue can be redeemed on the same day.
+function dealRedeemStatus(u, v, deal) {
+ if (!u || !v || !deal) return { ok: true };
+ const reds = (store.redemptions || []).filter(r => r.memberId === u.id && r.venueSlug === v.slug);
+ const now = Date.now();
+ const cdMs = ((deal.cooldownDays || 30)) * 86400000;
+ const lastThis = reds.filter(r => (r.dealId || null) === (deal.id || null)).sort((a,b)=> b.redeemedAt - a.redeemedAt)[0];
+ if (lastThis && (now - lastThis.redeemedAt) < cdMs) {
+ return { ok: false, reason: 'cooldown', days: Math.max(1, Math.ceil((cdMs - (now - lastThis.redeemedAt)) / 86400000)) };
+ }
+ const startToday = new Date(); startToday.setHours(0,0,0,0);
+ if (reds.some(r => r.redeemedAt >= startToday.getTime())) {
+ return { ok: false, reason: 'sameday' };
+ }
+ return { ok: true };
 }
 
 function toMemberShape(pv) {
@@ -1713,6 +1758,13 @@ async function registerUser({ firstName, lastName, email, password, role='MEMBER
  store.users.push(u);
  if (!store.saved[u.id]) store.saved[u.id] = [];
  saveStore();
+ // Real confirmation email (double opt-in) for members. Account is usable
+ // immediately in this demo; the email is sent + the confirmation is recorded
+ // server-side. (Full server-gated member login needs Supabase Auth — post-MVP.)
+ if (role === 'MEMBER' && typeof pushMemberConfirmation === 'function') {
+ pushMemberConfirmation(email, u.firstName);
+ try { toast((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Cuenta creada · te enviamos un email para confirmarla.' : 'Account created · we emailed you a confirmation link.'); } catch(e){}
+ }
  setSession(u.id);
  return u;
 }
@@ -3351,7 +3403,7 @@ function AppDiscover() {
  const heroRail = el('div',{class:'px-5 pt-5'});
  // --- helpers for the "Esta noche" hero (and reused by the grid restyle) ---
  const venuePhotoSrc = (v) => { try { return venueHasRealPhoto(v) ? venueRealPhotoSrc(v) : cuisinePhotoFor(v); } catch(e){ try { return cuisinePhotoFor(v); } catch(_) { return ''; } } };
- const estVenueSavings = (v) => { const m=[0,16,24,38,72]; return m[Math.max(1, Math.min(4, v.priceTier||2))] || 22; };
+ const estVenueSavings = (v) => { try { const d = getVenueDeals(v)[0]; if (d && typeof d.savingsEur === 'number') return d.savingsEur; } catch(e){} const m=[0,16,24,38,72]; return m[Math.max(1, Math.min(4, v.priceTier||2))] || 22; };
  const venueCloseTime = (v) => { try { const n=new Date(); const hhmm=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); for (const s of (v.dealSlots||[])) { if (s.active===false) continue; if (hhmm >= (s.timeStart||'00:00') && hhmm <= (s.timeEnd||'23:59')) return s.timeEnd; } } catch(e){} return null; };
  const tonightCard = (v, es) => {
  const deals = getVenueDeals(v);
@@ -4700,26 +4752,37 @@ function Venue() {
  ? (t('venue.redeemThisOffer') || 'Canjear esta oferta →')
  : (t('venue.notAvailableNow') || 'No disponible ahora');
 
- const savV = ([0,16,24,38,72][Math.max(1, Math.min(4, v.priceTier||2))]) || 22;
  return el('div',{class:'space-y-3'},
  el('div',{class:'disp', style:'font-size:26px;color:var(--ink);'}, esV?'Ofertas activas':'Active offers'),
  banner,
- ...dealsForCard.map(d => el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:18px 20px;box-shadow:4px 4px 0 var(--ink);'},
+ ...dealsForCard.map(d => {
+ const st = (typeof dealRedeemStatus === 'function' && u) ? dealRedeemStatus(u, v, d) : { ok:true };
+ const dealOk = canRedeemNow && st.ok;
+ let label = buttonLabel;
+ if (canRedeemNow && !st.ok) {
+ label = (st.reason === 'cooldown')
+ ? (esV ? ('Disponible en ' + st.days + ' día' + (st.days===1?'':'s')) : ('Available in ' + st.days + ' day' + (st.days===1?'':'s')))
+ : (esV ? 'Hoy ya canjeada · vuelve mañana' : 'Redeemed today · back tomorrow');
+ }
+ const recur = (typeof dealRecurrencyLabel === 'function') ? dealRecurrencyLabel(d, esV) : '';
+ return el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:18px 20px;box-shadow:4px 4px 0 var(--ink);'},
  el('div',{class:'flex items-start justify-between gap-3'},
  el('div',{style:'flex:1;min-width:0;'},
  el('div',{class:'disp', style:'font-size:clamp(20px,5vw,26px);color:var(--ink);'}, d.title),
- el('p',{style:'margin-top:6px;font-weight:600;color:#574F47;font-size:13px;line-height:1.45;'}, d.description || venueDefault)
+ el('p',{style:'margin-top:6px;font-weight:600;color:#574F47;font-size:13px;line-height:1.45;'}, d.description || venueDefault),
+ recur ? el('span',{style:'display:inline-block;margin-top:8px;border:2px solid var(--ink);font-weight:800;font-size:11px;padding:4px 9px;border-radius:4px;'}, recur) : null
  ),
- el('div',{class:'disp', style:'font-size:clamp(22px,6vw,30px);color:var(--red);white-space:nowrap;'}, '~€'+savV)
+ el('div',{class:'disp', style:'font-size:clamp(22px,6vw,30px);color:var(--red);white-space:nowrap;'}, '~€'+d.savingsEur)
  ),
  el('button',{
- style: canRedeemNow
+ style: dealOk
  ? 'margin-top:14px;width:100%;background:var(--red);color:#fff;border:none;font-family:Anton,sans-serif;font-size:18px;padding:13px;border-radius:4px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);'
  : 'margin-top:14px;width:100%;background:#F4EFE6;border:2px solid #ABA399;color:#7A7164;font-weight:800;padding:13px;border-radius:4px;cursor:not-allowed;',
- disabled: !canRedeemNow,
- onclick: canRedeemNow ? (() => redeemDeal(d)) : null
- }, buttonLabel)
- ))
+ disabled: !dealOk,
+ onclick: dealOk ? (() => redeemDeal(d)) : null
+ }, label)
+ );
+ })
  );
  })()
  ), // close the <aside> (sticky right column), comma to next sibling
@@ -4964,11 +5027,16 @@ function bookSlot(v, slot) {
  // redemptions this month AND active unexpired bookings so the user can't
  // pre-stack codes. The cap refreshes on the 1st of every month.
  {
- // G2: read the LIVE cap (admin-approved), not the partner's editor draft.
- const cap = (v._pv?.liveDeal?.creditsPerUser) ?? v._pv?.creditsPerUser ?? DEFAULT_CREDITS_PER_USER;
- const remaining = userCreditsRemaining(u.id, v.slug, cap);
- if (remaining <= 0) {
- toast(`You've used your ${cap} credit${cap===1?'':'s'} at ${v.name || 'this restaurant'} this month. Come back ${creditsRefreshLabel()}.`, 'err');
+ // Per-deal redeem policy (brief 19/06): replaces the old 3-per-month cap.
+ // A deal can't be re-redeemed until its cooldown elapses, and no two deals
+ // at the same venue can be redeemed the same day.
+ const _es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const _deals = getVenueDeals(v);
+ const _deal = _deals.find(d => d.id === state.pendingDealId) || _deals[0];
+ const _st = dealRedeemStatus(u, v, _deal);
+ if (!_st.ok) {
+ if (_st.reason === 'cooldown') toast(_es ? ('Ya canjeaste esta oferta. Disponible de nuevo en ' + _st.days + ' día' + (_st.days===1?'':'s') + '.') : ('You already redeemed this offer. Available again in ' + _st.days + ' day' + (_st.days===1?'':'s') + '.'), 'err');
+ else toast(_es ? 'Solo puedes canjear una oferta al día en cada local. Vuelve mañana.' : 'Only one offer per day at each venue. Come back tomorrow.', 'err');
  return;
  }
  }
@@ -5007,6 +5075,7 @@ function bookSlot(v, slot) {
  id: 'b_' + Math.random().toString(36).slice(2,10),
  memberId: u.id,
  venueSlug: v.slug,
+ dealId: state.pendingDealId || null,
  code: uniqueCode6(),
  slot,
  createdAt: Date.now(),
@@ -5246,7 +5315,7 @@ function Booking() {
  b.redeemed = true; b.redeemedAt = Date.now();
  // keep the booking valid for the full 1-hour window shown to the member
  b.expiresAt = Math.max(b.expiresAt || 0, Date.now() + 3600*1000);
- store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
+ store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, dealId: b.dealId || state.pendingDealId || null, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
  saveStore(); paint();
  // Push to Supabase so the partner's live feed sees it cross-device.
  if (typeof pushRedemptionToSupabase === 'function') pushRedemptionToSupabase({ venueSlug: b.venueSlug, memberId: u.id, memberName: (typeof fullName==='function'?fullName(u):''), dealTitle, redeemedAt: Date.now() });
@@ -8622,6 +8691,31 @@ function Admin() {
  descInput.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 resize-y';
  descInput.oninput = () => { d.description = descInput.value; markDirty(); };
  card.appendChild(descInput);
+ // Savings per redemption (€) — per-deal, set by admin (brief 19/06).
+ const savLabel = document.createElement('div');
+ savLabel.className = 'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mt-3 mb-1';
+ savLabel.textContent = 'Ahorro por canje (€)';
+ card.appendChild(savLabel);
+ const savInput = document.createElement('input');
+ savInput.type = 'number'; savInput.min = '0'; savInput.step = '1';
+ savInput.value = (typeof d.savingsEur === 'number') ? d.savingsEur : '';
+ savInput.placeholder = 'ej. 24';
+ savInput.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60';
+ savInput.oninput = () => { const n = parseInt(savInput.value, 10); d.savingsEur = isNaN(n) ? undefined : n; markDirty(); };
+ card.appendChild(savInput);
+ // Recurrency / cooldown — per-deal, agreed with the partner (brief 19/06).
+ const recLabel = document.createElement('div');
+ recLabel.className = 'text-[10px] uppercase tracking-widest text-slate2-400 font-bold mt-3 mb-1';
+ recLabel.textContent = 'Frecuencia de canje';
+ card.appendChild(recLabel);
+ const recSel = document.createElement('select');
+ recSel.className = 'w-full rounded-[4px] bg-ink-900 border border-slate2-50/15 px-3 py-2 text-sm text-slate2-50 outline-none focus:border-mv-500/60 cursor-pointer';
+ const recOpts = [[1,'A diario'],[7,'Cada semana'],[30,'Cada 30 días'],[60,'Cada 60 días'],[90,'Cada 90 días']];
+ const curCd = (typeof d.cooldownDays === 'number') ? d.cooldownDays : 30;
+ if (!recOpts.some(o => o[0] === curCd)) recOpts.push([curCd, 'Cada ' + curCd + ' días']);
+ recOpts.forEach(([val,lab]) => { const o = document.createElement('option'); o.value = String(val); o.textContent = lab; if (val === curCd) o.selected = true; recSel.appendChild(o); });
+ recSel.onchange = () => { d.cooldownDays = parseInt(recSel.value, 10) || 30; markDirty(); };
+ card.appendChild(recSel);
  // Active toggle
  const actRow = document.createElement('label');
  actRow.className = 'mt-3 flex items-center gap-2 cursor-pointer';
@@ -10494,7 +10588,15 @@ function Confirmar() {
  const token = new URLSearchParams(location.search).get('token') || '';
  if (!token) { show('err', es?'Enlace no válido':'Invalid link', es?'Falta el token de confirmación.':'The confirmation token is missing.'); return; }
  const r = await fetch('/api/confirm?token=' + encodeURIComponent(token));
- if (r.ok) { show('ok', es?'¡Estás dentro! 🎉':"You're in! 🎉", es?'Tu email está confirmado. Te avisaremos en cuanto Menuverso abra en Barcelona.':'Your email is confirmed. We will let you know the moment Menuverso opens in Barcelona.'); return; }
+ if (r.ok) {
+ const data = await r.json().catch(()=>({}));
+ if (data && data.kind === 'member') {
+ show('ok', es?'¡Cuenta confirmada! 🎉':'Account confirmed! 🎉', es?'Tu cuenta de Menuverso está activada. Ya puedes entrar y empezar a canjear.':'Your Menuverso account is active. Sign in and start redeeming.', el('button',{class:'mt-6 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3 font-extrabold cursor-pointer', onclick:()=>go('signin')}, es?'Iniciar sesión →':'Sign in →'));
+ } else {
+ show('ok', es?'¡Estás dentro! 🎉':"You're in! 🎉", es?'Tu email está confirmado. Te avisaremos en cuanto Menuverso abra en Barcelona.':'Your email is confirmed. We will let you know the moment Menuverso opens in Barcelona.');
+ }
+ return;
+ }
  if (r.status === 410) { show('err', es?'Enlace caducado':'Link expired', es?'Este enlace ha caducado. Vuelve a registrarte para recibir uno nuevo.':'This link has expired. Sign up again to get a new one.', el('button',{class:'mt-6 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3 font-extrabold cursor-pointer', onclick:()=>go('unete')}, es?'Volver a registrarme':'Sign up again')); return; }
  show('err', es?'No pudimos confirmar':'Could not confirm', es?'El enlace no es válido o ya se usó.':'The link is invalid or already used.');
  } catch (e) { show('err', es?'Algo salió mal':'Something went wrong', es?'Inténtalo de nuevo en un momento.':'Please try again in a moment.'); }
