@@ -110,8 +110,6 @@ tailwind.config = {
  @keyframes mv-in{ from{ opacity:0; transform:translateY(20px); } to{ opacity:1; transform:translateY(0); } }
  /* §1 motion: pulsing countdown / live dot on the drop screens. */
  @keyframes mv-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.5; } }
- /* §3.3 Escanear: scanline sweeping the scanner frame. */
- @keyframes mv-scan{ 0%{ top:6%; } 100%{ top:94%; } }
  /* Hero headline uses one shared clamp for EN + ES. It's deliberately modest
  so the longer Spanish copy still fits ~2 lines and both languages render at
  the same size/height (no push-down, no EN-too-big mismatch). */
@@ -3044,14 +3042,16 @@ function PasswordField(label, name, placeholder, { required=true, autocomplete='
  REAL SIGN IN
  ======================================================================== */
 function Signin() {
+ const esS = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const inner = el('div',{class:'p-6'},
  el('div',{class:'flex items-center justify-between'},
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('landing')},'← Back'),
  el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('signup')},'Create account')
  ),
- el('div',{class:'text-center mt-4'},
- el('h1',{class:'mt-3 text-2xl font-extrabold'},'Member sign-in'),
- el('p',{class:'text-slate2-400 text-sm mt-1'},'Sign in to your Menuverso member account.')
+ el('div',{class:'mt-5'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, esS?'Acceso':'Sign in'),
+ el('h1',{class:'disp', style:'font-size:clamp(34px,9vw,48px);color:var(--ink);margin-top:6px;line-height:.96;'}, esS?'Entra al universo':'Enter the universe'),
+ el('p',{class:'text-slate2-400 text-sm mt-2'}, esS?'Inicia sesión en tu cuenta Menuverso.':'Sign in to your Menuverso member account.')
  ),
  el('form',{class:'mt-6 space-y-3', onSubmit: async (e)=>{
  e.preventDefault();
@@ -3079,7 +3079,7 @@ function Signin() {
  }},
  InputField('Email','email','email','you@example.com', true, 'email'),
  PasswordField('Password','password','••••••••', { autocomplete:'current-password', minlength:0 }),
- el('button',{type:'submit', class:'mt-3 w-full rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white py-3.5 font-extrabold cursor-pointer disabled:opacity-50'},'Sign in'),
+ el('button',{type:'submit', class:'disabled:opacity-50', style:'margin-top:12px;width:100%;background:var(--red);color:#fff;border:none;font-family:Anton,sans-serif;font-size:20px;padding:14px;border-radius:4px;cursor:pointer;box-shadow:5px 5px 0 var(--ink);'},'Sign in'),
  el('button',{type:'button', class:'w-full text-xs text-slate2-400 underline mt-1 cursor-pointer bg-transparent border-0', onclick:()=>toast('In production this sends a reset link by email.')},'Forgot password?')
  ),
  // Cross-link to the dedicated partner sign-in.
@@ -5807,7 +5807,7 @@ function PartnerPortal() {
  const unread = partnerUnreadBookings(pv);
    const navItems = [['overview', esP?'Panel':'Panel', 0],
     ['ofertas', esP?'Mis ofertas':'My offers', 0],
-    ['redeem', esP?'Escanear':'Scan', unread],
+    ['redeem', esP?'Canjes en vivo':'Live redemptions', unread],
     ['clientes', esP?'Clientes':'Customers', 0],
     ['profile', esP?'Perfil':'Profile', 0]];
   const sidebar = el('aside',{class:'md:w-[270px] md:shrink-0 md:min-h-screen md:sticky md:top-0', style:'background:var(--ink);color:#F4EFE6;display:flex;flex-direction:column;'},
@@ -6469,7 +6469,7 @@ function PortalOverview() {
  el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, (esP?'Hoy · ':'Today · ') + dateStr),
  el('h1',{class:'disp', style:'font-size:clamp(36px,6vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, (esP?'Buenas, ':'Hi, ') + (pv.name.split(' ')[0]) + '.')
  ),
- el('button',{style:'background:var(--red);color:#fff;border:none;font-family:Anton;font-size:clamp(18px,3vw,24px);padding:14px 26px;border-radius:4px;cursor:pointer;box-shadow:6px 6px 0 var(--ink);', onclick:()=>go('partner-portal',{tab:'redeem'})}, (esP?'⊞ ESCANEAR CANJE':'⊞ SCAN REDEMPTION'))
+ el('button',{style:'background:var(--red);color:#fff;border:none;font-family:Anton;font-size:clamp(18px,3vw,24px);padding:14px 26px;border-radius:4px;cursor:pointer;box-shadow:6px 6px 0 var(--ink);', onclick:()=>go('partner-portal',{tab:'redeem'})}, (esP?'⊞ Ver canjes en vivo':'⊞ See live redemptions'))
  );
 
  // ---- Scoreboard ----
@@ -6524,7 +6524,7 @@ function PortalOverview() {
  scoreboard,
  unread > 0 ? el('div',{style:'background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:4px;padding:14px 18px;box-shadow:4px 4px 0 var(--ink);', class:'flex items-center justify-between gap-3 flex-wrap'},
  el('span',{style:'font-weight:800;'}, unread + ' ' + (esP ? (unread===1?'reserva nueva esperando canje':'reservas nuevas esperando canje') : ('new booking'+(unread===1?'':'s')+' waiting to redeem'))),
- el('button',{style:'background:#fff;color:var(--ink);border:none;font-weight:800;padding:8px 16px;border-radius:4px;cursor:pointer;', onclick:()=>go('partner-portal',{tab:'redeem'})}, esP?'Abrir Escanear →':'Open Scan →')
+ el('button',{style:'background:#fff;color:var(--ink);border:none;font-weight:800;padding:8px 16px;border-radius:4px;cursor:pointer;', onclick:()=>go('partner-portal',{tab:'redeem'})}, esP?'Ver canjes →':'See redemptions →')
  ) : null,
  el('div',{class:'grid gap-6', style:'grid-template-columns:repeat(auto-fit,minmax(300px,1fr));'}, activityCard, peakCard)
  );
@@ -6544,79 +6544,91 @@ function PortalOverview() {
  * acknowledges. There's nothing to type.
  */
 function PortalRedeem() {
- // §3.3 ESCANEAR — scanner frame + 6-digit code entry → real booking redeem →
- // GREEN scan-confirm drop. (Keeps the deliberate color split: member redeem =
- // scarlet celebration, partner confirm = green verified.)
+ // Canonical model: NO scanning, NO codes. Members slide-to-confirm at the
+ // table (creates a redemption row) + show the animated verification screen;
+ // that row appears here live and staff just acknowledges. The acknowledge tap
+ // fires the green scan-confirm drop.
  const pv = currentPartnerVenue();
  const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  if (!pv || pv.status !== 'LIVE') {
  return el('div',{style:'max-width:760px;margin:0 auto;background:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:6px 6px 0 var(--ink);padding:32px;text-align:center;'},
- el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, esP?'Escáner no disponible':'Scanner unavailable'),
- el('h2',{class:'disp', style:'font-size:36px;color:var(--ink);margin-top:6px;'}, esP?'Escanear':'Scan'),
+ el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, esP?'En vivo no disponible':'Live feed unavailable'),
+ el('h2',{class:'disp', style:'font-size:36px;color:var(--ink);margin-top:6px;'}, esP?'Canjes en vivo':'Live redemptions'),
  el('p',{style:'color:#574F47;font-weight:600;margin-top:10px;'}, esP?'Tu local aún no está activo, los socios no pueden canjear todavía.':'Your venue isn\'t live yet, so members can\'t redeem here yet.')
  );
  }
- const root = el('div',{});
- const msg = el('div',{style:'min-height:24px;margin-top:14px;text-align:center;font-weight:800;'});
- const input = el('input',{ maxlength:'6', inputmode:'numeric', autocomplete:'off',
- placeholder: esP?'código de 6 dígitos':'6-digit code',
- style:'flex:1;border:3px solid var(--ink);border-radius:4px;padding:14px 16px;font-family:Anton;font-size:24px;letter-spacing:.1em;text-align:center;background:#fff;color:var(--ink);text-transform:uppercase;' });
-
- function confirmCode() {
- const code = (input.value || '').trim().toUpperCase();
- let bk = code ? store.bookings.find(b => (b.code||'').toUpperCase() === code && b.venueSlug === pv.slug && !b.cancelled) : null;
- // demo convenience: empty field → most recent live unredeemed booking here.
- if (!bk && !code) bk = store.bookings.find(b => b.venueSlug === pv.slug && !b.cancelled && !b.redeemed && b.expiresAt > Date.now());
- if (!bk) { msg.style.color = 'var(--red)'; msg.textContent = esP?'⚠ Código no válido.':'⚠ Invalid code.'; return; }
- if (bk.redeemed) { msg.style.color = 'var(--red)'; msg.textContent = esP?'⚠ Este código ya se canjeó.':'⚠ This code was already redeemed.'; return; }
- // Real redeem.
- bk.redeemed = true; bk.redeemedAt = Date.now();
- store.redemptions.unshift({ memberId: bk.memberId, venueSlug: pv.slug, redeemedAt: Date.now(), method:'PARTNER_SCAN' });
- if (typeof markPartnerRedemptionsSeen === 'function') markPartnerRedemptionsSeen(pv);
- saveStore();
- const m = store.users.find(x => x.id === bk.memberId);
- const who = m ? fullName(m) : (esP?'Socio':'Member');
- const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(pv)[0]) ? getVenueDeals(pv)[0].title : null) || '2×1';
+ const venueSlug = pv.slug;
  const AVG = (typeof AVG_TICKET_EUR === 'number') ? AVG_TICKET_EUR : 18;
+ if (!window.__portalAck) window.__portalAck = new Set();
+ const wrap = el('div',{});
+ function todays() {
+ const start = new Date(); start.setHours(0,0,0,0); const cut = start.getTime();
+ const rows = [];
+ store.bookings.filter(b => b.venueSlug===venueSlug && b.redeemed && b.redeemedAt>=cut && !b.cancelled).forEach(b => rows.push({ id:'b:'+b.id, at:b.redeemedAt, memberId:b.memberId, slot:b.slot }));
+ (store.redemptions||[]).filter(r => r.venueSlug===venueSlug && r.redeemedAt>=cut).forEach((r,i) => rows.push({ id:'r:'+r.redeemedAt+':'+i, at:r.redeemedAt, memberId:r.memberId, slot:null }));
+ const seen = new Set(); const out = [];
+ for (const row of rows) { const k = row.memberId+':'+Math.floor(row.at/60000); if (seen.has(k)) continue; seen.add(k); out.push(row); }
+ return out.sort((a,b) => b.at - a.at);
+ }
+ const memberName = (id) => { const m = store.users.find(u => u.id===id); return m ? fullName(m) : (esP?'(socio)':'(member)'); };
+ const initials = (id) => { const m = store.users.find(u => u.id===id); if (!m) return '··'; return ((m.firstName||'?')[0]+(m.lastName||' ')[0]).toUpperCase(); };
+ const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(pv)[0]) ? getVenueDeals(pv)[0].title : null) || '2×1';
+ const ago = (t) => { const mn = Math.floor((Date.now()-t)/60000); if (mn<1) return esP?'ahora':'now'; if (mn<60) return (esP?'hace ':'')+mn+' min'+(esP?'':' ago'); const h=Math.floor(mn/60); return (esP?'hace ':'')+h+' h'+(esP?'':' ago'); };
+
+ function acknowledge(r) {
+ window.__portalAck.add(r.id);
+ const who = memberName(r.memberId);
  const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:10px;padding:clamp(22px,6vw,36px) clamp(26px,8vw,60px);margin:22px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
  el('div',{class:'disp', style:'font-size:clamp(80px,22vw,130px);color:#1F9D63;line-height:.8;'}, '✓'),
  el('div',{class:'disp', style:'font-size:clamp(36px,9vw,54px);color:#16110F;margin-top:6px;'}, esP?'2×1 aplicado':'2×1 applied'),
- el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:8px;'}, dealTitle + ' · ' + who + (bk.slot?(' · '+bk.slot):''))
+ el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:8px;'}, dealTitle + ' · ' + who + (r.slot?(' · '+r.slot):''))
  );
  const below = el('div',{style:'position:relative;color:#0b3d27;animation:mv-in .6s .2s both;'},
  el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.05em;font-size:18px;'}, esP?'Descuento aplicado a la cuenta':'Discount applied to the bill'),
  el('div',{class:'disp', style:'font-size:clamp(48px,12vw,64px);color:#16110F;margin-top:4px;'}, '−€'+AVG)
  );
- mvDrop({ bg:'#1F9D63', grainBlend:'overlay', kickColor:'#0b3d27', kick:'menuverso · '+(esP?'canje verificado':'redemption verified'),
- ticket, below, closeLabel:(esP?'SIGUIENTE CLIENTE →':'NEXT CUSTOMER →'),
- onClose:()=>{ input.value=''; msg.textContent=''; if (state.route==='partner-portal') render(); }
- });
+ mvDrop({ bg:'#1F9D63', kickColor:'#0b3d27', kick:'menuverso · '+(esP?'canje verificado':'redemption verified'), ticket, below, closeLabel:(esP?'SIGUIENTE CLIENTE →':'NEXT CUSTOMER →'), onClose:paint });
  }
 
- const scanner = el('div',{style:'position:relative;width:min(360px,82vw);height:min(360px,82vw);margin:0 auto;background:var(--ink);border:3px solid var(--ink);border-radius:8px;overflow:hidden;'},
- el('div',{style:'position:absolute;inset:0;background-image:linear-gradient(rgba(244,41,26,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(244,41,26,.12) 1px,transparent 1px);background-size:30px 30px;'}),
- el('div',{style:'position:absolute;left:0;right:0;height:3px;background:var(--red);box-shadow:0 0 16px var(--red);animation:mv-scan 2s ease-in-out infinite alternate;'}),
- el('div',{style:'position:absolute;top:24px;left:24px;width:46px;height:46px;border-top:5px solid #F2B100;border-left:5px solid #F2B100;'}),
- el('div',{style:'position:absolute;top:24px;right:24px;width:46px;height:46px;border-top:5px solid #F2B100;border-right:5px solid #F2B100;'}),
- el('div',{style:'position:absolute;bottom:24px;left:24px;width:46px;height:46px;border-bottom:5px solid #F2B100;border-left:5px solid #F2B100;'}),
- el('div',{style:'position:absolute;bottom:24px;right:24px;width:46px;height:46px;border-bottom:5px solid #F2B100;border-right:5px solid #F2B100;'}),
- el('div',{style:"position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Kaushan Script',cursive;color:rgba(255,255,255,.25);font-size:60px;"}, 'm')
+ function paint() {
+ const rows = todays();
+ wrap.innerHTML = '';
+ wrap.append(
+ el('div',{},
+ el('div',{class:'kick', style:'color:var(--red);font-size:13px;'}, esP?'En mesa · en vivo':'At the table · live'),
+ el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,56px);color:var(--ink);margin:2px 0 0;line-height:.92;'}, esP?'Canjes en vivo':'Live redemptions'),
+ el('p',{style:'margin-top:8px;font-weight:600;color:#574F47;font-size:16px;'},
+ el('span',{style:'font-weight:800;color:var(--ink);'}, String(rows.length)+' '),
+ (esP?(rows.length===1?'canje hoy':'canjes hoy'):('redemption'+(rows.length===1?'':'s')+' today')), ' · ',
+ el('span',{style:'color:#1F9D63;font-weight:800;'}, el('span',{class:'animate-pulse', style:'display:inline-block;width:8px;height:8px;border-radius:50%;background:#1F9D63;margin-right:6px;'}), (esP?'EN DIRECTO':'LIVE'))
+ )
+ ),
+ el('div',{style:'margin-top:16px;background:rgba(242,177,0,.14);border:2px solid #F2B100;border-radius:4px;padding:13px 16px;font-weight:600;font-size:14px;color:#574F47;'},
+ '💡 ' + (esP?'Sin escanear, sin códigos. El socio desliza para confirmar en la mesa y aparece aquí al instante. Solo tienes que reconocerlo.':'No scanning, no codes. The member slides to confirm at the table and it appears here instantly. Just acknowledge it.')),
+ rows.length===0
+ ? el('div',{style:'margin-top:18px;background:#fff;border:3px solid var(--ink);border-radius:4px;padding:30px;text-align:center;font-weight:600;color:#574F47;'}, esP?'Aún no hay canjes hoy. Aparecerán aquí al instante cuando los socios deslicen para confirmar.':'No redemptions yet today. They appear here instantly as members slide to confirm.')
+ : el('div',{class:'flex flex-col gap-3', style:'margin-top:18px;'},
+ ...rows.map(r => {
+ const acked = window.__portalAck.has(r.id);
+ return el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:16px 18px;box-shadow:4px 4px 0 var(--ink);', class:'flex items-center gap-4'},
+ el('span',{style:'width:46px;height:46px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Anton;font-size:18px;border-radius:4px;flex:0 0 auto;'}, initials(r.memberId)),
+ el('div',{style:'flex:1;min-width:0;'},
+ el('div',{style:'font-weight:800;font-size:16px;'}, memberName(r.memberId)+(esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealTitle)),
+ el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot?r.slot+' · ':'')+ago(r.at))
+ ),
+ acked
+ ? el('span',{style:'flex:0 0 auto;font-weight:800;color:#1F9D63;font-size:14px;'}, '✓ '+(esP?'Reconocido':'Acknowledged'))
+ : el('button',{style:'flex:0 0 auto;background:#1F9D63;color:#fff;border:none;font-weight:800;font-size:14px;padding:10px 16px;border-radius:4px;cursor:pointer;', onclick:()=>acknowledge(r)}, esP?'Reconocer':'Acknowledge')
  );
-
- root.append(
- el('div',{style:'max-width:760px;margin:0 auto;text-align:center;'},
- el('div',{class:'kick', style:'color:var(--red);font-size:14px;'}, esP?'En mesa · canje rápido':'At the table · quick redeem'),
- el('h1',{class:'disp', style:'font-size:clamp(40px,7vw,60px);color:var(--ink);margin:6px 0 0;line-height:.92;'}, esP?'Escanear código':'Scan code'),
- el('p',{style:'font-weight:600;color:#574F47;font-size:17px;margin:10px auto 26px;max-width:520px;'}, esP?'Pide al cliente que abra su 2×1. Escanea el QR o introduce el código de 6 dígitos.':'Ask the guest to open their 2×1. Scan the QR or enter the 6-digit code.'),
- scanner,
- el('div',{class:'flex items-center gap-3', style:'max-width:360px;margin:24px auto 0;'}, input),
- el('button',{style:'margin-top:16px;background:var(--red);color:#fff;border:none;font-family:Anton;font-size:24px;padding:16px 40px;border-radius:4px;cursor:pointer;box-shadow:6px 6px 0 var(--ink);', onclick:confirmCode}, esP?'CONFIRMAR CANJE →':'CONFIRM REDEMPTION →'),
- msg,
- el('div',{style:'font-weight:600;color:#7A7164;font-size:13px;margin-top:6px;'}, esP?'(demo · deja el campo vacío y pulsa para simular un escaneo)':'(demo · leave blank and tap to simulate a scan)')
+ })
  )
  );
- input.addEventListener('keydown', e => { if (e.key === 'Enter') confirmCode(); });
- return root;
+ if (typeof autoTranslate === 'function') autoTranslate(wrap);
+ }
+ paint();
+ if (window.__portalRedeemTimer) clearInterval(window.__portalRedeemTimer);
+ window.__portalRedeemTimer = setInterval(() => { if (!document.body.contains(wrap)) { clearInterval(window.__portalRedeemTimer); return; } paint(); }, 2000);
+ return el('div',{style:'max-width:760px;'}, wrap);
 }
 function PortalDeals() {
  const pv = currentPartnerVenue();
