@@ -420,18 +420,18 @@ const initialStore = {
  redemptions: [
  { memberId:'u_demo_member', venueSlug:'cerveceria-catalana', redeemedAt: Date.now() - 22*86400000, method:'PARTNER_CODE' },
  { memberId:'u_demo_member', venueSlug:'cerveceria-catalana', redeemedAt: Date.now() - 14*86400000, method:'PARTNER_CODE' },
- { memberId:'u_demo_member', venueSlug:'bar-ca-ete', redeemedAt: Date.now() - 9*86400000, method:'PARTNER_CODE' },
+ { memberId:'u_demo_member', venueSlug:'el-xampanyet', redeemedAt: Date.now() - 9*86400000, method:'PARTNER_CODE' },
  { memberId:'u_demo_member', venueSlug:'cerveceria-catalana', redeemedAt: Date.now() - 6*86400000, method:'PARTNER_CODE' },
- { memberId:'u_demo_member', venueSlug:'granja-petitbo', redeemedAt: Date.now() - 3*86400000, method:'PARTNER_CODE' }
+ { memberId:'u_demo_member', venueSlug:'federal-caf', redeemedAt: Date.now() - 3*86400000, method:'PARTNER_CODE' }
  ],
  // Seed reviews so the aggregated rating UI on venue pages has content.
  reviews: [
  { memberId:'u_demo_member', venueSlug:'cerveceria-catalana', stars:5, note:'Their bombas are unreal. The 2-for-1 covered both mains; we just paid for wine.', createdAt: Date.now() - 22*86400000 },
  { memberId:'u_demo_member', venueSlug:'cerveceria-catalana', stars:4, note:'Crowded on a Friday night but service was sharp. Code worked instantly.', createdAt: Date.now() - 14*86400000 },
- { memberId:'u_demo_member', venueSlug:'bar-ca-ete', stars:5, note:'Best Tuesday lunch I\'ve had in months.', createdAt: Date.now() - 9*86400000 },
+ { memberId:'u_demo_member', venueSlug:'el-xampanyet', stars:5, note:'Best Tuesday lunch I\'ve had in months.', createdAt: Date.now() - 9*86400000 },
  { memberId:'u_demo_member', venueSlug:'cerveceria-catalana', stars:5, note:null, createdAt: Date.now() - 6*86400000 }
  ],
- saved: { 'u_demo_member': ['cerveceria-catalana','bar-ca-ete'] },
+ saved: { 'u_demo_member': ['cerveceria-catalana','el-xampanyet'] },
  // Real partner-owned venues. Editable by their owners; surfaced in member discovery when status='LIVE'.
  partnerVenues: [
  {
@@ -3219,7 +3219,7 @@ function Checkout() {
  el('div',{class:'mt-8'},
  el('div',{class:'mx-auto h-16 w-16 rounded-[4px] bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer font-extrabold'},'✓'),
  el('h1',{class:'mt-4 text-2xl font-extrabold'},'You\'re already subscribed.'),
- el('p',{class:'mt-2 text-slate2-400 text-sm'},'Renews ', new Date(currentSub().renewsAt).toLocaleDateString('en-GB')),
+ el('p',{class:'mt-2 text-slate2-400 text-sm'},'Renews ', new Date(currentSub().renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB')),
  el('button',{class:'mt-8 rounded-[4px] bg-slate2-50 text-ink-900 px-6 py-3 font-bold cursor-pointer', onclick:()=>go('app')},'Open the app →')
  )
  ), { narrow: true });
@@ -4002,7 +4002,7 @@ function AppMap() {
  el('div',{class:'order-1 lg:order-2'}, mapEl)
  )
  );
- countEl.textContent = allVenues.length + ' deals · Barcelona';
+ countEl.textContent = allVenues.length + ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? ' planes · Barcelona' : ' deals · Barcelona');
 
  setTimeout(initMap, 0);
  setTimeout(fallbackToList, 4000);
@@ -4193,8 +4193,8 @@ function BookingHistoryRow(b, u) {
  else if (b.cancelled) { badge = 'Cancelled'; badgeCls = 'bg-slate2-50/[0.05] text-slate2-400 border-slate2-50/10'; }
  else { badge = 'Expired'; badgeCls = 'bg-red-500/10 text-red-600 border-red-500/30'; }
  const when = b.redeemedAt
- ? new Date(b.redeemedAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
- : new Date(b.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+ ? new Date(b.redeemedAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { day:'2-digit', month:'short', year:'numeric' })
+ : new Date(b.createdAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { day:'2-digit', month:'short', year:'numeric' });
  // Human-readable reason for cancelled rows, otherwise members puzzle over
  // why a booking they don't remember cancelling shows "Cancelled".
  const cancelHint = (b.cancelled && b.cancelReason)
@@ -4330,7 +4330,7 @@ function AppProfile() {
  const totalPaid = monthsSub * 4.99;
  const multiple = totalPaid > 0 ? (totalSaved / totalPaid) : 0;
  const memberSince = u.createdAt ? new Date(u.createdAt) : new Date();
- const memberSinceLabel = memberSince.toLocaleDateString('en-GB', { month:'short', year:'numeric' });
+ const memberSinceLabel = memberSince.toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { month:'short', year:'numeric' });
 
  // Unique cuisines + barrios actually visited.
  const visitedVenues = myReds.map(r => findVenueBySlug(r.venueSlug)).filter(Boolean);
@@ -4485,7 +4485,7 @@ function AppProfile() {
  el('div',{class:'font-bold text-sm truncate'}, v.venue.name),
  el('div',{class:'text-[11px] text-slate2-400 truncate'}, v.venue.cuisine || ', '),
  el('div',{class:'mt-1 text-[10px] text-slate2-500'},
- new Date(v.redeemedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+ new Date(v.redeemedAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB',{day:'numeric',month:'short'})
  )
  )
  ))
@@ -4523,7 +4523,7 @@ function AppProfile() {
  ? el('div',{class:'mt-3 flex items-center justify-between gap-3 flex-wrap'},
  el('div',{},
  el('div',{class:'font-bold text-sm'}, (function(){ const bp = sub.billingPeriod || 'annual'; const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es'); return (esP?'Activo · ':'Active · ') + (bp==='annual' ? (esP?'3,99 €/mes · anual':'€3.99/mo · annual') : (esP?'6,99 €/mes · mensual':'€6.99/mo · monthly')); })()),
- el('div',{class:'text-xs text-slate2-400'}, sub.cancelAtPeriodEnd ? 'Ends ' : 'Renews ', new Date(sub.renewsAt).toLocaleDateString('en-GB'))
+ el('div',{class:'text-xs text-slate2-400'}, sub.cancelAtPeriodEnd ? 'Ends ' : 'Renews ', new Date(sub.renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB'))
  ),
  el('span',{class:'rounded-[4px] bg-accent-emer/15 text-accent-emer px-2.5 py-0.5 text-xs font-extrabold'},'ACTIVE')
  )
@@ -4532,13 +4532,13 @@ function AppProfile() {
  el('button',{class:'mt-3 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-4 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>go('checkout')},'Subscribe, from €3.99/mo')
  ),
  sub && sub.status === 'ACTIVE' && !sub.cancelAtPeriodEnd && el('button',{class:'mt-3 text-xs text-slate2-400 underline cursor-pointer bg-transparent border-0', onclick:()=>{
- store.subscriptions[u.id].cancelAtPeriodEnd = true; saveStore(); toast('Cancellation scheduled, service runs until '+new Date(sub.renewsAt).toLocaleDateString('en-GB')); render();
+ store.subscriptions[u.id].cancelAtPeriodEnd = true; saveStore(); toast('Cancellation scheduled, service runs until '+new Date(sub.renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB')); render();
  }}, 'Cancel renewal'),
  // M-1: Resume renewal, gives the member a way back without contacting support.
  sub && sub.status === 'ACTIVE' && sub.cancelAtPeriodEnd && el('div',{class:'mt-3 rounded-[4px] bg-amber-500/10 border border-amber-500/30 px-3 py-2.5 flex items-center justify-between gap-3 flex-wrap'},
  el('div',{class:'min-w-0'},
  el('div',{class:'text-amber-700 text-xs font-bold'},'Renewal cancelled'),
- el('div',{class:'text-[11px] text-amber-200/70'},'Membership ends ' + new Date(sub.renewsAt).toLocaleDateString('en-GB') + '. Change your mind?')
+ el('div',{class:'text-[11px] text-amber-200/70'},'Membership ends ' + new Date(sub.renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') + '. Change your mind?')
  ),
  el('button',{class:'rounded-[4px] bg-accent-emer/20 text-accent-emer border border-accent-emer/40 px-4 py-2.5 text-sm font-extrabold cursor-pointer hover:bg-accent-emer/30 min-h-[44px]', onclick:()=>{
  store.subscriptions[u.id].cancelAtPeriodEnd = false; saveStore();
@@ -4810,7 +4810,7 @@ function Venue() {
  el('span',{class:'text-accent-amber text-xs tracking-widest'},
  '★'.repeat(r.stars), el('span',{class:'text-slate2-600'}, '☆'.repeat(Math.max(0, 5 - r.stars)))
  ),
- el('span',{class:'text-[10px] text-slate2-500 ml-auto'}, r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}) : '')
+ el('span',{class:'text-[10px] text-slate2-500 ml-auto'}, r.createdAt ? new Date(r.createdAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB',{day:'2-digit',month:'short'}) : '')
  ),
  el('p',{class:'mt-1.5 text-xs text-slate2-300 leading-relaxed'}, '"' + r.note + '"')
  );
@@ -4949,7 +4949,7 @@ function userCreditsRemaining(userId, venueSlug, capOverride) {
 function creditsRefreshLabel() {
  const now = new Date();
  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
- return next.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+ return next.toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { day: 'numeric', month: 'long' });
 }
 
 function bookSlot(v, slot) {
@@ -5047,7 +5047,7 @@ function Booking() {
  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
  const hex = h.toString(16).padStart(8, '0').toUpperCase();
  const token = `T·${hex.slice(0,3)}·${hex.slice(3,6)}`;
- const ts = new Date().toLocaleTimeString('en-GB', { hour12: false });
+ const ts = new Date().toLocaleTimeString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { hour12: false });
  inner.append(
  el('div',{class:'p-5'},
  el('div',{class:'relative rounded-[4px] overflow-hidden  shadow-mv-500/30 ring-1 ring-mv-500/40 mt-2'},
@@ -5152,7 +5152,7 @@ function Booking() {
  el('div',{class:'pop mx-auto h-24 w-24 rounded-[4px] bg-accent-emer/15 grid place-items-center text-5xl border-4 border-accent-emer text-accent-emer font-extrabold'},'✓'),
  el('h1',{class:'mt-5 text-2xl font-extrabold'},'Redeemed'),
  el('p',{class:'mt-1 text-slate2-300'}, v?.name),
- el('p',{class:'mt-1 text-xs text-slate2-500'}, new Date(b.redeemedAt).toLocaleString('en-GB')),
+ el('p',{class:'mt-1 text-xs text-slate2-500'}, new Date(b.redeemedAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB')),
  el('p',{class:'mt-6 text-sm text-slate2-300'},'Enjoy your meal.'),
  // ---- Rate-your-visit (post-6-min view) ----
  // Mirrors the inline Stage B rater so review prompt is consistent
@@ -6358,7 +6358,7 @@ function PartnerOnboarding() {
  el('div',{class:'text-sm'},
  el('div',{class:'font-bold'}, accepted ? 'You\'ve accepted the partner terms' : 'I have read and agree to the Menuverso partner terms'),
  el('div',{class:'mt-1 text-xs text-slate2-400'},'In particular: the 30-day live commitment, edit-approval requirement, and per-member credit cap.'),
- accepted && el('div',{class:'mt-2 text-[10px] text-slate2-500'},'Accepted ' + new Date(pv.tncAcceptedAt).toLocaleString('en-GB') + ' · ' + TNC_VERSION)
+ accepted && el('div',{class:'mt-2 text-[10px] text-slate2-500'},'Accepted ' + new Date(pv.tncAcceptedAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') + ' · ' + TNC_VERSION)
  )
  ),
  errors._tnc && el('div',{class:'mt-2 text-xs text-red-600'}, errors._tnc)
@@ -6930,7 +6930,7 @@ function PortalDeals() {
  el('div',{class:'flex items-center gap-2 text-mv-600 font-bold text-sm'},
  el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Changes pending admin review'
  ),
- el('p',{class:'mt-1 text-xs text-slate2-300'},'Submitted ' + new Date(pending.submittedAt).toLocaleString('en-GB') + '. Your members are still seeing the previously approved offer. You can keep editing, those edits won\'t enter the queue until you submit again.')
+ el('p',{class:'mt-1 text-xs text-slate2-300'},'Submitted ' + new Date(pending.submittedAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') + '. Your members are still seeing the previously approved offer. You can keep editing, those edits won\'t enter the queue until you submit again.')
  ),
  el('button',{class:'rounded-[4px] bg-slate2-50/10 border border-slate2-50/15 px-4 py-2 text-xs font-extrabold cursor-pointer hover:bg-slate2-50/[0.15]', onclick:()=>{
  pending.status = 'WITHDRAWN';
@@ -7183,7 +7183,7 @@ function PortalProfile() {
  el('h3',{class:'mt-2 font-bold'},'Your listing was removed'),
  el('p',{class:'mt-1 text-sm text-slate2-400 max-w-md mx-auto'},
  pv.removedAt
- ? 'On ' + new Date(pv.removedAt).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' }) + (pv.removalReason ? ' · ' + pv.removalReason : '') + '. Your account is still active, you can request reinstatement at any time.'
+ ? 'On ' + new Date(pv.removedAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { day:'numeric', month:'long', year:'numeric' }) + (pv.removalReason ? ' · ' + pv.removalReason : '') + '. Your account is still active, you can request reinstatement at any time.'
  : 'Removed by Menuverso. Your account is still active.'
  ),
  el('button',{class:'mt-4 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
@@ -7482,7 +7482,7 @@ function Admin() {
  ' · ', owner ? owner.email : 'unknown owner'
  ),
  el('div',{class:'text-xs text-slate2-400'}, pv.address || 'No address yet', pv.postcode ? (', ' + pv.postcode) : ''),
- el('div',{class:'text-xs text-slate2-400 mt-1'},'Submitted ', pv.submittedAt ? new Date(pv.submittedAt).toLocaleString('en-GB') : ', '),
+ el('div',{class:'text-xs text-slate2-400 mt-1'},'Submitted ', pv.submittedAt ? new Date(pv.submittedAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') : ', '),
  pv.description && el('p',{class:'mt-2 text-sm text-slate2-300 max-w-2xl'}, pv.description),
  el('div',{class:'mt-2 flex gap-2 flex-wrap'},
  ...(pv.photos || []).slice(0,4).map(src => el('img',{src, class:'h-14 w-20 object-cover rounded border border-slate2-50/10'}))
@@ -7546,7 +7546,7 @@ function Admin() {
  el('span',{class:'inline-flex items-center justify-center h-7 w-7 rounded-[4px] shrink-0 ' + ic.tone}, lucide(ic.name,{class:'h-3.5 w-3.5'})),
  el('span',{class:'text-slate2-200 truncate'}, (e.prefix || '') + (e.venueName || '') + (e.suffix || ''))
  ),
- el('span',{class:'text-[11px] text-slate2-500 shrink-0 tabular-nums'}, e.t ? new Date(e.t).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '')
+ el('span',{class:'text-[11px] text-slate2-500 shrink-0 tabular-nums'}, e.t ? new Date(e.t).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '')
  );
  })
  );
@@ -7576,7 +7576,7 @@ function Admin() {
  return v?.name || '(unknown venue)';
  }
  function fmtDate(ts) {
- return new Date(ts).toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+ return new Date(ts).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
  }
  function approveRemovalSoft(cr) {
  const v = store.partnerVenues.find(x => x.id === cr.venueId);
@@ -9360,7 +9360,7 @@ function Admin() {
  ),
  el('div',{class:'text-xs text-slate2-400 mt-1'},
  'Created', ' ', usr.createdAt ? new Date(usr.createdAt).toLocaleDateString(MV_LANG==='es'?'es-ES':'en-GB') : '—',
- sub ? el('span',{}, ' · ', 'Sub:', ' ', sub.status, sub.cancelAtPeriodEnd ? (MV_LANG==='es' ? (' (cancelando ' + new Date(sub.renewsAt).toLocaleDateString('es-ES') + ')') : (' (cancelling ' + new Date(sub.renewsAt).toLocaleDateString('en-GB') + ')')) : '') : '',
+ sub ? el('span',{}, ' · ', 'Sub:', ' ', sub.status, sub.cancelAtPeriodEnd ? (MV_LANG==='es' ? (' (cancelando ' + new Date(sub.renewsAt).toLocaleDateString('es-ES') + ')') : (' (cancelling ' + new Date(sub.renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') + ')')) : '') : '',
  venue ? el('span',{}, ' · ', 'Venue:', ' ', venue.name, ' (', venue.status, ')') : '',
  usr.role === 'MEMBER' ? el('span',{}, ' · ', String(memberBks), ' ', memberBks===1?'booking':'bookings', ' · ', String(memberReds), ' ', 'redemptions') : ''
  )
@@ -9470,8 +9470,8 @@ function Admin() {
  el('td',{class:'text-xs font-mono'}, m?.email ?? ', '),
  el('td',{class:'text-xs font-extrabold ' + cls}, status),
  el('td',{class:'text-xs text-slate2-400'},
- b.redeemedAt ? new Date(b.redeemedAt).toLocaleString('en-GB') :
- b.createdAt ? new Date(b.createdAt).toLocaleString('en-GB') : ', '
+ b.redeemedAt ? new Date(b.redeemedAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') :
+ b.createdAt ? new Date(b.createdAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') : ', '
  ),
  el('td',{class:'text-xs'},
  isActive && el('button',{class:'underline text-red-600 cursor-pointer bg-transparent border-0', onclick:()=>{
@@ -9681,7 +9681,7 @@ function Admin() {
  el('span',{class:'text-accent-emer'}, ''),
  el('span',{class:'text-slate2-200 truncate'}, (m ? (m.name || m.email) : 'unknown member') + ' · ' + (v ? v.name : r.venueSlug))
  ),
- el('span',{class:'text-xs text-slate2-400 shrink-0'}, r.redeemedAt ? new Date(r.redeemedAt).toLocaleString('en-GB') : ', ')
+ el('span',{class:'text-xs text-slate2-400 shrink-0'}, r.redeemedAt ? new Date(r.redeemedAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') : ', ')
  );
  })
  )
@@ -9780,7 +9780,7 @@ function Admin() {
  ' · ',
  el('button',{class:'underline cursor-pointer bg-transparent border-0', onclick:()=>v && go('venue',{slug:v.slug})}, v ? v.name : r.venueSlug),
  ' · ',
- r.createdAt ? new Date(r.createdAt).toLocaleString('en-GB') : ', '
+ r.createdAt ? new Date(r.createdAt).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') : ', '
  )
  ),
  el('div',{class:'flex items-center gap-2 shrink-0'},
@@ -10063,7 +10063,7 @@ function Admin() {
  el('div',{class:'flex items-center justify-between text-xs text-slate2-400 mb-1'},
  el('span',{}, author ? ((author.name||'') + ' · ' + author.email) : 'unknown admin'),
  el('span',{class:'flex items-center gap-2'},
- el('span',{}, n.ts ? new Date(n.ts).toLocaleString('en-GB') : ', '),
+ el('span',{}, n.ts ? new Date(n.ts).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') : ', '),
  el('button',{class:'underline text-red-600 cursor-pointer bg-transparent border-0', onclick:()=>{
  confirmDo('Delete this note?', () => {
  store.adminNotes[selectedSlug] = (store.adminNotes[selectedSlug] || []).filter(x => x.id !== n.id);
@@ -10221,7 +10221,7 @@ function Admin() {
  el('div',{class:'text-xs text-slate2-400'},
  (author ? author.email : 'unknown admin'),
  ' · ',
- e.ts ? new Date(e.ts).toLocaleString('en-GB') : '',
+ e.ts ? new Date(e.ts).toLocaleString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB') : '',
  e.reason ? ' · ' + e.reason : ''
  )
  ),
