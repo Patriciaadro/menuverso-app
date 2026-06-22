@@ -507,6 +507,18 @@ function saveStore() {
 // ============================================================================
 const MV_SUPABASE_URL = 'https://qjrqnnrucdvpwrbkxean.supabase.co';
 const MV_SUPABASE_KEY = 'sb_publishable_YtbbDiRvRffpKBhRB7Yl_g_FtAtUYhA';
+// ── Member accounts: real Supabase Auth + double opt-in ──────────────────────
+// Flip to TRUE only AFTER Supabase Auth is configured (dashboard Phase 0:
+// enable Email + "Confirm email", set redirect URLs, Resend SMTP, paste the
+// email templates). While FALSE, members use the local demo store exactly as
+// before — zero behaviour change. Demo accounts ALWAYS use the local path.
+const MV_USE_SUPABASE_AUTH = false;
+const MV_DEMO_EMAILS = new Set(['maria@menuverso.com', 'admin@menuverso.com', 'owner@cerveceria.test']);
+// Returns the supabase-js client iff Auth is enabled AND the library loaded.
+function mvAuth() {
+ if (!MV_USE_SUPABASE_AUTH) return null;
+ try { const c = (typeof mvRealtimeClient === 'function') ? mvRealtimeClient() : null; return (c && c.auth) ? c : null; } catch (e) { return null; }
+}
 const MV_SUPABASE_HEADERS = {
  'apikey': MV_SUPABASE_KEY,
  'Authorization': 'Bearer ' + MV_SUPABASE_KEY,
@@ -1744,6 +1756,17 @@ async function registerUser({ firstName, lastName, email, password, role='MEMBER
  email = email.trim().toLowerCase();
  if (!isEmail(email)) throw new Error('Please enter a valid email.');
  if (password.length < 8) throw new Error('Password must be at least 8 characters.');
+ // Real server-side accounts + double opt-in (members only, non-demo, flag on).
+ // Supabase creates the user UNCONFIRMED and emails an activation link; the
+ // account can't log in until it's clicked. We do NOT start a session here.
+ {
+ const auth = (role === 'MEMBER' && !MV_DEMO_EMAILS.has(email)) ? mvAuth() : null;
+ if (auth) {
+ const { error } = await auth.auth.signUp({ email, password, options: { data: { first_name: firstName?.trim() || null, last_name: lastName?.trim() || null }, emailRedirectTo: (location.origin + '/confirmar') } });
+ if (error) throw new Error(error.message || 'Could not create your account.');
+ return { pendingConfirmation: true, email };
+ }
+ }
  if (store.users.find(u => u.email === email)) throw new Error('An account with that email already exists.');
  const u = {
  id: 'u_' + Math.random().toString(36).slice(2,12),
@@ -1770,6 +1793,34 @@ async function registerUser({ firstName, lastName, email, password, role='MEMBER
 }
 async function loginUser({ email, password }) {
  email = email.trim().toLowerCase();
+ // Real server-side login (non-demo emails, flag on). Blocks unconfirmed
+ // accounts; on success, mirror the Auth user into the local store so the
+ // existing member experience (saved/subscription) keeps working.
+ {
+ const auth = (!MV_DEMO_EMAILS.has(email)) ? mvAuth() : null;
+ if (auth) {
+ const { data, error } = await auth.auth.signInWithPassword({ email, password });
+ if (error) {
+ const m = (error.message || '').toLowerCase();
+ if (m.includes('confirm')) throw new Error((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Confirma tu email primero — revisa tu bandeja de entrada.' : 'Confirm your email first — check your inbox.');
+ throw new Error('Email or password is wrong.');
+ }
+ const au = data && data.user;
+ let u = store.users.find(x => x.email === email);
+ if (!u) {
+ u = { id: 'sb_' + ((au && au.id) ? au.id.slice(0,16) : Math.random().toString(36).slice(2,12)), email,
+ passwordHash: 'supabase-auth',
+ firstName: (au && au.user_metadata && au.user_metadata.first_name) || null,
+ lastName: (au && au.user_metadata && au.user_metadata.last_name) || null,
+ role: 'MEMBER', createdAt: Date.now(), verifiedAt: Date.now() };
+ store.users.push(u);
+ if (!store.saved[u.id]) store.saved[u.id] = [];
+ saveStore();
+ }
+ setSession(u.id);
+ return u;
+ }
+ }
  const u = store.users.find(x => x.email === email);
  if (!u) throw new Error('Email or password is wrong.');
  const ok = await checkPassword(u.passwordHash, password);
@@ -3047,12 +3098,26 @@ function Signup() {
  if (pw.length < 8) { toast('Password must be at least 8 characters.', 'err'); return; }
  btn.disabled = true; btn.textContent = es?'Creando cuenta…':'Creating account…';
  try {
- await registerUser({
+ const res = await registerUser({
  firstName: fd.get('firstName'),
  lastName: fd.get('lastName'),
  email: fd.get('email'),
  password: pw
  });
+ // Double opt-in: account created but inactive until the email link is clicked.
+ if (res && res.pendingConfirmation) {
+ const form = e.target;
+ form.innerHTML = '';
+ form.append(
+ el('div',{class:'text-center py-6'},
+ el('div',{class:'mx-auto h-14 w-14 rounded-[4px] grid place-items-center text-2xl', style:'background:var(--red);color:#fff;'}, '✉'),
+ el('div',{class:'disp', style:'font-size:28px;color:var(--ink);margin-top:14px;'}, es?'Revisa tu email':'Check your email'),
+ el('p',{class:'mt-3 text-sm', style:'color:#574F47;'}, (es?'Te hemos enviado un enlace de activación a ':'We sent an activation link to ') + el('strong',{}, res.email).textContent + (es?'. Haz clic para activar tu cuenta.':'. Click it to activate your account.')),
+ el('button',{type:'button', class:'mt-5 cursor-pointer', style:'background:var(--ink);color:#fff;border:none;font-weight:800;padding:11px 20px;border-radius:4px;', onclick:()=>go('signin')}, es?'Ir a iniciar sesión':'Go to sign in')
+ )
+ );
+ return;
+ }
  toast('Account created');
  // Personalization first, feed quality jumps when we know cuisines/barrios.
  // Skipping is allowed; either way they land on checkout next.
@@ -3175,7 +3240,18 @@ function Signin() {
  InputField('Email','email','email','you@example.com', true, 'email'),
  PasswordField('Password','password','••••••••', { autocomplete:'current-password', minlength:0 }),
  el('button',{type:'submit', class:'disabled:opacity-50', style:'margin-top:12px;width:100%;background:var(--red);color:#fff;border:none;font-family:Anton,sans-serif;font-size:20px;padding:14px;border-radius:4px;cursor:pointer;box-shadow:5px 5px 0 var(--ink);'},'Sign in'),
- el('button',{type:'button', class:'w-full text-xs text-slate2-400 underline mt-1 cursor-pointer bg-transparent border-0', onclick:()=>toast('In production this sends a reset link by email.')},'Forgot password?')
+ el('button',{type:'button', class:'w-full text-xs text-slate2-400 underline mt-1 cursor-pointer bg-transparent border-0', onclick: async (ev)=>{
+ const a = (typeof mvAuth==='function') ? mvAuth() : null;
+ const em = ((ev.target.closest('form') && ev.target.closest('form').querySelector('input[name=email],input[type=email]')) || {}).value || '';
+ if (a && em.trim()) {
+ try { await a.auth.resetPasswordForEmail(em.trim().toLowerCase(), { redirectTo: location.origin + '/confirmar' }); toast(esS?'Te enviamos un enlace para restablecer tu contraseña.':'We sent you a password reset link.'); }
+ catch (e) { toast(esS?'No se pudo enviar el enlace. Inténtalo de nuevo.':'Could not send the link. Try again.', 'err'); }
+ } else if (a && !em.trim()) {
+ toast(esS?'Escribe tu email primero.':'Enter your email first.', 'err');
+ } else {
+ toast('In production this sends a reset link by email.');
+ }
+ }},'Forgot password?')
  ),
  // Cross-link to the dedicated partner sign-in.
  el('div',{class:'mt-5 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-3 text-sm flex items-center justify-between gap-3'},
