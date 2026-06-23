@@ -366,7 +366,7 @@ tailwind.config = {
 const STORE_KEY = 'menuverso_demo_v4';
 const SESSION_KEY = 'menuverso_session_v4';
 
-const DEFAULT_DEAL_TERMS = 'Tell your server you\'re redeeming with Menuverso before ordering. Slide to confirm in-app at the table and show the animated verification screen. Partner-defined exclusions apply. Cannot be combined with other offers.';
+const DEFAULT_DEAL_TERMS = 'Tell your server you\'re redeeming with Menuverso before ordering. Slide to confirm in-app at the table. Partner-defined exclusions apply. Cannot be combined with other offers.';
 const DEFAULT_SLOTS = () => [
  { id:'s_lunch', label:'Weekday Lunch', days:'Mon-Thu', timeStart:'13:00', timeEnd:'15:30', active:true },
  { id:'s_dinner', label:'Early Dinner', days:'Mon-Wed', timeStart:'19:30', timeEnd:'21:30', active:true },
@@ -397,7 +397,7 @@ const TNC_BODY = [
  ['Editing the offer', 'You may edit the offer at any time, but changes to the deal itself (the conditions text, the slot schedule, or the per-member credit cap) require Menuverso approval before they go live. Profile metadata, your photos, name, address, hours, contact details, and description, can be edited freely without review.'],
  ['Removing the offer', 'After the 30-day commitment has elapsed, you may submit a removal request explaining why. Menuverso aims to approve all bona-fide requests within 3 business days. Early removal requests (inside the 30-day window) may be approved at our discretion if there are exceptional circumstances; doing so is a breach of the commitment above and will be noted on your account.'],
  ['Per-member credit cap', 'Each Menuverso member can redeem your offer at your restaurant up to N times per calendar month, where N is the number you configure (default 3). The cap refreshes on the first day of every month. You cannot configure a cap of zero.'],
- ['Honouring redemptions', 'You agree to honour every valid (unexpired, unredeemed) deal redemption presented in-app by a Menuverso member. Validity is signalled by the member sliding to confirm at the table and showing the animated verification screen; the same redemption appears live on your partner dashboard. Refusing a valid redemption without a documented reason is grounds for offer suspension by Menuverso.'],
+ ['Honouring redemptions', 'You agree to honour every valid (unexpired, unredeemed) deal redemption presented in-app by a Menuverso member. Validity is signalled by the member sliding to confirm at the table; the same redemption appears live on your partner dashboard. Refusing a valid redemption without a documented reason is grounds for offer suspension by Menuverso.'],
  ['Fees', 'Listing on Menuverso is free during our launch period. We will give you 30 days notice before any pricing change.'],
  ['Liability', 'Menuverso provides the booking platform and the membership relationship; we are not party to the actual meal you serve. Disputes over food quality or service are between you and the diner. Menuverso may mediate but is not financially liable for restaurant-side outcomes.'],
  ['Termination', 'Menuverso may terminate your listing at any time for repeated breaches of these terms, persistent member complaints, or activity that risks our brand or other partners. We will give you reasonable notice and the opportunity to respond before termination.'],
@@ -2520,22 +2520,30 @@ function BottomNav() {
  const r = state.route;
  const u = currentUser();
  const activeCode = u ? !!getActiveBooking(u) : false;
- const item = (key, icon, label, route, badge, dot) =>
+ // Bottom nav (web app) — thicker, spaced, with icons so each tab is an easy
+ // tap target (doc [p]).
+ const ICON = {
+ app:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+ map:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+ bookings:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><line x1="14" y1="5" x2="14" y2="19"/></svg>',
+ profile:'<svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>'
+ };
+ const item = (key, label, route, badge, dot) =>
  el('button',{
- class: 'flex-1 flex flex-col items-center gap-0.5 py-2 cursor-pointer bg-transparent border-0 relative ' + (key===r ? 'text-slate2-50' : 'text-slate2-400 hover:text-slate2-200'),
- onclick: ()=>go(route)
+ class: 'flex-1 flex flex-col items-center justify-center gap-1 py-3 min-h-[60px] rounded-[6px] cursor-pointer bg-transparent border-0 relative transition ' + (key===r ? 'text-mv-500' : 'text-slate2-400 hover:text-slate2-200'),
+ 'aria-label': label, onclick: ()=>go(route)
  },
- el('span',{class:'text-xl relative'}, icon,
- badge ? el('span',{class:'absolute -top-1 -right-2 bg-mv-500 text-white text-[9px] font-extrabold rounded-[4px] px-1.5 py-0.5 leading-tight'}, String(badge)) : null,
- dot ? el('span',{class:'absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-mv-500 ring-2 ring-ink-900 animate-pulse'}) : null
+ el('span',{class:'relative inline-flex', html: ICON[key] || '' },
+ badge ? el('span',{class:'absolute -top-1.5 -right-2.5 bg-mv-500 text-white text-[9px] font-extrabold rounded-[4px] px-1.5 py-0.5 leading-tight'}, String(badge)) : null,
+ dot ? el('span',{class:'absolute -top-0.5 -right-1 h-2 w-2 rounded-full bg-mv-500 ring-2 ring-ink-900 animate-pulse'}) : null
  ),
- el('span',{class:'text-[10px] font-bold uppercase tracking-wider'}, label)
+ el('span',{class:'text-[11px] font-bold uppercase tracking-wide'}, label)
  );
- return el('div',{class:'md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-900/95 border-t border-slate2-50/10 backdrop-blur flex'},
- item('app','','Discover','app'),
- item('map','','Map','map'),
- item('bookings','','Bookings','bookings', null, activeCode),
- item('profile','','Profile','profile')
+ return el('div',{class:'md:hidden fixed bottom-0 inset-x-0 z-30 bg-ink-900/95 border-t-2 border-slate2-50/10 backdrop-blur flex gap-1.5 px-2', style:'padding-bottom:max(8px, env(safe-area-inset-bottom));'},
+ item('app','Discover','app'),
+ item('map','Map','map'),
+ item('bookings','Bookings','bookings', null, activeCode),
+ item('profile','Profile','profile')
  );
 }
 
@@ -2843,7 +2851,7 @@ function Landing() {
  // sits at the same vertical position when navigating between routes.
  ConceptBanner(),
  MarketingHeader(),
- el('div',{html:`<section style="position:relative; padding:0;"><div class="hero-grid"><div class="hero-left" style="position:relative;"><div class="kick" style="display:inline-block; background:var(--red); color:#fff; padding:9px 16px; transform:rotate(-2deg);">● ${t('hero.eyebrow')}</div><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; margin:26px 0 0; color:var(--ink);">${t('hero.line1')}</h1><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; color:var(--red); margin:16px 0 0;">${t('hero.line2')}</h1><div style="width:330px; max-width:80%; height:16px; background:var(--red); transform:skewX(-22deg); margin:24px 0 0 6px;"></div><p style="font-size:20px; line-height:1.5; max-width:520px; margin:30px 0 0; font-weight:500; color:var(--ink);">${t('hero.subhead.tail')}</p><div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap;"><a href="#" onclick="go('signup');return false;" style="background:var(--red); color:#fff; padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; box-shadow:6px 6px 0 var(--ink);">${t('hero.ctaJoin')}</a><a href="#how" style="border:3px solid var(--ink); padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--ink);">${t('hero.ctaHow')}</a></div></div><div style="position:relative; background:var(--red); overflow:hidden; min-height:560px;"><video src="hero-loop.mp4" autoplay muted loop playsinline poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; mix-blend-mode:luminosity; opacity:.9; filter:contrast(1.15);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(244,41,26,.35));"></div><div style="position:absolute; left:32px; bottom:30px; z-index:2; color:#fff;"><div class="disp" style="font-size:78px;">2×1</div><div style="font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:15px;">${t('hero.overlayVenues')}</div></div></div></div></section>`}),
+ el('div',{html:`<section style="position:relative; padding:0;"><div class="hero-grid"><div class="hero-left" style="position:relative;"><div class="kick" style="display:inline-block; background:var(--red); color:#fff; padding:9px 16px; transform:rotate(-2deg);">● ${t('hero.eyebrow')}</div><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; margin:26px 0 0; color:var(--ink);">${t('hero.line1')}</h1><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; color:var(--red); margin:16px 0 0;">${t('hero.line2')}</h1><div style="width:330px; max-width:80%; height:16px; background:var(--red); transform:skewX(-22deg); margin:24px 0 0 6px;"></div><p style="font-size:20px; line-height:1.5; max-width:520px; margin:30px 0 0; font-weight:500; color:var(--ink);">${t('hero.subhead.tail')}</p><div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap;"><a href="#" onclick="go('signup');return false;" style="background:var(--red); color:#fff; padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; box-shadow:6px 6px 0 var(--ink);">${t('hero.ctaJoin')}</a><a href="#how" style="border:3px solid var(--ink); padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--ink);">${t('hero.ctaHow')}</a></div></div><div style="position:relative; background:#16110F; overflow:hidden; min-height:560px;"><video src="hero-loop.mp4" autoplay muted loop playsinline poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(20,17,15,.45));"></div><div style="position:absolute; left:32px; bottom:30px; z-index:2; color:#fff;"><div class="disp" style="font-size:78px;">2×1</div><div style="font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:15px;">${t('hero.overlayVenues')}</div></div></div></div></section>`}),
  // ====== Consumer 'How it works', three-phone storyboard ======
  // Replaces the previous magazine-style 4-step storyboard with a denser,
  // app-screenshot-led version (per neotaste / image reference). Phones
@@ -3855,8 +3863,8 @@ function AppMap() {
  const vpSrc = (v) => { try { return venueHasRealPhoto(v) ? venueRealPhotoSrc(v) : cuisinePhotoFor(v); } catch(e){ try { return cuisinePhotoFor(v); } catch(_) { return ''; } } };
  function mapListCard(v) {
  const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
- const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,1) : [];
- const dealLbl = deals.length ? deals[0].title : '2×1';
+ const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,2) : [];
+ const dealLabels = deals.length ? deals.map(d => d.title) : ['2×1'];
  const live = isVenueAvailableNow(v);
  return el('div',{class:'card-lift', style:'background:#fff;border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:5px 5px 0 var(--ink);cursor:pointer;'},
  el('div',{style:'height:150px;position:relative;background:var(--red);overflow:hidden;'},
@@ -3865,8 +3873,8 @@ function AppMap() {
  el('div',{style:'position:absolute;left:14px;bottom:10px;color:#fff;'}, el('div',{class:'vname', style:'font-size:26px;'}, v.name)),
  live ? el('div',{style:'position:absolute;top:10px;right:10px;background:#F2B100;color:#16110F;font-weight:900;font-size:11px;text-transform:uppercase;padding:4px 8px;border-radius:4px;'}, (es?'Abierto':'Open')) : null
  ),
- el('div',{style:'padding:12px 14px;'},
- el('span',{style:'border:2px solid var(--red);color:var(--red);font-weight:800;font-size:13px;padding:5px 9px;border-radius:4px;'}, dealLbl)
+ el('div',{class:'flex flex-wrap gap-2', style:'padding:12px 14px;'},
+ ...dealLabels.map(lbl => el('span',{style:'border:2px solid var(--red);color:var(--red);font-weight:800;font-size:13px;padding:5px 9px;border-radius:4px;'}, lbl))
  )
  );
  }
@@ -4293,12 +4301,7 @@ function AppBookings() {
  el('button',{class:'rounded-[4px] border border-slate2-50/15 bg-slate2-50/[0.02] px-4 py-3 font-bold hover:bg-slate2-50/[0.06] cursor-pointer', onclick:()=>go('venue',{slug:active.venueSlug})},'View restaurant')
  )
  );
- })() : el('div',{class:'rounded-[4px] bg-slate2-50/[0.03] border border-slate2-50/10 p-8 text-center'},
- ILLUS.emptyPlate('h-20 w-20 text-mv-500/70'),
- el('h3',{class:'mt-4 font-bold text-lg'},'No active booking'),
- el('p',{class:'mt-1.5 text-sm text-slate2-400 max-w-xs mx-auto'},'Pick a restaurant, choose a deal, and slide to redeem at the table.'),
- el('button',{class:'mt-5 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-5 py-2.5 font-extrabold text-sm cursor-pointer', onclick:()=>go('app')},'Browse deals →')
- ),
+ })() : null,  /* doc [n]: removed the "no active booking" placeholder image; history (below) still shows */
 
  // ---- History ----
  past.length > 0 && el('div',{},
@@ -4452,8 +4455,11 @@ function AppProfile() {
  const myBookings = store.bookings.filter(b => b.memberId === u.id);
  const since30 = Date.now() - 30 * 86400000;
  const recentReds = myReds.filter(r => r.redeemedAt >= since30);
- const totalSaved = myReds.length * AVG_SAVED;
- const recentSaved = recentReds.length * AVG_SAVED;
+ // doc [e]: total saved sums each redemption's actual per-deal savings (set in
+ // admin), not a flat average — so it matches what the venue/offer shows.
+ const savForRed = (r) => { try { const vv = findVenueBySlug(r.venueSlug); const ds = getVenueDeals(vv); const d = ds.find(x => x.id === r.dealId) || ds[0]; return (d && typeof d.savingsEur === 'number') ? d.savingsEur : AVG_SAVED; } catch(e){ return AVG_SAVED; } };
+ const totalSaved = myReds.reduce((s, r) => s + savForRed(r), 0);
+ const recentSaved = recentReds.reduce((s, r) => s + savForRed(r), 0);
  const monthsSub = sub ? Math.max(1, Math.ceil((Date.now() - (sub.startedAt || Date.now())) / (30 * 86400000))) : 0;
  const totalPaid = monthsSub * 4.99;
  const multiple = totalPaid > 0 ? (totalSaved / totalPaid) : 0;
@@ -4642,6 +4648,31 @@ function AppProfile() {
  )
  ),
 
+ // ===== SAVED LOCATIONS (doc [m]: saved lives inside Profile) =====
+ (function(){
+ const slugs = (typeof validSavedSlugs === 'function') ? validSavedSlugs(u) : [];
+ const list = getAllVenues().filter(x => slugs.includes(x.slug));
+ const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const sp = (vn) => { try { return venueHasRealPhoto(vn) ? venueRealPhotoSrc(vn) : cuisinePhotoFor(vn); } catch(e){ return ''; } };
+ return el('div',{class:'px-5 mt-6'},
+ el('div',{class:'flex items-baseline justify-between'},
+ el('h2',{class:'font-bold'}, esP?'Tus guardados':'Saved'),
+ el('span',{class:'text-xs text-slate2-400'}, String(list.length))
+ ),
+ list.length === 0
+ ? el('p',{class:'mt-2 text-sm text-slate2-400'}, esP?'Aún no has guardado locales. Toca el corazón en cualquier sitio.':'No saved spots yet. Tap the heart on any venue.')
+ : el('div',{class:'mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3'},
+ ...list.map(vn => el('button',{class:'text-left rounded-[4px] overflow-hidden border border-slate2-50/10 bg-slate2-50/[0.03] cursor-pointer hover:border-mv-500/40 transition bg-transparent', onclick:()=>go('venue',{slug:vn.slug})},
+ el('div',{style:'height:92px;position:relative;background:#16110F;', html:'<img src="'+sp(vn)+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">'}),
+ el('div',{class:'p-2'},
+ el('div',{class:'vname', style:'font-size:18px;color:var(--ink);line-height:1;'}, vn.name),
+ el('div',{class:'text-[11px] text-slate2-400 mt-0.5 truncate'}, (localizeBarrio(vn.barrio)||''))
+ )
+ ))
+ )
+ );
+ })(),
+
  // ===== ACCOUNT, slim footer card =====
  el('div',{class:'px-5 mt-5'},
  el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10'},
@@ -4691,18 +4722,26 @@ function Venue() {
  const esV = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const vpSrcV = (vn) => { try { return venueHasRealPhoto(vn) ? venueRealPhotoSrc(vn) : cuisinePhotoFor(vn); } catch(e){ try { return cuisinePhotoFor(vn); } catch(_) { return ''; } } };
  const liveNowV = (typeof isVenueAvailableNow === 'function') ? isVenueAvailableNow(v) : true;
+ // doc [b]+[c]: real-color photo CAROUSEL of every uploaded image (no red duotone).
+ const heroImgs = (function(){
+ const out = [];
+ ['photos','foodPhotos','venuePhotos','menuPhotos'].forEach(k => { if (Array.isArray(v[k])) v[k].forEach(p => { const src = (typeof p === 'string') ? p : (p && (p.url || p.src || p.dataUrl)); if (src) out.push(src); }); });
+ const seen = new Set(); const uniq = out.filter(s => { if (seen.has(s)) return false; seen.add(s); return true; });
+ return uniq.length ? uniq : [vpSrcV(v)];
+ })();
  const inner = el('div',{class:'pb-24'},
- // §6 Restaurant-detail hero: red-duotone photo, bone ink-bordered back/♥
- // buttons, green open status + giant italic venue name (matches reference).
- el('div',{class:'relative', style:'height:clamp(220px,42vw,300px);background:var(--red);overflow:hidden;'},
- el('div',{style:'position:absolute;inset:0;', html:'<img src="'+vpSrcV(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.9;filter:contrast(1.15);">'}),
- el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,41,26,.1),rgba(20,17,15,.6));'}),
+ el('div',{class:'relative', style:'height:clamp(220px,42vw,320px);background:#16110F;overflow:hidden;'},
+ el('div',{class:'snaprow', style:'position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;'},
+ ...heroImgs.map(src => el('div',{style:'flex:0 0 100%;scroll-snap-align:start;height:100%;', html:'<img src="'+src+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">'}))
+ ),
+ el('div',{style:'position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(20,17,15,.12),rgba(20,17,15,.62));'}),
+ heroImgs.length > 1 ? el('div',{style:'position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(20,17,15,.6);color:#fff;font-weight:800;font-size:11px;padding:3px 10px;border-radius:20px;'}, heroImgs.length + ' ' + (esV?'fotos':'photos')) : null,
  el('button',{'aria-label':esV?'Volver':'Back', style:'position:absolute;top:16px;left:16px;z-index:3;background:#F4EFE6;border:3px solid var(--ink);border-radius:4px;width:44px;height:44px;font-size:20px;line-height:1;cursor:pointer;', onclick:()=>go('app')}, '←'),
  u ? el('button',{'aria-label': saved?(esV?'Quitar de guardados':'Remove from saved'):(esV?'Guardar':'Save'), style:'position:absolute;top:16px;right:16px;z-index:3;background:#F4EFE6;border:3px solid var(--ink);border-radius:4px;width:44px;height:44px;font-size:20px;line-height:1;cursor:pointer;color:'+(saved?'#F4291A':'#16110F')+';',
  onclick:()=>{ toggleSaved(v.slug); render(); } }, '♥') : null,
- el('div',{style:'position:absolute;left:20px;right:20px;bottom:18px;z-index:3;color:#fff;'},
+ el('div',{style:'position:absolute;left:20px;right:20px;bottom:18px;z-index:3;color:#fff;pointer-events:none;'},
  liveNowV ? el('span',{style:'background:#1F9D63;color:#fff;font-weight:800;font-size:12px;padding:5px 11px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em;'}, esV?'● Abierto':'● Open') : el('span',{style:'background:rgba(20,17,15,.7);color:#fff;font-weight:800;font-size:12px;padding:5px 11px;border-radius:4px;text-transform:uppercase;letter-spacing:.03em;'}, esV?'● Cerrado':'● Closed'),
- el('div',{class:'vname', style:'font-size:clamp(38px,11vw,74px);color:#fff;margin-top:10px;'}, v.name)
+ el('div',{class:'vname', style:'font-size:clamp(34px,10vw,68px);color:#fff;margin-top:10px;'}, v.name)
  )
  ),
  // Desktop 2-col layout: main column scrolls (title + action + reviews),
@@ -4790,27 +4829,9 @@ function Venue() {
  );
  const slotLabel = (bookable && (bookable.label || 'Slot') + ' · ' + bookable.timeStart + '-' + bookable.timeEnd) || fallbackStaticTime;
 
- // Optional inline status banner (open now / next opening).
+ // doc [d]: availability message removed. Offers are redeemable when the slot
+ // is active (governed in admin); no on-page "available/next opening" message.
  let banner = null;
- if (activeSlots.length) {
- const openSlot = activeSlots.find(s => isSlotBookableNow(pvForSlots, s));
- if (openSlot) {
- banner = el('div',{class:'rounded-[4px] bg-accent-emer/15 border border-accent-emer/40 px-3 py-2.5 flex items-center gap-2.5'},
- el('span',{class:'h-2 w-2 rounded-full bg-accent-emer shrink-0 animate-pulse'}),
- el('div',{class:'text-[12px] text-accent-emer font-bold leading-tight'}, t('venue.openNowBanner') || 'Disponible ahora mismo')
- );
- } else {
- const hint = activeSlots.map(s => nextOpenLabel(s)).find(Boolean);
- if (hint) {
- banner = el('div',{class:'rounded-[4px] bg-amber-500/12 border border-amber-500/30 px-3 py-2.5 flex items-center gap-2.5'},
- el('div',{class:'text-[12px] text-amber-200 leading-tight'},
- el('span',{class:'font-bold'}, t('venue.nextOpeningBanner') || 'Próxima disponibilidad'),
- ' · ', hint
- )
- );
- }
- }
- }
 
  // Per-deal redeem button. Same bookSlot under the hood but the deal
  // title is passed through as context (so the confirmation screen can
@@ -5180,116 +5201,8 @@ function Booking() {
 
  function paint() {
  inner.innerHTML = '';
- // === STAGE B (animated verification), must precede the redeemed-success
- // branch below, otherwise commitRedeem (which sets b.redeemed=true) would
- // skip straight to the success view. While the redemption is still fresh
- // (< 6 minutes old), show the shimmer-gradient verification screen with
- // a rotating display token + live timestamp.
- if (b.redeemed && b.redeemedAt && Date.now() - b.redeemedAt < 6 * 60 * 1000) {
- const bucket = Math.floor(Date.now() / 2000);
- let h = 0x811c9dc5 >>> 0;
- const seed = b.id + ':' + bucket;
- for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
- const hex = h.toString(16).padStart(8, '0').toUpperCase();
- const token = `T·${hex.slice(0,3)}·${hex.slice(3,6)}`;
- const ts = new Date().toLocaleTimeString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB', { hour12: false });
- inner.append(
- el('div',{class:'p-5'},
- el('div',{class:'relative rounded-[4px] overflow-hidden  shadow-mv-500/30 ring-1 ring-mv-500/40 mt-2'},
- el('div',{class:'absolute inset-0', style:'background: linear-gradient(135deg, #F4291A 0%, #FF6A4F 50%, #C81C10 100%);'}),
- el('div',{class:'absolute inset-0 mv-shimmer-anim opacity-20 pointer-events-none'}),
- el('div',{class:'relative p-7 text-white text-center'},
- el('div',{class:'text-[10px] uppercase tracking-[0.28em] font-extrabold opacity-85'},'Redeeming at'),
- el('h1',{class:'mt-1 font-serif-display italic text-3xl font-extrabold leading-tight'}, v?.name ?? '?'),
- el('p',{class:'mt-2 text-sm font-bold opacity-85'}, b.slot),
- el('div',{class:'mt-7 mx-auto h-40 w-40 rounded-[4px] grid place-items-center relative', style:'border: 2px dashed rgba(255,255,255,0.35);'},
- el('div',{class:'absolute inset-2 rounded-[4px]', style:'border: 1px solid rgba(255,255,255,0.4);'}),
- el('div',{class:'text-center'},
- el('div',{class:'text-[9px] uppercase tracking-[0.25em] font-bold opacity-80'},'Verification'),
- el('div',{class:'mt-1 font-mono font-extrabold text-xl tracking-widest'}, token)
- )
- ),
- el('div',{class:'mt-6 font-mono font-bold text-sm opacity-90'}, ts, ' · BCN'),
- el('div',{class:'text-[10px] uppercase tracking-[0.2em] font-extrabold opacity-85 mt-1'},'Show this to your server'),
- el('div',{class:'mt-5 inline-flex items-center gap-2 rounded-[4px] bg-accent-emer/95 px-3 py-1.5 text-xs font-bold'},
- el('span',{html:'<svg viewBox="0 0 24 24" class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l4 4L20 6"/></svg>'}),
- 'Confirmed · partner notified'
- )
- )
- ),
- // ---- Inline rate-your-visit card (Patricia: surface review prompt
- // immediately after redemption, not only after the 6-min verification
- // window). Reuses the same store.reviews shape used everywhere else.
- (() => {
- const existingReview = (store.reviews || []).find(r => r.memberId === u.id && r.venueSlug === b.venueSlug);
- const card = el('div',{class:'mt-6 rounded-[4px] bg-slate2-50/[0.06] border border-slate2-50/10 p-5'});
- if (existingReview) {
- card.append(
- el('div',{class:'text-center'},
- el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'Tu valoración'),
- el('div',{class:'mt-2 text-accent-amber text-2xl tracking-widest'},
- '★'.repeat(existingReview.stars) + '☆'.repeat(5 - existingReview.stars)
- ),
- existingReview.note && el('p',{class:'mt-2 text-sm text-slate2-300 italic'}, '"' + existingReview.note + '"')
- )
- );
- } else {
- const inner2 = el('div',{class:'text-center'});
- function paintRater() {
- inner2.innerHTML = '';
- // raterStars / raterNote are hoisted onto the Booking() function scope
- // so they survive the 1Hz paint() repaint that drives the rotating
- // verification token. Without hoisting, the user's star selection
- // gets wiped every second and the rater is unusable.
- const kids = [
- el('div',{class:'text-xs uppercase tracking-widest text-slate2-400 font-bold'},'¿Qué tal fue?'),
- el('div',{class:'mt-3 flex justify-center gap-1'},
- ...[1,2,3,4,5].map(n => el('button',{
- class:'text-3xl leading-none cursor-pointer bg-transparent border-0 transition ' + (n <= raterStars ? 'text-accent-amber' : 'text-slate2-500 hover:text-accent-amber/60'),
- onclick:()=>{ raterStars = n; paintRater(); }
- }, n <= raterStars ? '★' : '☆'))
- )
- ];
- if (raterStars > 0) {
- kids.push(
- el('textarea',{
- class:'mt-3 w-full bg-slate2-50/[0.04] border border-slate2-50/10 rounded-[4px] px-3 py-2 text-sm text-slate2-100 placeholder-slate2-500',
- rows:'2',
- placeholder: 'Comentario rápido (opcional)',
- ref: ta => { ta.value = raterNote; },
- onInput: e => { raterNote = e.target.value; }
- }),
- el('button',{
- class:'mt-3 w-full rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white py-2.5 text-sm font-extrabold cursor-pointer transition',
- onclick: ()=>{
- if (!store.reviews) store.reviews = [];
- store.reviews.push({
- memberId: u.id,
- venueSlug: b.venueSlug,
- stars: raterStars,
- note: raterNote.trim() || null,
- createdAt: Date.now()
- });
- saveStore();
- toast('Gracias por tu valoración');
- raterStars = 0; raterNote = '';
- paint();
- }
- },'Enviar valoración')
- );
- }
- inner2.append(...kids);
- }
- paintRater();
- card.append(inner2);
- }
- return card;
- })(),
- el('button',{class:'mt-6 w-full rounded-[4px] bg-slate2-50 text-ink-900 hover:bg-slate2-200 py-3 font-extrabold cursor-pointer transition text-sm', onclick:()=>go('profile')},'Done, back to profile')
- )
- );
- return;
- }
+ // Animated verification screen removed (doc [j]); redeemed bookings go
+ // straight to the Redeemed success + rate view below.
  if (b.redeemed) {
  const existingReview = (store.reviews || []).find(r => r.memberId === u.id && r.venueSlug === b.venueSlug);
  const rated = !!existingReview;
@@ -5374,11 +5287,11 @@ function Booking() {
  // before (no more 15-min vs 1-hour mismatch).
  let countdown = 3600, iv = null;
  const cdNode = el('div',{class:'disp', style:'font-size:clamp(44px,12vw,68px);color:#16110F;margin-top:6px;animation:mv-pulse 1.4s ease-in-out infinite;'}, mmss(countdown));
- const cdNote = el('div',{style:'font-weight:600;color:#574F47;font-size:13px;margin-top:8px;max-width:320px;margin-left:auto;margin-right:auto;'}, es?'Válido 1 h. Si caduca, vuelve a deslizar para confirmar.':'Valid for 1 h. If it runs out, just slide to confirm again.');
+ const cdNote = el('div',{style:'font-weight:700;color:#16110F;font-size:13px;margin-top:8px;max-width:320px;margin-left:auto;margin-right:auto;'}, es?'Válido 1 h. Si caduca, vuelve a deslizar para confirmar.':'Valid for 1 h. If it runs out, just slide to confirm again.');
  const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:8px;padding:clamp(22px,6vw,40px) clamp(26px,8vw,64px);margin:24px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
- el('div',{class:'disp', style:'font-size:clamp(90px,28vw,200px);color:#F4291A;line-height:.78;'}, '2×1'),
- el('div',{class:'vname', style:'font-size:clamp(28px,7vw,48px);color:#16110F;margin-top:8px;'}, v?.name || ''),
- el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:6px;'}, dealTitle)
+ el('div',{class:'disp', style:'font-size:clamp(34px,9vw,56px);color:#F4291A;line-height:.92;'}, dealTitle),
+ el('div',{class:'vname', style:'font-size:clamp(24px,6vw,40px);color:#16110F;margin-top:10px;'}, v?.name || ''),
+ el('div',{class:'disp', style:'font-size:clamp(26px,7vw,40px);color:#16110F;margin-top:12px;'}, (es?'ahorras ~€':'save ~€') + dealSav)
  );
  const below = el('div',{style:'position:relative;color:#16110F;animation:mv-in .6s .2s both;'},
  el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.06em;font-size:18px;'}, es?'Enséñalo a tu camarero':'Show this to your server'),
@@ -5428,30 +5341,33 @@ function Booking() {
  iv = setInterval(() => { countdown = Math.max(0, countdown-1); cdNode.textContent = mmss(countdown); if (countdown === 0) { clearInterval(iv); cdNode.style.color = '#C81C10'; cdNote.textContent = es?'Caducado · vuelve a deslizar para confirmar.':'Expired · slide to confirm again.'; } }, 1000);
  }
 
+ const esR = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const curDeal = (typeof getVenueDeals === 'function') ? (getVenueDeals(v).find(d => d.id === (b.dealId || state.pendingDealId)) || getVenueDeals(v)[0]) : null;
  inner.append(
- el('div',{class:'p-5'},
- el('button',{class:'text-slate2-400 text-sm cursor-pointer bg-transparent border-0', onclick:()=>go('venue',{slug:b.venueSlug})},'← Back'),
- el('div',{class:'text-xs uppercase tracking-widest text-mv-500 font-bold mt-3 text-center'},'Redeeming at'),
- el('h1',{class:'mt-1 text-2xl font-extrabold text-center'}, v?.name ?? '?'),
- el('div',{class:'mt-1 text-sm text-slate2-400 text-center'}, b.slot),
+ el('div',{class:'p-5', style:'max-width:560px;margin:0 auto;'},
+ el('button',{class:'cursor-pointer bg-transparent border-0', style:'color:#7A7164;font-size:14px;', onclick:()=>go('venue',{slug:b.venueSlug})}, esR?'← Volver':'← Back'),
+ el('div',{class:'kick', style:'color:var(--red);font-size:13px;margin-top:12px;text-align:center;'}, esR?'Canjeando en':'Redeeming at'),
+ el('h1',{class:'vname', style:'font-size:clamp(32px,8vw,52px);color:var(--ink);text-align:center;margin-top:4px;'}, v?.name ?? '?'),
+ curDeal ? el('div',{class:'disp', style:'font-size:clamp(20px,5vw,28px);color:var(--red);text-align:center;margin-top:8px;'}, curDeal.title) : null,
+ el('div',{style:'text-align:center;font-weight:700;color:#7A7164;font-size:14px;margin-top:4px;'}, b.slot),
 
- // Deal terms callout
- el('div',{class:'mt-6 rounded-[4px] border border-mv-500/30 bg-mv-500/5 p-4 text-sm'},
- el('div',{class:'font-bold text-slate2-50'},'Before you order:'),
- el('ol',{class:'mt-2 space-y-1.5 list-decimal pl-5 text-slate2-300 text-xs'},
- el('li',{},'Tell your server you\'re redeeming with Menuverso.'),
- el('li',{},'Slide to confirm below, the animated screen proves it\'s real.'),
- el('li',{},'Your server acknowledges at the table. Order as normal.')
+ // Steps callout (Xibeca) — no verification-screen mention (removed in [j]).
+ el('div',{style:'margin-top:22px;background:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:5px 5px 0 var(--ink);padding:18px 20px;'},
+ el('div',{class:'kick', style:'color:var(--red);font-size:12px;'}, esR?'Antes de pedir':'Before you order'),
+ el('ol',{class:'list-decimal', style:'margin-top:10px;padding-left:20px;font-weight:600;color:#574F47;font-size:14px;line-height:1.6;'},
+ el('li',{}, esR?'Avisa al camarero de que canjeas con Menuverso.':'Tell your server you\'re redeeming with Menuverso.'),
+ el('li',{}, esR?'Desliza para confirmar abajo.':'Slide to confirm below.'),
+ el('li',{}, esR?'Enséñaselo al camarero. Pide como siempre.':'Show your server. Order as normal.')
  )
  ),
 
  // Slide-to-confirm bar
  (() => {
- const track = el('div',{class:'relative h-14 rounded-[4px] bg-slate2-50/[0.06] ring-1 ring-mv-500/30 overflow-hidden select-none mt-7'});
- const fill = el('div',{class:'absolute inset-y-0 left-0 bg-gradient-to-r from-mv-500 to-mv-400 transition-[width] duration-150 ease-out', style:'width:0%'});
- const label = el('div',{class:'absolute inset-0 flex items-center justify-center pointer-events-none text-[12px] font-extrabold uppercase tracking-[0.25em] text-slate2-300'},'Slide to redeem →');
- const thumb = el('button',{class:'absolute top-1 h-12 w-12 rounded-[4px] bg-white  shadow-mv-500/30 flex items-center justify-center cursor-grab', style:'left:4px'},
- el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5 text-mv-500" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'})
+ const track = el('div',{class:'relative h-16 rounded-[4px] overflow-hidden select-none mt-7', style:'border:3px solid var(--ink);background:#F4EFE6;'});
+ const fill = el('div',{class:'absolute inset-y-0 left-0 transition-[width] duration-150 ease-out', style:'width:0%;background:var(--red);'});
+ const label = el('div',{class:'absolute inset-0 flex items-center justify-center pointer-events-none text-[13px] font-extrabold uppercase tracking-[0.2em]', style:'color:var(--ink);'}, esR?'Desliza para canjear →':'Slide to redeem →');
+ const thumb = el('button',{class:'absolute top-1.5 h-12 w-12 rounded-[4px] flex items-center justify-center cursor-grab', style:'left:5px;background:var(--ink);'},
+ el('span',{html:'<svg viewBox="0 0 24 24" class="h-5 w-5" style="color:#fff" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'})
  );
  track.append(fill, label, thumb);
  function setProgress(p) {
@@ -11531,7 +11447,7 @@ window.MV_TR_ES = {
  "Are you a restaurant?": "¿Eres un restaurante?",
  "Search restaurants, cuisines, barrios": "Buscar restaurantes, cocinas, barrios",
  "Search by name, cuisine, barrio, owner email": "Buscar por nombre, cocina, barrio, email del propietario",
- "Tell your server you're redeeming with Menuverso before ordering. Slide to confirm in-app at the table and show the animated verification screen. Partner-defined exclusions apply. Cannot be combined with other offers.": "Avisa al camarero antes de pedir de que estás canjeando con Menuverso. Desliza para confirmar en la app en la mesa y muestra la pantalla de verificación animada. Aplican exclusiones definidas por el local. No se puede combinar con otras ofertas.",
+ "Tell your server you're redeeming with Menuverso before ordering. Slide to confirm in-app at the table. Partner-defined exclusions apply. Cannot be combined with other offers.": "Avisa al camarero antes de pedir de que estás canjeando con Menuverso. Desliza para confirmar en la app en la mesa y muestra la pantalla de verificación animada. Aplican exclusiones definidas por el local. No se puede combinar con otras ofertas.",
  "Enjoy your meal.": "Que aproveche.",
  "Redeemed": "Canjeado",
  "Done, back to profile": "Listo, volver al perfil",
