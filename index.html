@@ -773,6 +773,12 @@ async function checkPassword(stored, plain) {
 async function hashPassword(plain) { return await safeHash(plain); }
 
 const store = loadStore();
+// Clean-slate flag (client 23/06): hide ALL seeded/demo locations — the 22
+// hardcoded catalog venues AND the seeded demo partner — so only venues created
+// in the admin tool show. Reversible: set to false to restore the demo seeds.
+// Declared here (before the boot purge below + getAllVenues) to avoid a TDZ error.
+const MV_HIDE_SEED_VENUES = true;
+const MV_SEED_PARTNER_IDS = ['pv_cerveceria'];
 // Defensive: ensure new fields exist on stores loaded from earlier versions.
 if (!store.partnerVenues) store.partnerVenues = JSON.parse(JSON.stringify(initialStore.partnerVenues));
 // Hostile-audit hardening: these collections are accessed unguarded as
@@ -789,6 +795,24 @@ if (!Array.isArray(store.bookings)) store.bookings = [];
 if (!Array.isArray(store.redemptions)) store.redemptions = [];
 if (!Array.isArray(store.changeRequests)) store.changeRequests = [];
 if (!Array.isArray(store.tncVersions)) store.tncVersions = [];
+// Clean-slate purge (client 23/06): one-time wipe of the seeded demo partner
+// venue + demo activity (redemptions/reviews/bookings/saved) so only venues you
+// create show — including in the admin activity feed. Runs once per browser;
+// data created by real members afterwards is never touched. Reversible for the
+// catalog seeds via MV_HIDE_SEED_VENUES=false (purged activity does not return).
+if (MV_HIDE_SEED_VENUES) {
+ try {
+ if (localStorage.getItem('mv_seed_purged_v1') !== '1') {
+ store.partnerVenues = (store.partnerVenues || []).filter(v => !MV_SEED_PARTNER_IDS.includes(v.id));
+ store.redemptions = [];
+ store.reviews = [];
+ store.bookings = [];
+ store.saved = {};
+ localStorage.setItem('mv_seed_purged_v1', '1');
+ try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {}
+ }
+ } catch (e) {}
+}
 // Migrate legacy @menuverso.app emails → @menuverso.com so demo sign-in works
 // for users whose localStorage was seeded before the domain change.
 let _emailMigrated = 0;
@@ -1022,11 +1046,13 @@ function getAllVenues() {
  // G3: REMOVED venues never surface to members. PAUSED also stays out of
  // Discover/Map; they resolve through findVenueBySlug only (for saved
  // venues + direct links).
- const partnerLive = (store.partnerVenues || []).filter(pv => pv.status === 'LIVE').map(toMemberShape);
+ const partnerLive = (store.partnerVenues || [])
+ .filter(pv => pv.status === 'LIVE' && !(MV_HIDE_SEED_VENUES && MV_SEED_PARTNER_IDS.includes(pv.id)))
+ .map(toMemberShape);
  const overrides = store.seedOverrides || {};
  // 2026-05-28 (Patricia): seed venues admin-marked with _hidden:true are
  // hidden from Discover/Map. Admin can use "Revert" to bring them back.
- const seeds = VENUES.map(v => {
+ const seeds = MV_HIDE_SEED_VENUES ? [] : VENUES.map(v => {
  const o = overrides[v.slug];
  if (o && o._hidden) return null;
  return o ? { ...v, ...o } : v;
@@ -4723,16 +4749,26 @@ function Venue() {
  const vpSrcV = (vn) => { try { return venueHasRealPhoto(vn) ? venueRealPhotoSrc(vn) : cuisinePhotoFor(vn); } catch(e){ try { return cuisinePhotoFor(vn); } catch(_) { return ''; } } };
  const liveNowV = (typeof isVenueAvailableNow === 'function') ? isVenueAvailableNow(v) : true;
  // doc [b]+[c]: real-color photo CAROUSEL of every uploaded image (no red duotone).
+ // Hero focal point (Phase 1): keep object-fit:cover + same height, but bias the
+ // crop with object-position so plated food stays in frame. Default 50% / 40%
+ // (centered, slightly above middle); a per-photo {focal_x,focal_y} is honored
+ // if present so the Phase-2 admin picker can write to it without changing this.
  const heroImgs = (function(){
  const out = [];
- ['photos','foodPhotos','venuePhotos','menuPhotos'].forEach(k => { if (Array.isArray(v[k])) v[k].forEach(p => { const src = (typeof p === 'string') ? p : (p && (p.url || p.src || p.dataUrl)); if (src) out.push(src); }); });
- const seen = new Set(); const uniq = out.filter(s => { if (seen.has(s)) return false; seen.add(s); return true; });
- return uniq.length ? uniq : [vpSrcV(v)];
+ ['photos','foodPhotos','venuePhotos','menuPhotos'].forEach(k => { if (Array.isArray(v[k])) v[k].forEach(p => {
+ const src = (typeof p === 'string') ? p : (p && (p.url || p.src || p.dataUrl));
+ if (!src) return;
+ const fx = (p && typeof p === 'object' && p.focal_x != null) ? p.focal_x : 50;
+ const fy = (p && typeof p === 'object' && p.focal_y != null) ? p.focal_y : 40;
+ out.push({ src, fx, fy });
+ }); });
+ const seen = new Set(); const uniq = out.filter(o => { if (seen.has(o.src)) return false; seen.add(o.src); return true; });
+ return uniq.length ? uniq : [{ src: vpSrcV(v), fx: 50, fy: 40 }];
  })();
  const inner = el('div',{class:'pb-24'},
  el('div',{class:'relative', style:'height:clamp(220px,42vw,320px);background:#16110F;overflow:hidden;'},
  el('div',{class:'snaprow', style:'position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;'},
- ...heroImgs.map(src => el('div',{style:'flex:0 0 100%;scroll-snap-align:start;height:100%;', html:'<img src="'+src+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">'}))
+ ...heroImgs.map(o => el('div',{style:'flex:0 0 100%;scroll-snap-align:start;height:100%;', html:'<img src="'+o.src+'" alt="" style="width:100%;height:100%;object-fit:cover;object-position:'+o.fx+'% '+o.fy+'%;display:block;">'}))
  ),
  el('div',{style:'position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(20,17,15,.12),rgba(20,17,15,.62));'}),
  heroImgs.length > 1 ? el('div',{style:'position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(20,17,15,.6);color:#fff;font-weight:800;font-size:11px;padding:3px 10px;border-radius:20px;'}, heroImgs.length + ' ' + (esV?'fotos':'photos')) : null,
@@ -7960,6 +7996,8 @@ function Admin() {
 
  // --- Compute filtered list ---
  const filtered = store.partnerVenues.filter(v => {
+ // Clean-slate: hide seeded demo venues from the admin list too (client 23/06).
+ if (typeof MV_HIDE_SEED_VENUES !== 'undefined' && MV_HIDE_SEED_VENUES && typeof MV_SEED_PARTNER_IDS !== 'undefined' && MV_SEED_PARTNER_IDS.includes(v.id)) return false;
  if (statusFilter !== 'all' && v.status !== statusFilter) return false;
  if (q) {
  const owner = store.users.find(x => x.id === v.ownerId);
@@ -9382,12 +9420,19 @@ function Admin() {
  draft.deals = (draft.deals || [])
  .filter(d => d && typeof d.title === 'string' && d.title.trim() !== '')
  .slice(0, 2)
- .map(d => ({
+ .map(d => {
+ const o = {
  id: d.id || ('d_' + Math.random().toString(36).slice(2, 8)),
  title: d.title.trim(),
  description: (d.description || '').trim(),
  active: d.active !== false
- }));
+ };
+ // Preserve the per-deal savings + recurrency (was being stripped here,
+ // which made "Save changes" report "No changes" for those fields).
+ if (typeof d.savingsEur === 'number') o.savingsEur = d.savingsEur;
+ if (typeof d.cooldownDays === 'number') o.cooldownDays = d.cooldownDays;
+ return o;
+ });
  // Diff draft against current. Only persist actually-changed fields.
  // The four photo arrays + dealSlots + deals are array-typed and require
  // JSON-string comparison.
