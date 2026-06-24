@@ -3517,14 +3517,15 @@ function AppDiscover() {
  const venueCloseTime = (v) => { try { const n=new Date(); const hhmm=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); for (const s of (v.dealSlots||[])) { if (s.active===false) continue; if (hhmm >= (s.timeStart||'00:00') && hhmm <= (s.timeEnd||'23:59')) return s.timeEnd; } } catch(e){} return null; };
  const tonightCard = (v, es) => {
  const deals = getVenueDeals(v);
+ const _hasRealT = (typeof venueHasRealPhoto === 'function') && venueHasRealPhoto(v);
  const dealTitle = (deals[0] && deals[0].title) || '2×1';
  const open = isVenueAvailableNow(v);
  const close = venueCloseTime(v);
  const sticker = (es?'● Abierto':'● Open') + (close ? (es?' · cierra '+close:' · closes '+close) : '');
  const meta = [localizeBarrio(v.barrio), localizeCuisine(v.cuisine), '€'.repeat(v.priceTier||2)].filter(Boolean).join(' · ');
- return el('div',{style:'scroll-snap-align:start;flex:0 0 min(760px,86vw);height:420px;position:relative;background:var(--red);border:3px solid var(--ink);border-radius:4px;overflow:hidden;cursor:pointer;', onclick:()=>go('venue',{slug:v.slug})},
- el('div',{style:'position:absolute;inset:0;', html:'<img src="'+venuePhotoSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
- el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,rgba(244,41,26,.05),rgba(20,17,15,.78));'}),
+ return el('div',{style:'scroll-snap-align:start;flex:0 0 min(760px,86vw);height:420px;position:relative;background:'+(_hasRealT?'#16110F':'var(--red)')+';border:3px solid var(--ink);border-radius:4px;overflow:hidden;cursor:pointer;', onclick:()=>go('venue',{slug:v.slug})},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+venuePhotoSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'+(_hasRealT?'':'mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);')+'">'}),
+ el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,17,15,.05),rgba(20,17,15,.78));'}),
  open ? el('div',{style:'position:absolute;top:20px;left:20px;background:#F2B100;color:#16110F;padding:7px 13px;font-weight:900;text-transform:uppercase;font-size:13px;border-radius:4px;'}, sticker) : null,
  el('div',{style:'position:absolute;left:28px;right:28px;bottom:24px;color:#fff;'},
  el('div',{class:'vname', style:'font-size:clamp(38px,7vw,60px);'}, v.name),
@@ -3553,7 +3554,11 @@ function AppDiscover() {
  const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,2) : [];
  const dealLabels = deals.length ? deals.map(d => d.title) : ['2×1'];
  const saved = venueIsSaved(v);
- const variant = (i % 5 === 1) ? 'ink' : (i % 5 === 4) ? 'scarlet' : 'photo';
+ // A real, partner/admin-uploaded photo MUST always be shown — never replaced
+ // by a decorative watermark treatment. Only placeholder venues (no uploaded
+ // photo) get the ink/scarlet rhythm variants.
+ const hasReal = (typeof venueHasRealPhoto === 'function') && venueHasRealPhoto(v);
+ const variant = hasReal ? 'photo' : ((i % 5 === 1) ? 'ink' : (i % 5 === 4) ? 'scarlet' : 'photo');
  const heart = el('button',{
  'aria-label': saved ? (es?'Quitar de guardados':'Remove from saved') : (es?'Guardar':'Save'),
  style:'position:absolute;top:14px;right:14px;width:42px;height:42px;border:none;background:rgba(255,255,255,.92);border-radius:4px;font-size:20px;line-height:1;cursor:pointer;color:'+(saved?'#F4291A':'#16110F')+';',
@@ -3575,8 +3580,13 @@ function AppDiscover() {
  el('div',{style:'font-weight:700;font-size:14px;opacity:.92;'}, meta)
  ), heart);
  } else {
- media = el('div',{style:'height:230px;position:relative;background:var(--red);overflow:hidden;'},
- el('div',{style:'position:absolute;inset:0;', html:'<img src="'+venuePhotoSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
+ // Real uploaded photo → true color, no red duotone (matches what the
+ // venue actually uploaded). Stock/cuisine placeholder → keep brand duotone.
+ const _imgStyle = hasReal
+  ? 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'
+  : 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);';
+ media = el('div',{style:'height:230px;position:relative;background:'+(hasReal?'#16110F':'var(--red)')+';overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+venuePhotoSrc(v)+'" alt="" style="'+_imgStyle+'">'}),
  el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(20,17,15,.7));'}),
  el('div',{style:'position:absolute;left:18px;bottom:14px;color:#fff;'},
  el('div',{class:'vname', style:'font-size:34px;'}, v.name),
@@ -3892,9 +3902,10 @@ function AppMap() {
  const deals = (typeof getVenueDeals === 'function') ? getVenueDeals(v).slice(0,2) : [];
  const dealLabels = deals.length ? deals.map(d => d.title) : ['2×1'];
  const live = isVenueAvailableNow(v);
+ const _hasRealM = (typeof venueHasRealPhoto === 'function') && venueHasRealPhoto(v);
  return el('div',{class:'card-lift', style:'background:#fff;border:3px solid var(--ink);border-radius:4px;overflow:hidden;box-shadow:5px 5px 0 var(--ink);cursor:pointer;'},
- el('div',{style:'height:150px;position:relative;background:var(--red);overflow:hidden;'},
- el('div',{style:'position:absolute;inset:0;', html:'<img src="'+vpSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);">'}),
+ el('div',{style:'height:150px;position:relative;background:'+(_hasRealM?'#16110F':'var(--red)')+';overflow:hidden;'},
+ el('div',{style:'position:absolute;inset:0;', html:'<img src="'+vpSrc(v)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;'+(_hasRealM?'':'mix-blend-mode:luminosity;opacity:.88;filter:contrast(1.15);')+'">'}),
  el('div',{style:'position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(20,17,15,.7));'}),
  el('div',{style:'position:absolute;left:14px;bottom:10px;color:#fff;'}, el('div',{class:'vname', style:'font-size:26px;'}, v.name)),
  live ? el('div',{style:'position:absolute;top:10px;right:10px;background:#F2B100;color:#16110F;font-weight:900;font-size:11px;text-transform:uppercase;padding:4px 8px;border-radius:4px;'}, (es?'Abierto':'Open')) : null
