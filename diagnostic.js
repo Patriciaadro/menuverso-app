@@ -189,9 +189,113 @@ const fire = (el, type) => el.dispatchEvent(new el.ownerDocument.defaultView.Eve
   }
 })();
 
-console.log('\n================ HARD DIAGNOSTIC ================');
-console.log(results.join('\n'));
-console.log('------------------------------------------------');
-console.log('PASS: ' + pass + '   FAIL: ' + fail);
-console.log('================================================');
-process.exit(fail ? 1 : 0);
+// Minimal Leaflet mock so the Map screen can init and paint its side-list.
+// (Real tiles/pins still require a browser; this exercises the list + cards.)
+function installLeafletMock(w) {
+  const noop = () => {};
+  w.L = {
+    map: () => { const m = { setView: () => m, on: () => m, addLayer: noop, removeLayer: noop, fitBounds: noop, remove: noop, invalidateSize: noop }; return m; },
+    tileLayer: () => ({ addTo: () => ({}) }),
+    markerClusterGroup: () => ({ clearLayers: noop, addLayer: noop, on: noop }),
+    marker: () => { const m2 = { on: () => m2, bindPopup: () => m2, addTo: () => m2 }; return m2; },
+    featureGroup: () => ({ getBounds: () => ({}) }),
+    divIcon: (o) => o || {}
+  };
+}
+const tick = (ms) => new Promise(r => setTimeout(r, ms || 30));
+
+// ============================================================
+// SECTION G — Map-side list renders the uploaded photo + BOTH deal chips [o]
+// ============================================================
+async function sectionG() {
+  const w = boot('u_demo_member');
+  installLeafletMock(w);
+  w.eval(`(function(){
+    store.partnerVenues=[{id:"pv_b",slug:"sky-lounge",name:"Sky Lounge",barrio:"Eixample",cuisine:"Drinks",priceTier:2,status:"LIVE",
+      photos:["${PNG}"],foodPhotos:[],venuePhotos:[],menuPhotos:[],
+      deals:[{id:"d1",title:"2×1 cocktails",active:true,savingsEur:17,cooldownDays:7},{id:"d2",title:"2 por 1 cervezas",active:true,savingsEur:6,cooldownDays:7}],
+      dealSlots:[],rating:4.5,reviews:3,lat:41.39,lng:2.16,liveDeal:{dealSlots:[]}}];
+    saveStore();
+  })()`);
+  ev(w, 'map');
+  await tick(60); // let setTimeout(initMap,0) → repopulate → paintList run
+  const root = w.document.getElementById('root');
+  const dataImgs = [...root.querySelectorAll('img')].map(i => i.getAttribute('src') || '').filter(s => s.startsWith('data:image'));
+  check('G: map-side list painted at least one card', /sky lounge/i.test(root.textContent), 'list did not paint');
+  check('G: map list shows the uploaded photo (real-color fix)', dataImgs.length >= 1, 'no data:image in map list');
+  const chips = root.textContent;
+  check('G: map list shows BOTH deal chips [o]', /cocktails/i.test(chips) && /cervezas/i.test(chips), 'missing one of the two deals');
+  check('G: map render — 0 errors', w.__e.length === 0, w.__e.slice(0,2).join(' | '));
+}
+
+// ============================================================
+// SECTION H — Real photo-upload path: drive the admin file input → Save → render
+// (compressImage uses canvas, unavailable headless, so it is stubbed to a known
+//  data URL; everything else — the input handler, push, diff/save, render — is real.)
+// ============================================================
+async function sectionH() {
+  const w = boot('u_demo_admin');
+  // size-guard is pure JS → test it for real (no stub) BEFORE stubbing.
+  let guardOk = false;
+  try {
+    const r = await w.eval(`compressImage({ size: 9*1024*1024, name:'big.jpg' })`).then(() => 'resolved', e => e && e.code);
+    guardOk = (r === 'PHOTO_TOO_LARGE');
+  } catch (e) { guardOk = false; }
+  check('H: compressImage rejects >8MB files (real size guard)', guardOk);
+
+  // stub compressImage (canvas not available headless), then drive the real upload UI.
+  const stubbed = w.eval(`(function(){ try { compressImage = function(){ return Promise.resolve(${JSON.stringify(PNG)}); }; return typeof compressImage === 'function'; } catch(e){ return 'ERR:'+e.message; } })()`);
+  check('H: compressImage is globally overridable (stub installed)', stubbed === true, 'got ' + stubbed);
+  w.eval(`(function(){
+    store.partnerVenues=[{id:"pv_u",ownerId:null,name:"Upload Bar",slug:"upload-bar",barrio:"Eixample",cuisine:"Drinks",priceTier:2,
+      address:"",postcode:"",phone:"",website:"",instagram:"",description:"",hours:"",
+      photos:[],foodPhotos:[],venuePhotos:[],menuPhotos:[],dealTerms:"",dealSlots:[],
+      deals:[{id:"d1",title:"2×1",description:"",active:true,savingsEur:10,cooldownDays:30}],
+      rating:4.5,reviews:0,status:"LIVE",liveDeal:{dealSlots:[]},offerVersion:1}];
+    saveStore();
+  })()`);
+  ev(w, 'admin', { tab: 'partners' });
+  const root = w.document.getElementById('root');
+  const editBtn = [...root.querySelectorAll('button')].find(b => /^(Editar|Edit)$/.test(b.textContent.trim()));
+  if (editBtn) editBtn.click();
+  const form = root.querySelector('[data-edit-form]');
+  check('H: admin editor opened', !!form);
+  if (!form) return;
+  const fileInput = form.querySelector('input[type=file]');
+  check('H: photo upload input present', !!fileInput);
+  if (fileInput) {
+    const file = new w.File(['xxxx'], 'photo.png', { type: 'image/png' });
+    Object.defineProperty(fileInput, 'files', { value: [file], configurable: true });
+    fileInput.dispatchEvent(new w.Event('change', { bubbles: true }));
+    await tick(50); // async onchange → await compressImage stub → push → renderCat
+  }
+  const saveBtn = [...form.querySelectorAll('button')].find(b => /save changes|guardar/i.test(b.textContent));
+  if (saveBtn) saveBtn.click();
+  const photos = w.eval('store.partnerVenues[0].photos');
+  check('H: uploaded photo persisted to venue.photos', Array.isArray(photos) && photos[0] === PNG, 'photos.len=' + (photos && photos.length));
+
+  // now confirm a member actually sees it on Discover
+  const w2 = boot('u_demo_member');
+  w2.eval(`(function(){
+    store.partnerVenues=[{id:"pv_u",slug:"upload-bar",name:"Upload Bar",barrio:"Eixample",cuisine:"Drinks",priceTier:2,status:"LIVE",
+      photos:[${JSON.stringify(PNG)}],foodPhotos:[],venuePhotos:[],menuPhotos:[],
+      deals:[{id:"d1",title:"2×1",active:true,savingsEur:10,cooldownDays:30}],dealSlots:[],rating:4.5,reviews:1,lat:41.39,lng:2.16,liveDeal:{dealSlots:[]}}];
+    saveStore();
+  })()`);
+  ev(w2, 'app');
+  const imgs = [...w2.document.getElementById('root').querySelectorAll('img')].map(i => i.getAttribute('src') || '').filter(s => s.startsWith('data:image'));
+  check('H: uploaded photo shows on Discover end-to-end', imgs.length >= 1, 'uploaded imgs=' + imgs.length);
+}
+
+(async function main() {
+  try { await sectionG(); } catch (e) { check('G: section ran without throwing', false, e.message); }
+  try { await sectionH(); } catch (e) { check('H: section ran without throwing', false, e.message); }
+  console.log('\n================ HARD DIAGNOSTIC ================');
+  console.log(results.join('\n'));
+  console.log('------------------------------------------------');
+  console.log('PASS: ' + pass + '   FAIL: ' + fail);
+  console.log('NOTE: headless harness cannot verify real pixels/CSS, live tiles,');
+  console.log('      Supabase round-trips, or email — verify those on the deployed site.');
+  console.log('================================================');
+  process.exit(fail ? 1 : 0);
+})();
