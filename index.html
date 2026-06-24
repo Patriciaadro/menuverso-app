@@ -4777,7 +4777,7 @@ function Venue() {
  // Allow only data:image, http(s) and root-relative URLs; URL-encode quotes;
  // coerce focal points to clamped numbers (closes a CSS object-position inject).
  const safeSrc = (sx) => (typeof sx === 'string' && /^(data:image\/|https?:\/\/|\/)/i.test(sx)) ? sx.replace(/"/g, '%22') : null;
- const clampN = (n, d) => { const x = Number(n); return (isFinite(x) && x >= 0 && x <= 100) ? x : d; };
+ const clampN = (n, d) => { if (n == null) return d; const x = Number(n); return (isFinite(x) && x >= 0 && x <= 100) ? x : d; };
  ['photos','foodPhotos','venuePhotos','menuPhotos'].forEach(k => { if (Array.isArray(v[k])) v[k].forEach(p => {
  const raw = (typeof p === 'string') ? p : (p && (p.url || p.src || p.dataUrl));
  const src = safeSrc(raw);
