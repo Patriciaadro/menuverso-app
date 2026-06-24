@@ -1,0 +1,15 @@
+{
+  "name": "menuverso",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Menuverso — Barcelona 2×1 dining-membership SPA. Single-file app (index.html) + /api serverless functions.",
+  "scripts": {
+    "test": "node run-tests.js",
+    "test:diagnostic": "node diagnostic.js index.html",
+    "test:audit": "node audit.js index.html",
+    "test:api": "node api-audit.js api"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

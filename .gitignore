@@ -3,3 +3,5 @@
 menuverso_enriched.tsv
 *.pdf
 Claude/
+node_modules/
+package-lock.json
