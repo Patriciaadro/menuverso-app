@@ -4766,11 +4766,18 @@ function Venue() {
  // if present so the Phase-2 admin picker can write to it without changing this.
  const heroImgs = (function(){
  const out = [];
+ // SECURITY: photos can originate from the venue store / Supabase sync, so a
+ // crafted string must never break out of the <img src="..."> attribute below.
+ // Allow only data:image, http(s) and root-relative URLs; URL-encode quotes;
+ // coerce focal points to clamped numbers (closes a CSS object-position inject).
+ const safeSrc = (sx) => (typeof sx === 'string' && /^(data:image\/|https?:\/\/|\/)/i.test(sx)) ? sx.replace(/"/g, '%22') : null;
+ const clampN = (n, d) => { const x = Number(n); return (isFinite(x) && x >= 0 && x <= 100) ? x : d; };
  ['photos','foodPhotos','venuePhotos','menuPhotos'].forEach(k => { if (Array.isArray(v[k])) v[k].forEach(p => {
- const src = (typeof p === 'string') ? p : (p && (p.url || p.src || p.dataUrl));
+ const raw = (typeof p === 'string') ? p : (p && (p.url || p.src || p.dataUrl));
+ const src = safeSrc(raw);
  if (!src) return;
- const fx = (p && typeof p === 'object' && p.focal_x != null) ? p.focal_x : 50;
- const fy = (p && typeof p === 'object' && p.focal_y != null) ? p.focal_y : 40;
+ const fx = clampN((p && typeof p === 'object') ? p.focal_x : null, 50);
+ const fy = clampN((p && typeof p === 'object') ? p.focal_y : null, 40);
  out.push({ src, fx, fy });
  }); });
  const seen = new Set(); const uniq = out.filter(o => { if (seen.has(o.src)) return false; seen.add(o.src); return true; });
