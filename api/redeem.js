@@ -21,7 +21,9 @@ module.exports = async function handler(req, res) {
       member_id: body.memberId ? String(body.memberId).slice(0, 80) : null,
       member_name: body.memberName ? String(body.memberName).slice(0, 120) : null,
       deal_title: body.dealTitle ? String(body.dealTitle).slice(0, 160) : null,
-      redeemed_at: body.redeemedAt ? new Date(body.redeemedAt).toISOString() : new Date().toISOString()
+      // Hostile-input guard: a malformed redeemedAt must not 500 (which would
+      // silently drop the redemption). Fall back to now on an invalid date.
+      redeemed_at: (function () { const d = body.redeemedAt ? new Date(body.redeemedAt) : new Date(); return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString(); })()
     };
     const r = await fetch(SUPABASE_URL + '/rest/v1/redemptions', {
       method: 'POST',
