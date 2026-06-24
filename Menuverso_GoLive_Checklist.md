@@ -10,6 +10,25 @@ Related docs in this folder: `Menuverso_Resend_DNS_Handoff.md`, `Menuverso_Membe
 
 ---
 
+## Pre-flight — run the automated test suite before every push
+Three audit harnesses ship with the code (`diagnostic.js`, `audit.js`, `api-audit.js`).
+Together they run **130 checks**: data-integrity & money rules, security & hostile input
+(XSS, route guards, corrupt/polluted storage), cross-flow consistency, content/i18n, and the
+`/api/*` endpoints (GDPR consent gate, token hashing, injection, failure handling).
+
+```
+cd ~/Menuverso
+npm install      # one time only — installs jsdom
+npm test         # runs all three suites; expect "SUITES PASSED: 3 / 3"
+```
+
+- [ ] `npm test` is green (3/3 suites). If anything is red, fix before deploying.
+- Individual suites if you want to narrow down: `npm run test:diagnostic`, `npm run test:audit`, `npm run test:api`.
+- **What the suite canNOT see (verify these manually, live):** real rendered pixels/CSS,
+  live map tiles, Supabase RLS round-trips, and actual email deliverability.
+
+---
+
 ## 0. Confirm signups actually land  ⚠ do this first
 The website writes waitlist + restaurant leads with the public key; they only store if the
 tables allow the anonymous insert.
@@ -19,11 +38,27 @@ tables allow the anonymous insert.
       **Supabase → Table Editor → `launch_waitlist`** and **`partner_leads`** — the rows should appear.
 
 ## 1. Deploy the code
-- [ ] `git push origin main` (already committed locally).
+- [ ] Push to GitHub (triggers the Vercel deploy). If git complains about a lock file
+      (left over from an automated commit), clear it first:
+      ```
+      cd ~/Menuverso
+      rm -f .git/index.lock .git/HEAD.lock .git/objects/maintenance.lock
+      git push origin main
+      ```
 - [ ] Confirm the **production** Vercel project builds green. Find which one serves the domain:
       **Vercel → project → Settings → Domains** (the one with `menuverso.com` attached).
 - [ ] The duplicate `…-99ge` project is likely a leftover — if it has no production domain, delete it
       (and don't put secrets there).
+
+## 1b. Manual live smoke test (the things the test suite can't see)
+Do this on the deployed site after the build goes green:
+- [ ] **Venue photo end-to-end:** create a venue in the admin tool, upload a photo, set it LIVE,
+      then open Discover, the Map, and the venue page — the photo must show (in true colour, not
+      the generic "2×1" placeholder) on all three.
+- [ ] **Admin save:** edit a deal's savings (€) and frequency, press Save changes — it should save,
+      not say "No changes" — then confirm the new values show on the member venue page.
+- [ ] **Map:** pins render and the side list shows real cards with photos + both offer chips.
+- [ ] **Mobile:** load on a phone — bottom nav is tappable, headings don't overlap.
 
 ### 🟢 PRE-LAUNCH ready after 0 + 1
 The marketing site is live and collecting waitlist emails + restaurant leads into Supabase.
