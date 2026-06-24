@@ -2251,7 +2251,13 @@ function setLang(l){
 // of every page. Loud on purpose so any restaurant that lands here knows
 // instantly the listings are illustrative and we are NOT claiming real
 // partnerships. Renders in the active language via t().
+// Set to false (client 24/06) to remove the "DEMO IN PROGRESS" strip from the
+// top of every page for the live launch. Flip back to true to restore it.
+const MV_SHOW_CONCEPT_BANNER = false;
 function ConceptBanner() {
+ // Hidden in production unless the flag above is on. Returns an empty node so
+ // every call site keeps working without edits.
+ if (!MV_SHOW_CONCEPT_BANNER) return el('div');
  // Bilingual copy: punchy, can't-miss-it. Stronger than the previous
  // tint-and-whisper version. Keeps the line short so it doesn't wrap
  // awkwardly on mobile.
