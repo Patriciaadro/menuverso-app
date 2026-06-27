@@ -1477,10 +1477,22 @@ function venueReviews(slug) {
  if (!store.reviews) return [];
  return store.reviews.filter(r => r.venueSlug === slug);
 }
+// Per-redemption savings = the ACTUAL per-deal savingsEur (set in admin), with a
+// flat fallback only when a deal/venue can't be resolved. Shared by Bookings +
+// Profile so the two screens can never show different totals (client 24/06).
+function redemptionSavingsEur(r) {
+ try {
+ const v = (typeof findVenueBySlug === 'function') ? findVenueBySlug(r.venueSlug) : null;
+ const ds = (typeof getVenueDeals === 'function') ? getVenueDeals(v) : [];
+ const d = ds.find(x => x.id === r.dealId) || ds[0];
+ return (d && typeof d.savingsEur === 'number') ? d.savingsEur : AVG_TICKET_EUR;
+ } catch (e) { return AVG_TICKET_EUR; }
+}
 function memberSavingsEur(u) {
  if (!u) return 0;
- const redeemed = store.redemptions.filter(r => r.memberId === u.id).length;
- return redeemed * AVG_TICKET_EUR;
+ // Sum each redemption's real per-deal savings (was count × AVG_TICKET_EUR,
+ // which disagreed with the Profile's per-deal total).
+ return store.redemptions.filter(r => r.memberId === u.id).reduce((sum, r) => sum + redemptionSavingsEur(r), 0);
 }
 
 // Personalization prefs, cuisines / barrios / dietary the member picked at signup.
@@ -4393,7 +4405,7 @@ function BookingHistoryRow(b, u) {
  ),
  el('div',{class:'mt-0.5 text-xs text-slate2-400'},
  when, ' · ', b.slot,
- b.redeemed ? el('span',{}, ' · ', el('span',{class:'text-accent-emer font-bold'}, 'Saved €' + AVG_TICKET_EUR)) : null
+ b.redeemed ? el('span',{}, ' · ', el('span',{class:'text-accent-emer font-bold'}, ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Ahorrado €':'Saved €') + redemptionSavingsEur(b))) : null
  ),
  cancelHint && el('div',{class:'mt-1 text-[11px] text-slate2-500 italic'}, cancelHint),
  existingReview
@@ -4599,9 +4611,9 @@ function AppProfile() {
  el('div',{class:'flex items-baseline justify-between'},
  el('div',{},
  el('div',{class:'text-[10px] uppercase tracking-widest text-mv-400 font-extrabold'},'Last 12 weeks'),
- el('div',{class:'mt-1 text-2xl font-extrabold'},'€' + (recentSaved + (weekData.slice(0,8).reduce((s,n)=>s+n,0) * AVG_SAVED)).toLocaleString())
+ el('div',{class:'mt-1 text-2xl font-extrabold'},'€' + myReds.filter(r => (Date.now() - r.redeemedAt) <= 12*7*86400000).reduce((s,r)=>s+savForRed(r),0).toLocaleString())
  ),
- el('div',{class:'text-right text-[10px] text-slate2-400'},'~€', String(AVG_SAVED), '/', 'visit')
+ el('div',{class:'text-right text-[10px] text-slate2-400'},'~€' + Math.round(totalSaved / Math.max(1, myReds.length)) + ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'/visita':'/visit'))
  ),
  el('div',{class:'mt-4 flex items-end gap-1 h-20'},
  ...weekData.map((v,i) => {
