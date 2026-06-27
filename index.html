@@ -3644,8 +3644,8 @@ function AppDiscover() {
  heroRail.append(
  el('div',{class:'flex items-end justify-between gap-3 mb-5 flex-wrap'},
  el('div',{},
- el('div',{class:'kick text-mv-500', style:'font-size:13px;'}, anyOpen ? (es?'● Cerca de ti · abierto ahora':'● Near you · open now') : (es?'● Cerca de ti · los mejores planes':'● Near you · top picks')),
- el('h1',{class:'disp text-slate2-50 mt-2', style:'font-size:clamp(38px,6vw,72px);line-height:.9;'}, es?'Esta noche cenas':'Tonight you eat', el('br'), es?'en uno de estos.':'at one of these.')
+ el('div',{class:'kick text-mv-500', style:'font-size:13px;'}, anyOpen ? (es?'● Cerca de ti · abierto ahora':'● Near you · open now') : (es?'● Cerca de ti':'● Near you')),
+ el('h1',{class:'disp text-slate2-50 mt-2', style:'font-size:clamp(38px,6vw,72px);line-height:.9;'}, es?'El plan de hoy.':"Today's plan.")
  ),
  el('div',{class:'flex gap-2.5 shrink-0'},
  el('button',{'aria-label':'prev', class:'grid place-items-center cursor-pointer', style:'width:52px;height:52px;border:3px solid var(--ink);background:var(--paper);font-family:Anton;font-size:24px;border-radius:4px;', onclick:()=>{ heroScroll.rail && heroScroll.rail.scrollBy({left:-740,behavior:'smooth'}); }}, '‹'),
@@ -5385,7 +5385,7 @@ function Booking() {
  );
  mvDrop({ bg:'#1F9D63', grainBlend:'overlay', kickColor:'#0b3d27', kick:'menuverso · ' + (es?'canje verificado':'redemption verified'),
  ticket: gticket, below: gbelow, closeLabel:(es?'HECHO ✓':'DONE ✓'),
- onClose: () => { if (stars > 0) { if (!store.reviews) store.reviews = []; store.reviews.push({ memberId: u.id, venueSlug: b.venueSlug, stars: stars, note: (noteVal||'').trim() || null, createdAt: Date.now() }); saveStore(); } paint(); }
+ onClose: () => { if (stars > 0) { if (!store.reviews) store.reviews = []; store.reviews.push({ memberId: u.id, venueSlug: b.venueSlug, stars: stars, note: (noteVal||'').trim() || null, createdAt: Date.now() }); saveStore(); } go('profile'); }  // client 24/06: after the green Done screen, skip the 'Canjeado' confirmation and go straight to Profile
  });
  }
  mvDrop({ bg:'#F4291A', kickColor:'#16110F', kick:'menuverso · ' + (es?'canje confirmado':'redemption confirmed'),
