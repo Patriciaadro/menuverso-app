@@ -1,0 +1,98 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+11,La Pubilla,Catalan,https://restaurantelapubilla.com/,+34 932 18 29 94,https://www.google.com/maps/search/?api=1&query=La+Pubilla+Pla%C3%A7a+de+la+Llibertat%2C+23+Barcelona,"Plaça de la Llibertat, 23",08012
+12,Fonda Pepa,Catalan,https://fondapepa.cat/,+34 932 17 10 10,https://www.google.com/maps/search/?api=1&query=Fonda+Pepa+C%2F+de+Ram%C3%B3n+y+Cajal%2C+2+Barcelona,"C/ de Ramón y Cajal, 2",08012
+13,Casa Lopez,Spanish,,+34 634 59 21 65,https://www.google.com/maps/search/?api=1&query=Casa+Lopez+C%2F+del+Topazi%2C+11+Barcelona,"C/ del Topazi, 11",08012
+14,El Far del Nord,Mediterranean,https://elfardelnord.com/,+34 937 37 98 55,https://www.google.com/maps/search/?api=1&query=El+Far+del+Nord+C%2F+de+la+Provid%C3%A8ncia%2C+88+Barcelona,"C/ de la Providència, 88",08024
+15,Cafè Salambó,Mediterranean,https://www.cafesalambo.com/,+34 932 18 69 66,https://www.google.com/maps/search/?api=1&query=Caf%C3%A8+Salamb%C3%B3+C%2F+de+Torrijos%2C+51+Barcelona,"C/ de Torrijos, 51",08012
+16,Casa Pages,Spanish,,+34 934 573 545,https://www.google.com/maps/search/?api=1&query=Casa+Pages+C%2F+de+la+Llibertat%2C+19+Barcelona,"C/ de la Llibertat, 19",08012
+17,Kibuka Ramen,Japanese,https://kibuka.com/,+34 933682036,https://www.google.com/maps/search/?api=1&query=Kibuka+Ramen+C%2F+de+Torrijos%2C+15+Barcelona,"C/ de Torrijos, 15",08012
+18,Cal Boter,Catalan,https://restaurantcalboter.com/,+34 934588462,https://www.google.com/maps/search/?api=1&query=Cal+Boter+C%2F+Major+de+Gr%C3%A0cia%2C+56+Barcelona,"C/ Major de Gràcia, 56",08012
+19,La Trini,Mediterranean,https://latrini30.com,+34 932 37 03 35,https://www.google.com/maps/search/?api=1&query=La+Trini+C%2F+de+Verdi%2C+30+Barcelona,"C/ de Verdi, 30",08012
+20,La Caceta,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Caceta+C%2F+del+Planet%2C+3+Barcelona,"C/ del Planet, 3",08012
+142,Con Gracia,Mediterranean,https://congracia.es/,+34 932380201,https://www.google.com/maps/search/?api=1&query=Con+Gracia+C%2F+de+Mozart%2C+16+Barcelona,"C/ de Mozart, 16",08012
+143,Roig Robí,Catalan,,,https://www.google.com/maps/search/?api=1&query=Roig+Rob%C3%AD+C%2F+de+Bruniquer%2C+48+Barcelona,"C/ de Bruniquer, 48",08012
+144,L'Arrosseria Xàtiva,Mediterranean,https://grupxativa.com/,,https://www.google.com/maps/search/?api=1&query=L%27Arrosseria+X%C3%A0tiva+C%2F+de+l%27Or%2C+86+Barcelona,"C/ de l'Or, 86",08012
+145,La Singular,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Singular+C%2F+del+Torrent+de+l%27Olla%2C+55+Barcelona,"C/ del Torrent de l'Olla, 55",08012
+146,Verdi Dinou,Catalan,,,https://www.google.com/maps/search/?api=1&query=Verdi+Dinou+C%2F+de+Torrijos%2C+7+Barcelona,"C/ de Torrijos, 7",08024
+147,Beryti Bistro,Lebanese,,,https://www.google.com/maps/search/?api=1&query=Beryti+Bistro+C%2F+de+Torrijos%2C+21+Barcelona,"C/ de Torrijos, 21",08012
+148,Askadinya,Middle Eastern,https://askadinyabarcelona.com/,,https://www.google.com/maps/search/?api=1&query=Askadinya+C%2F+de+Torrijos%2C+22+Barcelona,"C/ de Torrijos, 22",08012
+149,Omu,Japanese,,,https://www.google.com/maps/search/?api=1&query=Omu+Pl.+de+la+Vila+de+Gr%C3%A0cia%2C+188+Barcelona,"Pl. de la Vila de Gràcia, 188",08024
+150,Lluritu,Seafood,,,https://www.google.com/maps/search/?api=1&query=Lluritu+C%2F+Gran+de+Gr%C3%A0cia%2C+119+Barcelona,"C/ Gran de Gràcia, 119",08024
+151,Santa Gula,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Santa+Gula+C%2F+de+Bruniquer%2C+48+Barcelona,"C/ de Bruniquer, 48",08012
+152,Cibulet,Fusion,https://cibulet.com/,+34 653 792 304,https://www.google.com/maps/search/?api=1&query=Cibulet+C%2F+de+Rabassa%2C+127+Barcelona,"C/ de Rabassa, 127",08012
+153,Antigua,Catalan,,,https://www.google.com/maps/search/?api=1&query=Antigua+C%2F+de+Torrijos%2C+171+Barcelona,"C/ de Torrijos, 171",08024
+154,Galú,Italian,,,https://www.google.com/maps/search/?api=1&query=Gal%C3%BA+Pl.+de+la+Vila+de+Gr%C3%A0cia%2C+117+Barcelona,"Pl. de la Vila de Gràcia, 117",08024
+155,Indian Herbs,Indian,,,https://www.google.com/maps/search/?api=1&query=Indian+Herbs+C%2F+de+la+Perla%2C+171+Barcelona,"C/ de la Perla, 171",08012
+156,La Panxa del Bisbe,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Panxa+del+Bisbe+C%2F+de+Rabassa%2C+46+Barcelona,"C/ de Rabassa, 46",08024
+157,Berbena,Fusion,,,https://www.google.com/maps/search/?api=1&query=Berbena+C%2F+de+la+Perla%2C+118+Barcelona,"C/ de la Perla, 118",08024
+158,El Diset,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Diset+C%2F+de+Bonavista%2C+9+Barcelona,"C/ de Bonavista, 9",08012
+159,Can Tosca,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Tosca+Pl.+del+Sol%2C+143+Barcelona,"Pl. del Sol, 143",08012
+160,Gut,Fusion,,,https://www.google.com/maps/search/?api=1&query=Gut+C%2F+Gran+de+Gr%C3%A0cia%2C+8+Barcelona,"C/ Gran de Gràcia, 8",08012
+161,Cantina Machito,Mexican,,,https://www.google.com/maps/search/?api=1&query=Cantina+Machito+C%2F+de+Bruniquer%2C+130+Barcelona,"C/ de Bruniquer, 130",08012
+162,Contracorrent Bistro,Italian,https://contracorrentbar.com/,+34 623922644,https://www.google.com/maps/search/?api=1&query=Contracorrent+Bistro+C%2F+de+Verdi%2C+136+Barcelona,"C/ de Verdi, 136",08024
+163,Gasterea,Spanish,,,https://www.google.com/maps/search/?api=1&query=Gasterea+C%2F+del+Torrent+de+l%27Olla%2C+74+Barcelona,"C/ del Torrent de l'Olla, 74",08024
+164,La Xula Tapería,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Xula+Taper%C3%ADa+C%2F+de+Verdi%2C+53+Barcelona,"C/ de Verdi, 53",08024
+165,Extra Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Extra+Bar+C%2F+de+Verdi%2C+193+Barcelona,"C/ de Verdi, 193",08024
+166,Bodega Neus,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Neus+C%2F+del+Torrent+de+l%27Olla%2C+24+Barcelona,"C/ del Torrent de l'Olla, 24",08024
+167,Sol Soler,Spanish,,,https://www.google.com/maps/search/?api=1&query=Sol+Soler+C%2F+de+la+Perla%2C+51+Barcelona,"C/ de la Perla, 51",08012
+168,Bar Bodega Quimet,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Bodega+Quimet+C%2F+de+Bonavista%2C+78+Barcelona,"C/ de Bonavista, 78",08024
+169,Ca'l Pep,Spanish,,,https://www.google.com/maps/search/?api=1&query=Ca%27l+Pep+C%2F+de+l%27Or%2C+165+Barcelona,"C/ de l'Or, 165",08024
+170,Bar Pietro,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Pietro+C%2F+de+Verdi%2C+181+Barcelona,"C/ de Verdi, 181",08012
+171,Café Pagès,Catalan,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Pag%C3%A8s+C%2F+de+l%27Or%2C+131+Barcelona,"C/ de l'Or, 131",08012
+172,Bar Canigó,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Canig%C3%B3+C%2F+de+la+Llibertat%2C+75+Barcelona,"C/ de la Llibertat, 75",08024
+377,Intrèpid de Gràcia,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Intr%C3%A8pid+de+Gr%C3%A0cia+C%2F+del+Torrent+de+l%27Olla%2C+176+Barcelona,"C/ del Torrent de l'Olla, 176",08012
+378,L'olla del Torrent,French,,,https://www.google.com/maps/search/?api=1&query=L%27olla+del+Torrent+C%2F+del+Torrent+de+l%27Olla%2C+106+Barcelona,"C/ del Torrent de l'Olla, 106",08012
+379,Bar Alegría Gràcia,Spanish,https://baralegriarestaurante.com/,+34 934152078,https://www.google.com/maps/search/?api=1&query=Bar+Alegr%C3%ADa+Gr%C3%A0cia+C%2F+del+Torrent+de+l%27Olla%2C+77+Barcelona,"C/ del Torrent de l'Olla, 77",08012
+380,Pepa Tomate,Mediterranean,https://www.pepatomategrup.com/,+34 932104698,https://www.google.com/maps/search/?api=1&query=Pepa+Tomate+Pl.+de+la+Revoluci%C3%B3%2C+15+Barcelona,"Pl. de la Revolució, 15",08012
+381,Botafumeiro,Seafood,https://botafumeiro.es/,+34 932184230,https://www.google.com/maps/search/?api=1&query=Botafumeiro+C%2F+Gran+de+Gr%C3%A0cia%2C+81+Barcelona,"C/ Gran de Gràcia, 81",08012
+382,La Llar dels Orígens,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Llar+dels+Or%C3%ADgens+C%2F+de+Ramon+y+Cajal%2C+12+Barcelona,"C/ de Ramon y Cajal, 12",08012
+383,Ipar-Txoko,Basque,,,https://www.google.com/maps/search/?api=1&query=Ipar-Txoko+C%2F+de+Mozart%2C+22+Barcelona,"C/ de Mozart, 22",08012
+384,Café del Sol,Mediterranean,https://cafedelsol.cat/,+34 934156863,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+del+Sol+Pl.+del+Sol%2C+16+Barcelona,"Pl. del Sol, 16",08012
+385,Chivuo's,Gastropub,https://chivuos.com/,+34 936670145,https://www.google.com/maps/search/?api=1&query=Chivuo%27s+C%2F+de+Torrijos%2C+30+Barcelona,"C/ de Torrijos, 30",08012
+494,Café Camelia,Café,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Camelia+C%2F+de+Verdi%2C+79+Barcelona,"C/ de Verdi, 79",08012
+495,La Monroe,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Monroe+Pl.+del+Sol%2C+12+Barcelona,"Pl. del Sol, 12",08012
+496,Cervecería En Aparte,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Cervecer%C3%ADa+En+Aparte+C%2F+de+la+Llibertat%2C+28+Barcelona,"C/ de la Llibertat, 28",08012
+497,Fragments Café,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Fragments+Caf%C3%A9+Pl.+de+la+Conc%C3%B2rdia%2C+12+Barcelona,"Pl. de la Concòrdia, 12",08012
+498,El Racó de la Vila,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Rac%C3%B3+de+la+Vila+C%2F+de+la+Llibertat%2C+18+Barcelona,"C/ de la Llibertat, 18",08012
+499,Thai Gardens,Asian,,,https://www.google.com/maps/search/?api=1&query=Thai+Gardens+C%2F+de+la+Diputaci%C3%B3%2C+273+Barcelona,"C/ de la Diputació, 273",08007
+500,Vietnamita Gràcia,Asian,,,https://www.google.com/maps/search/?api=1&query=Vietnamita+Gr%C3%A0cia+C%2F+de+Torrijos%2C+40+Barcelona,"C/ de Torrijos, 40",08012
+501,Il Giardinetto,Italian,https://ilgiardinetto.es/,+34 932 187 536,https://www.google.com/maps/search/?api=1&query=Il+Giardinetto+C%2F+de+la+Granada+del+Pened%C3%A8s%2C+22+Barcelona,"C/ de la Granada del Penedès, 22",08006
+502,Can Vidalet,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Vidalet+C%2F+de+Ros+de+Olano%2C+1+Barcelona,"C/ de Ros de Olano, 1",08012
+503,Mama Manouche,Middle Eastern,,,https://www.google.com/maps/search/?api=1&query=Mama+Manouche+C%2F+de+Torrijos%2C+48+Barcelona,"C/ de Torrijos, 48",08012
+504,Koku Kitchen Ramen,Japanese,,,https://www.google.com/maps/search/?api=1&query=Koku+Kitchen+Ramen+C%2F+del+C%C3%B3s%2C+11+Barcelona,"C/ del Cós, 11",08012
+516,Bar Casi,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Casi+C%2F+de+Puigmart%C3%AD%2C+10+Barcelona,"C/ de Puigmartí, 10",08012
+553,Bo de Bernat,Catalan,,,https://www.google.com/maps/search/?api=1&query=Bo+de+Bernat+C%2F+de+Bonavista%2C+7+Barcelona,"C/ de Bonavista, 7",08012
+592,Café Godot,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Godot+C%2F+de+Sant+Dom%C3%A8nec%2C+19+Barcelona,"C/ de Sant Domènec, 19",08012
+593,Chido One,Mexican,,,https://www.google.com/maps/search/?api=1&query=Chido+One+C%2F+de+Torrent+de+l%27Olla%2C+175+Barcelona,"C/ de Torrent de l'Olla, 175",08012
+594,Himalaya,Indian,,,https://www.google.com/maps/search/?api=1&query=Himalaya+C%2F+de+Bruniquer%2C+40+Barcelona,"C/ de Bruniquer, 40",08024
+654,Croq & Roll Croqueteria,Spanish,,,https://www.google.com/maps/search/?api=1&query=Croq+%26+Roll+Croqueteria+C%2F+de+Mozart%2C+20+Barcelona,"C/ de Mozart, 20",08012
+655,Cafè Pagès,Spanish,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A8+Pag%C3%A8s+Pl.+de+la+Revoluci%C3%B3+de+1868%2C+3+Barcelona,"Pl. de la Revolució de 1868, 3",08012
+656,Can Punyetes,Spanish,,,https://www.google.com/maps/search/?api=1&query=Can+Punyetes+Pl.+de+la+Revoluci%C3%B3+de+1868%2C+8+Barcelona,"Pl. de la Revolució de 1868, 8",08012
+657,La Pepita Gràcia,Spanish,https://www.lapepita.com/,+34 932384893,https://www.google.com/maps/search/?api=1&query=La+Pepita+Gr%C3%A0cia+C%2F+de+C%C3%B2rsega%2C+343+Barcelona,"C/ de Còrsega, 343",08037
+658,El Glop,Catalan,https://elglop.com/,+34 932137058,https://www.google.com/maps/search/?api=1&query=El+Glop+C%2F+de+Sant+Llu%C3%ADs%2C+24+Barcelona,"C/ de Sant Lluís, 24",08012
+659,Botà,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bot%C3%A0+C%2F+de+Torrent+de+l%27Olla%2C+70+Barcelona,"C/ de Torrent de l'Olla, 70",08012
+724,Bottega Bernacca,Italian,,,https://www.google.com/maps/search/?api=1&query=Bottega+Bernacca+C%2F+de+Bonavista%2C+20+Barcelona,"C/ de Bonavista, 20",08012
+730,L'Italiano Perso,Italian,,,https://www.google.com/maps/search/?api=1&query=L%27Italiano+Perso+C%2F+de+Saragossa%2C+30+Barcelona,"C/ de Saragossa, 30",08006
+731,Thai Noodles Gràcia,Asian,,,https://www.google.com/maps/search/?api=1&query=Thai+Noodles+Gr%C3%A0cia+C%2F+de+Torrent+de+l%27Olla%2C+150+Barcelona,"C/ de Torrent de l'Olla, 150",08012
+732,Restaurant Emocionar,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Emocionar+C%2F+de+la+Mare+de+D%C3%A9u+dels+Desemparats%2C+10+Barcelona,"C/ de la Mare de Déu dels Desemparats, 10",08012
+799,Restaurant La Salut,Mediterranean,https://lasalutrestaurant.com/,,https://www.google.com/maps/search/?api=1&query=Restaurant+La+Salut+C%2F+de+la+Mare+de+D%C3%A9u+de+la+Salut%2C+10+Barcelona,"C/ de la Mare de Déu de la Salut, 10",08024
+800,Salut! Bistro,Mediterranean,https://salutbistro.es/,,https://www.google.com/maps/search/?api=1&query=Salut%21+Bistro+C%2F+de+Torrent+de+l%27Olla%2C+160+Barcelona,"C/ de Torrent de l'Olla, 160",08012
+801,Corgi Café,Café,https://corgicafe.es/,,https://www.google.com/maps/search/?api=1&query=Corgi+Caf%C3%A9+C%2F+de+Verdi%2C+40+Barcelona,"C/ de Verdi, 40",08012
+855,Honest Greens Gràcia,Vegetarian/Vegan,https://honestgreens.com/,+34 931227664,https://www.google.com/maps/search/?api=1&query=Honest+Greens+Gr%C3%A0cia+C%2F+de+Torrent+de+l%27Olla%2C+100+Barcelona,"C/ de Torrent de l'Olla, 100",08012
+857,El Roble,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Roble+C%2F+de+Luis+Ant%C3%BAnez%2C+5+Barcelona,"C/ de Luis Antúnez, 5",08012
+858,Kibuka Gràcia,Japanese,https://kibuka.com/,+34 933682036,https://www.google.com/maps/search/?api=1&query=Kibuka+Gr%C3%A0cia+C%2F+de+Verdi%2C+60+Barcelona,"C/ de Verdi, 60",08012
+859,La Estrella del Born-Gràcia,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Estrella+del+Born-Gr%C3%A0cia+C%2F+de+Verdi%2C+50+Barcelona,"C/ de Verdi, 50",08012
+860,Sushi Ya,Japanese,,,https://www.google.com/maps/search/?api=1&query=Sushi+Ya+C%2F+de+Torrijos%2C+30+Barcelona,"C/ de Torrijos, 30",08012
+905,Casa Guinart,Catalan,https://casaguinart.com/,+34 933178887,https://www.google.com/maps/search/?api=1&query=Casa+Guinart+La+Rambla%2C+95+Barcelona,"La Rambla, 95",08012
+911,La Parra,Mediterranean,https://barlaparra.com/,+34 932134733,https://www.google.com/maps/search/?api=1&query=La+Parra+C%2F+de+Joanot+Martorell%2C+3+Barcelona,"C/ de Joanot Martorell, 3",08012
+936,Casa Pagès,Catalan,https://casapages.cat/,+34 934573545,https://www.google.com/maps/search/?api=1&query=Casa+Pag%C3%A8s+C%2F+de+la+Llibertat%2C+19+Barcelona,"C/ de la Llibertat, 19",08012
+950,Arume Gràcia,Seafood,https://arumerestaurante.com/,+34 930228043,https://www.google.com/maps/search/?api=1&query=Arume+Gr%C3%A0cia+C%2F+de+Bruniquer%2C+75+Barcelona,"C/ de Bruniquer, 75",08024
+996,Casa Rincón de Gràcia,Catalan,,,https://www.google.com/maps/search/?api=1&query=Casa+Rinc%C3%B3n+de+Gr%C3%A0cia+C%2F+de+Torrent+de+l+Olla%2C+130+Barcelona,"C/ de Torrent de l Olla, 130",08012
+1024,Tangana Gràcia,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tangana+Gr%C3%A0cia+Gr%C3%A0cia%2C+Barcelona+Barcelona,"Gràcia, Barcelona",08024
+1077,El Disbarat,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Disbarat+Gr%C3%A0cia%2C+Barcelona+Barcelona,"Gràcia, Barcelona",08025
+1103,La Nena Gràcia,Café,,,https://www.google.com/maps/search/?api=1&query=La+Nena+Gr%C3%A0cia+Gr%C3%A0cia%2C+Barcelona+Barcelona,"Gràcia, Barcelona",08012
+1104,La Vermutería del Tano,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Vermuter%C3%ADa+del+Tano+Gr%C3%A0cia%2C+Barcelona+Barcelona,"Gràcia, Barcelona",08024
+1105,Tunateca Balfegó,Seafood,,,https://www.google.com/maps/search/?api=1&query=Tunateca+Balfeg%C3%B3+Gr%C3%A0cia%2C+Barcelona+Barcelona,"Gràcia, Barcelona",08024
+1142,El Rincón de Gràcia,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Rinc%C3%B3n+de+Gr%C3%A0cia+Gr%C3%A0cia%2C+Barcelona+Barcelona,"Gràcia, Barcelona",08025
+1225,Gràcia Platets i Bistró,Mediterranean,https://graciaplatetsibistro.makro.rest/,+34 654 65 41 80,https://www.google.com/maps/search/?api=1&query=Gr%C3%A0cia+Platets+i+Bistr%C3%B3++Barcelona,"Carrer de Roger de Llúria, 49, Eixample, 08009 Barcelona",08009
+1268,El Jardinet de Gràcia,Other,,,https://www.google.com/maps/search/?api=1&query=El+Jardinet+de+Gr%C3%A0cia++Barcelona,,

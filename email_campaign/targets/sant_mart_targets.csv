@@ -1,0 +1,23 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+56,Sant Martí Restaurant,Mediterranean,https://santmarti-restaurant.es,,https://www.google.com/maps/search/?api=1&query=Sant+Mart%C3%AD+Restaurant+Av.+Meridiana%2C+200+Barcelona,"Av. Meridiana, 200",08027
+57,Ryu Ramen,Japanese,,,https://www.google.com/maps/search/?api=1&query=Ryu+Ramen+C%2F+de+Bac+de+Roda%2C+53+Barcelona,"C/ de Bac de Roda, 53",08019
+279,La Barca del Salamanca,Seafood,,,https://www.google.com/maps/search/?api=1&query=La+Barca+del+Salamanca+Av.+Meridiana%2C+8+Barcelona,"Av. Meridiana, 8",08019
+280,El Cangrejo Loco,Seafood,,,https://www.google.com/maps/search/?api=1&query=El+Cangrejo+Loco+C%2F+de+Bac+de+Roda%2C+32+Barcelona,"C/ de Bac de Roda, 32",08020
+281,Xiringuito Escribà,Seafood,https://restaurantsescriba.com/xiringuitoescriba,+34 932210729,https://www.google.com/maps/search/?api=1&query=Xiringuito+Escrib%C3%A0+Av.+Meridiana%2C+106+Barcelona,"Av. Meridiana, 106",08019
+465,Restaurante El Port,Seafood,,,https://www.google.com/maps/search/?api=1&query=Restaurante+El+Port+C%2F+del+Taulat%2C+10+Barcelona,"C/ del Taulat, 10",08019
+466,Can Recasens,Catalan,https://canrecasens.restaurant/,+34 933008123,https://www.google.com/maps/search/?api=1&query=Can+Recasens+Rambla+del+Poblenou%2C+102+Barcelona,"Rambla del Poblenou, 102",08005
+467,Agreste Mar,Italian,,,https://www.google.com/maps/search/?api=1&query=Agreste+Mar+Pg.+Colom%2C+9+Barcelona,"Pg. Colom, 9",08002
+468,LOMBO,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=LOMBO+C%2F+de+Llull%2C+330+Barcelona,"C/ de Llull, 330",08019
+574,Restaurant Can Fisher,Seafood,https://canfisher.com/,+34 932252802,https://www.google.com/maps/search/?api=1&query=Restaurant+Can+Fisher+Av.+Litoral+Mar%2C+42+Barcelona,"Av. Litoral Mar, 42",08005
+575,L'Adresse,Fusion,,,https://www.google.com/maps/search/?api=1&query=L%27Adresse+Av.+Diagonal%2C+3+Barcelona,"Av. Diagonal, 3",08019
+872,Restaurant El Foro,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurant+El+Foro+C%2F+de+Proven%C3%A7als%2C+20+Barcelona,"C/ de Provençals, 20",08019
+873,La Forquilla Sant Martí,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Forquilla+Sant+Mart%C3%AD+C%2F+de+Pallars%2C+120+Barcelona,"C/ de Pallars, 120",08018
+874,Xiringuito Mar Bella,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Xiringuito+Mar+Bella+Platja+de+la+Mar+Bella+Barcelona,Platja de la Mar Bella,08005
+875,Can Mañes,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Ma%C3%B1es+C%2F+de+Pere+IV%2C+80+Barcelona,"C/ de Pere IV, 80",08005
+876,El Glop Sant Martí,Catalan,https://elglop.com/,,https://www.google.com/maps/search/?api=1&query=El+Glop+Sant+Mart%C3%AD+C%2F+de+Pallars%2C+100+Barcelona,"C/ de Pallars, 100",08018
+937,El Xiringo,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Xiringo+Sant+Mart%C3%AD%2C+Barcelona+Barcelona,"Sant Martí, Barcelona",08005
+1049,Restaurant Sant Martí,Mediterranean,https://santmarti-restaurant.es/,,https://www.google.com/maps/search/?api=1&query=Restaurant+Sant+Mart%C3%AD+Sant+Mart%C3%AD%2C+Barcelona+Barcelona,"Sant Martí, Barcelona",08005
+1050,Aürt Barcelona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=A%C3%BCrt+Barcelona+Sant+Mart%C3%AD%2C+Barcelona+Barcelona,"Sant Martí, Barcelona",08005
+1051,Enoteca Paco Pérez,Seafood,,,https://www.google.com/maps/search/?api=1&query=Enoteca+Paco+P%C3%A9rez+Sant+Mart%C3%AD%2C+Barcelona+Barcelona,"Sant Martí, Barcelona",08020
+1052,Muysca Barcelona,Colombian,,,https://www.google.com/maps/search/?api=1&query=Muysca+Barcelona+Sant+Mart%C3%AD%2C+Barcelona+Barcelona,"Sant Martí, Barcelona",08005
+1053,Locanda del Vulture,Italian,,,https://www.google.com/maps/search/?api=1&query=Locanda+del+Vulture+Sant+Mart%C3%AD%2C+Barcelona+Barcelona,"Sant Martí, Barcelona",08019

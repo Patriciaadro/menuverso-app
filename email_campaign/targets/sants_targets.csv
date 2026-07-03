@@ -1,0 +1,59 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+49,L'Arrosseria de Sants,Mediterranean,https://arrosseriadesants.com,+34 933322804,https://www.google.com/maps/search/?api=1&query=L%27Arrosseria+de+Sants+C%2F+Sants%2C+360+Barcelona,"C/ Sants, 360",08028
+298,Granja Elena,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Granja+Elena+C%2F+de+Joan+G%C3%BCell%2C+165+Barcelona,"C/ de Joan Güell, 165",08014
+299,Suto Barcelona,Japanese,https://sutobarcelona.com/,+34 934266945,https://www.google.com/maps/search/?api=1&query=Suto+Barcelona+C%2F+de+Joan+G%C3%BCell%2C+175+Barcelona,"C/ de Joan Güell, 175",08028
+300,Zaytun,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Zaytun+C%2F+de+Moian%C3%A8s%2C+66+Barcelona,"C/ de Moianès, 66",08028
+301,La Tere Gastro Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Tere+Gastro+Bar+Pl.+de+Sants%2C+19+Barcelona,"Pl. de Sants, 19",08014
+302,La Mundana,Spanish,https://lamundana.cat/,+34 935680028,https://www.google.com/maps/search/?api=1&query=La+Mundana+C%2F+de+la+Creu+Coberta%2C+156+Barcelona,"C/ de la Creu Coberta, 156",08014
+303,Bar Iberia,Catalan,,,https://www.google.com/maps/search/?api=1&query=Bar+Iberia+Pl.+de+Sants%2C+109+Barcelona,"Pl. de Sants, 109",08028
+304,Homo Sibaris,Spanish,,,https://www.google.com/maps/search/?api=1&query=Homo+Sibaris+C%2F+de+Sants%2C+196+Barcelona,"C/ de Sants, 196",08014
+305,Vermut i a la Gàbia,Spanish,,,https://www.google.com/maps/search/?api=1&query=Vermut+i+a+la+G%C3%A0bia+C%2F+de+Sants%2C+119+Barcelona,"C/ de Sants, 119",08014
+306,La Briciola,Italian,https://labriciola.es/,+34 933310826,https://www.google.com/maps/search/?api=1&query=La+Briciola+C%2F+de+la+Creu+Coberta%2C+156+Barcelona,"C/ de la Creu Coberta, 156",08028
+307,Las Tres Mentiras,Mexican,,,https://www.google.com/maps/search/?api=1&query=Las+Tres+Mentiras+C%2F+de+la+Creu+Coberta%2C+198+Barcelona,"C/ de la Creu Coberta, 198",08028
+308,Addis Abeba,Ethiopian,,,https://www.google.com/maps/search/?api=1&query=Addis+Abeba+C%2F+de+la+Creu+Coberta%2C+128+Barcelona,"C/ de la Creu Coberta, 128",08028
+388,La Flauta del Paralelo,Spanish,https://laflautagroup.com/,+34 934414133,https://www.google.com/maps/search/?api=1&query=La+Flauta+del+Paralelo+Av.+del+Paral%C2%B7lel%2C+32+Barcelona,"Av. del Paral·lel, 32",08001
+433,Txalaparta,Basque,https://restaurantetxalaparta.com/,,https://www.google.com/maps/search/?api=1&query=Txalaparta+C%2F+de+Sants%2C+210+Barcelona,"C/ de Sants, 210",08028
+434,Tremendo Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tremendo+Bar+C%2F+de+Sants%2C+150+Barcelona,"C/ de Sants, 150",08028
+435,La Nova Farga,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Nova+Farga+C%2F+de+la+Creu+Coberta%2C+83+Barcelona,"C/ de la Creu Coberta, 83",08014
+436,El Rebost d'Hostafrancs,Mediterranean,https://elrebostdhostafrancs.com/,,https://www.google.com/maps/search/?api=1&query=El+Rebost+d%27Hostafrancs+Gran+Via+de+les+Corts+Catalanes%2C+415+Barcelona,"Gran Via de les Corts Catalanes, 415",08015
+437,Café Bar Ernesto,Spanish,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Bar+Ernesto+C%2F+de+la+Creu+Coberta%2C+62+Barcelona,"C/ de la Creu Coberta, 62",08014
+438,Bar Lola Tapas y Platillos,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Lola+Tapas+y+Platillos+Gran+Via+de+les+Corts+Catalanes%2C+450+Barcelona,"Gran Via de les Corts Catalanes, 450",08015
+439,Tapaspuma,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tapaspuma+Gran+Via+de+les+Corts+Catalanes%2C+420+Barcelona,"Gran Via de les Corts Catalanes, 420",08015
+440,Ugarit Sants,Middle Eastern,,,https://www.google.com/maps/search/?api=1&query=Ugarit+Sants+C%2F+de+Sants%2C+105+Barcelona,"C/ de Sants, 105",08014
+441,Asador de Lugo,Spanish,,,https://www.google.com/maps/search/?api=1&query=Asador+de+Lugo+C%2F+de+Joan+G%C3%BCell%2C+45+Barcelona,"C/ de Joan Güell, 45",08028
+442,O'Rincón da Terra,Spanish,,,https://www.google.com/maps/search/?api=1&query=O%27Rinc%C3%B3n+da+Terra+C%2F+de+Sants%2C+180+Barcelona,"C/ de Sants, 180",08028
+443,Bodega Salvat,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Salvat+C%2F+de+Galileu%2C+30+Barcelona,"C/ de Galileu, 30",08028
+599,Tasca Felipe,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tasca+Felipe+C%2F+de+Sants%2C+120+Barcelona,"C/ de Sants, 120",08014
+600,Rincón Gallego,Seafood,,,https://www.google.com/maps/search/?api=1&query=Rinc%C3%B3n+Gallego+C%2F+de+Sants%2C+80+Barcelona,"C/ de Sants, 80",08014
+601,Cal Joan,Catalan,,,https://www.google.com/maps/search/?api=1&query=Cal+Joan+C%2F+de+la+Creu+Coberta%2C+90+Barcelona,"C/ de la Creu Coberta, 90",08014
+602,Restaurante Candela,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Candela+C%2F+de+Sants%2C+140+Barcelona,"C/ de Sants, 140",08028
+688,Bodega Bartolí,Catalan,,,https://www.google.com/maps/search/?api=1&query=Bodega+Bartol%C3%AD+C%2F+de+Sants%2C+160+Barcelona,"C/ de Sants, 160",08028
+689,Terra d'Escudella,Catalan,,,https://www.google.com/maps/search/?api=1&query=Terra+d%27Escudella+C%2F+de+la+Creu+Coberta%2C+50+Barcelona,"C/ de la Creu Coberta, 50",08014
+690,El Celler del Nou Priorat,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Celler+del+Nou+Priorat+C%2F+de+Sants%2C+90+Barcelona,"C/ de Sants, 90",08014
+691,La Vicoca,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Vicoca+C%2F+de+la+Creu+Coberta%2C+70+Barcelona,"C/ de la Creu Coberta, 70",08014
+692,Mula Bar,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Mula+Bar+C%2F+de+Sants%2C+110+Barcelona,"C/ de Sants, 110",08014
+693,La Patatona,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Patatona+C%2F+de+Sants%2C+130+Barcelona,"C/ de Sants, 130",08014
+694,Tapes d'Or,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tapes+d%27Or+C%2F+de+Sants%2C+70+Barcelona,"C/ de Sants, 70",08014
+695,La Jabata,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Jabata+C%2F+de+Sants%2C+95+Barcelona,"C/ de Sants, 95",08014
+696,Doppietta Sants,Italian,,,https://www.google.com/maps/search/?api=1&query=Doppietta+Sants+C%2F+de+Joan+G%C3%BCell%2C+20+Barcelona,"C/ de Joan Güell, 20",08028
+813,Restaurante Badal,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Badal+C%2F+de+Badal%2C+50+Barcelona,"C/ de Badal, 50",08014
+814,Marisquería La Estrella,Seafood,,,https://www.google.com/maps/search/?api=1&query=Marisquer%C3%ADa+La+Estrella+C%2F+de+Joan+G%C3%BCell%2C+30+Barcelona,"C/ de Joan Güell, 30",08028
+815,Piazza Navona,Italian,,,https://www.google.com/maps/search/?api=1&query=Piazza+Navona+C%2F+de+Sants%2C+180+Barcelona,"C/ de Sants, 180",08028
+816,El Rinconcillo de Sants,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Rinconcillo+de+Sants+C%2F+de+Sants%2C+150+Barcelona,"C/ de Sants, 150",08028
+866,Can Viada,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Viada+C%2F+de+Sants%2C+200+Barcelona,"C/ de Sants, 200",08028
+867,La Cuina de Sants,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+de+Sants+C%2F+de+la+Creu+Coberta%2C+60+Barcelona,"C/ de la Creu Coberta, 60",08014
+868,El Tomàquet de Sants,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Tom%C3%A0quet+de+Sants+C%2F+de+Sants%2C+170+Barcelona,"C/ de Sants, 170",08028
+908,La Cuina de Can Simon,Catalan,https://lacuinadecansimon.cat/,+34 933310516,https://www.google.com/maps/search/?api=1&query=La+Cuina+de+Can+Simon+C%2F+del+Consell+de+Cent%2C+5+Barcelona,"C/ del Consell de Cent, 5",08014
+923,Sants BBQ,Gastropub,,,https://www.google.com/maps/search/?api=1&query=Sants+BBQ+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08028
+940,Can Batlló,Catalan,,+34 934214077,https://www.google.com/maps/search/?api=1&query=Can+Batll%C3%B3+C%2F+del+Marqu%C3%A8s+de+Sentmenat%2C+35+Barcelona,"C/ del Marquès de Sentmenat, 35",08014
+995,La Cuina del Paisé,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+del+Pais%C3%A9+C%2F+de+Sants%2C+190+Barcelona,"C/ de Sants, 190",08028
+1032,Tramendu,Catalan,,,https://www.google.com/maps/search/?api=1&query=Tramendu+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08028
+1033,Bar Remei,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Remei+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08014
+1034,Casa Axin,Spanish,,,https://www.google.com/maps/search/?api=1&query=Casa+Axin+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08028
+1035,Las Palmeras La Marina,Spanish,,,https://www.google.com/maps/search/?api=1&query=Las+Palmeras+La+Marina+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08014
+1036,Tiberi Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tiberi+Bar+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08028
+1037,Buenavista Winery Sants,Spanish,,,https://www.google.com/maps/search/?api=1&query=Buenavista+Winery+Sants+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08014
+1115,Casa Pagès Sants,Catalan,,,https://www.google.com/maps/search/?api=1&query=Casa+Pag%C3%A8s+Sants+Sants%2C+Barcelona+Barcelona,"Sants, Barcelona",08028
+1132,Can Toni,Catalan,,+34 934315135,https://www.google.com/maps/search/?api=1&query=Can+Toni+C%2F+de+la+Creu+Coberta%2C+46+Barcelona,"C/ de la Creu Coberta, 46",08014
+1178,SALTA FOOD ZONA FRANCA,Argentine,http://saltafood.com/,+34 665 78 73 59,https://www.google.com/maps/search/?api=1&query=SALTA+FOOD+ZONA+FRANCA+Carrer+de+la+Mare+de+D%C3%A9u+de+Port%2C+90+Barcelona,"Carrer de la Mare de Deu de Port, 90, 08038 Barcelona",08038
+1186,Noush Bcn,Fusion,https://noush.es/,+34 694 25 24 01,https://www.google.com/maps/search/?api=1&query=Noush+Bcn+Carrer+d%27Olzinelles%2C+100+Barcelona,"Carrer d Olzinelles, 100, 08014 Barcelona",08014

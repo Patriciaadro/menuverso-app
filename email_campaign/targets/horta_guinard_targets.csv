@@ -1,0 +1,39 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+70,Can Cortada,Catalan,https://cancortada.com/,+34 934 27 23 15,https://www.google.com/maps/search/?api=1&query=Can+Cortada+Av.+de+l%27Estatut+de+Catalunya%2C+s%2Fn+Barcelona,"Av. de l'Estatut de Catalunya, s/n",08035
+71,Restaurant Mati's,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Mati%27s+C%2F+del+Carmel%2C+15+Barcelona,"C/ del Carmel, 15",08024
+310,El Taronger de l'Avi,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Taronger+de+l%27Avi+C%2F+de+Dante+Alighieri%2C+136+Barcelona,"C/ de Dante Alighieri, 136",08032
+395,Can Travi Nou,Catalan,https://gruptravi.com/ca/can-travi-nou/,+34 934280301,https://www.google.com/maps/search/?api=1&query=Can+Travi+Nou+C%2F+de+Jorge+Manrique%2C+s%2Fn+Barcelona,"C/ de Jorge Manrique, s/n",08035
+453,Can Travi Vell,Catalan,https://gruptravi.com/,+34 934280301,https://www.google.com/maps/search/?api=1&query=Can+Travi+Vell+C%2F+de+Jorge+Manrique%2C+10+Barcelona,"C/ de Jorge Manrique, 10",08035
+454,Restaurant La Masia de Horta,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+La+Masia+de+Horta+C%2F+de+Campoamor%2C+5+Barcelona,"C/ de Campoamor, 5",08024
+455,El Racó d'en Paco,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Rac%C3%B3+d%27en+Paco+C%2F+del+Carmel%2C+75+Barcelona,"C/ del Carmel, 75",08024
+456,Bar La Font,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+La+Font+C%2F+de+Dante+Alighieri%2C+30+Barcelona,"C/ de Dante Alighieri, 30",08032
+457,Restaurant La Terrassa del Guinardó,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurant+La+Terrassa+del+Guinard%C3%B3+C%2F+de+M%C3%BChlberg%2C+15+Barcelona,"C/ de Mühlberg, 15",08024
+519,El Rincón Sevillano,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Rinc%C3%B3n+Sevillano+C%2F+del+Carmel%2C+55+Barcelona,"C/ del Carmel, 55",08024
+521,Quimet d'Horta,Spanish,,,https://www.google.com/maps/search/?api=1&query=Quimet+d%27Horta+C%2F+d%27Horta%2C+35+Barcelona,"C/ d'Horta, 35",08032
+522,Vinomio,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Vinomio+C%2F+del+Tajo%2C+20+Barcelona,"C/ del Tajo, 20",08032
+523,Destapa't,Spanish,,,https://www.google.com/maps/search/?api=1&query=Destapa%27t+C%2F+del+Dante%2C+15+Barcelona,"C/ del Dante, 15",08032
+524,Maragall Tapas,Spanish,,,https://www.google.com/maps/search/?api=1&query=Maragall+Tapas+Pg.+de+Maragall%2C+160+Barcelona,"Pg. de Maragall, 160",08041
+525,La Bodegueta d'Horta,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Bodegueta+d%27Horta+C%2F+d%27Horta%2C+50+Barcelona,"C/ d'Horta, 50",08032
+526,Escaleta del Guinardó,Catalan,,,https://www.google.com/maps/search/?api=1&query=Escaleta+del+Guinard%C3%B3+C%2F+de+M%C3%BChlberg%2C+20+Barcelona,"C/ de Mühlberg, 20",08024
+527,La Cuineta d'Horta,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuineta+d%27Horta+C%2F+d%27Horta%2C+80+Barcelona,"C/ d'Horta, 80",08032
+528,Thai & Green,Asian,,,https://www.google.com/maps/search/?api=1&query=Thai+%26+Green+C%2F+de+Campoamor%2C+20+Barcelona,"C/ de Campoamor, 20",08024
+531,El Mirador del Carmelo,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Mirador+del+Carmelo+C%2F+del+Carmel%2C+100+Barcelona,"C/ del Carmel, 100",08024
+614,Can Xus Horta,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Xus+Horta+C%2F+d%27Horta%2C+60+Barcelona,"C/ d'Horta, 60",08032
+615,Dorotea Restaurant,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Dorotea+Restaurant+Pg.+de+la+Font+d%27en+Fargas%2C+20+Barcelona,"Pg. de la Font d'en Fargas, 20",08032
+616,DVenus Restaurante,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=DVenus+Restaurante+C%2F+del+Dante%2C+40+Barcelona,"C/ del Dante, 40",08032
+617,Casa Julia 1978,Catalan,,,https://www.google.com/maps/search/?api=1&query=Casa+Julia+1978+C%2F+d%27Horta%2C+90+Barcelona,"C/ d'Horta, 90",08032
+618,La Trobada Horta,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Trobada+Horta+C%2F+de+Campoamor%2C+30+Barcelona,"C/ de Campoamor, 30",08024
+746,L'Arrosseria Xàtiva Horta,Spanish,https://grupxativa.com/,,https://www.google.com/maps/search/?api=1&query=L%27Arrosseria+X%C3%A0tiva+Horta+C%2F+de+Campoamor%2C+50+Barcelona,"C/ de Campoamor, 50",08024
+747,Sospechoso Bar Horta,Spanish,,,https://www.google.com/maps/search/?api=1&query=Sospechoso+Bar+Horta+C%2F+del+Dante%2C+25+Barcelona,"C/ del Dante, 25",08032
+748,Restaurante Brasas Vega's,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Brasas+Vega%27s+C%2F+de+Jorge+Manrique%2C+15+Barcelona,"C/ de Jorge Manrique, 15",08035
+749,Marisquería A Estrela Galega,Seafood,,,https://www.google.com/maps/search/?api=1&query=Marisquer%C3%ADa+A+Estrela+Galega+C%2F+del+Tajo%2C+30+Barcelona,"C/ del Tajo, 30",08032
+750,Restaurante SICHUAN,Chinese,,,https://www.google.com/maps/search/?api=1&query=Restaurante+SICHUAN+C%2F+del+Dante%2C+50+Barcelona,"C/ del Dante, 50",08032
+751,L'art de la Pinsa,Italian,,,https://www.google.com/maps/search/?api=1&query=L%27art+de+la+Pinsa+C%2F+d%27Horta%2C+45+Barcelona,"C/ d'Horta, 45",08032
+827,El Rincón del Guinardó,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Rinc%C3%B3n+del+Guinard%C3%B3+C%2F+de+M%C3%BChlberg%2C+30+Barcelona,"C/ de Mühlberg, 30",08024
+828,Restaurante El Portal,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurante+El+Portal+C%2F+de+Campoamor%2C+40+Barcelona,"C/ de Campoamor, 40",08024
+885,Restaurant Can Rectoret,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Can+Rectoret+C%2F+d%27Horta%2C+100+Barcelona,"C/ d'Horta, 100",08032
+886,L'Hogar Gallego,Seafood,,,https://www.google.com/maps/search/?api=1&query=L%27Hogar+Gallego+C%2F+del+Dante%2C+60+Barcelona,"C/ del Dante, 60",08032
+887,Zumo Bar Horta,Café,,,https://www.google.com/maps/search/?api=1&query=Zumo+Bar+Horta+C%2F+d%27Horta%2C+70+Barcelona,"C/ d'Horta, 70",08032
+957,Can Panella,Catalan,,+34 934274189,https://www.google.com/maps/search/?api=1&query=Can+Panella+C%2F+del+Carmel%2C+12+Barcelona,"C/ del Carmel, 12",08035
+958,El Mesón de Horta,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Mes%C3%B3n+de+Horta+Horta-Guinard%C3%B3%2C+Barcelona+Barcelona,"Horta-Guinardó, Barcelona",08032
+1043,La Botigueta Horta,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Botigueta+Horta+Horta-Guinard%C3%B3%2C+Barcelona+Barcelona,"Horta-Guinardó, Barcelona",08024

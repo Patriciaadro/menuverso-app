@@ -1,0 +1,83 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+50,Més de Vi,Mediterranean,https://restaurantemesdevi.es,,https://www.google.com/maps/search/?api=1&query=M%C3%A9s+de+Vi+Rambla+del+Poblenou%2C+38+Barcelona,"Rambla del Poblenou, 38",08005
+51,L'Artesana Poblenou,Mediterranean,,+34 930022039,https://www.google.com/maps/search/?api=1&query=L%27Artesana+Poblenou+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+72+Barcelona,"C/ de Marià Aguiló, 72",08005
+52,Casa Cabo,Mediterranean,https://grupocabo.es/,+34 608332208,https://www.google.com/maps/search/?api=1&query=Casa+Cabo+C%2F+de+Pere+IV%2C+91+Barcelona,"C/ de Pere IV, 91",08018
+53,Morgentau,Vegetarian/Vegan,https://morgentau.es,+34 931 98 37 65,https://www.google.com/maps/search/?api=1&query=Morgentau+C%2F+de+la+Llacuna%2C+114+Barcelona,"C/ de la Llacuna, 114",08018
+54,Warike,Peruvian,https://warikeproject.com/,+34 685621172,https://www.google.com/maps/search/?api=1&query=Warike+C%2F+del+Dr.+Trueta%2C+144+Barcelona,"C/ del Dr. Trueta, 144",08005
+55,Sopa,Vegetarian/Vegan,https://sopa.vg,+34 933 09 56 76,https://www.google.com/maps/search/?api=1&query=Sopa+C%2F+de+Roc+Boronat%2C+114+Barcelona,"C/ de Roc Boronat, 114",08018
+262,Els Pescadors,Seafood,https://elspescadors.com/,+34 932252018,https://www.google.com/maps/search/?api=1&query=Els+Pescadors+C%2F+de+Pujades%2C+171+Barcelona,"C/ de Pujades, 171",08005
+263,Els Tres Porquets,Catalan,,,https://www.google.com/maps/search/?api=1&query=Els+Tres+Porquets+C%2F+del+Taulat%2C+109+Barcelona,"C/ del Taulat, 109",08005
+264,Xorús,Spanish,http://www.xorus-braseria.com/,+34 937 689 112,https://www.google.com/maps/search/?api=1&query=Xor%C3%BAs+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+185+Barcelona,"C/ de Marià Aguiló, 185",08005
+265,Bar Nuri,Catalan,,,https://www.google.com/maps/search/?api=1&query=Bar+Nuri+C%2F+del+Dr.+Trueta%2C+160+Barcelona,"C/ del Dr. Trueta, 160",08005
+266,Restaurant Gegant,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Gegant+C%2F+del+Dr.+Trueta%2C+144+Barcelona,"C/ del Dr. Trueta, 144",08005
+267,Aguaribay,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Aguaribay+C%2F+de+Pujades%2C+97+Barcelona,"C/ de Pujades, 97",08005
+268,Vrutal,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Vrutal+C%2F+de+Llacuna%2C+185+Barcelona,"C/ de Llacuna, 185",08018
+269,Fetén,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Fet%C3%A9n+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+157+Barcelona,"C/ de Marià Aguiló, 157",08005
+270,La Tavernicola,Argentine,,,https://www.google.com/maps/search/?api=1&query=La+Tavernicola+C%2F+del+Dr.+Trueta%2C+126+Barcelona,"C/ del Dr. Trueta, 126",08018
+271,Puerto Escondido,Mexican,,,https://www.google.com/maps/search/?api=1&query=Puerto+Escondido+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+90+Barcelona,"C/ de Marià Aguiló, 90",08005
+272,Warike Project,Japanese,,,https://www.google.com/maps/search/?api=1&query=Warike+Project+C%2F+de+Pere+IV%2C+154+Barcelona,"C/ de Pere IV, 154",08018
+273,Can Dende,Café,,,https://www.google.com/maps/search/?api=1&query=Can+Dende+C%2F+de+Pere+IV%2C+131+Barcelona,"C/ de Pere IV, 131",08018
+274,Cal Cuc,Asian,,,https://www.google.com/maps/search/?api=1&query=Cal+Cuc+C%2F+de+Llacuna%2C+98+Barcelona,"C/ de Llacuna, 98",08018
+275,El Menjador (Sala Beckett),Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Menjador+%28Sala+Beckett%29+C%2F+del+Dr.+Trueta%2C+183+Barcelona,"C/ del Dr. Trueta, 183",08005
+276,Balius,Spanish,,,https://www.google.com/maps/search/?api=1&query=Balius+C%2F+de+Pujades%2C+64+Barcelona,"C/ de Pujades, 64",08018
+277,La Cervecita Nuestra de Cada Día,Gastropub,,,https://www.google.com/maps/search/?api=1&query=La+Cervecita+Nuestra+de+Cada+D%C3%ADa+C%2F+del+Dr.+Trueta%2C+26+Barcelona,"C/ del Dr. Trueta, 26",08018
+278,Bodega Mendoza,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Mendoza+C%2F+de+Llacuna%2C+70+Barcelona,"C/ de Llacuna, 70",08018
+370,El 58,Spanish,https://el58.es/,+34 933191658,https://www.google.com/maps/search/?api=1&query=El+58+Rambla+del+Poblenou%2C+58+Barcelona,"Rambla del Poblenou, 58",08005
+371,Batea,Seafood,,+34 933 214 501,https://www.google.com/maps/search/?api=1&query=Batea+Rambla+del+Poblenou%2C+16+Barcelona,"Rambla del Poblenou, 16",08005
+372,Atipical,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Atipical+C%2F+de+Llull%2C+259+Barcelona,"C/ de Llull, 259",08005
+373,Superlocal,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Superlocal+C%2F+de+Pere+IV%2C+168+Barcelona,"C/ de Pere IV, 168",08005
+374,Can Dennís,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Denn%C3%ADs+C%2F+de+Pasqual+de+Gaiola%2C+5+Barcelona,"C/ de Pasqual de Gaiola, 5",08005
+375,La Pubilla del Poblenou,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Pubilla+del+Poblenou+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+149+Barcelona,"C/ de Marià Aguiló, 149",08005
+376,Parking Pizza,Italian,https://parkingpizza.com/,+34 937102363,https://www.google.com/maps/search/?api=1&query=Parking+Pizza+C%2F+de+Llull%2C+72+Barcelona,"C/ de Llull, 72",08005
+507,Zumzeig Cinecafé,Café,,,https://www.google.com/maps/search/?api=1&query=Zumzeig+Cinecaf%C3%A9+C%2F+de+B%C3%A9jar%2C+53+Barcelona,"C/ de Béjar, 53",08014
+508,La Pizzería del Born Poblenou,Italian,,,https://www.google.com/maps/search/?api=1&query=La+Pizzer%C3%ADa+del+Born+Poblenou+Rambla+del+Poblenou%2C+70+Barcelona,"Rambla del Poblenou, 70",08005
+509,Green Spot,Vegetarian/Vegan,https://grupotragaluz.com/restaurante/the-green-spot/,+34 938025565,https://www.google.com/maps/search/?api=1&query=Green+Spot+C%2F+de+la+Reina+Cristina%2C+12+Barcelona,"C/ de la Reina Cristina, 12",08003
+510,Casa de Tapas Cañota,Spanish,,,https://www.google.com/maps/search/?api=1&query=Casa+de+Tapas+Ca%C3%B1ota+C%2F+de+Llull%2C+285+Barcelona,"C/ de Llull, 285",08019
+511,Rooftop Smoking Room Poblenou,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Rooftop+Smoking+Room+Poblenou+C%2F+de+Pere+IV%2C+272+Barcelona,"C/ de Pere IV, 272",08005
+514,Per Feina,Spanish,,,https://www.google.com/maps/search/?api=1&query=Per+Feina+C%2F+de+Pallars%2C+85+Barcelona,"C/ de Pallars, 85",08018
+548,Dagma,Spanish,,,https://www.google.com/maps/search/?api=1&query=Dagma+C%2F+de+T%C3%A0nger%2C+80+Barcelona,"C/ de Tànger, 80",08018
+549,Atipical Casa de Menjars,Italian,,,https://www.google.com/maps/search/?api=1&query=Atipical+Casa+de+Menjars+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+60+Barcelona,"C/ de Marià Aguiló, 60",08005
+596,Tío Che,Spanish,https://eltioche.es/,+34 933 091 872,https://www.google.com/maps/search/?api=1&query=T%C3%ADo+Che+Rambla+del+Poblenou%2C+44+Barcelona,"Rambla del Poblenou, 44",08005
+597,Le Cucine Mandarosso,Italian,,,https://www.google.com/maps/search/?api=1&query=Le+Cucine+Mandarosso+C%2F+de+Pujades%2C+50+Barcelona,"C/ de Pujades, 50",08005
+598,Muns,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Muns+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+90+Barcelona,"C/ de Marià Aguiló, 90",08005
+671,Rascal,Fusion,,,https://www.google.com/maps/search/?api=1&query=Rascal+C%2F+del+Joncar%2C+30+Barcelona,"C/ del Joncar, 30",08005
+672,Barkada BCN Burgers,Gastropub,,,https://www.google.com/maps/search/?api=1&query=Barkada+BCN+Burgers+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+50+Barcelona,"C/ de Marià Aguiló, 50",08005
+673,Regina Brunch Coffee,Café,,,https://www.google.com/maps/search/?api=1&query=Regina+Brunch+Coffee+C%2F+de+Pujades%2C+120+Barcelona,"C/ de Pujades, 120",08005
+674,La Piccolina Pizzeria,Italian,,,https://www.google.com/maps/search/?api=1&query=La+Piccolina+Pizzeria+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+70+Barcelona,"C/ de Marià Aguiló, 70",08005
+722,Finca Nebot,Catalan,,,https://www.google.com/maps/search/?api=1&query=Finca+Nebot+C%2F+de+Pujades%2C+200+Barcelona,"C/ de Pujades, 200",08005
+757,Café Labath,Café,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Labath+C%2F+de+Pujades%2C+150+Barcelona,"C/ de Pujades, 150",08005
+758,New Lio,Café,,,https://www.google.com/maps/search/?api=1&query=New+Lio+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+80+Barcelona,"C/ de Marià Aguiló, 80",08005
+759,Moku Healthy,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Moku+Healthy+C%2F+de+Pujades%2C+130+Barcelona,"C/ de Pujades, 130",08005
+805,Habana Vieja,Cuban,,,https://www.google.com/maps/search/?api=1&query=Habana+Vieja+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+100+Barcelona,"C/ de Marià Aguiló, 100",08005
+806,La Vermutería del Poblenou,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Vermuter%C3%ADa+del+Poblenou+Rambla+del+Poblenou%2C+80+Barcelona,"Rambla del Poblenou, 80",08005
+861,Can Dendé,Café,,,https://www.google.com/maps/search/?api=1&query=Can+Dend%C3%A9+C%2F+de+la+Ciutat+de+Granada%2C+44+Barcelona,"C/ de la Ciutat de Granada, 44",08005
+862,La Llesca,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Llesca+Rambla+del+Poblenou%2C+90+Barcelona,"Rambla del Poblenou, 90",08005
+863,El Grillo,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Grillo+C%2F+del+Joncar%2C+25+Barcelona,"C/ del Joncar, 25",08005
+917,El Bon Lloc,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Bon+Lloc+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08019
+934,Cervesería Joana,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cerveser%C3%ADa+Joana+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08018
+935,Restaurant Morro Fi,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Morro+Fi+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08019
+952,El Racó del Poblenou,Mediterranean,,+34 934869188,https://www.google.com/maps/search/?api=1&query=El+Rac%C3%B3+del+Poblenou+C%2F+d%27%C3%80vila%2C+160+Barcelona,"C/ d'Àvila, 160",08019
+953,FoodBox Poblenou,Fusion,,,https://www.google.com/maps/search/?api=1&query=FoodBox+Poblenou+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08019
+971,Blubar,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Blubar+C%2F+de+Llull%2C+200+Barcelona,"C/ de Llull, 200",08005
+972,Catacroquet,Spanish,,,https://www.google.com/maps/search/?api=1&query=Catacroquet+C%2F+de+Pujades%2C+160+Barcelona,"C/ de Pujades, 160",08005
+973,Sopa Restaurant BCN,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Sopa+Restaurant+BCN+C%2F+de+Pujades%2C+170+Barcelona,"C/ de Pujades, 170",08005
+974,Metl Barcelona,Mexican,,,https://www.google.com/maps/search/?api=1&query=Metl+Barcelona+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+120+Barcelona,"C/ de Marià Aguiló, 120",08005
+975,Florentine BCN,Café,,,https://www.google.com/maps/search/?api=1&query=Florentine+BCN+C%2F+de+Pujades%2C+190+Barcelona,"C/ de Pujades, 190",08005
+976,Gegant,Catalan,,,https://www.google.com/maps/search/?api=1&query=Gegant+C%2F+de+Pere+IV%2C+100+Barcelona,"C/ de Pere IV, 100",08005
+977,Gabby Brunch,Café,,,https://www.google.com/maps/search/?api=1&query=Gabby+Brunch+C%2F+de+Pujades%2C+195+Barcelona,"C/ de Pujades, 195",08005
+978,Little Fern,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Little+Fern+C%2F+de+Pere+IV%2C+110+Barcelona,"C/ de Pere IV, 110",08005
+979,CACHO Brunch,Café,,,https://www.google.com/maps/search/?api=1&query=CACHO+Brunch+C%2F+de+Pallars%2C+190+Barcelona,"C/ de Pallars, 190",08018
+980,Nomad Frutas Selectas,Café,,,https://www.google.com/maps/search/?api=1&query=Nomad+Frutas+Selectas+Pg.+del+Born%2C+20+Barcelona,"Pg. del Born, 20",08003
+981,CASA TAOS,Café,,,https://www.google.com/maps/search/?api=1&query=CASA+TAOS+C%2F+de+Pujades%2C+185+Barcelona,"C/ de Pujades, 185",08005
+982,The Miners Coffee,Café,,,https://www.google.com/maps/search/?api=1&query=The+Miners+Coffee+Rambla+del+Poblenou%2C+120+Barcelona,"Rambla del Poblenou, 120",08005
+983,Sopa Boronat,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Sopa+Boronat+C%2F+de+Roc+Boronat%2C+114+Barcelona,"C/ de Roc Boronat, 114",08018
+998,Padoca BCN,Café,,,https://www.google.com/maps/search/?api=1&query=Padoca+BCN+C%2F+de+Pere+IV%2C+120+Barcelona,"C/ de Pere IV, 120",08005
+999,Magma Bakery Lab,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Magma+Bakery+Lab+C%2F+de+Pallars%2C+180+Barcelona,"C/ de Pallars, 180",08018
+1000,Mammamia Poblenou,Italian,,,https://www.google.com/maps/search/?api=1&query=Mammamia+Poblenou+C%2F+de+Mari%C3%A0+Aguil%C3%B3%2C+90+Barcelona,"C/ de Marià Aguiló, 90",08005
+1001,La Picantería Escribà,Fusion,,,https://www.google.com/maps/search/?api=1&query=La+Picanter%C3%ADa+Escrib%C3%A0+C%2F+de+Pujades%2C+200+Barcelona,"C/ de Pujades, 200",08005
+1057,Lombarda Poblenou,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Lombarda+Poblenou+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08019
+1078,Siberia Poblenou,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Siberia+Poblenou+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08005
+1109,La Llesca del Born Poblenou,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Llesca+del+Born+Poblenou+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08005
+1110,Boo Restaurant,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Boo+Restaurant+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08018
+1111,The Green Spot,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=The+Green+Spot+Poblenou%2C+Barcelona+Barcelona,"Poblenou, Barcelona",08019
+1177,Maiks,Café,,+34 670 77 99 75,https://www.google.com/maps/search/?api=1&query=Maiks+Carrer+de+Pujades%2C+207+Barcelona,"Carrer de Pujades, 207, 08005 Barcelona",08005

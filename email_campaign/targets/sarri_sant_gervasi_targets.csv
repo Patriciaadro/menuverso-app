@@ -1,0 +1,52 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+44,Amaica,Mediterranean,https://amaica.es,+34 934 183 156,https://www.google.com/maps/search/?api=1&query=Amaica+C%2F+de+Bertrand+i+Serra%2C+11+Barcelona,"C/ de Bertrand i Serra, 11",08022
+45,Bar Monterolas,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Monterolas+C%2F+de+Monterolas%2C+7+Barcelona,"C/ de Monterolas, 7",08017
+46,Koryo,Asian,,+34 932 123 139,https://www.google.com/maps/search/?api=1&query=Koryo+C%2F+de+Reus%2C+4+Barcelona,"C/ de Reus, 4",08022
+47,Vermuteria La Raspa de Moragas,Catalan,,,https://www.google.com/maps/search/?api=1&query=Vermuteria+La+Raspa+de+Moragas+C%2F+de+Moragas%2C+6+Barcelona,"C/ de Moragas, 6",08023
+282,ABaC,Mediterranean,https://abacbarcelona.com/,,https://www.google.com/maps/search/?api=1&query=ABaC+Pg.+de+la+Bonanova%2C+180+Barcelona,"Pg. de la Bonanova, 180",08022
+283,Hofmann,Catalan,,,https://www.google.com/maps/search/?api=1&query=Hofmann+C%2F+de+Ganduxer%2C+105+Barcelona,"C/ de Ganduxer, 105",08022
+284,Isabella's Restaurant,Italian,,,https://www.google.com/maps/search/?api=1&query=Isabella%27s+Restaurant+C%2F+de+Muntaner%2C+63+Barcelona,"C/ de Muntaner, 63",08023
+285,El Pescadito de Mandri,Seafood,,+34 934 180 887,https://www.google.com/maps/search/?api=1&query=El+Pescadito+de+Mandri+Av.+Tibidabo%2C+16+Barcelona,"Av. Tibidabo, 16",08023
+286,Barra Alta,Spanish,,,https://www.google.com/maps/search/?api=1&query=Barra+Alta+C%2F+de+Ganduxer%2C+118+Barcelona,"C/ de Ganduxer, 118",08023
+287,Bar El Tomás,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+El+Tom%C3%A1s+Pg.+de+la+Bonanova%2C+43+Barcelona,"Pg. de la Bonanova, 43",08022
+288,Chandigarh Café,Café,,,https://www.google.com/maps/search/?api=1&query=Chandigarh+Caf%C3%A9+Av.+Tibidabo%2C+89+Barcelona,"Av. Tibidabo, 89",08017
+289,Bistró Mató,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bistr%C3%B3+Mat%C3%B3+Av.+Tibidabo%2C+152+Barcelona,"Av. Tibidabo, 152",08034
+391,Vivanda,Catalan,https://vivanda.cat/,+34 932031918,https://www.google.com/maps/search/?api=1&query=Vivanda+C%2F+Major+de+Sarri%C3%A0%2C+134+Barcelona,"C/ Major de Sarrià, 134",08017
+392,Tram-Tram,Catalan,,,https://www.google.com/maps/search/?api=1&query=Tram-Tram+C%2F+Major+de+Sarri%C3%A0%2C+121+Barcelona,"C/ Major de Sarrià, 121",08017
+393,El Asador de Aranda,Spanish,https://asadordearanda.net/,+34 934170115,https://www.google.com/maps/search/?api=1&query=El+Asador+de+Aranda+Av.+del+Tibidabo%2C+31+Barcelona,"Av. del Tibidabo, 31",08022
+394,Via Veneto,Catalan,https://viavenetobarcelona.com/,+34 932007244,https://www.google.com/maps/search/?api=1&query=Via+Veneto+C%2F+de+Ganduxer%2C+10+Barcelona,"C/ de Ganduxer, 10",08021
+429,9 Reinas Gourmet,Argentine,https://nuevereinas.com/,+34 933 486 820,https://www.google.com/maps/search/?api=1&query=9+Reinas+Gourmet+Av.+Diagonal%2C+648+Barcelona,"Av. Diagonal, 648",08017
+430,Dos Torres,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Dos+Torres+Av.+Pearson%2C+2+Barcelona,"Av. Pearson, 2",08034
+431,El Jardí de l'Abadessa,Mediterranean,https://jardiabadessa.com/,,https://www.google.com/maps/search/?api=1&query=El+Jard%C3%AD+de+l%27Abadessa+Av.+de+Pedralbes%2C+30+Barcelona,"Av. de Pedralbes, 30",08034
+432,Crep Nova Pedralbes,Italian,,,https://www.google.com/maps/search/?api=1&query=Crep+Nova+Pedralbes+C%2F+del+Dr.+August+Pi+i+Sunyer%2C+12+Barcelona,"C/ del Dr. August Pi i Sunyer, 12",08034
+515,Gornishki,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Gornishki+Pl.+de+Francesc+Maci%C3%A0%2C+5+Barcelona,"Pl. de Francesc Macià, 5",08021
+518,La Balmesina,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Balmesina+C%2F+de+Balmes%2C+350+Barcelona,"C/ de Balmes, 350",08006
+576,Café de París,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+de+Par%C3%ADs+C%2F+de+la+Travessera+de+Gr%C3%A0cia%2C+250+Barcelona,"C/ de la Travessera de Gràcia, 250",08021
+589,Flash Flash Tortillería,Spanish,https://flashflashtortilleria.com/,+34 932373104,https://www.google.com/maps/search/?api=1&query=Flash+Flash+Tortiller%C3%ADa+C%2F+de+la+Granada+del+Pened%C3%A8s%2C+25+Barcelona,"C/ de la Granada del Penedès, 25",08006
+625,Bar Tomás,Spanish,https://eltomasdesarria.com/,+34 932031077,https://www.google.com/maps/search/?api=1&query=Bar+Tom%C3%A1s+C%2F+Major+de+Sarri%C3%A0%2C+49+Barcelona,"C/ Major de Sarrià, 49",08017
+652,Masia del Tibidabo,Catalan,,,https://www.google.com/maps/search/?api=1&query=Masia+del+Tibidabo+Pl.+del+Tibidabo%2C+1+Barcelona,"Pl. del Tibidabo, 1",08035
+678,Mirablau,Mediterranean,https://mirablaubcn.com/,+34 934185879,https://www.google.com/maps/search/?api=1&query=Mirablau+Pl.+del+Doctor+Andreu%2C+s%2Fn+Barcelona,"Pl. del Doctor Andreu, s/n",08035
+687,La Venta,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Venta+Pl.+del+Doctor+Andreu%2C+1+Barcelona,"Pl. del Doctor Andreu, 1",08035
+697,Asador de Aranda,Spanish,,,https://www.google.com/maps/search/?api=1&query=Asador+de+Aranda+Av.+del+Tibidabo%2C+31+Barcelona,"Av. del Tibidabo, 31",08022
+698,Gouthier,French,,,https://www.google.com/maps/search/?api=1&query=Gouthier+Pl.+Sant+Vicen%C3%A7%2C+2+Barcelona,"Pl. Sant Vicenç, 2",08017
+699,El Canalla Sarrià,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Canalla+Sarri%C3%A0+C%2F+Major+de+Sarri%C3%A0%2C+60+Barcelona,"C/ Major de Sarrià, 60",08017
+733,Tres Torres Restaurant,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tres+Torres+Restaurant+C%2F+de+Calatrava%2C+22+Barcelona,"C/ de Calatrava, 22",08017
+945,La Formatgeria de Sarrià,Café,,,https://www.google.com/maps/search/?api=1&query=La+Formatgeria+de+Sarri%C3%A0+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+946,El Cau de Sarrià,Catalan,,+34 932043522,https://www.google.com/maps/search/?api=1&query=El+Cau+de+Sarri%C3%A0+C%2F+Major+de+Sarri%C3%A0%2C+118+Barcelona,"C/ Major de Sarrià, 118",08006
+984,Gerbard,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Gerbard+C%2F+Major+de+Sarri%C3%A0%2C+100+Barcelona,"C/ Major de Sarrià, 100",08017
+1004,Macambo,Peruvian,,,https://www.google.com/maps/search/?api=1&query=Macambo+C%2F+de+Ganduxer%2C+40+Barcelona,"C/ de Ganduxer, 40",08021
+1005,Emii Experience,Italian,,,https://www.google.com/maps/search/?api=1&query=Emii+Experience+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08017
+1006,Boka House,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Boka+House+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08017
+1007,Jazminos,Middle Eastern,,,https://www.google.com/maps/search/?api=1&query=Jazminos+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08006
+1008,Avenir Restaurant,Catalan,,,https://www.google.com/maps/search/?api=1&query=Avenir+Restaurant+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+1009,Feroz Barcelona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Feroz+Barcelona+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+1054,Ultramarinos Marin,Spanish,,,https://www.google.com/maps/search/?api=1&query=Ultramarinos+Marin+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08017
+1055,Parfum Cocktail Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Parfum+Cocktail+Bar+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+1056,Som Coffee Bar,Café,,,https://www.google.com/maps/search/?api=1&query=Som+Coffee+Bar+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08017
+1072,UMO Barcelona,Japanese,,,https://www.google.com/maps/search/?api=1&query=UMO+Barcelona+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+1073,La Marimandona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Marimandona+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08006
+1074,Pino All Day Bar,Café,,,https://www.google.com/maps/search/?api=1&query=Pino+All+Day+Bar+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08006
+1075,Fonda Balmes,Catalan,,,https://www.google.com/maps/search/?api=1&query=Fonda+Balmes+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+1076,La Taverna Gallega de Marcos,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Taverna+Gallega+de+Marcos+Sarri%C3%A0-Sant+Gervasi%2C+Barcelona+Barcelona,"Sarrià-Sant Gervasi, Barcelona",08034
+1094,El Asador de Aranda Tibidabo,Catalan,https://asadordearanda.com/,+34 934170115,https://www.google.com/maps/search/?api=1&query=El+Asador+de+Aranda+Tibidabo+Av.+del+Tibidabo%2C+31%2C+08035+Barcelona+Barcelona,"Av. del Tibidabo, 31, 08035 Barcelona",08006
+1292,El Roble - Sant Gervasi,Other,,,https://www.google.com/maps/search/?api=1&query=El+Roble+-+Sant+Gervasi++Barcelona,,

@@ -1,0 +1,71 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+25,El Racó de Montjuïc,Mediterranean,,+34 930 004 851,https://www.google.com/maps/search/?api=1&query=El+Rac%C3%B3+de+Montju%C3%AFc+Av.+de+Miramar%2C+1+Barcelona,"Av. de Miramar, 1",08038
+26,Bagaría Barcelona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bagar%C3%ADa+Barcelona+C%2F+Nou+de+la+Rambla%2C+152+Barcelona,"C/ Nou de la Rambla, 152",08004
+27,Antic Café Espanyol,Catalan,,+34 931 060 534,https://www.google.com/maps/search/?api=1&query=Antic+Caf%C3%A9+Espanyol+Av.+del+Paral%C2%B7lel%2C+64+Barcelona,"Av. del Paral·lel, 64",08001
+28,Brisas do Sil,Spanish,,+34 933 250 446,https://www.google.com/maps/search/?api=1&query=Brisas+do+Sil+C%2F+de+Jaume+Fabra%2C+16+Barcelona,"C/ de Jaume Fabra, 16",08004
+233,Quimet y Quimet,Spanish,https://quimetiquimet.com/,+34 934 423 142,https://www.google.com/maps/search/?api=1&query=Quimet+y+Quimet+Av.+del+Paral%C2%B7lel%2C+149+Barcelona,"Av. del Paral·lel, 149",08004
+234,La Bodega d'en Rafel,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Bodega+d%27en+Rafel+C%2F+de+Magalh%C3%A3es%2C+125+Barcelona,"C/ de Magalhães, 125",08004
+235,Bodega Montferry,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Montferry+C%2F+de+Tapioles%2C+16+Barcelona,"C/ de Tapioles, 16",08004
+236,Tickets,Spanish,https://ticketsbar.es/,+34 932924254,https://www.google.com/maps/search/?api=1&query=Tickets+C%2F+del+Poeta+Cabanyes%2C+114+Barcelona,"C/ del Poeta Cabanyes, 114",08004
+237,Mano Rota,Mediterranean,https://manorota.com/,+34 931864717,https://www.google.com/maps/search/?api=1&query=Mano+Rota+C%2F+de+Blai%2C+77+Barcelona,"C/ de Blai, 77",08004
+238,Lascar 74,Peruvian,,,https://www.google.com/maps/search/?api=1&query=Lascar+74+C%2F+de+Magalh%C3%A3es%2C+78+Barcelona,"C/ de Magalhães, 78",08004
+349,Quimet & Quimet,Spanish,https://www.quimetquimet.com/,+34 934423142,https://www.google.com/maps/search/?api=1&query=Quimet+%26+Quimet+C%2F+del+Poeta+Cabanyes%2C+25+Barcelona,"C/ del Poeta Cabanyes, 25",08004
+350,Bar Seco,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bar+Seco+Pg.+de+Montju%C3%AFc%2C+74+Barcelona,"Pg. de Montjuïc, 74",08038
+351,Al Bistró,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Al+Bistr%C3%B3+C%2F+de+Blai%2C+56+Barcelona,"C/ de Blai, 56",08004
+352,La Tomaquera,Catalan,https://latomaquera.cat/,+34 675902389,https://www.google.com/maps/search/?api=1&query=La+Tomaquera+C%2F+de+Margarit%2C+58+Barcelona,"C/ de Margarit, 58",08004
+353,Bodega Saltó,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Salt%C3%B3+C%2F+de+Blesa%2C+36+Barcelona,"C/ de Blesa, 36",08004
+354,La Bella Napoli,Italian,https://labellanapoli.es/,+34 934426056,https://www.google.com/maps/search/?api=1&query=La+Bella+Napoli+C%2F+de+Margarit%2C+14+Barcelona,"C/ de Margarit, 14",08004
+355,Federal Café Poble Sec,Café,https://federalcafe.es/,+34 934334551,https://www.google.com/maps/search/?api=1&query=Federal+Caf%C3%A9+Poble+Sec+C%2F+del+Parlament%2C+39+Barcelona,"C/ del Parlament, 39",08015
+356,Palo Cortao,Spanish,,,https://www.google.com/maps/search/?api=1&query=Palo+Cortao+C%2F+de+Nou+de+la+Rambla%2C+146+Barcelona,"C/ de Nou de la Rambla, 146",08004
+488,Celler Cal Marino,Catalan,,,https://www.google.com/maps/search/?api=1&query=Celler+Cal+Marino+C%2F+de+Margarit%2C+54+Barcelona,"C/ de Margarit, 54",08004
+489,Bar Restaurant Martínez,Mediterranean,https://martinezbarcelona.com/,+34 933106462,https://www.google.com/maps/search/?api=1&query=Bar+Restaurant+Mart%C3%ADnez+Av.+de+Miramar%2C+s%2Fn+Barcelona,"Av. de Miramar, s/n",08038
+490,La Malandrina,Italian,,,https://www.google.com/maps/search/?api=1&query=La+Malandrina+C%2F+de+Blai%2C+72+Barcelona,"C/ de Blai, 72",08004
+491,El Sortidor,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Sortidor+Pl.+del+Sortidor%2C+5+Barcelona,"Pl. del Sortidor, 5",08004
+567,Terrassa Martínez,Seafood,https://martinezbarcelona.com/,+34 933106462,https://www.google.com/maps/search/?api=1&query=Terrassa+Mart%C3%ADnez+Ctra.+de+Miramar%2C+38+Barcelona,"Ctra. de Miramar, 38",08038
+568,CASA XICA,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=CASA+XICA+C%2F+de+Blai%2C+45+Barcelona,"C/ de Blai, 45",08004
+626,Koska Taverna,Spanish,,,https://www.google.com/maps/search/?api=1&query=Koska+Taverna+C%2F+de+Blai%2C+8+Barcelona,"C/ de Blai, 8",08004
+627,Blai 9,Spanish,,,https://www.google.com/maps/search/?api=1&query=Blai+9+C%2F+de+Blai%2C+9+Barcelona,"C/ de Blai, 9",08004
+628,La Tasqueta de Blai,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Tasqueta+de+Blai+C%2F+de+Blai%2C+17+Barcelona,"C/ de Blai, 17",08004
+629,La Esquinita de Blai,Basque,,,https://www.google.com/maps/search/?api=1&query=La+Esquinita+de+Blai+C%2F+de+Blai%2C+16+Barcelona,"C/ de Blai, 16",08004
+630,Blai Tonight,Spanish,,,https://www.google.com/maps/search/?api=1&query=Blai+Tonight+C%2F+de+Blai%2C+23+Barcelona,"C/ de Blai, 23",08004
+631,Es Xibiu,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Es+Xibiu+C%2F+de+Blai%2C+48+Barcelona,"C/ de Blai, 48",08004
+632,Cañota,Seafood,,,https://www.google.com/maps/search/?api=1&query=Ca%C3%B1ota+C%2F+de+Lleida%2C+7+Barcelona,"C/ de Lleida, 7",08004
+633,Gran Bodega Saltó,Spanish,,,https://www.google.com/maps/search/?api=1&query=Gran+Bodega+Salt%C3%B3+C%2F+de+Blesa%2C+36+Barcelona,"C/ de Blesa, 36",08004
+634,Ikibana Paral·lel,Japanese,,,https://www.google.com/maps/search/?api=1&query=Ikibana+Paral%C2%B7lel+Av.+del+Paral%C2%B7lel%2C+148+Barcelona,"Av. del Paral·lel, 148",08015
+635,La Federica,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Federica+C%2F+de+Salv%C3%A0%2C+3+Barcelona,"C/ de Salvà, 3",08004
+636,Ramen Shifu Paral·lel,Japanese,,,https://www.google.com/maps/search/?api=1&query=Ramen+Shifu+Paral%C2%B7lel+Av.+del+Paral%C2%B7lel%2C+100+Barcelona,"Av. del Paral·lel, 100",08015
+637,Can Lampazas,Seafood,,,https://www.google.com/maps/search/?api=1&query=Can+Lampazas+Av.+del+Paral%C2%B7lel%2C+80+Barcelona,"Av. del Paral·lel, 80",08015
+677,La Caseta del Migdia,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Caseta+del+Migdia+Mirador+del+Migdia%2C+Montju%C3%AFc+Barcelona,"Mirador del Migdia, Montjuïc",08038
+707,Annare' Pizzeria,Italian,,,https://www.google.com/maps/search/?api=1&query=Annare%27+Pizzeria+C%2F+de+Blai%2C+60+Barcelona,"C/ de Blai, 60",08004
+755,Tast Gastro Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tast+Gastro+Bar+C%2F+del+Poeta+Cabanyes%2C+30+Barcelona,"C/ del Poeta Cabanyes, 30",08004
+756,El Rincón del Cava,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Rinc%C3%B3n+del+Cava+C%2F+de+Margarit%2C+15+Barcelona,"C/ de Margarit, 15",08004
+795,O Carballiño Blai,Spanish,,,https://www.google.com/maps/search/?api=1&query=O+Carballi%C3%B1o+Blai+C%2F+de+Blai%2C+30+Barcelona,"C/ de Blai, 30",08004
+796,Pincho J.,Spanish,,,https://www.google.com/maps/search/?api=1&query=Pincho+J.+C%2F+de+Blai%2C+35+Barcelona,"C/ de Blai, 35",08004
+797,L'Atelier de Blai,Spanish,,,https://www.google.com/maps/search/?api=1&query=L%27Atelier+de+Blai+C%2F+de+Blai%2C+40+Barcelona,"C/ de Blai, 40",08004
+798,Blai Tapas Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Blai+Tapas+Bar+C%2F+de+Blai%2C+12+Barcelona,"C/ de Blai, 12",08004
+869,Tacos Tacos Poble Sec,Mexican,,,https://www.google.com/maps/search/?api=1&query=Tacos+Tacos+Poble+Sec+C%2F+del+Poeta+Cabanyes%2C+10+Barcelona,"C/ del Poeta Cabanyes, 10",08004
+870,Bella Napoli Poble Sec,Italian,,,https://www.google.com/maps/search/?api=1&query=Bella+Napoli+Poble+Sec+C%2F+de+Margarit%2C+20+Barcelona,"C/ de Margarit, 20",08004
+871,Bodega Ampelón,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Ampel%C3%B3n+C%2F+de+Tamarit%2C+50+Barcelona,"C/ de Tamarit, 50",08004
+955,Bar Joan,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Joan+Poble+Sec%2C+Barcelona+Barcelona,"Poble Sec, Barcelona",08004
+956,La Cuina del Paral·lel,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+del+Paral%C2%B7lel+Poble+Sec%2C+Barcelona+Barcelona,"Poble Sec, Barcelona",08004
+961,Taberna Blai Tonight,Spanish,,,https://www.google.com/maps/search/?api=1&query=Taberna+Blai+Tonight+C%2F+de+Blai%2C+20+Barcelona,"C/ de Blai, 20",08004
+962,Bar Mombiela,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Mombiela+C%2F+del+Poeta+Cabanyes%2C+60+Barcelona,"C/ del Poeta Cabanyes, 60",08004
+963,El Sortidor de la Filomena Pagès,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Sortidor+de+la+Filomena+Pag%C3%A8s+Pl.+del+Sortidor%2C+5+Barcelona,"Pl. del Sortidor, 5",08004
+964,Casa Pepi,Spanish,,,https://www.google.com/maps/search/?api=1&query=Casa+Pepi+C%2F+de+Tamarit%2C+60+Barcelona,"C/ de Tamarit, 60",08004
+965,La Chana,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Chana+C%2F+de+Salv%C3%A0%2C+40+Barcelona,"C/ de Salvà, 40",08004
+966,La Platilleria,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Platilleria+C%2F+del+Poeta+Cabanyes%2C+45+Barcelona,"C/ del Poeta Cabanyes, 45",08004
+967,Bodega Vidal,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Vidal+C%2F+de+les+Hortes%2C+10+Barcelona,"C/ de les Hortes, 10",08001
+968,V de Vermut,Spanish,,,https://www.google.com/maps/search/?api=1&query=V+de+Vermut+C%2F+del+Poeta+Cabanyes%2C+50+Barcelona,"C/ del Poeta Cabanyes, 50",08004
+969,Café Cometa,Café,,,https://www.google.com/maps/search/?api=1&query=Caf%C3%A9+Cometa+C%2F+del+Parlament%2C+20+Barcelona,"C/ del Parlament, 20",08004
+970,Cactus Café,Café,,,https://www.google.com/maps/search/?api=1&query=Cactus+Caf%C3%A9+C%2F+del+Paral%C2%B7lel%2C+40+Barcelona,"C/ del Paral·lel, 40",08004
+991,Fundació Miró Restaurant,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Fundaci%C3%B3+Mir%C3%B3+Restaurant+Parc+de+Montju%C3%AFc+Barcelona,Parc de Montjuïc,08038
+992,La Font del Gat,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Font+del+Gat+Pg.+de+Santa+Madrona%2C+28+Barcelona,"Pg. de Santa Madrona, 28",08038
+993,Petit Hípica,Catalan,,,https://www.google.com/maps/search/?api=1&query=Petit+H%C3%ADpica+Av.+del+Miramar%2C+50+Barcelona,"Av. del Miramar, 50",08038
+1017,Annaré Pizzeria,Italian,,,https://www.google.com/maps/search/?api=1&query=Annar%C3%A9+Pizzeria+Poble+Sec%2C+Barcelona+Barcelona,"Poble Sec, Barcelona",08004
+1113,Quimet i Quimet Poble Sec,Spanish,https://www.quimetquimet.com/,+34 934423142,https://www.google.com/maps/search/?api=1&query=Quimet+i+Quimet+Poble+Sec+C%2F+del+Poeta+Cabanyes%2C+25+Barcelona,"C/ del Poeta Cabanyes, 25",08004
+1114,Tickets Successor,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tickets+Successor+Poble+Sec%2C+Barcelona+Barcelona,"Poble Sec, Barcelona",08004
+1133,Bar Leo,Spanish,,+34 934431011,https://www.google.com/maps/search/?api=1&query=Bar+Leo+C%2F+de+Blai%2C+59+Barcelona,"C/ de Blai, 59",08004
+1134,Oleum MNAC,Mediterranean,https://oleumrestaurant.com/,+34 932890679,https://www.google.com/maps/search/?api=1&query=Oleum+MNAC+Palau+Nacional%2C+Parc+de+Montju%C3%AFc+Barcelona,"Palau Nacional, Parc de Montjuïc",08004
+1175,Brasa Gaucha Grill,Argentine,,+34 697 91 68 31,https://www.google.com/maps/search/?api=1&query=Brasa+Gaucha+Grill+Carrer+de+Margarit%2C+31+Barcelona,"Carrer de Margarit, 31, 08004 Barcelona",08004
+1182,Don Brasa Asador Argentino,Argentine,,+34 682 51 91 60,https://www.google.com/maps/search/?api=1&query=Don+Brasa+Asador+Argentino+Carrer+del+Poeta+Cabanyes%2C+19+Barcelona,"Carrer del Poeta Cabanyes, 19, 08004 Barcelona",08004
+1185,La Criolla Asador,Argentine,,+34 697 91 68 31,https://www.google.com/maps/search/?api=1&query=La+Criolla+Asador+Carrer+de+Margarit%2C+13+Barcelona,"Carrer de Margarit, 13, 08004 Barcelona",08004

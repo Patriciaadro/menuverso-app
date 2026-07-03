@@ -1,0 +1,48 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+37,Ca La Montse,Seafood,https://restaurantcalamontse.com,,https://www.google.com/maps/search/?api=1&query=Ca+La+Montse+C%2F+de+l%27Almirall+Aixada%2C+18+Barcelona,"C/ de l'Almirall Aixada, 18",08003
+38,El Nou Ramonet,Seafood,https://grupramonet.com,+34 932683313,https://www.google.com/maps/search/?api=1&query=El+Nou+Ramonet+C%2F+de+la+Maquinista%2C+17+Barcelona,"C/ de la Maquinista, 17",08003
+39,Los Pescadores,Seafood,,+34 933 19 30 58,https://www.google.com/maps/search/?api=1&query=Los+Pescadores+C%2F+de+la+Maquinista%2C+48+Barcelona,"C/ de la Maquinista, 48",08003
+242,Can Solé,Seafood,https://restaurantcansole.com/,+34 932215012,https://www.google.com/maps/search/?api=1&query=Can+Sol%C3%A9+C%2F+de+Baluard%2C+175+Barcelona,"C/ de Baluard, 175",08003
+243,Carballeira,Seafood,https://carballeira.com/,+34 933103006,https://www.google.com/maps/search/?api=1&query=Carballeira+Pl.+del+Mar%2C+36+Barcelona,"Pl. del Mar, 36",08003
+244,Restaurant Barceloneta,Seafood,https://restaurantbarceloneta.com/,+34 932212111,https://www.google.com/maps/search/?api=1&query=Restaurant+Barceloneta+C%2F+de+l%27Almirall+Aixada%2C+29+Barcelona,"C/ de l'Almirall Aixada, 29",08003
+245,Can Ramonet,Seafood,https://grupramonet.com/canramonet/,+34 933193064,https://www.google.com/maps/search/?api=1&query=Can+Ramonet+C%2F+de+Sant+Carles%2C+24+Barcelona,"C/ de Sant Carles, 24",08003
+246,Can Borbó,Seafood,,,https://www.google.com/maps/search/?api=1&query=Can+Borb%C3%B3+Passeig+de+Joan+de+Borb%C3%B3%2C+115+Barcelona,"Passeig de Joan de Borbó, 115",08003
+247,Can Majó,Seafood,,,https://www.google.com/maps/search/?api=1&query=Can+Maj%C3%B3+Passeig+de+Joan+de+Borb%C3%B3%2C+95+Barcelona,"Passeig de Joan de Borbó, 95",08003
+248,Ca La Nuri,Seafood,,,https://www.google.com/maps/search/?api=1&query=Ca+La+Nuri+C%2F+de+Baluard%2C+72+Barcelona,"C/ de Baluard, 72",08003
+249,El Refugi del Port,Seafood,,,https://www.google.com/maps/search/?api=1&query=El+Refugi+del+Port+C%2F+de+Sant+Carles%2C+62+Barcelona,"C/ de Sant Carles, 62",08003
+250,La Mar Salada,Seafood,https://lamarsalada.cat/,+34 932212127,https://www.google.com/maps/search/?api=1&query=La+Mar+Salada+C%2F+de+la+Maquinista%2C+195+Barcelona,"C/ de la Maquinista, 195",08003
+251,El Suquet de l'Almirall,Seafood,http://www.suquetdelalmirall.com/,+34 932 216 233,https://www.google.com/maps/search/?api=1&query=El+Suquet+de+l%27Almirall+C%2F+de+Baluard%2C+136+Barcelona,"C/ de Baluard, 136",08003
+252,Can Maño,Seafood,,,https://www.google.com/maps/search/?api=1&query=Can+Ma%C3%B1o+Passeig+de+Joan+de+Borb%C3%B3%2C+134+Barcelona,"Passeig de Joan de Borbó, 134",08003
+253,Bar Electricitat,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Electricitat+C%2F+de+l%27Almirall+Aixada%2C+59+Barcelona,"C/ de l'Almirall Aixada, 59",08003
+254,Bar Jai-Ca,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Jai-Ca+C%2F+de+l%27Almirall+Aixada%2C+3+Barcelona,"C/ de l'Almirall Aixada, 3",08003
+255,La Cova Fumada,Seafood,https://lacovafumada.shop/,+34 932214061,https://www.google.com/maps/search/?api=1&query=La+Cova+Fumada+C%2F+de+Baluard%2C+100+Barcelona,"C/ de Baluard, 100",08003
+256,La Peninsular,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Peninsular+C%2F+de+Sant+Carles%2C+78+Barcelona,"C/ de Sant Carles, 78",08003
+257,Els Maños,Seafood,,,https://www.google.com/maps/search/?api=1&query=Els+Ma%C3%B1os+Pl.+del+Mar%2C+110+Barcelona,"Pl. del Mar, 110",08003
+258,Pez Vela,Seafood,https://grupotragaluz.com/restaurante/pez-vela/,+34 932216317,https://www.google.com/maps/search/?api=1&query=Pez+Vela+Passeig+de+Joan+de+Borb%C3%B3%2C+179+Barcelona,"Passeig de Joan de Borbó, 179",08003
+259,Bestial,Italian,,,https://www.google.com/maps/search/?api=1&query=Bestial+C%2F+de+la+Maquinista%2C+154+Barcelona,"C/ de la Maquinista, 154",08003
+260,Maná 75,Mediterranean,,+34 932 212 111,https://www.google.com/maps/search/?api=1&query=Man%C3%A1+75+C%2F+de+l%27Almirall+Aixada%2C+43+Barcelona,"C/ de l'Almirall Aixada, 43",08003
+261,1881 by Sagardi,Spanish,,,https://www.google.com/maps/search/?api=1&query=1881+by+Sagardi+C%2F+de+l%27Almirall+Aixada%2C+131+Barcelona,"C/ de l'Almirall Aixada, 131",08003
+357,Can Paixano (La Xampanyeria),Spanish,https://canpaixano.com/,+34 933100839,https://www.google.com/maps/search/?api=1&query=Can+Paixano+%28La+Xampanyeria%29+C%2F+de+la+Reina+Cristina%2C+7+Barcelona,"C/ de la Reina Cristina, 7",08003
+358,Vaso de Oro,Spanish,https://vasodeoro.com/,+34 933193098,https://www.google.com/maps/search/?api=1&query=Vaso+de+Oro+C%2F+de+Balboa%2C+6+Barcelona,"C/ de Balboa, 6",08003
+359,El Chiringuito de la Barceloneta,Seafood,https://elchiringuito.com/,+34 932258018,https://www.google.com/maps/search/?api=1&query=El+Chiringuito+de+la+Barceloneta+Pg.+Mar%C3%ADtim%2C+30+Barcelona,"Pg. Marítim, 30",08003
+360,Salamanca,Seafood,https://restaurantesalamanca.es/,+34 932213033,https://www.google.com/maps/search/?api=1&query=Salamanca+C%2F+de+l%27Almirall+Cervera%2C+34+Barcelona,"C/ de l'Almirall Cervera, 34",08003
+361,1881 per Sagardi,Basque,https://www.sagardi.com/1881/,+34 932212185,https://www.google.com/maps/search/?api=1&query=1881+per+Sagardi+Pl.+de+Pau+Vila%2C+3+Barcelona,"Pl. de Pau Vila, 3",08003
+396,Torre de Alta Mar,Seafood,https://torredealtamar.com/,+34 932210007,https://www.google.com/maps/search/?api=1&query=Torre+de+Alta+Mar+Pg.+de+Joan+de+Borb%C3%B3%2C+88+Barcelona,"Pg. de Joan de Borbó, 88",08039
+505,Somorrostro,Seafood,https://somorrostro.com/,+34 932250010,https://www.google.com/maps/search/?api=1&query=Somorrostro+C%2F+de+Sant+Carles%2C+11+Barcelona,"C/ de Sant Carles, 11",08003
+506,Barceloneta,Seafood,https://restaurantbarceloneta.com/,+34 932212111,https://www.google.com/maps/search/?api=1&query=Barceloneta+C%2F+de+l%27Escar%2C+22+Barcelona,"C/ de l'Escar, 22",08039
+560,Eldelmar Barcelona,Seafood,,,https://www.google.com/maps/search/?api=1&query=Eldelmar+Barcelona+Pg.+Mar%C3%ADtim+de+la+Barceloneta%2C+s%2Fn+Barcelona,"Pg. Marítim de la Barceloneta, s/n",08003
+591,Restaurante 1881,Mediterranean,https://1881restaurant.com/,+34 932565207,https://www.google.com/maps/search/?api=1&query=Restaurante+1881+Pla%C3%A7a+de+Pau+Vila%2C+3+Barcelona,"Plaça de Pau Vila, 3",08003
+651,Jai-Ca,Seafood,,+34 932685332,https://www.google.com/maps/search/?api=1&query=Jai-Ca+C%2F+de+Ginebra%2C+13+Barcelona,"C/ de Ginebra, 13",08003
+802,Can Manel la Puda,Seafood,,+34 932215013,https://www.google.com/maps/search/?api=1&query=Can+Manel+la+Puda+Pg.+de+Joan+de+Borb%C3%B3%2C+60-61+Barcelona,"Pg. de Joan de Borbó, 60-61",08003
+803,Bodega 1900,Spanish,,+34 932175904,https://www.google.com/maps/search/?api=1&query=Bodega+1900+C%2F+de+Tamarit%2C+91+Barcelona,"C/ de Tamarit, 91",08015
+804,El Guinardó,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Guinard%C3%B3+C%2F+de+Ginebra%2C+15+Barcelona,"C/ de Ginebra, 15",08003
+864,Set Portes,Catalan,https://7portes.com/,+34 933193033,https://www.google.com/maps/search/?api=1&query=Set+Portes+Pg.+d%27Isabel+II%2C+14+Barcelona,"Pg. d'Isabel II, 14",08003
+865,La Mar Bella Chiringuito,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Mar+Bella+Chiringuito+Platja+de+la+Mar+Bella+Barcelona,Platja de la Mar Bella,08005
+898,Can Paixano Barceloneta,Spanish,https://canpaixano.com/,+34 933100839,https://www.google.com/maps/search/?api=1&query=Can+Paixano+Barceloneta+C%2F+de+la+Reina+Cristina%2C+7+Barcelona,"C/ de la Reina Cristina, 7",08003
+922,La Bota Fumeiro,Seafood,,+34 932215894,https://www.google.com/maps/search/?api=1&query=La+Bota+Fumeiro+C%2F+de+la+Maquinista%2C+30+Barcelona,"C/ de la Maquinista, 30",08003
+942,Restaurante El Cid,Spanish,,+34 933107612,https://www.google.com/maps/search/?api=1&query=Restaurante+El+Cid+C%2F+de+Balboa%2C+12+Barcelona,"C/ de Balboa, 12",08003
+1028,Surf House Barcelona,Café,,,https://www.google.com/maps/search/?api=1&query=Surf+House+Barcelona+Barceloneta%2C+Barcelona+Barcelona,"Barceloneta, Barcelona",08003
+1031,Can Fisher,Seafood,,,https://www.google.com/maps/search/?api=1&query=Can+Fisher+Barceloneta%2C+Barcelona+Barcelona,"Barceloneta, Barcelona",08003
+1135,Kaiku Barceloneta,Seafood,http://restaurantkaiku.cat/,+34 932219082,https://www.google.com/maps/search/?api=1&query=Kaiku+Barceloneta+Barceloneta%2C+Barcelona+Barcelona,"Barceloneta, Barcelona",08003
+1136,Filferro Barcelona,Mediterranean,,+34 936240149,https://www.google.com/maps/search/?api=1&query=Filferro+Barcelona+Pg.+de+Joan+de+Borb%C3%B3%2C+22+Barcelona,"Pg. de Joan de Borbó, 22",08003
+1269,Monarq Barceloneta,Other,,,https://www.google.com/maps/search/?api=1&query=Monarq+Barceloneta++Barcelona,,

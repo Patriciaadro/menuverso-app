@@ -1,0 +1,32 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+35,Els Ocellets,Catalan,https://elsocellets.com,,https://www.google.com/maps/search/?api=1&query=Els+Ocellets+C%2F+de+Villadomat%2C+25+Barcelona,"C/ de Villadomat, 25",08015
+36,Bar Chiqui,Japanese,https://barchiqui.com,+34 933 25 08 33,https://www.google.com/maps/search/?api=1&query=Bar+Chiqui+C%2F+de+Vilamar%C3%AD%2C+29+Barcelona,"C/ de Vilamarí, 29",08015
+239,Morro Fi,Spanish,,,https://www.google.com/maps/search/?api=1&query=Morro+Fi+C%2F+del+Parlament%2C+71+Barcelona,"C/ del Parlament, 71",08015
+240,Bodega Sepúlveda,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Sep%C3%BAlveda+C%2F+del+Comte+Borrell%2C+107+Barcelona,"C/ del Comte Borrell, 107",08015
+241,Flax & Kale,Vegetarian/Vegan,https://flaxandkale.com/,+34 933175664,https://www.google.com/maps/search/?api=1&query=Flax+%26+Kale+C%2F+de+Manso%2C+23+Barcelona,"C/ de Manso, 23",08015
+386,Lolita Tapería,Spanish,https://lolitataperia.com/,+34 934245231,https://www.google.com/maps/search/?api=1&query=Lolita+Taper%C3%ADa+C%2F+de+Tamarit%2C+104+Barcelona,"C/ de Tamarit, 104",08015
+387,Tarannà,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Tarann%C3%A0+C%2F+de+Viladomat%2C+23+Barcelona,"C/ de Viladomat, 23",08015
+389,Bar Calders,Mediterranean,https://barcalders.cat/,+34 933299349,https://www.google.com/maps/search/?api=1&query=Bar+Calders+C%2F+del+Parlament%2C+25+Barcelona,"C/ del Parlament, 25",08015
+492,Cervecería City Hall,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cervecer%C3%ADa+City+Hall+C%2F+del+Comte+Borrell%2C+80+Barcelona,"C/ del Comte Borrell, 80",08015
+493,Entrepanes y Postres,Spanish,,,https://www.google.com/maps/search/?api=1&query=Entrepanes+y+Postres+C%2F+del+Parlament%2C+57+Barcelona,"C/ del Parlament, 57",08015
+517,Can Vilaró,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Vilar%C3%B3+C%2F+del+Comte+Borrell%2C+37+Barcelona,"C/ del Comte Borrell, 37",08015
+556,Jiribilla,Mexican,,,https://www.google.com/maps/search/?api=1&query=Jiribilla+C%2F+del+Parlament%2C+35+Barcelona,"C/ del Parlament, 35",08015
+559,Contracorrent,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Contracorrent+C%2F+de+Manso%2C+30+Barcelona,"C/ de Manso, 30",08015
+621,Federal Café Sant Antoni,Café,https://federalcafe.es/,+34 931873607,https://www.google.com/maps/search/?api=1&query=Federal+Caf%C3%A9+Sant+Antoni+C%2F+del+Parlament%2C+39+Barcelona,"C/ del Parlament, 39",08015
+664,Bar Ramón,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Ram%C3%B3n+C%2F+del+Comte+Borrell%2C+81+Barcelona,"C/ del Comte Borrell, 81",08015
+665,Can Deu,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Deu+Pl.+d%27Osca%2C+7+Barcelona,"Pl. d'Osca, 7",08015
+763,La Mundana Sant Antoni,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Mundana+Sant+Antoni+C%2F+del+Parlament%2C+60+Barcelona,"C/ del Parlament, 60",08015
+764,Puro Barcelona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Puro+Barcelona+C%2F+del+Parlament%2C+50+Barcelona,"C/ del Parlament, 50",08015
+807,La Esquina,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Esquina+C%2F+del+Parlament%2C+40+Barcelona,"C/ del Parlament, 40",08015
+808,Rooftop Smoke Bar,Gastropub,,,https://www.google.com/maps/search/?api=1&query=Rooftop+Smoke+Bar+C%2F+del+Comte+Borrell%2C+50+Barcelona,"C/ del Comte Borrell, 50",08015
+809,Cervecería Jazz,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cervecer%C3%ADa+Jazz+C%2F+de+Manso%2C+40+Barcelona,"C/ de Manso, 40",08015
+890,Bodega 1900 Sant Antoni,Spanish,,+34 932175904,https://www.google.com/maps/search/?api=1&query=Bodega+1900+Sant+Antoni+C%2F+de+Tamarit%2C+91+Barcelona,"C/ de Tamarit, 91",08015
+941,El Recó de Sant Antoni,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Rec%C3%B3+de+Sant+Antoni+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08015
+943,La Pepita Sant Antoni,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Pepita+Sant+Antoni+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08015
+994,Morryssom Sant Antoni,Spanish,,,https://www.google.com/maps/search/?api=1&query=Morryssom+Sant+Antoni+C%2F+de+Manso%2C+30+Barcelona,"C/ de Manso, 30",08015
+1018,Gurí Barcelona,Fusion,,,https://www.google.com/maps/search/?api=1&query=Gur%C3%AD+Barcelona+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08015
+1025,Bar Canyí,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Cany%C3%AD+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08015
+1058,Jiribilla BCN,Mexican,,,https://www.google.com/maps/search/?api=1&query=Jiribilla+BCN+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08015
+1079,Sra. Dolores,Spanish,,,https://www.google.com/maps/search/?api=1&query=Sra.+Dolores+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08011
+1080,Bar Chiqui Sushi,Fusion,,,https://www.google.com/maps/search/?api=1&query=Bar+Chiqui+Sushi+Sant+Antoni%2C+Barcelona+Barcelona,"Sant Antoni, Barcelona",08011
+1184,Asado Central Barcelona,Argentine,https://asado-central.eatbu.com/?lang=es,+34 632 06 08 32,https://www.google.com/maps/search/?api=1&query=Asado+Central+Barcelona+Pg.+Sant+Antoni%2C+23+Barcelona,"Pg. Sant Antoni, 23, 08014 Barcelona",08014

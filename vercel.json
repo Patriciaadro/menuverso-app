@@ -5,5 +5,8 @@
     { "source": "/unete", "destination": "/index.html" },
     { "source": "/alta", "destination": "/index.html" },
     { "source": "/confirmar", "destination": "/index.html" }
+  ],
+  "redirects": [
+    { "source": "/deck", "destination": "/deck.pdf", "permanent": false }
   ]
 }

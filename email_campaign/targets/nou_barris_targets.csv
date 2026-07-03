@@ -1,0 +1,35 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+65,La Forquilla,Fusion,,,https://www.google.com/maps/search/?api=1&query=La+Forquilla+C%2F+de+Viladrosa%2C+57+Barcelona,"C/ de Viladrosa, 57",08042
+66,5 Hermanos,Spanish,,,https://www.google.com/maps/search/?api=1&query=5+Hermanos+C%2F+de+Canyelles%2C+9+Barcelona,"C/ de Canyelles, 9",08042
+449,Can Maño Nou Barris,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Ma%C3%B1o+Nou+Barris+C%2F+de+Viladrosa%2C+35+Barcelona,"C/ de Viladrosa, 35",08042
+450,El Mirador de Nou Barris,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Mirador+de+Nou+Barris+Pg.+de+Fabra+i+Puig%2C+300+Barcelona,"Pg. de Fabra i Puig, 300",08042
+451,Restaurant La Llanterna,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+La+Llanterna+C%2F+de+Viladrosa%2C+80+Barcelona,"C/ de Viladrosa, 80",08042
+452,Bar Cal Jordi,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Cal+Jordi+C%2F+de+Canyelles%2C+20+Barcelona,"C/ de Canyelles, 20",08042
+529,La Cholita,Fusion,,,https://www.google.com/maps/search/?api=1&query=La+Cholita+Pg.+de+Fabra+i+Puig%2C+220+Barcelona,"Pg. de Fabra i Puig, 220",08042
+530,Ovante,Gastropub,,,https://www.google.com/maps/search/?api=1&query=Ovante+C%2F+de+Viladrosa%2C+50+Barcelona,"C/ de Viladrosa, 50",08042
+532,Cervecería Conde Drácula,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cervecer%C3%ADa+Conde+Dr%C3%A1cula+C%2F+de+Viladrosa%2C+60+Barcelona,"C/ de Viladrosa, 60",08042
+533,Los Tres Pinos,Spanish,,,https://www.google.com/maps/search/?api=1&query=Los+Tres+Pinos+C%2F+de+la+Mare+de+D%C3%A9u+de+Montserrat%2C+20+Barcelona,"C/ de la Mare de Déu de Montserrat, 20",08042
+534,Bar Centro Nou Barris,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Centro+Nou+Barris+C%2F+de+Canyelles%2C+30+Barcelona,"C/ de Canyelles, 30",08042
+535,El Barrilet,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Barrilet+C%2F+de+Vallcivera%2C+15+Barcelona,"C/ de Vallcivera, 15",08042
+536,Restaurante Casa Angelita,Seafood,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Casa+Angelita+C%2F+de+Teide%2C+20+Barcelona,"C/ de Teide, 20",08042
+537,Trattoria Italiana Nou Barris,Italian,,,https://www.google.com/maps/search/?api=1&query=Trattoria+Italiana+Nou+Barris+Pg.+de+Fabra+i+Puig%2C+200+Barcelona,"Pg. de Fabra i Puig, 200",08042
+608,Restaurante Pica-Pica,Other,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Pica-Pica+C%2F+de+Viladrosa%2C+30+Barcelona,"C/ de Viladrosa, 30",08042
+609,Más Que México,Mexican,,,https://www.google.com/maps/search/?api=1&query=M%C3%A1s+Que+M%C3%A9xico+Pg.+de+Fabra+i+Puig%2C+230+Barcelona,"Pg. de Fabra i Puig, 230",08042
+610,El 23 Gastrobar,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+23+Gastrobar+C%2F+de+Canyelles%2C+23+Barcelona,"C/ de Canyelles, 23",08042
+611,El Rebost d'en Xavi,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Rebost+d%27en+Xavi+Pg.+de+Fabra+i+Puig%2C+210+Barcelona,"Pg. de Fabra i Puig, 210",08042
+612,Buga Ramen Nou Barris,Japanese,,,https://www.google.com/maps/search/?api=1&query=Buga+Ramen+Nou+Barris+Pg.+de+Fabra+i+Puig%2C+240+Barcelona,"Pg. de Fabra i Puig, 240",08042
+613,El Malevo Asador,Argentine,,,https://www.google.com/maps/search/?api=1&query=El+Malevo+Asador+C%2F+de+Teide%2C+30+Barcelona,"C/ de Teide, 30",08042
+742,Txapeldun Fabra i Puig,Basque,,,https://www.google.com/maps/search/?api=1&query=Txapeldun+Fabra+i+Puig+Pg.+de+Fabra+i+Puig%2C+260+Barcelona,"Pg. de Fabra i Puig, 260",08042
+743,La Columna Nou Barris,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Columna+Nou+Barris+Pg.+de+Fabra+i+Puig%2C+205+Barcelona,"Pg. de Fabra i Puig, 205",08042
+744,Restaurante Casa Castro,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Casa+Castro+C%2F+del+Tur%C3%B3+de+la+Peira%2C+20+Barcelona,"C/ del Turó de la Peira, 20",08042
+745,L'antic Mediterrani,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=L%27antic+Mediterrani+C%2F+de+Viladrosa%2C+40+Barcelona,"C/ de Viladrosa, 40",08042
+823,Restaurante Can Ros,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Can+Ros+Pg.+de+Fabra+i+Puig%2C+215+Barcelona,"Pg. de Fabra i Puig, 215",08042
+824,El Fogón de Roquetas,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Fog%C3%B3n+de+Roquetas+C%2F+de+Canyelles%2C+40+Barcelona,"C/ de Canyelles, 40",08042
+825,Bar El Padrino,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+El+Padrino+C%2F+del+Tur%C3%B3+de+la+Peira%2C+30+Barcelona,"C/ del Turó de la Peira, 30",08042
+826,Restaurante Xavi,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Xavi+Pg.+de+Fabra+i+Puig%2C+225+Barcelona,"Pg. de Fabra i Puig, 225",08042
+883,La Masia de Nou Barris,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Masia+de+Nou+Barris+Pg.+de+Fabra+i+Puig%2C+250+Barcelona,"Pg. de Fabra i Puig, 250",08042
+884,Restaurante Chen Ji,Chinese,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Chen+Ji+Pg.+de+Fabra+i+Puig%2C+235+Barcelona,"Pg. de Fabra i Puig, 235",08042
+959,Restaurante El Cid Nou Barris,Spanish,,+34 933541207,https://www.google.com/maps/search/?api=1&query=Restaurante+El+Cid+Nou+Barris+C%2F+de+la+Mare+de+D%C3%A9u+de+Montserrat%2C+5+Barcelona,"C/ de la Mare de Déu de Montserrat, 5",08042
+1045,Txapeldun Egarri,Basque,,,https://www.google.com/maps/search/?api=1&query=Txapeldun+Egarri+Nou+Barris%2C+Barcelona+Barcelona,"Nou Barris, Barcelona",08016
+1116,Restaurant Nou Barris,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Nou+Barris+Nou+Barris%2C+Barcelona+Barcelona,"Nou Barris, Barcelona",08042
+1117,El Cim del Nord,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Cim+del+Nord+Nou+Barris%2C+Barcelona+Barcelona,"Nou Barris, Barcelona",08031

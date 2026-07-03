@@ -1,0 +1,31 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+67,Pizzeria Nanà,Italian,,,https://www.google.com/maps/search/?api=1&query=Pizzeria+Nan%C3%A0+C%2F+Gran+de+Sant+Andreu%2C+95+Barcelona,"C/ Gran de Sant Andreu, 95",08030
+68,La Marcelina,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Marcelina+C%2F+Gran+de+Sant+Andreu%2C+52+Barcelona,"C/ Gran de Sant Andreu, 52",08030
+69,Izakaya Barcelona,Japanese,,,https://www.google.com/maps/search/?api=1&query=Izakaya+Barcelona+C%2F+de+Joan+Torras%2C+38+Barcelona,"C/ de Joan Torras, 38",08030
+444,La Cuina de l'Avia,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+de+l%27Avia+C%2F+Gran+de+Sant+Andreu%2C+110+Barcelona,"C/ Gran de Sant Andreu, 110",08030
+445,El Celler de Sant Andreu,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Celler+de+Sant+Andreu+C%2F+Gran+de+Sant+Andreu%2C+80+Barcelona,"C/ Gran de Sant Andreu, 80",08030
+446,Can Joanet,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Joanet+Pl.+del+Comer%C3%A7%2C+5+Barcelona,"Pl. del Comerç, 5",08030
+447,La Perla del Born,Seafood,,,https://www.google.com/maps/search/?api=1&query=La+Perla+del+Born+C%2F+Gran+de+Sant+Andreu%2C+145+Barcelona,"C/ Gran de Sant Andreu, 145",08030
+448,Bar El Roble,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+El+Roble+C%2F+de+Joan+Torras%2C+55+Barcelona,"C/ de Joan Torras, 55",08030
+538,Collonut Sant Andreu,Catalan,,,https://www.google.com/maps/search/?api=1&query=Collonut+Sant+Andreu+C%2F+Gran+de+Sant+Andreu%2C+130+Barcelona,"C/ Gran de Sant Andreu, 130",08030
+539,Fogón del Castellano y Leonés,Spanish,,,https://www.google.com/maps/search/?api=1&query=Fog%C3%B3n+del+Castellano+y+Leon%C3%A9s+C%2F+de+Joan+Torras%2C+80+Barcelona,"C/ de Joan Torras, 80",08030
+540,Restaurant l'Andreuenc,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+l%27Andreuenc+C%2F+de+Neop%C3%A0tria%2C+22+Barcelona,"C/ de Neopàtria, 22",08030
+541,Restaurant La Marcelina,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurant+La+Marcelina+C%2F+de+les+Monges%2C+10+Barcelona,"C/ de les Monges, 10",08030
+542,TocaTeca,Spanish,,,https://www.google.com/maps/search/?api=1&query=TocaTeca+C%2F+Gran+de+Sant+Andreu%2C+100+Barcelona,"C/ Gran de Sant Andreu, 100",08030
+543,La Panxa del Bou,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Panxa+del+Bou+C%2F+de+Neop%C3%A0tria%2C+40+Barcelona,"C/ de Neopàtria, 40",08030
+606,Izakaya Sant Andreu,Japanese,,,https://www.google.com/maps/search/?api=1&query=Izakaya+Sant+Andreu+C%2F+Gran+de+Sant+Andreu%2C+110+Barcelona,"C/ Gran de Sant Andreu, 110",08030
+607,V Modern Italian Sant Andreu,Italian,,,https://www.google.com/maps/search/?api=1&query=V+Modern+Italian+Sant+Andreu+C%2F+de+Neop%C3%A0tria%2C+50+Barcelona,"C/ de Neopàtria, 50",08030
+737,L'Empanat,Spanish,,,https://www.google.com/maps/search/?api=1&query=L%27Empanat+C%2F+de+Neop%C3%A0tria%2C+60+Barcelona,"C/ de Neopàtria, 60",08030
+738,L'Arrossat de l'Empanat,Seafood,,,https://www.google.com/maps/search/?api=1&query=L%27Arrossat+de+l%27Empanat+C%2F+de+Neop%C3%A0tria%2C+65+Barcelona,"C/ de Neopàtria, 65",08030
+739,Il Duomo & La Mole,Italian,,,https://www.google.com/maps/search/?api=1&query=Il+Duomo+%26+La+Mole+C%2F+Gran+de+Sant+Andreu%2C+70+Barcelona,"C/ Gran de Sant Andreu, 70",08030
+740,El Lagar Sant Andreu,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Lagar+Sant+Andreu+C%2F+Gran+de+Sant+Andreu%2C+50+Barcelona,"C/ Gran de Sant Andreu, 50",08030
+741,Taco'n Madre,Mexican,,,https://www.google.com/maps/search/?api=1&query=Taco%27n+Madre+C%2F+de+Joan+Torras%2C+90+Barcelona,"C/ de Joan Torras, 90",08030
+820,La Cuina de l'Andreuenc,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+de+l%27Andreuenc+C%2F+Gran+de+Sant+Andreu%2C+120+Barcelona,"C/ Gran de Sant Andreu, 120",08030
+821,Restaurante Paco,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Paco+C%2F+Joan+Torras%2C+100+Barcelona,"C/ Joan Torras, 100",08030
+822,El Mesón de la Muela,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Mes%C3%B3n+de+la+Muela+C%2F+de+l%27Arxiu%2C+10+Barcelona,"C/ de l'Arxiu, 10",08030
+881,La Cuina del 9,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+del+9+C%2F+Gran+de+Sant+Andreu%2C+80+Barcelona,"C/ Gran de Sant Andreu, 80",08030
+882,Bar Manolo Sant Andreu,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Manolo+Sant+Andreu+C%2F+Gran+de+Sant+Andreu%2C+60+Barcelona,"C/ Gran de Sant Andreu, 60",08030
+960,La Taberna de Sant Andreu,Spanish,,+34 933457065,https://www.google.com/maps/search/?api=1&query=La+Taberna+de+Sant+Andreu+C%2F+Gran+de+Sant+Andreu%2C+116+Barcelona,"C/ Gran de Sant Andreu, 116",08030
+1044,Versalles 1928,Catalan,,,https://www.google.com/maps/search/?api=1&query=Versalles+1928+Sant+Andreu%2C+Barcelona+Barcelona,"Sant Andreu, Barcelona",08030
+1118,La Cuina de Sant Andreu,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+de+Sant+Andreu+Sant+Andreu%2C+Barcelona+Barcelona,"Sant Andreu, Barcelona",08030
+1119,El Petit Andreu,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Petit+Andreu+Sant+Andreu%2C+Barcelona+Barcelona,"Sant Andreu, Barcelona",08030

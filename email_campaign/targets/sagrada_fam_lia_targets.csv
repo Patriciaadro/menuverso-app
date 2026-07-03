@@ -1,0 +1,33 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+58,Restaurante Lepanto,Spanish,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Lepanto+C%2F+de+Lepant%2C+300+Barcelona,"C/ de Lepant, 300",08025
+59,Arc Iris,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Arc+Iris+C%2F+de+Sardenya%2C+120+Barcelona,"C/ de Sardenya, 120",08013
+60,La Yaya Amelia,Spanish,https://layayamelia.cat/,+34 660287529,https://www.google.com/maps/search/?api=1&query=La+Yaya+Amelia+C%2F+de+Sardenya%2C+364+Barcelona,"C/ de Sardenya, 364",08025
+309,Restaurant Can Ravell,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Can+Ravell+C%2F+del+Doctor+Farreras%2C+23+Barcelona,"C/ del Doctor Farreras, 23",08013
+458,Ca l'Estevet Sagrada Família,Catalan,,,https://www.google.com/maps/search/?api=1&query=Ca+l%27Estevet+Sagrada+Fam%C3%ADlia+C%2F+de+Padilla%2C+210+Barcelona,"C/ de Padilla, 210",08013
+459,El Gran Café Sagrada Família,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Gran+Caf%C3%A9+Sagrada+Fam%C3%ADlia+C%2F+de+Sardenya%2C+250+Barcelona,"C/ de Sardenya, 250",08013
+460,Pizzeria Italiana Sagrada,Italian,,,https://www.google.com/maps/search/?api=1&query=Pizzeria+Italiana+Sagrada+C%2F+de+Marina%2C+180+Barcelona,"C/ de Marina, 180",08013
+461,El Fogón de Sicília,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Fog%C3%B3n+de+Sic%C3%ADlia+C%2F+de+Sic%C3%ADlia%2C+265+Barcelona,"C/ de Sicília, 265",08025
+462,Restaurante Marina Alta,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Marina+Alta+C%2F+de+Marina%2C+260+Barcelona,"C/ de Marina, 260",08025
+604,Bar Restaurant Nono,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Restaurant+Nono+C%2F+de+l%27Ind%C3%BAstria%2C+80+Barcelona,"C/ de l'Indústria, 80",08025
+605,Maitea Nikkei,Japanese,,,https://www.google.com/maps/search/?api=1&query=Maitea+Nikkei+C%2F+de+Sardenya%2C+250+Barcelona,"C/ de Sardenya, 250",08013
+675,Restaurant Alkimia Next,Catalan,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Alkimia+Next+C%2F+de+la+Ind%C3%BAstria%2C+85+Barcelona,"C/ de la Indústria, 85",08025
+725,El Glop Gaudí,Spanish,https://elglop.com/,,https://www.google.com/maps/search/?api=1&query=El+Glop+Gaud%C3%AD+C%2F+de+Sardenya%2C+200+Barcelona,"C/ de Sardenya, 200",08013
+810,Osmosis Restaurant,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Osmosis+Restaurant+C%2F+d%27Aribau%2C+100+Barcelona,"C/ d'Aribau, 100",08036
+811,Mesón del Café,Café,,,https://www.google.com/maps/search/?api=1&query=Mes%C3%B3n+del+Caf%C3%A9+C%2F+de+la+Marina%2C+150+Barcelona,"C/ de la Marina, 150",08013
+812,Casa Delfín,Catalan,https://casadelfin.com/,+34 933195088,https://www.google.com/maps/search/?api=1&query=Casa+Delf%C3%ADn+Pg.+del+Born%2C+36+Barcelona,"Pg. del Born, 36",08003
+878,El Born Bàsic,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Born+B%C3%A0sic+C%2F+de+Sardenya%2C+220+Barcelona,"C/ de Sardenya, 220",08013
+879,Pizzería Da Michele,Italian,,,https://www.google.com/maps/search/?api=1&query=Pizzer%C3%ADa+Da+Michele+C%2F+de+Sic%C3%ADlia%2C+150+Barcelona,"C/ de Sicília, 150",08013
+880,Bar Mut Sagrada Família,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Mut+Sagrada+Fam%C3%ADlia+C%2F+de+Sardenya%2C+230+Barcelona,"C/ de Sardenya, 230",08013
+947,Restaurante Bambú,Asian,,+34 934560023,https://www.google.com/maps/search/?api=1&query=Restaurante+Bamb%C3%BA+C%2F+de+Lepant%2C+311+Barcelona,"C/ de Lepant, 311",08025
+948,Mesón Can Pepe,Spanish,,,https://www.google.com/maps/search/?api=1&query=Mes%C3%B3n+Can+Pepe+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08013
+985,L Encant Vegetarià,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=L+Encant+Vegetari%C3%A0+C%2F+dels+Castillejos%2C+210+Barcelona,"C/ dels Castillejos, 210",08013
+1015,Hokkaido Ramen BCN,Japanese,,,https://www.google.com/maps/search/?api=1&query=Hokkaido+Ramen+BCN+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08025
+1069,El Tastet de l'Artur,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Tastet+de+l%27Artur+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08026
+1070,Madre Taberna Moderna,Spanish,,,https://www.google.com/maps/search/?api=1&query=Madre+Taberna+Moderna+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08013
+1071,Papanato Sagrada Familia,Argentine,,,https://www.google.com/maps/search/?api=1&query=Papanato+Sagrada+Familia+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08013
+1090,Mooi Matcha,Café,,,https://www.google.com/maps/search/?api=1&query=Mooi+Matcha+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08025
+1121,Casa de Tapes Cañota SF,Spanish,,,https://www.google.com/maps/search/?api=1&query=Casa+de+Tapes+Ca%C3%B1ota+SF+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08026
+1122,Il Forno di Sabatini,Italian,,,https://www.google.com/maps/search/?api=1&query=Il+Forno+di+Sabatini+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08013
+1123,La Flauta Sagrada Família,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Flauta+Sagrada+Fam%C3%ADlia+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08026
+1141,Restaurante Sagrada Familia,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurante+Sagrada+Familia+Sagrada+Fam%C3%ADlia%2C+Barcelona+Barcelona,"Sagrada Família, Barcelona",08013
+1283,Taperia Sagrada Familia,Other,,,https://www.google.com/maps/search/?api=1&query=Taperia+Sagrada+Familia++Barcelona,,

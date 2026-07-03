@@ -1,0 +1,92 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+29,Rosa Negra,Mexican,https://rosanegra.cat/,+34 933010226,https://www.google.com/maps/search/?api=1&query=Rosa+Negra+C%2F+dels+Tallers%2C+71+Barcelona,"C/ dels Tallers, 71",08001
+30,MamaCafe,Mediterranean,,+34 933 012 940,https://www.google.com/maps/search/?api=1&query=MamaCafe+C%2F+del+Doctor+Dou%2C+10+Barcelona,"C/ del Doctor Dou, 10",08001
+31,Bar Muy Buenas,Spanish,http://muybuenas.cat/,+34 938072857,https://www.google.com/maps/search/?api=1&query=Bar+Muy+Buenas+C%2F+del+Carme%2C+63+Barcelona,"C/ del Carme, 63",08001
+32,Bar Bodega Agustín,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Bodega+Agust%C3%ADn+C%2F+de+Ferlandina%2C+32+Barcelona,"C/ de Ferlandina, 32",08001
+33,Casa Bella,Spanish,,+34 933 18 24 59,https://www.google.com/maps/search/?api=1&query=Casa+Bella+C%2F+de+Montserrat%2C+15+Barcelona,"C/ de Montserrat, 15",08001
+34,Norai Raval,Mediterranean,https://norai.org,+34 646 852 697,https://www.google.com/maps/search/?api=1&query=Norai+Raval+Av.+de+les+Drassanes%2C+s%2Fn+Barcelona,"Av. de les Drassanes, s/n",08001
+215,Ca l'Estevet,Catalan,,,https://www.google.com/maps/search/?api=1&query=Ca+l%27Estevet+Rambla+del+Raval%2C+48+Barcelona,"Rambla del Raval, 48",08001
+216,Suculent,Catalan,,,https://www.google.com/maps/search/?api=1&query=Suculent+C%2F+de+Robador%2C+62+Barcelona,"C/ de Robador, 62",08001
+217,Ca l'Isidre,Catalan,https://calisidre.com/,+34 934411139,https://www.google.com/maps/search/?api=1&query=Ca+l%27Isidre+C%2F+de+la+Cera%2C+164+Barcelona,"C/ de la Cera, 164",08001
+218,Fonda España,Catalan,http://www.hotelespanya.com/,+34 935500000,https://www.google.com/maps/search/?api=1&query=Fonda+Espa%C3%B1a+Rambla+del+Raval%2C+13+Barcelona,"Rambla del Raval, 13",08001
+219,Arume,Spanish,,,https://www.google.com/maps/search/?api=1&query=Arume+C%2F+del+Doctor+Dou%2C+181+Barcelona,"C/ del Doctor Dou, 181",08001
+220,Louro,Spanish,,,https://www.google.com/maps/search/?api=1&query=Louro+C%2F+de+l%27Hospital%2C+92+Barcelona,"C/ de l'Hospital, 92",08001
+221,Cera 23,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cera+23+C%2F+del+Carme%2C+66+Barcelona,"C/ del Carme, 66",08001
+222,Dos Palillos,Asian,https://dospalillos.com/,+34 933040513,https://www.google.com/maps/search/?api=1&query=Dos+Palillos+C%2F+de+la+Cera%2C+41+Barcelona,"C/ de la Cera, 41",08001
+223,A Tu Bola,Middle Eastern,,,https://www.google.com/maps/search/?api=1&query=A+Tu+Bola+C%2F+de+Robador%2C+67+Barcelona,"C/ de Robador, 67",08001
+224,Loto,Asian,,,https://www.google.com/maps/search/?api=1&query=Loto+C%2F+del+Doctor+Dou%2C+88+Barcelona,"C/ del Doctor Dou, 88",08001
+225,Dos Pebrots,Mediterranean,https://dospebrots.com/,+34 938534598,https://www.google.com/maps/search/?api=1&query=Dos+Pebrots+C%2F+del+Doctor+Dou%2C+99+Barcelona,"C/ del Doctor Dou, 99",08001
+226,Resolis,Spanish,,,https://www.google.com/maps/search/?api=1&query=Resolis+C%2F+d%27Elisabets%2C+116+Barcelona,"C/ d'Elisabets, 116",08001
+227,Tropico,Café,,,https://www.google.com/maps/search/?api=1&query=Tropico+C%2F+de+Ferlandina%2C+68+Barcelona,"C/ de Ferlandina, 68",08001
+228,Fat Cat,Café,,,https://www.google.com/maps/search/?api=1&query=Fat+Cat+C%2F+d%27Elisabets%2C+165+Barcelona,"C/ d'Elisabets, 165",08001
+229,Caravelle,Fusion,https://caravellebcn.com/,+34 933179892,https://www.google.com/maps/search/?api=1&query=Caravelle+C%2F+del+Doctor+Dou%2C+157+Barcelona,"C/ del Doctor Dou, 157",08001
+230,Mama Café,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Mama+Caf%C3%A9+Pla%C3%A7a+de+la+Boqueria%2C+6+Barcelona,"Plaça de la Boqueria, 6",08001
+231,El Magraner Boig,Greek,,,https://www.google.com/maps/search/?api=1&query=El+Magraner+Boig+C%2F+de+la+Cera%2C+198+Barcelona,"C/ de la Cera, 198",08001
+232,La Rosa del Raval,Mexican,,,https://www.google.com/maps/search/?api=1&query=La+Rosa+del+Raval+C%2F+de+l%27Hospital%2C+140+Barcelona,"C/ de l'Hospital, 140",08001
+338,Elisabets,Spanish,,+34 933175826,https://www.google.com/maps/search/?api=1&query=Elisabets+C%2F+d%27Elisabets%2C+2+Barcelona,"C/ d'Elisabets, 2",08001
+339,78|33,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=78%7C33+C%2F+de+Ferlandina%2C+29+Barcelona,"C/ de Ferlandina, 29",08001
+340,Palosanto Tapas Bar,Spanish,https://palosantotapasbar.com/,,https://www.google.com/maps/search/?api=1&query=Palosanto+Tapas+Bar+Rambla+del+Raval%2C+26+Barcelona,"Rambla del Raval, 26",08001
+341,Güell Tapas,Spanish,https://guelltapas.com/,+34 933015558,https://www.google.com/maps/search/?api=1&query=G%C3%BCell+Tapas+C%2F+Nou+de+la+Rambla%2C+20+Barcelona,"C/ Nou de la Rambla, 20",08001
+342,Gats,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Gats+C%2F+del+Carme%2C+28+Barcelona,"C/ del Carme, 28",08001
+343,Bar Pinotxo,Spanish,https://pinotxobar.com/,+34 933171731,https://www.google.com/maps/search/?api=1&query=Bar+Pinotxo+La+Boqueria%2C+Pl.+66-67+Barcelona,"La Boqueria, Pl. 66-67",08001
+344,Koy Shunka,Japanese,https://koyshunka.com/,+34 934127939,https://www.google.com/maps/search/?api=1&query=Koy+Shunka+C%2F+de+Copons%2C+7+Barcelona,"C/ de Copons, 7",08002
+345,Bar Lobo,Mediterranean,https://grupotragaluz.com/restaurante/bar-lobo/,+34 934813346,https://www.google.com/maps/search/?api=1&query=Bar+Lobo+C%2F+del+Pintor+Fortuny%2C+3+Barcelona,"C/ del Pintor Fortuny, 3",08001
+346,Biblioteca,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Biblioteca+C%2F+de+la+Junta+de+Comer%C3%A7%2C+28+Barcelona,"C/ de la Junta de Comerç, 28",08001
+347,La Boqueria Market Stalls,Other,https://boqueria.barcelona/,+34 934132303,https://www.google.com/maps/search/?api=1&query=La+Boqueria+Market+Stalls+La+Rambla%2C+91+Barcelona,"La Rambla, 91",08001
+348,Sesamo,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Sesamo+C%2F+de+Sant+Antoni+Abat%2C+52+Barcelona,"C/ de Sant Antoni Abat, 52",08001
+481,El Cangrejo Loco Raval,Seafood,,,https://www.google.com/maps/search/?api=1&query=El+Cangrejo+Loco+Raval+C%2F+de+la+Cera%2C+25+Barcelona,"C/ de la Cera, 25",08001
+482,Mam i Teca,Catalan,,,https://www.google.com/maps/search/?api=1&query=Mam+i+Teca+C%2F+de+la+Lluna%2C+4+Barcelona,"C/ de la Lluna, 4",08001
+483,La Tertulia del Chef,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Tertulia+del+Chef+C%2F+de+Ferlandina%2C+18+Barcelona,"C/ de Ferlandina, 18",08001
+484,Bacoa Raval,Gastropub,https://bacoa.es/,+34 932689548,https://www.google.com/maps/search/?api=1&query=Bacoa+Raval+C%2F+dels+Tallers%2C+83+Barcelona,"C/ dels Tallers, 83",08001
+485,Flax & Kale Raval,Vegetarian/Vegan,https://flaxandkale.com/,+34 933175664,https://www.google.com/maps/search/?api=1&query=Flax+%26+Kale+Raval+C%2F+dels+Tallers%2C+74b+Barcelona,"C/ dels Tallers, 74b",08001
+486,Las Fernandez,Spanish,,,https://www.google.com/maps/search/?api=1&query=Las+Fernandez+C%2F+del+Carme%2C+17+Barcelona,"C/ del Carme, 17",08001
+487,En Ville,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=En+Ville+C%2F+del+Doctor+Dou%2C+14+Barcelona,"C/ del Doctor Dou, 14",08001
+569,Bar Cañete,Spanish,https://barcanete.com/,+34 932703458,https://www.google.com/maps/search/?api=1&query=Bar+Ca%C3%B1ete+C%2F+de+la+Uni%C3%B3%2C+17+Barcelona,"C/ de la Unió, 17",08001
+619,Flax & Kale Tallers,Vegetarian/Vegan,https://flaxandkale.com/,+34 933175664,https://www.google.com/maps/search/?api=1&query=Flax+%26+Kale+Tallers+C%2F+dels+Tallers%2C+74bis+Barcelona,"C/ dels Tallers, 74bis",08001
+645,Louro La Rambla,Seafood,,,https://www.google.com/maps/search/?api=1&query=Louro+La+Rambla+La+Rambla%2C+50+Barcelona,"La Rambla, 50",08002
+650,Luzia,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Luzia+La+Rambla%2C+80+Barcelona,"La Rambla, 80",08002
+653,Bo de B El Raval,Spanish,https://bodeb.com/,+34 932681408,https://www.google.com/maps/search/?api=1&query=Bo+de+B+El+Raval+C%2F+de+la+Boqueria%2C+18+Barcelona,"C/ de la Boqueria, 18",08002
+660,El Quim de la Boqueria,Spanish,https://elquimdelaboqueria.com/,+34 933019810,https://www.google.com/maps/search/?api=1&query=El+Quim+de+la+Boqueria+La+Boqueria%2C+Parada+584+Barcelona,"La Boqueria, Parada 584",08001
+661,El Kiosko Universal,Seafood,,,https://www.google.com/maps/search/?api=1&query=El+Kiosko+Universal+La+Boqueria%2C+Parada+691+Barcelona,"La Boqueria, Parada 691",08001
+662,Can Lluis,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Lluis+C%2F+de+la+Cera%2C+49+Barcelona,"C/ de la Cera, 49",08001
+663,CatBar,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=CatBar+C%2F+de+la+B%C3%B2ria%2C+17+Barcelona,"C/ de la Bòria, 17",08003
+679,100 Montaditos Raval,Spanish,,,https://www.google.com/maps/search/?api=1&query=100+Montaditos+Raval+La+Rambla%2C+60+Barcelona,"La Rambla, 60",08001
+682,Cerveseria Dolina,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cerveseria+Dolina+C%2F+de+Joaqu%C3%ADn+Costa%2C+44+Barcelona,"C/ de Joaquín Costa, 44",08001
+683,El Jabalí,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Jabal%C3%AD+C%2F+de+la+Cera%2C+30+Barcelona,"C/ de la Cera, 30",08001
+684,El Pacífico,Peruvian,,,https://www.google.com/maps/search/?api=1&query=El+Pac%C3%ADfico+C%2F+d%27en+Robador%2C+25+Barcelona,"C/ d'en Robador, 25",08001
+708,Tacos Guzmán,Mexican,,,https://www.google.com/maps/search/?api=1&query=Tacos+Guzm%C3%A1n+C%2F+de+Joaqu%C3%ADn+Costa%2C+30+Barcelona,"C/ de Joaquín Costa, 30",08001
+760,Sip Coffee Raval,Café,,,https://www.google.com/maps/search/?api=1&query=Sip+Coffee+Raval+C%2F+d%27Elisabets%2C+15+Barcelona,"C/ d'Elisabets, 15",08001
+761,Fresquito,Spanish,,,https://www.google.com/maps/search/?api=1&query=Fresquito+C%2F+de+la+Cera%2C+20+Barcelona,"C/ de la Cera, 20",08001
+762,Empanada Barcelona,Argentine,,,https://www.google.com/maps/search/?api=1&query=Empanada+Barcelona+C%2F+de+la+Boqueria%2C+10+Barcelona,"C/ de la Boqueria, 10",08001
+782,RAÓ,Catalan,,,https://www.google.com/maps/search/?api=1&query=RA%C3%93+C%2F+dels+Tallers%2C+80+Barcelona,"C/ dels Tallers, 80",08001
+783,Anardi,Basque,,,https://www.google.com/maps/search/?api=1&query=Anardi+C%2F+de+Joaqu%C3%ADn+Costa%2C+50+Barcelona,"C/ de Joaquín Costa, 50",08001
+784,Superclàssic,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Supercl%C3%A0ssic+C%2F+de+Joaqu%C3%ADn+Costa%2C+55+Barcelona,"C/ de Joaquín Costa, 55",08001
+785,Bellvitja,Catalan,,,https://www.google.com/maps/search/?api=1&query=Bellvitja+C%2F+de+la+Cera%2C+40+Barcelona,"C/ de la Cera, 40",08001
+786,Mimi Tapas,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Mimi+Tapas+C%2F+d%27Elisabets%2C+20+Barcelona,"C/ d'Elisabets, 20",08001
+787,Bodega d'en Rubén,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+d%27en+Rub%C3%A9n+C%2F+de+les+Flors%2C+20+Barcelona,"C/ de les Flors, 20",08001
+788,Bianco Noir,Fusion,,,https://www.google.com/maps/search/?api=1&query=Bianco+Noir+C%2F+dels+Tallers%2C+60+Barcelona,"C/ dels Tallers, 60",08001
+789,Bar Atlanta,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Atlanta+C%2F+de+la+Riereta%2C+20+Barcelona,"C/ de la Riereta, 20",08001
+790,La Morera,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Morera+C%2F+del+Carme%2C+40+Barcelona,"C/ del Carme, 40",08001
+791,La Ravala,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Ravala+C%2F+de+la+Cera%2C+25+Barcelona,"C/ de la Cera, 25",08001
+792,Mendizábal,Spanish,,,https://www.google.com/maps/search/?api=1&query=Mendiz%C3%A1bal+C%2F+d%27en+Robador%2C+30+Barcelona,"C/ d'en Robador, 30",08001
+793,Bar Marsella,Spanish,,+34 934427263,https://www.google.com/maps/search/?api=1&query=Bar+Marsella+C%2F+de+Sant+Pau%2C+65+Barcelona,"C/ de Sant Pau, 65",08001
+794,Biocenter,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Biocenter+C%2F+del+Pintor+Fortuny%2C+25+Barcelona,"C/ del Pintor Fortuny, 25",08001
+856,La Boqueria Stall 1,Seafood,,,https://www.google.com/maps/search/?api=1&query=La+Boqueria+Stall+1+La+Boqueria%2C+Parada+500+Barcelona,"La Boqueria, Parada 500",08001
+910,Gat Blau,Spanish,https://gatblaurestaurant.com/,+34 933256199,https://www.google.com/maps/search/?api=1&query=Gat+Blau+C%2F+del+Comte+Borrell%2C+122+Barcelona,"C/ del Comte Borrell, 122",08015
+930,Govinda,Indian,https://govinda.es/,+34 933187729,https://www.google.com/maps/search/?api=1&query=Govinda+Pla%C3%A7a+Vila+de+Madrid%2C+4+Barcelona,"Plaça Vila de Madrid, 4",08001
+931,Los Pinchitos,Spanish,,,https://www.google.com/maps/search/?api=1&query=Los+Pinchitos+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+954,L Hamburguesa,Gastropub,,,https://www.google.com/maps/search/?api=1&query=L+Hamburguesa+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+986,L Hortet,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=L+Hortet+C%2F+del+Pintor+Fortuny%2C+30+Barcelona,"C/ del Pintor Fortuny, 30",08001
+1029,El Guindilla,Spanish,,,https://www.google.com/maps/search/?api=1&query=El+Guindilla+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+1030,La Vermutería del Raval,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Vermuter%C3%ADa+del+Raval+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+1084,Que Bo Raval,Middle Eastern,,,https://www.google.com/maps/search/?api=1&query=Que+Bo+Raval+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+1093,Flax&Kale,Vegetarian/Vegan,https://flaxandkale.com/,+34 933175664,https://www.google.com/maps/search/?api=1&query=Flax%26Kale+C%2F+dels+Tallers%2C+74b%2C+08001+Barcelona+Barcelona,"C/ dels Tallers, 74b, 08001 Barcelona",08001
+1106,Casa Leopoldo,Catalan,https://casaleopoldo.com/,+34 933127385,https://www.google.com/maps/search/?api=1&query=Casa+Leopoldo+C%2F+de+Sant+Rafael%2C+24+Barcelona,"C/ de Sant Rafael, 24",08001
+1107,El Pla dels Àngels,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Pla+dels+%C3%80ngels+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+1108,Ca l Isidre,Catalan,,,https://www.google.com/maps/search/?api=1&query=Ca+l+Isidre+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+1126,La Boqueria Market Bar,Spanish,https://boqueria.barcelona/,+34 934132303,https://www.google.com/maps/search/?api=1&query=La+Boqueria+Market+Bar+La+Rambla%2C+91+Barcelona,"La Rambla, 91",08001
+1127,Cañete Barcelona,Spanish,https://barcanete.com/,+34 932703458,https://www.google.com/maps/search/?api=1&query=Ca%C3%B1ete+Barcelona+C%2F+de+la+Uni%C3%B3%2C+17+Barcelona,"C/ de la Unió, 17",08001
+1140,La Cuina del Raval,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Cuina+del+Raval+El+Raval%2C+Barcelona+Barcelona,"El Raval, Barcelona",08001
+1183,Papadam Indian Authentic,Indian,https://www.papadam.es/,+34 931 43 85 56,https://www.google.com/maps/search/?api=1&query=Papadam+Indian+Authentic+Ronda+de+Sant+Pau%2C+11+Barcelona,"Rda. de Sant Pau, 11, 08015 Barcelona",08015
+1192,Julivert Meu Restaurante,Catalan,http://www.julivertmeu.com/,+34 932 46 42 62,https://www.google.com/maps/search/?api=1&query=Julivert+Meu+Restaurante+Carrer+del+Bonsucc%C3%A9s%2C+7+Barcelona,"Carrer del Bonsuccés, 7",
+1193,La Alhambra,Indian,https://alhambrarestaurant.es/,,https://www.google.com/maps/search/?api=1&query=La+Alhambra+Rda.+de+Sant+Pau%2C+48+Barcelona,"Rda. de Sant Pau, 48, 08001 Barcelona",08001

@@ -1,0 +1,75 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+21,Ristorante Gravin,Italian,https://gravinristorante.com,,https://www.google.com/maps/search/?api=1&query=Ristorante+Gravin+C%2F+de+l%27Argenteria%2C+64+Barcelona,"C/ de l'Argenteria, 64",08003
+22,El Casal Cafe Bar,Mediterranean,https://elcasalcafe.es,,https://www.google.com/maps/search/?api=1&query=El+Casal+Cafe+Bar+C%2F+de+Sant+Pere+M%C3%A9s+Alt%2C+1+Barcelona,"C/ de Sant Pere Més Alt, 1",08003
+23,Quillo Bar Tapas,Spanish,https://quillo-bar.com,+34 931 38 31 30,https://www.google.com/maps/search/?api=1&query=Quillo+Bar+Tapas+C%2F+de+Banys+Vells%2C+12+Barcelona,"C/ de Banys Vells, 12",08003
+24,En Aparte,French,,,https://www.google.com/maps/search/?api=1&query=En+Aparte+C%2F+del+Rec%2C+4+Barcelona,"C/ del Rec, 4",08003
+199,La Paradeta,Seafood,https://laparadeta.com/,,https://www.google.com/maps/search/?api=1&query=La+Paradeta+C%2F+dels+Banys+Vells%2C+122+Barcelona,"C/ dels Banys Vells, 122",08003
+200,Spacca Napoli,Italian,,,https://www.google.com/maps/search/?api=1&query=Spacca+Napoli+C%2F+dels+Flassaders%2C+36+Barcelona,"C/ dels Flassaders, 36",08003
+201,Montiel,Mediterranean,https://restaurantmontiel.com/,+34 932683729,https://www.google.com/maps/search/?api=1&query=Montiel+Passeig+del+Born%2C+42+Barcelona,"Passeig del Born, 42",08003
+202,Pla de la Garsa,Catalan,,,https://www.google.com/maps/search/?api=1&query=Pla+de+la+Garsa+C%2F+dels+Banys+Vells%2C+66+Barcelona,"C/ dels Banys Vells, 66",08003
+203,Sagàs,Catalan,,,https://www.google.com/maps/search/?api=1&query=Sag%C3%A0s+C%2F+dels+Banys+Vells%2C+129+Barcelona,"C/ dels Banys Vells, 129",08003
+204,Guzzo,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Guzzo+C%2F+de+Sant+Pere+M%C3%A9s+Alt%2C+191+Barcelona,"C/ de Sant Pere Més Alt, 191",08003
+205,Calabrasa,Mediterranean,https://www.calabrasa.com/,+34 933 100 786,https://www.google.com/maps/search/?api=1&query=Calabrasa+C%2F+de+la+Princesa%2C+133+Barcelona,"Pg. del Born, 27, 08003 Barcelona",08003
+206,Golfo de Bizkaia Born,Spanish,,,https://www.google.com/maps/search/?api=1&query=Golfo+de+Bizkaia+Born+C%2F+de+l%27Argenteria%2C+172+Barcelona,"C/ de l'Argenteria, 172",08003
+207,El Xampanyet,Spanish,https://elxampanyet.es/,+34 933197003,https://www.google.com/maps/search/?api=1&query=El+Xampanyet+C%2F+de+l%27Argenteria%2C+200+Barcelona,"C/ de l'Argenteria, 200",08003
+208,Casa Lolea,Spanish,,,https://www.google.com/maps/search/?api=1&query=Casa+Lolea+C%2F+de+Sant+Pere+M%C3%A9s+Alt%2C+186+Barcelona,"C/ de Sant Pere Més Alt, 186",08003
+209,Bar del Pla,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+del+Pla+C%2F+dels+Banys+Vells%2C+194+Barcelona,"C/ dels Banys Vells, 194",08003
+210,Bastaix,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bastaix+C%2F+dels+Banys+Vells%2C+155+Barcelona,"C/ dels Banys Vells, 155",08003
+211,Txirimiri,Spanish,,,https://www.google.com/maps/search/?api=1&query=Txirimiri+Passeig+del+Born%2C+21+Barcelona,"Passeig del Born, 21",08003
+212,Elsa y Fred,Spanish,,,https://www.google.com/maps/search/?api=1&query=Elsa+y+Fred+C%2F+de+Montcada%2C+154+Barcelona,"C/ de Montcada, 154",08003
+213,Cremat 11,Café,,,https://www.google.com/maps/search/?api=1&query=Cremat+11+C%2F+de+Montcada%2C+175+Barcelona,"C/ de Montcada, 175",08003
+214,Alsur Cafe,Café,,,https://www.google.com/maps/search/?api=1&query=Alsur+Cafe+C%2F+del+Rec%2C+157+Barcelona,"C/ del Rec, 157",08003
+367,Passadís del Pep,Seafood,https://passadis.com/,+34 933101021,https://www.google.com/maps/search/?api=1&query=Passad%C3%ADs+del+Pep+Pl.+del+Palau%2C+2+Barcelona,"Pl. del Palau, 2",08003
+368,Llamber,Mediterranean,https://llamber.com/,+34 933196250,https://www.google.com/maps/search/?api=1&query=Llamber+C%2F+de+la+Fusina%2C+5+Barcelona,"C/ de la Fusina, 5",08003
+369,Tantarantana,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Tantarantana+C%2F+de+Tantarantana%2C+24+Barcelona,"C/ de Tantarantana, 24",08003
+476,Euskal Etxea,Basque,https://euskaletxeabarcelona.com/,+34 933102185,https://www.google.com/maps/search/?api=1&query=Euskal+Etxea+Pl.+de+Montcada%2C+1-3+Barcelona,"Pl. de Montcada, 1-3",08003
+477,La Bàscula,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=La+B%C3%A0scula+C%2F+dels+Flassaders%2C+30+Barcelona,"C/ dels Flassaders, 30",08003
+478,Bornet Bar,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bornet+Bar+Pl.+Comercial%2C+10+Barcelona,"Pl. Comercial, 10",08003
+479,Senyor Parellada,Catalan,https://senyorparellada.com/,+34 933105094,https://www.google.com/maps/search/?api=1&query=Senyor+Parellada+C%2F+de+l%27Argenteria%2C+37+Barcelona,"C/ de l'Argenteria, 37",08003
+480,El Petit Bangkok,Asian,,,https://www.google.com/maps/search/?api=1&query=El+Petit+Bangkok+C%2F+de+l%27Argenteria%2C+58+Barcelona,"C/ de l'Argenteria, 58",08003
+554,Bar Puntal,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bar+Puntal+C%2F+de+Sant+Pere+M%C3%A9s+Baix%2C+45+Barcelona,"C/ de Sant Pere Més Baix, 45",08003
+555,Mantequerias Pirenaicas,Spanish,,,https://www.google.com/maps/search/?api=1&query=Mantequerias+Pirenaicas+C%2F+de+l%27Argenteria%2C+65+Barcelona,"C/ de l'Argenteria, 65",08003
+590,Taller de Tapas Argenteria,Spanish,https://tallerdetapas.com/,+34 932688559,https://www.google.com/maps/search/?api=1&query=Taller+de+Tapas+Argenteria+C%2F+de+l%27Argenteria%2C+51+Barcelona,"C/ de l'Argenteria, 51",08003
+595,El Passadís d'en Pep,Seafood,https://passadis.com/,+34 933101021,https://www.google.com/maps/search/?api=1&query=El+Passad%C3%ADs+d%27en+Pep+Pl.+del+Palau%2C+2+Barcelona,"Pl. del Palau, 2",08003
+624,Bacoa Born,Gastropub,https://bacoaburger.com/,+34 932689548,https://www.google.com/maps/search/?api=1&query=Bacoa+Born+C%2F+del+Bou+de+la+Pla%C3%A7a+Nova%2C+6+Barcelona,"C/ del Bou de la Plaça Nova, 6",08002
+669,Origen 99.99%,Catalan,,,https://www.google.com/maps/search/?api=1&query=Origen+99.99%25+C%2F+de+la+Vidrieria%2C+6-8+Barcelona,"C/ de la Vidrieria, 6-8",08003
+670,Picnic BCN,Café,,,https://www.google.com/maps/search/?api=1&query=Picnic+BCN+C%2F+del+Comer%C3%A7%2C+1+Barcelona,"C/ del Comerç, 1",08003
+685,Restaurant 7 Portes,Catalan,https://7portes.com/,+34 933193033,https://www.google.com/maps/search/?api=1&query=Restaurant+7+Portes+Pg.+Isabel+II%2C+14+Barcelona,"Pg. Isabel II, 14",08003
+686,La Carassa,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Carassa+C%2F+de+Grunyi%2C+1+Barcelona,"C/ de Grunyi, 1",08003
+712,Bar Patata,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Patata+C%2F+dels+Flassaders%2C+10+Barcelona,"C/ dels Flassaders, 10",08003
+714,Volta Barcelona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Volta+Barcelona+C%2F+d%27Ample%2C+30+Barcelona,"C/ d'Ample, 30",08002
+723,Bornès,Catalan,,,https://www.google.com/maps/search/?api=1&query=Born%C3%A8s+C%2F+de+la+Princesa%2C+20+Barcelona,"C/ de la Princesa, 20",08003
+778,Quillo Bar,Spanish,,,https://www.google.com/maps/search/?api=1&query=Quillo+Bar+C%2F+dels+Semoleres%2C+5+Barcelona,"C/ dels Semoleres, 5",08003
+779,Ten's Tapas,Spanish,,,https://www.google.com/maps/search/?api=1&query=Ten%27s+Tapas+C%2F+dels+Sombrerers%2C+10+Barcelona,"C/ dels Sombrerers, 10",08003
+780,Euskal Etxea Taberna,Basque,,,https://www.google.com/maps/search/?api=1&query=Euskal+Etxea+Taberna+Pl.+de+Montcada%2C+1-3+Barcelona,"Pl. de Montcada, 1-3",08003
+781,Cuines Santa Caterina,Mediterranean,https://grupotragaluz.com/restaurantes/cuines-santa-caterina/,+34 932689918,https://www.google.com/maps/search/?api=1&query=Cuines+Santa+Caterina+Av.+de+Francesc+Camb%C3%B3%2C+16+Barcelona,"Av. de Francesc Cambó, 16",08003
+892,Perikete,Basque,,,https://www.google.com/maps/search/?api=1&query=Perikete+Pl.+de+la+Font%2C+2+Barcelona,"Pl. de la Font, 2",08003
+897,Flax & Kale Born,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Flax+%26+Kale+Born+C%2F+dels+Flassaders%2C+20+Barcelona,"C/ dels Flassaders, 20",08003
+899,Paradiso,Fusion,https://paradiso.cat/,+34 933607222,https://www.google.com/maps/search/?api=1&query=Paradiso+C%2F+de+Rera+Palau%2C+4+Barcelona,"C/ de Rera Palau, 4",08003
+904,La Pepita Born,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Pepita+Born+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+907,Kibuka Born,Japanese,https://kibuka.com/,+34 932378994,https://www.google.com/maps/search/?api=1&query=Kibuka+Born+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+913,Mandarosso,Italian,https://www.mandarosso.com/,+34 932690780,https://www.google.com/maps/search/?api=1&query=Mandarosso+C%2F+de+Verdaguer+i+Call%C3%ADs%2C+4+Barcelona,"C/ de Verdaguer i Callís, 4",08003
+915,Can Culleretes Born,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Culleretes+Born+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+918,El Pasaje,Spanish,https://elpasaje.es/,+34 933198498,https://www.google.com/maps/search/?api=1&query=El+Pasaje+C%2F+de+Sant+Pere+M%C3%A9s+Baix%2C+56+Barcelona,"C/ de Sant Pere Més Baix, 56",08003
+919,Celler de la Ribera,Catalan,https://familialonja.com/,+34 933107845,https://www.google.com/maps/search/?api=1&query=Celler+de+la+Ribera+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+925,Milk Bar Born,Café,,,https://www.google.com/maps/search/?api=1&query=Milk+Bar+Born+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+932,El Salón,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Sal%C3%B3n+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+933,Miramelindo,Spanish,https://miramelindo.es/,+34 933101027,https://www.google.com/maps/search/?api=1&query=Miramelindo+Pg.+del+Born%2C+15+Barcelona,"Pg. del Born, 15",08003
+949,El Vergel Veggie,Vegetarian/Vegan,https://restaurantvegetalia.com/,,https://www.google.com/maps/search/?api=1&query=El+Vergel+Veggie+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+988,Pizzeria da Nanni,Italian,,,https://www.google.com/maps/search/?api=1&query=Pizzeria+da+Nanni+C%2F+dels+Assaonadors%2C+20+Barcelona,"C/ dels Assaonadors, 20",08003
+989,Quick Greek BCN,Greek,,,https://www.google.com/maps/search/?api=1&query=Quick+Greek+BCN+C%2F+dels+Carders%2C+10+Barcelona,"C/ dels Carders, 10",08003
+990,The Pans Club,Café,,,https://www.google.com/maps/search/?api=1&query=The+Pans+Club+C%2F+dels+Flassaders%2C+25+Barcelona,"C/ dels Flassaders, 25",08003
+1010,Volta Borneta,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Volta+Borneta+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+1027,Tapería Princesa,Spanish,,,https://www.google.com/maps/search/?api=1&query=Taper%C3%ADa+Princesa+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+1083,Dagma Barcelona,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Dagma+Barcelona+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+1112,Cal Pep Born,Seafood,https://www.calpep.com/,+34 933107961,https://www.google.com/maps/search/?api=1&query=Cal+Pep+Born+Pla%C3%A7a+de+les+Olles%2C+8+Barcelona,"Plaça de les Olles, 8",08003
+1129,Sagardi Barcelona,Basque,https://www.sagardi.com/,+34 933199993,https://www.google.com/maps/search/?api=1&query=Sagardi+Barcelona+C%2F+de+l%27Argenteria%2C+62+Barcelona,"C/ de l'Argenteria, 62",08003
+1131,La Basculla,Vegetarian/Vegan,https://labasculla.cat/,+34 933189098,https://www.google.com/maps/search/?api=1&query=La+Basculla+C%2F+de+la+Flassaders%2C+30+Barcelona,"C/ de la Flassaders, 30",08003
+1138,Bacaro Venice Wine Bar,Italian,,,https://www.google.com/maps/search/?api=1&query=Bacaro+Venice+Wine+Bar+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+1139,La Ribera Born Tapas,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Ribera+Born+Tapas+El+Born%2C+Barcelona+Barcelona,"El Born, Barcelona",08003
+1143,Bormuth Born,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bormuth+Born+Barcelona,"C/ del Rec, 157",08003
+1144,Picnic Born,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Picnic+Born+Barcelona,"C/ del Comerç, 1",08003
+1181,Barcelona Grill Steak House,Argentine,,+34 625 12 60 61,https://www.google.com/maps/search/?api=1&query=Barcelona+Grill+Steak+House+Carrer+del+Rec+Comtal%2C+7+Barcelona,"Carrer del Rec Comtal, 7, 08003 Barcelona",08003
+1195,Grill Argento Steakhouse,Argentine,,+34 931 43 04 35,https://www.google.com/maps/search/?api=1&query=Grill+Argento+Steakhouse+Carrer+del+Bou+de+Sant+Pere%2C+13+Barcelona,"Carrer del Bou de Sant Pere, 13",
+1241,Palau del Born,Other,https://palaudelborn.com/,+34 930 47 85 02,https://www.google.com/maps/search/?api=1&query=Palau+del+Born++Barcelona,"Pla de Palau, 7, Ciutat Vella, 08003 Barcelona",08003
+1276,El racó de Princesa,Other,,,https://www.google.com/maps/search/?api=1&query=El+rac%C3%B3+de+Princesa++Barcelona,,

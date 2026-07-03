@@ -1,0 +1,48 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+48,L'Antull,Spanish,,,https://www.google.com/maps/search/?api=1&query=L%27Antull+C%2F+d%27Europa%2C+33+Barcelona,"C/ d'Europa, 33",08028
+290,Casa Petra,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Casa+Petra+Travessera+de+les+Corts%2C+72+Barcelona,"Travessera de les Corts, 72",08029
+291,OBBA Corea BBQ,Asian,,,https://www.google.com/maps/search/?api=1&query=OBBA+Corea+BBQ+Travessera+de+les+Corts%2C+60+Barcelona,"Travessera de les Corts, 60",08028
+292,Yashima,Japanese,,,https://www.google.com/maps/search/?api=1&query=Yashima+Av.+Diagonal%2C+4+Barcelona,"Av. Diagonal, 4",08029
+293,Chennai Masala Dosa,Indian,,,https://www.google.com/maps/search/?api=1&query=Chennai+Masala+Dosa+Travessera+de+les+Corts%2C+81+Barcelona,"Travessera de les Corts, 81",08028
+294,Bangkok Cafe,Asian,,,https://www.google.com/maps/search/?api=1&query=Bangkok+Cafe+Travessera+de+les+Corts%2C+123+Barcelona,"Travessera de les Corts, 123",08028
+295,Bar Manila,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Manila+C%2F+de+Num%C3%A0ncia%2C+75+Barcelona,"C/ de Numància, 75",08029
+296,Baló,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Bal%C3%B3+C%2F+de+Num%C3%A0ncia%2C+146+Barcelona,"C/ de Numància, 146",08029
+297,Bodega Aregall,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Aregall+C%2F+d%27Aregall%2C+4+Barcelona,"C/ d'Aregall, 4",08028
+390,Cervecería Naviera,Spanish,,,https://www.google.com/maps/search/?api=1&query=Cervecer%C3%ADa+Naviera+Av.+Diagonal%2C+534+Barcelona,"Av. Diagonal, 534",08029
+419,Cocina Hermanos Torres,Mediterranean,https://cocinahermanostorres.com/,+34 934100020,https://www.google.com/maps/search/?api=1&query=Cocina+Hermanos+Torres+C%2F+del+Taqu%C3%ADgraf+Serra%2C+20+Barcelona,"C/ del Taquígraf Serra, 20",08029
+420,Arrosseria Xàtiva Les Corts,Spanish,https://grupxativa.com/,+34 932848502,https://www.google.com/maps/search/?api=1&query=Arrosseria+X%C3%A0tiva+Les+Corts+C%2F+de+Galileu%2C+96+Barcelona,"C/ de Galileu, 96",08028
+421,Bar Restaurante Las Corts,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Restaurante+Las+Corts+Travessera+de+les+Corts%2C+110+Barcelona,"Travessera de les Corts, 110",08028
+422,Can Fusté,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Can+Fust%C3%A9+C%2F+de+Vallespir%2C+45+Barcelona,"C/ de Vallespir, 45",08014
+423,Manda Huevos,Spanish,,,https://www.google.com/maps/search/?api=1&query=Manda+Huevos+Travessera+de+les+Corts%2C+66+Barcelona,"Travessera de les Corts, 66",08028
+424,El Guajolote,Mexican,,,https://www.google.com/maps/search/?api=1&query=El+Guajolote+C%2F+de+Galileu%2C+71+Barcelona,"C/ de Galileu, 71",08028
+425,El Tap,Gastropub,,,https://www.google.com/maps/search/?api=1&query=El+Tap+Travessera+de+les+Corts%2C+44+Barcelona,"Travessera de les Corts, 44",08028
+426,Putxinel·lis,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Putxinel%C2%B7lis+C%2F+de+Num%C3%A0ncia%2C+90+Barcelona,"C/ de Numància, 90",08029
+427,Bodega Brugal,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Brugal+C%2F+de+Galileu%2C+105+Barcelona,"C/ de Galileu, 105",08028
+428,Beirut Restaurant,Lebanese,,,https://www.google.com/maps/search/?api=1&query=Beirut+Restaurant+C%2F+de+Vallespir%2C+22+Barcelona,"C/ de Vallespir, 22",08014
+561,La Nueva Marquesa,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Nueva+Marquesa+Travessera+de+les+Corts%2C+100+Barcelona,"Travessera de les Corts, 100",08028
+562,La Riera,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=La+Riera+C%2F+de+Num%C3%A0ncia%2C+75+Barcelona,"C/ de Numància, 75",08029
+563,El Racó de les Corts,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Rac%C3%B3+de+les+Corts+Travessera+de+les+Corts%2C+85+Barcelona,"Travessera de les Corts, 85",08028
+564,Casa Varela,Catalan,,,https://www.google.com/maps/search/?api=1&query=Casa+Varela+C%2F+de+Galileu%2C+55+Barcelona,"C/ de Galileu, 55",08028
+565,Mà de Morter,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=M%C3%A0+de+Morter+Travessera+de+les+Corts%2C+120+Barcelona,"Travessera de les Corts, 120",08028
+566,Tapas 24 Camp Nou,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tapas+24+Camp+Nou+C%2F+de+les+Corts%2C+20+Barcelona,"C/ de les Corts, 20",08028
+577,La Modesta,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Modesta+C%2F+de+Num%C3%A0ncia%2C+85+Barcelona,"C/ de Numància, 85",08029
+666,Masia Can Cortes,Catalan,,,https://www.google.com/maps/search/?api=1&query=Masia+Can+Cortes+Travessera+de+les+Corts%2C+130+Barcelona,"Travessera de les Corts, 130",08028
+667,Leku Les Corts,Basque,,,https://www.google.com/maps/search/?api=1&query=Leku+Les+Corts+C%2F+de+les+Corts%2C+40+Barcelona,"C/ de les Corts, 40",08028
+668,Restaurant Baló,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Restaurant+Bal%C3%B3+Travessera+de+les+Corts%2C+110+Barcelona,"Travessera de les Corts, 110",08028
+680,Honest Greens Pedralbes,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Honest+Greens+Pedralbes+Av.+Diagonal%2C+609+Barcelona,"Av. Diagonal, 609",08028
+700,Santa Clara Pedralbes,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Santa+Clara+Pedralbes+Av.+de+Pedralbes%2C+10+Barcelona,"Av. de Pedralbes, 10",08034
+701,Vinogrado,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Vinogrado+Av.+de+Pedralbes%2C+20+Barcelona,"Av. de Pedralbes, 20",08034
+702,Crep Nova,French,,,https://www.google.com/maps/search/?api=1&query=Crep+Nova+Av.+de+Pedralbes%2C+15+Barcelona,"Av. de Pedralbes, 15",08034
+703,Tritón,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Trit%C3%B3n+C%2F+dels+Comtes+de+Bell%C2%B7lloc%2C+50+Barcelona,"C/ dels Comtes de Bell·lloc, 50",08034
+829,Acontraluz,Mediterranean,https://acontraluz.es/,+34 932030658,https://www.google.com/maps/search/?api=1&query=Acontraluz+C%2F+del+Milanesat%2C+19+Barcelona,"C/ del Milanesat, 19",08017
+888,Can Culleres Les Corts,Catalan,,,https://www.google.com/maps/search/?api=1&query=Can+Culleres+Les+Corts+Travessera+de+les+Corts%2C+90+Barcelona,"Travessera de les Corts, 90",08028
+889,El Japonés de Pedralbes,Japanese,,,https://www.google.com/maps/search/?api=1&query=El+Japon%C3%A9s+de+Pedralbes+Av.+de+Pedralbes%2C+40+Barcelona,"Av. de Pedralbes, 40",08034
+951,La Masia de les Corts,Catalan,,,https://www.google.com/maps/search/?api=1&query=La+Masia+de+les+Corts+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1011,ERRE Urrechu,Basque,,,https://www.google.com/maps/search/?api=1&query=ERRE+Urrechu+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1038,L'Àvia Les Corts,Catalan,,,https://www.google.com/maps/search/?api=1&query=L%27%C3%80via+Les+Corts+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1039,Punta Anguila,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Punta+Anguila+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08034
+1040,Ca Terry,Gastropub,,,https://www.google.com/maps/search/?api=1&query=Ca+Terry+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1041,La Cantonada de la Riera,Spanish,https://lacantonadadelariera.com/,,https://www.google.com/maps/search/?api=1&query=La+Cantonada+de+la+Riera+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1042,Bar Manila Pedralbes,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+Manila+Pedralbes+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1085,Lora at Camp Nou,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Lora+at+Camp+Nou+Les+Corts%2C+Barcelona+Barcelona,"Les Corts, Barcelona",08028
+1208,Pueblo Grill Steak House,Argentine,,+34 662 32 19 00,https://www.google.com/maps/search/?api=1&query=Pueblo+Grill+Steak+House+Carrer+del+Cardenal+Reig%2C+16+Barcelona,"Carrer del Cardenal Reig, 16",

@@ -1,0 +1,70 @@
+source_id,name,cuisine_type,website,phone,google_maps_url,address_full,postal_code
+40,Cometa Pla,Vegetarian/Vegan,,+34 646197845,https://www.google.com/maps/search/?api=1&query=Cometa+Pla+C%2F+de+Comtal%2C+2+Barcelona,"C/ de Comtal, 2",08002
+41,BOSCO Restaurant,Mediterranean,https://restaurantbosco.com/,+34 934121370,https://www.google.com/maps/search/?api=1&query=BOSCO+Restaurant+C%2F+de+Capellans%2C+9+Barcelona,"C/ de Capellans, 9",08002
+42,Granja Mabel,Spanish,,+34 934852028,https://www.google.com/maps/search/?api=1&query=Granja+Mabel+C%2F+de+Ferran%2C+11+Barcelona,"C/ de Ferran, 11",08002
+43,Grangels Mix,Catalan,,,https://www.google.com/maps/search/?api=1&query=Grangels+Mix+C%2F+de+l%27Arc+de+Sant+Ramon%2C+12+Barcelona,"C/ de l'Arc de Sant Ramon, 12",08002
+173,Caelis,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Caelis+C%2F+dels+Escudellers%2C+182+Barcelona,"C/ dels Escudellers, 182",08002
+174,Els Quatre Gats,Catalan,https://4gats.com/,+34 933024140,https://www.google.com/maps/search/?api=1&query=Els+Quatre+Gats+C%2F+de+la+Pietat%2C+144+Barcelona,"C/ de la Pietat, 144",08002
+175,Can Culleretes,Catalan,https://culleretes.com/,+34 933173022,https://www.google.com/maps/search/?api=1&query=Can+Culleretes+C%2F+d%27en+Quintana%2C+5+Barcelona,"C/ d'en Quintana, 5",08002
+176,La Fonda,Mediterranean,https://grupandilana.com/es/restaurantes/la-fonda,+34 933017515,https://www.google.com/maps/search/?api=1&query=La+Fonda+C%2F+dels+Escudellers%2C+10+Barcelona,"C/ dels Escudellers, 10",08002
+177,Cafè de l'Acadèmia,Catalan,https://gruposantelmo.com/,+34 933198253,https://www.google.com/maps/search/?api=1&query=Caf%C3%A8+de+l%27Acad%C3%A8mia+C%2F+dels+Lled%C3%B3%2C+1+Barcelona,"C/ dels Lledó, 1",08002
+178,Colom Restaurant,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Colom+Restaurant+C%2F+de+la+Boqueria%2C+30+Barcelona,"C/ de la Boqueria, 30",08002
+179,Contraban,Mediterranean,https://www.wittmorehotel.com/en/#gastronomia,+34 935 500 885,https://www.google.com/maps/search/?api=1&query=Contraban+C%2F+dels+Escudellers%2C+169+Barcelona,"C/ dels Escudellers, 169",08002
+180,Bistro Levante,Middle Eastern,,,https://www.google.com/maps/search/?api=1&query=Bistro+Levante+C%2F+de+la+Boqueria%2C+3+Barcelona,"C/ de la Boqueria, 3",08002
+181,Arcano,Mediterranean,https://restaurantarcano.com/,+34 933520631,https://www.google.com/maps/search/?api=1&query=Arcano+C%2F+de+Ferran%2C+182+Barcelona,"C/ de Ferran, 182",08002
+182,La Alcoba Barcino,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=La+Alcoba+Barcino+C%2F+de+Petritxol%2C+30+Barcelona,"C/ de Petritxol, 30",08002
+183,Honest Greens,Vegetarian/Vegan,,,https://www.google.com/maps/search/?api=1&query=Honest+Greens+C%2F+de+Petritxol%2C+42+Barcelona,"C/ de Petritxol, 42",08002
+184,Cañete,Spanish,https://barcanete.com/,+34 932703458,https://www.google.com/maps/search/?api=1&query=Ca%C3%B1ete+C%2F+de+Ferran%2C+110+Barcelona,"C/ de Ferran, 110",08002
+185,Mercer,Mediterranean,https://mercerbarcelona.com/,+34 933107480,https://www.google.com/maps/search/?api=1&query=Mercer+C%2F+dels+Banys+Nous%2C+29+Barcelona,"C/ dels Banys Nous, 29",08002
+186,Mizuki,Japanese,,,https://www.google.com/maps/search/?api=1&query=Mizuki+C%2F+Ample%2C+177+Barcelona,"C/ Ample, 177",08002
+187,IRATI Taverna Basca,Spanish,https://iratitaverna.com/,+34 933022084,https://www.google.com/maps/search/?api=1&query=IRATI+Taverna+Basca+C%2F+dels+Banys+Nous%2C+184+Barcelona,"C/ dels Banys Nous, 184",08002
+188,Antic Bocoi del Gotic,Catalan,,,https://www.google.com/maps/search/?api=1&query=Antic+Bocoi+del+Gotic+C%2F+de+la+Pietat%2C+195+Barcelona,"C/ de la Pietat, 195",08002
+189,Gourmet Sensi,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Gourmet+Sensi+C%2F+de+la+Pietat%2C+173+Barcelona,"C/ de la Pietat, 173",08002
+190,La Alcoba Azul,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Alcoba+Azul+C%2F+de+Ferran%2C+26+Barcelona,"C/ de Ferran, 26",08002
+191,Bar La Plata,Spanish,https://barlaplata.com/,+34 611647688,https://www.google.com/maps/search/?api=1&query=Bar+La+Plata+C%2F+de+la+Boqueria%2C+69+Barcelona,"C/ de la Boqueria, 69",08002
+192,Bodega Biarritz 1881,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+Biarritz+1881+C%2F+dels+Banys+Nous%2C+157+Barcelona,"C/ dels Banys Nous, 157",08002
+193,Bodega La Palma,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bodega+La+Palma+C%2F+de+la+Boqueria%2C+81+Barcelona,"C/ de la Boqueria, 81",08002
+194,Pla B,Spanish,,,https://www.google.com/maps/search/?api=1&query=Pla+B+C%2F+de+la+Merc%C3%A8%2C+34+Barcelona,"C/ de la Mercè, 34",08002
+195,Antic Tapas Ferran,Spanish,,,https://www.google.com/maps/search/?api=1&query=Antic+Tapas+Ferran+Pl.+Reial%2C+91+Barcelona,"Pl. Reial, 91",08002
+196,Tapeo,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tapeo+C%2F+de+Ferran%2C+51+Barcelona,"C/ de Ferran, 51",08002
+197,Milk Bar & Bistro,Café,,,https://www.google.com/maps/search/?api=1&query=Milk+Bar+%26+Bistro+C%2F+del+Call%2C+17+Barcelona,"C/ del Call, 17",08002
+198,Federal Cafe Gotic,Café,https://federalcafe.es/,+34 932808171,https://www.google.com/maps/search/?api=1&query=Federal+Cafe+Gotic+C%2F+de+la+Merc%C3%A8%2C+154+Barcelona,"C/ de la Mercè, 154",08002
+362,Gilda by Belgious,Other,https://gildabcn.com/,+34 933176454,https://www.google.com/maps/search/?api=1&query=Gilda+by+Belgious+C%2F+Ample%2C+34+Barcelona,"C/ Ample, 34",08002
+363,Tapas del Gòtic,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tapas+del+G%C3%B2tic+C%2F+de+Montsi%C3%B3%2C+5+Barcelona,"C/ de Montsió, 5",08002
+364,Granja Dulcinea,Café,,+34 933026824,https://www.google.com/maps/search/?api=1&query=Granja+Dulcinea+C%2F+de+Petritxol%2C+2+Barcelona,"C/ de Petritxol, 2",08002
+365,Los Caracoles,Catalan,https://loscaracoles.es/,+34 933912041,https://www.google.com/maps/search/?api=1&query=Los+Caracoles+C%2F+dels+Escudellers%2C+14+Barcelona,"C/ dels Escudellers, 14",08002
+366,Agut,Catalan,http://www.restaurantagut.com/,+34 933151709,https://www.google.com/maps/search/?api=1&query=Agut+C%2F+d%27en+Gign%C3%A0s%2C+16+Barcelona,"C/ d'en Gignàs, 16",08002
+469,Rasoterra,Vegetarian/Vegan,https://rasoterra.cat/,+34 933186926,https://www.google.com/maps/search/?api=1&query=Rasoterra+C%2F+del+Palau%2C+5+Barcelona,"C/ del Palau, 5",08002
+470,Flax & Kale Passage,Vegetarian/Vegan,https://flaxandkale.com/,+34 933175664,https://www.google.com/maps/search/?api=1&query=Flax+%26+Kale+Passage+C%2F+de+Sant+Pere+M%C3%A9s+Alt%2C+31-33+Barcelona,"C/ de Sant Pere Més Alt, 31-33",08003
+471,Satan's Coffee Corner,Café,https://satanscoffee.com/,+34 933668422,https://www.google.com/maps/search/?api=1&query=Satan%27s+Coffee+Corner+C%2F+de+l%27Arc+de+Sant+Ramon+del+Call%2C+11+Barcelona,"C/ de l'Arc de Sant Ramon del Call, 11",08002
+472,Venus Delicatessen,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Venus+Delicatessen+C%2F+d%27Aviny%C3%B3%2C+25+Barcelona,"C/ d'Avinyó, 25",08002
+473,La Vinateria del Call,Mediterranean,https://lavinateriadelcall.com/,+34 933026092,https://www.google.com/maps/search/?api=1&query=La+Vinateria+del+Call+C%2F+de+Sant+Dom%C3%A8nec+del+Call%2C+9+Barcelona,"C/ de Sant Domènec del Call, 9",08002
+474,Sensi Tapas,Spanish,https://sensibistro.com/,+34 932952568,https://www.google.com/maps/search/?api=1&query=Sensi+Tapas+C%2F+Ample%2C+26+Barcelona,"C/ Ample, 26",08002
+475,Ocaña,Mediterranean,https://ocana.cat/,+34 936764814,https://www.google.com/maps/search/?api=1&query=Oca%C3%B1a+Pl.+Reial%2C+13-15+Barcelona,"Pl. Reial, 13-15",08002
+646,Julivert Meu,Catalan,,,https://www.google.com/maps/search/?api=1&query=Julivert+Meu+C%2F+del+Cardenal+Casa%C3%B1as%2C+2+Barcelona,"C/ del Cardenal Casañas, 2",08002
+647,La Taverneta Barcelona,Spanish,,,https://www.google.com/maps/search/?api=1&query=La+Taverneta+Barcelona+C%2F+dels+Lled%C3%B3%2C+5+Barcelona,"C/ dels Lledó, 5",08002
+648,Rambla Café,Catalan,,,https://www.google.com/maps/search/?api=1&query=Rambla+Caf%C3%A9+La+Rambla%2C+120+%28Palau+Moja%29+Barcelona,"La Rambla, 120 (Palau Moja)",08002
+753,Cala del Vermut,Catalan,,,https://www.google.com/maps/search/?api=1&query=Cala+del+Vermut+C%2F+de+l%27Arc+de+Sant+Ramon+del+Call%2C+5+Barcelona,"C/ de l'Arc de Sant Ramon del Call, 5",08002
+773,Bar del Pi,Spanish,,,https://www.google.com/maps/search/?api=1&query=Bar+del+Pi+Pl.+de+Sant+Josep+Oriol%2C+1+Barcelona,"Pl. de Sant Josep Oriol, 1",08002
+774,Le Bistro Sensi,Fusion,https://sensibistro.com/,+34 933199854,https://www.google.com/maps/search/?api=1&query=Le+Bistro+Sensi+C%2F+dels+Lled%C3%B3%2C+8+Barcelona,"C/ dels Lledó, 8",08002
+775,Brugarol,Japanese,,,https://www.google.com/maps/search/?api=1&query=Brugarol+C%2F+de+l%27Argenteria%2C+55+Barcelona,"C/ de l'Argenteria, 55",08003
+776,Petit Tapas,Spanish,,,https://www.google.com/maps/search/?api=1&query=Petit+Tapas+C%2F+d%27Aviny%C3%B3%2C+30+Barcelona,"C/ d'Avinyó, 30",08002
+777,Bar Celta Pulpería,Seafood,,,https://www.google.com/maps/search/?api=1&query=Bar+Celta+Pulper%C3%ADa+C%2F+de+la+Merc%C3%A8%2C+16+Barcelona,"C/ de la Mercè, 16",08002
+846,Hard Rock Cafe,Gastropub,https://www.hardrockcafe.com/location/barcelona/,+34 932702305,https://www.google.com/maps/search/?api=1&query=Hard+Rock+Cafe+Pl.+de+Catalunya%2C+21+Barcelona,"Pl. de Catalunya, 21",08002
+909,El Pintor,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Pintor+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+916,Restaurant Cervantes,Spanish,https://restaurantecervantes.com/,+34 933173384,https://www.google.com/maps/search/?api=1&query=Restaurant+Cervantes+C%2F+de+Cervantes%2C+7+Barcelona,"C/ de Cervantes, 7",08002
+920,Sensi Sushi,Japanese,,,https://www.google.com/maps/search/?api=1&query=Sensi+Sushi+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+924,El Bosc de les Fades,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=El+Bosc+de+les+Fades+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+1081,Lora SLS Barcelona,Lebanese,,,https://www.google.com/maps/search/?api=1&query=Lora+SLS+Barcelona+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+1082,Voro at Veraz,Mediterranean,,,https://www.google.com/maps/search/?api=1&query=Voro+at+Veraz+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+1092,El Tastet de la Rambla,Catalan,,,https://www.google.com/maps/search/?api=1&query=El+Tastet+de+la+Rambla+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+1128,Koy Shunka Gòtic,Japanese,,,https://www.google.com/maps/search/?api=1&query=Koy+Shunka+G%C3%B2tic+Barri+G%C3%B2tic%2C+Barcelona+Barcelona,"Barri Gòtic, Barcelona",08002
+1130,Ferrum Restaurant,Mediterranean,https://ferrumrestaurant.com/,+34 933101230,https://www.google.com/maps/search/?api=1&query=Ferrum+Restaurant+C%2F+de+la+Fusina%2C+11+Barcelona,"C/ de la Fusina, 11",08002
+1180,Rasa,Indian,https://rasabarcelona.com/,+34 931 97 51 84,https://www.google.com/maps/search/?api=1&query=Rasa+Carrer+de+Josep+Anselm+Clav%C3%A9%2C+11+Barcelona,"Carrer de Josep Anselm Clave, 11, 08002 Barcelona",08002
+1200,Restaurant Gotic,Other,https://restaurante.covermanager.com/restaurant-gotic/,+34 931 82 21 52,https://www.google.com/maps/search/?api=1&query=Restaurant+Gotic++Barcelona,"Carrer de Ferran, 30, Ciutat Vella, 08002 Barcelona",08002
+1224,Poca-Solta - Portal de l'Àngel,Mediterranean,https://pocaxsolta.com/,+34 937 86 67 23,https://www.google.com/maps/search/?api=1&query=Poca-Solta+-+Portal+de+l%27%C3%80ngel++Barcelona,"Carrer de Duran i Bas, 3, Ciutat Vella, 08002 Barcelona",08002
+1245,Braseria Ferran,Other,,,https://www.google.com/maps/search/?api=1&query=Braseria+Ferran++Barcelona,,
+1251,Momo Avinyó,Other,,,https://www.google.com/maps/search/?api=1&query=Momo+Aviny%C3%B3++Barcelona,,
+1258,Tapas Avinyó,Spanish,,,https://www.google.com/maps/search/?api=1&query=Tapas+Aviny%C3%B3++Barcelona,,
+1286,Avinyó 10,Other,,,https://www.google.com/maps/search/?api=1&query=Aviny%C3%B3+10++Barcelona,,
+1301,El Pintxo de Petritxol,Other,,,https://www.google.com/maps/search/?api=1&query=El+Pintxo+de+Petritxol++Barcelona,,
