@@ -7,6 +7,6 @@
     { "source": "/confirmar", "destination": "/index.html" }
   ],
   "redirects": [
-    { "source": "/deck", "destination": "/deck.pdf", "permanent": false }
+    { "source": "/deck", "destination": "/deck-en.pdf", "permanent": false }
   ]
 }
