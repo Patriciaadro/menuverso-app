@@ -4795,21 +4795,21 @@ function Venue() {
  const src = safeSrc(raw);
  if (!src) return;
  const fx = clampN((p && typeof p === 'object') ? p.focal_x : null, 50);
- const fy = clampN((p && typeof p === 'object') ? p.focal_y : null, 50);
+ const fy = clampN((p && typeof p === 'object') ? p.focal_y : null, 40);
  out.push({ src, fx, fy });
  }); });
  const seen = new Set(); const uniq = out.filter(o => { if (seen.has(o.src)) return false; seen.add(o.src); return true; });
- return uniq.length ? uniq : [{ src: vpSrcV(v), fx: 50, fy: 50 }];
+ return uniq.length ? uniq : [{ src: vpSrcV(v), fx: 50, fy: 40 }];
  })();
  const inner = el('div',{class:'pb-24'},
  el('div',{class:'relative', style:'height:clamp(220px,42vw,320px);background:#16110F;overflow:hidden;'},
  el('div',{class:'snaprow', style:'position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;'},
- // Show the FULL photo regardless of its dimensions (client 24/06: photos were
- // getting cropped on the profile). A blurred, zoomed copy fills the box edge-
- // to-edge (no empty letterbox bars); the sharp copy sits on top with
- // object-fit:contain so nothing important is ever cut off. o.src is already
- // scheme-sanitized above (XSS guard).
- ...heroImgs.map(o => el('div',{style:'flex:0 0 100%;scroll-snap-align:start;height:100%;position:relative;overflow:hidden;background:#16110F;', html:'<img src="'+o.src+'" alt="" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(20px) brightness(.6);transform:scale(1.12);display:block;"><img src="'+o.src+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;">'}))
+ // Hero fills edge-to-edge with object-fit:cover (client 07/26: no letterbox,
+ // no blur bands, regardless of photo orientation). The crop is biased by the
+ // per-photo focal point (focal_x/focal_y → object-position, default 50% 40%).
+ // Full uncropped photos remain viewable in the gallery lightbox (contain).
+ // o.src is already scheme-sanitized above (XSS guard); fx/fy are clamped numbers.
+ ...heroImgs.map(o => el('div',{style:'flex:0 0 100%;scroll-snap-align:start;height:100%;position:relative;overflow:hidden;background:#16110F;', html:'<img src="'+o.src+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:'+o.fx+'% '+o.fy+'%;display:block;">'}))
  ),
  el('div',{style:'position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(20,17,15,0) 42%,rgba(20,17,15,.62));'}),
  heroImgs.length > 1 ? el('div',{style:'position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(20,17,15,.6);color:#fff;font-weight:800;font-size:11px;padding:3px 10px;border-radius:20px;'}, heroImgs.length + ' ' + (esV?'fotos':'photos')) : null,
