@@ -12206,6 +12206,7 @@ if (state.session) {
  if (seg === 'privacidad') { MV_LANG = 'es'; state.route = 'privacy'; }
  else if (seg === 'privacy') { MV_LANG = 'en'; state.route = 'privacy'; }
  else if (seg === 'unete' || seg === 'únete') { state.route = 'unete'; }
+ else if (seg === 'para-locales' || seg === 'locales' || seg === 'partners') { state.route = 'partner-landing'; }
  else if (seg === 'alta') { state.route = 'alta'; }
  else if (seg === 'confirmar' || seg === 'confirm') { state.route = 'confirmar'; }
  if (state.route === 'privacy') document.documentElement.setAttribute('lang', MV_LANG);

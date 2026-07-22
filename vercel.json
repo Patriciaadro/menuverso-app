@@ -3,6 +3,9 @@
     { "source": "/privacidad", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/index.html" },
     { "source": "/unete", "destination": "/index.html" },
+    { "source": "/para-locales", "destination": "/index.html" },
+    { "source": "/locales", "destination": "/index.html" },
+    { "source": "/partners", "destination": "/index.html" },
     { "source": "/alta", "destination": "/index.html" },
     { "source": "/confirmar", "destination": "/index.html" }
   ],
