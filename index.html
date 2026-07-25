@@ -2804,8 +2804,8 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  wrap.appendChild(
  el('div', __cmp ? {style:'background:#F2B100;color:#16110F;padding:16px 16px;'} : {class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
  (__cmp ? el('span',{}) : el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓')),
- el('div',{class:(__cmp?'font-extrabold':'font-bold text-slate2-50')}, (__cmp ? (esW?'✓ Ya estás en la lista':"✓ You're on the list") : t('waitlist.success.title'))),
- el('div',{class:(__cmp?'mt-1 text-sm':'mt-1 text-sm text-slate2-300')}, (__cmp ? (esW?'Revisa tu correo: te hemos enviado la confirmación.':'Check your inbox: we sent you the confirmation.') : t('waitlist.success.body')))
+ el('div',{class:(__cmp?'font-extrabold':'font-bold text-slate2-50')}, (__cmp ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'✓ Ya estás en la lista':"✓ You're on the list") : t('waitlist.success.title'))),
+ el('div',{class:(__cmp?'mt-1 text-sm':'mt-1 text-sm text-slate2-300')}, (__cmp ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Revisa tu correo: te hemos enviado la confirmación.':'Check your inbox: we sent you the confirmation.') : t('waitlist.success.body')))
  )
  );
  return;
