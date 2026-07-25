@@ -2791,7 +2791,7 @@ function LiveTicker() {
 /* ========================================================================
  LANDING (marketing)
  ======================================================================== */
-function WaitlistForm(){
+function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  const wrap = el('div',{class:'mt-8 max-w-md mx-auto'});
  let state = 'idle'; // idle | submitting | done | error
  let errorMsg = '';
@@ -2802,10 +2802,10 @@ function WaitlistForm(){
  wrap.innerHTML = '';
  if (state === 'done') {
  wrap.appendChild(
- el('div',{class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
- el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓'),
- el('div',{class:'font-bold text-slate2-50'}, t('waitlist.success.title')),
- el('div',{class:'mt-1 text-sm text-slate2-300'}, t('waitlist.success.body'))
+ el('div', __cmp ? {style:'background:#F2B100;color:#16110F;padding:16px 16px;'} : {class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
+ (__cmp ? el('span',{}) : el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓')),
+ el('div',{class:(__cmp?'font-extrabold':'font-bold text-slate2-50')}, (__cmp ? (esW?'✓ Ya estás en la lista':"✓ You're on the list") : t('waitlist.success.title'))),
+ el('div',{class:(__cmp?'mt-1 text-sm':'mt-1 text-sm text-slate2-300')}, (__cmp ? (esW?'Revisa tu correo: te hemos enviado la confirmación.':'Check your inbox: we sent you the confirmation.') : t('waitlist.success.body')))
  )
  );
  return;
@@ -2875,14 +2875,14 @@ function WaitlistForm(){
  el('input',{ name:'consent', type:'checkbox', checked: lastConsent, disabled: state === 'submitting',
  class:'mt-0.5 h-4 w-4 shrink-0 cursor-pointer', style:'accent-color:#F4291A;' }),
  el('span',{class:'text-[13px] text-slate2-300 leading-snug'},
- esW ? 'Acepto recibir novedades sobre el lanzamiento de Menuverso y ofertas de acceso anticipado. Puedo darme de baja en cualquier momento.'
- : "I agree to receive updates about Menuverso's launch and early access offers. I can unsubscribe at any time.")
+ esW ? (__cmp ? 'Acepto recibir novedades sobre el lanzamiento.' : 'Acepto recibir novedades sobre el lanzamiento de Menuverso y ofertas de acceso anticipado. Puedo darme de baja en cualquier momento.')
+ : (__cmp ? "I agree to receive launch updates." : "I agree to receive updates about Menuverso's launch and early access offers. I can unsubscribe at any time."))
  ),
  el('p',{class:'mt-1.5 text-[11px] text-slate2-500 leading-snug'},
- esW ? 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. '
- : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. ',
+ esW ? (__cmp ? 'Sin spam. Solo el aviso de lanzamiento. · ' : 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. ')
+ : (__cmp ? 'No spam. Just the launch notice. · ' : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. '),
  el('a',{class:'underline text-mv-500 hover:text-mv-600 cursor-pointer', onclick:(e)=>{ e.preventDefault(); go('privacy'); }},
- esW ? 'Lee nuestra Política de Privacidad.' : 'Read our Privacy Policy.')
+ esW ? (__cmp ? 'Política de privacidad' : 'Lee nuestra Política de Privacidad.') : (__cmp ? 'Privacy policy' : 'Read our Privacy Policy.'))
  )
  )
  );
@@ -2901,7 +2901,27 @@ function Landing() {
  // sits at the same vertical position when navigating between routes.
  ConceptBanner(),
  MarketingHeader(),
- el('div',{html:`<section style="position:relative; padding:0;"><div class="hero-grid"><div class="hero-left" style="position:relative;"><div class="kick" style="display:inline-block; background:var(--red); color:#fff; padding:9px 16px; transform:rotate(-2deg);">● ${t('hero.eyebrow')}</div><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; margin:26px 0 0; color:var(--ink);">${t('hero.line1')}</h1><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; color:var(--red); margin:16px 0 0;">${t('hero.line2')}</h1><div style="width:330px; max-width:80%; height:16px; background:var(--red); transform:skewX(-22deg); margin:24px 0 0 6px;"></div><p style="font-size:20px; line-height:1.5; max-width:520px; margin:30px 0 0; font-weight:500; color:var(--ink);">${t('hero.subhead.tail')}</p><div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap;"><a href="#" onclick="go('signup');return false;" style="background:var(--red); color:#fff; padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; box-shadow:6px 6px 0 var(--ink);">${t('hero.ctaJoin')}</a><a href="#how" style="border:3px solid var(--ink); padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--ink);">${t('hero.ctaHow')}</a></div></div><div style="position:relative; background:#16110F; overflow:hidden; min-height:560px;"><video src="hero-loop.mp4" autoplay muted loop playsinline poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(20,17,15,.45));"></div><div style="position:absolute; left:32px; bottom:30px; z-index:2; color:#fff;"><div class="disp" style="font-size:78px;">2×1</div><div style="font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:15px;">${t('hero.overlayVenues')}</div></div></div></div></section>`}),
+    (function(){
+      var es = (typeof MV_LANG!=='undefined' && MV_LANG==='es');
+      return el('div',{},
+        el('section',{class:'md:hidden relative', style:'background:#F6F1E6;'},
+          el('div',{class:'px-5 pt-8 pb-10'},
+            el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, '● ' + t('hero.eyebrow')),
+            el('div',{class:'disp', style:'font-size:clamp(44px,12vw,60px); line-height:.9; margin-top:20px; color:var(--ink);'}, es?'Descubre.':'Discover.'),
+            el('div',{class:'disp', style:'font-size:clamp(44px,12vw,60px); line-height:.9; color:var(--red);'}, es?'Disfruta.':'Enjoy.'),
+            el('div',{class:'disp', style:'font-size:clamp(44px,12vw,60px); line-height:.9; color:var(--ink);'}, es?'Ahorra.':'Save.'),
+            el('div',{style:'width:240px; max-width:70%; height:14px; background:var(--ink); transform:skewX(-22deg); margin:18px 0 0 6px;'}),
+            el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'Tu ciudad está llena de sitios deliciosos por descubrir. Encuéntralos con menuverso y accede a promociones exclusivas como 2 por 1, postres gratis, descuentos directos.':'Your city is full of delicious places to discover. Find them with menuverso and unlock exclusive perks like 2-for-1, free desserts and direct discounts.'),
+            el('div',{class:'mt-6', style:'background:var(--ink); box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'},
+              el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, es?'1 mes gratis':'1 month free'),
+              WaitlistForm({compact:true})
+            ),
+            el('a',{href:'#how', class:'inline-flex items-center gap-2 font-extrabold uppercase cursor-pointer', style:'margin-top:20px; color:var(--ink); font-size:13px; letter-spacing:.08em; min-height:44px;', onclick:function(e){ e.preventDefault(); var h=document.getElementById('how'); if(h){ var top=Math.max(0, h.getBoundingClientRect().top+window.scrollY-24); window.scrollTo({top:top,behavior:'smooth'}); } }}, (es?'Cómo funciona':'How it works'), el('span',{style:'font-size:16px;'},'↓'))
+          )
+        ),
+        el('div',{class:'hidden md:block'},  el('div',{html:`<section style="position:relative; padding:0;"><div class="hero-grid"><div class="hero-left" style="position:relative;"><div class="kick" style="display:inline-block; background:var(--red); color:#fff; padding:9px 16px; transform:rotate(-2deg);">● ${t('hero.eyebrow')}</div><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; margin:26px 0 0; color:var(--ink);">${t('hero.line1')}</h1><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; color:var(--red); margin:16px 0 0;">${t('hero.line2')}</h1><div style="width:330px; max-width:80%; height:16px; background:var(--red); transform:skewX(-22deg); margin:24px 0 0 6px;"></div><p style="font-size:20px; line-height:1.5; max-width:520px; margin:30px 0 0; font-weight:500; color:var(--ink);">${t('hero.subhead.tail')}</p><div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap;"><a href="#" onclick="go('signup');return false;" style="background:var(--red); color:#fff; padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; box-shadow:6px 6px 0 var(--ink);">${t('hero.ctaJoin')}</a><a href="#how" style="border:3px solid var(--ink); padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--ink);">${t('hero.ctaHow')}</a></div></div><div style="position:relative; background:#16110F; overflow:hidden; min-height:560px;"><video src="hero-loop.mp4" autoplay muted loop playsinline preload="none" poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(20,17,15,.45));"></div><div style="position:absolute; left:32px; bottom:30px; z-index:2; color:#fff;"><div class="disp" style="font-size:78px;">2×1</div><div style="font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:15px;">${t('hero.overlayVenues')}</div></div></div></div></section>`}),)
+      );
+    })(),
  // ====== Consumer 'How it works', three-phone storyboard ======
  // Replaces the previous magazine-style 4-step storyboard with a denser,
  // app-screenshot-led version (per neotaste / image reference). Phones
@@ -5955,7 +5975,33 @@ function PartnerLanding() {
  ),
 
 
- // ====== "Why partners join", three editorial value pillars ======
+      (function(){
+        var es = (typeof MV_LANG!=='undefined' && MV_LANG==='es');
+        return el('div',{},
+        el('section',{class:'md:hidden relative', style:'background:#F6F1E6;'},
+          el('div',{class:'px-5 pt-8'},
+            el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, '● ' + t('partner.hero.eyebrow')),
+            el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; margin-top:20px; color:var(--ink);'}, es?'Llega a nuevos clientes,':'Reach new customers,'),
+            el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; color:var(--red);'}, es?'consigue más ingresos,':'earn more,'),
+            el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; color:var(--ink);'}, es?'más visibilidad.':'more visibility.'),
+            el('div',{style:'width:240px; max-width:70%; height:14px; background:var(--ink); transform:skewX(-22deg); margin:18px 0 0 6px;'}),
+            el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'Hazte conocer: llega a nuevos clientes de una forma fácil y sencilla y sin coste.':'Get discovered: reach new customers easily and simply, at no cost.'),
+            el('a',{class:'inline-flex items-center underline cursor-pointer', style:'margin-top:12px; color:#6B5F57; font-size:14px; min-height:44px;', onclick:function(){ go('partner-signin'); }}, es?'¿Ya eres partner? Inicia sesión →':'Already a partner? Sign in →'),
+            el('div',{class:'w-full overflow-hidden aspect-[4/3] mt-6', style:'background:#E7DFD2;', html:'<img src="hero-partner-barista.jpg" alt="'+(es?'Barista sirviendo un café a un cliente':'Barista serving a coffee to a customer')+'" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block" onerror="this.style.display=&quot;none&quot;">'}),
+            el('div',{class:'mt-7 pb-9', style:'display:flex; flex-direction:column; gap:16px;'},
+              el('div',{class:'flex items-baseline gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:42px; line-height:.9;'},'01'), el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:19px;'}, es?'Cero costes':'Zero cost')),
+              el('div',{class:'flex items-baseline gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:42px; line-height:.9;'},'02'), el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:19px;'}, es?'Nuevos clientes':'New customers')),
+              el('div',{class:'flex items-baseline gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:42px; line-height:.9;'},'03'), el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:19px;'}, es?'A tu manera':'On your terms'))
+            )
+          ),
+          el('button',{class:'w-full cursor-pointer border-0 text-left', style:'background:var(--red); color:#F6F1E6; padding:20px 20px; min-height:44px;', onclick:function(){ var f=document.getElementById('partner-contact'); if(f){ f.scrollIntoView({behavior:'smooth',block:'center'}); var i=f.querySelector('input'); if(i) setTimeout(function(){i.focus();},400); } }},
+            el('div',{class:'flex items-center justify-between gap-3'},
+              el('span',{class:'disp', style:'font-size:clamp(20px,6vw,30px); line-height:1;'}, es?'ÚNETE COMO LOCAL →':'JOIN AS A VENUE →'),
+              el('span',{class:'font-extrabold shrink-0', style:'font-size:11px; letter-spacing:.05em; opacity:.85;'}, 'MENUVERSO.COM')
+            )
+          )
+        ),
+          el('div',{class:'hidden md:block'},
  el('section',{class:'mx-auto max-w-6xl px-4 py-14 md:py-20'},
  el('div',{class:'text-center max-w-3xl mx-auto'},
  el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
@@ -5994,6 +6040,9 @@ function PartnerLanding() {
  )
  )
  ),
+          )
+        );
+      })(),
 
  // ====== Contact form, relocated here from the old hero ======
  el('section',{class:'mx-auto max-w-3xl px-4 pb-20 md:pb-24'},
