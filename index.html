@@ -2862,7 +2862,7 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  placeholder: t('waitlist.placeholder'),
  disabled: state === 'submitting',
  value: lastEmail,
- class:'flex-1 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition disabled:opacity-50'
+ class:(__cmp?'flex-1 rounded-[4px] bg-white border-2 border-[#16110F] px-5 py-3.5 text-base text-[#16110F] placeholder:text-[#9b8f86] outline-none focus:border-[#F4291A] transition disabled:opacity-50':'flex-1 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition disabled:opacity-50')
  }),
  el('button',{ type:'submit',
  disabled: state === 'submitting',
@@ -2874,11 +2874,11 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  el('label',{class:'flex items-start gap-2.5 cursor-pointer'},
  el('input',{ name:'consent', type:'checkbox', checked: lastConsent, disabled: state === 'submitting',
  class:'mt-0.5 h-4 w-4 shrink-0 cursor-pointer', style:'accent-color:#F4291A;' }),
- el('span',{class:'text-[13px] text-slate2-300 leading-snug'},
+ el('span',{class:(__cmp?'text-[13px] leading-snug text-[#4a423c]':'text-[13px] text-slate2-300 leading-snug')},
  esW ? (__cmp ? 'Acepto recibir novedades sobre el lanzamiento.' : 'Acepto recibir novedades sobre el lanzamiento de Menuverso y ofertas de acceso anticipado. Puedo darme de baja en cualquier momento.')
  : (__cmp ? "I agree to receive launch updates." : "I agree to receive updates about Menuverso's launch and early access offers. I can unsubscribe at any time."))
  ),
- el('p',{class:'mt-1.5 text-[11px] text-slate2-500 leading-snug'},
+ el('p',{class:(__cmp?'mt-1.5 text-[11px] leading-snug text-[#6b5f57]':'mt-1.5 text-[11px] text-slate2-500 leading-snug')},
  esW ? (__cmp ? 'Sin spam. Solo el aviso de lanzamiento. · ' : 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. ')
  : (__cmp ? 'No spam. Just the launch notice. · ' : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. '),
  el('a',{class:'underline text-mv-500 hover:text-mv-600 cursor-pointer', onclick:(e)=>{ e.preventDefault(); go('privacy'); }},
@@ -2912,7 +2912,7 @@ function Landing() {
             el('div',{class:'disp', style:'font-size:clamp(44px,12vw,60px); line-height:.9; color:var(--ink);'}, es?'Ahorra.':'Save.'),
             el('div',{style:'width:240px; max-width:70%; height:14px; background:var(--ink); transform:skewX(-22deg); margin:18px 0 0 6px;'}),
             el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'Tu ciudad está llena de sitios deliciosos por descubrir. Encuéntralos con menuverso y accede a promociones exclusivas como 2 por 1, postres gratis, descuentos directos.':'Your city is full of delicious places to discover. Find them with menuverso and unlock exclusive perks like 2-for-1, free desserts and direct discounts.'),
-            el('div',{class:'mt-6', style:'background:var(--ink); box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'},
+            el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'},
               el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, es?'1 mes gratis':'1 month free'),
               WaitlistForm({compact:true})
             ),
