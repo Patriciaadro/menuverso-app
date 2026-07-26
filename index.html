@@ -2378,7 +2378,7 @@ function MarketingHeader() {
  return el('header',{class:'sticky top-0 z-30 bg-ink-950/85 backdrop-blur border-b border-slate2-50/5'},
  el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-2 md:gap-4'},
  el('a',{class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go('landing')},
- el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:24px;width:auto;display:block">'})
+ el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:24px;width:auto;display:block">'})
  ),
  el('nav',{class:'flex items-center gap-2 md:gap-4 text-sm text-slate2-300'},
  el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('how')}, t('nav.howItWorks')),
@@ -2512,7 +2512,7 @@ function AppTopBar({ showNav }) {
  return el('header',{class:'sticky top-0 z-30 bg-ink-950/85 backdrop-blur border-b border-slate2-50/5'},
  el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-4'},
  el('a',{class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go(u ? (u.role==='ADMIN'?'admin':u.role==='PARTNER_OWNER'?'partner-portal':'app') : 'landing')},
- el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:24px;width:auto;display:block">'})
+ el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:24px;width:auto;display:block">'})
  ),
  showNav ? el('nav',{class:'flex items-center gap-1'},
  navItem('app','','Discover','app'),
@@ -2916,6 +2916,7 @@ function Landing() {
               el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, es?'1 mes gratis':'1 month free'),
               WaitlistForm({compact:true})
             ),
+            el('div',{class:'mt-6', html:'<div style="position:relative; overflow:hidden; background:#16110F; aspect-ratio:16/10;"><video src="hero-loop.mp4" autoplay muted loop playsinline preload="none" poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(20,17,15,.55));"></div><div style="position:absolute; left:16px; bottom:14px; z-index:2; color:#fff;"><div class="disp" style="font-size:56px; line-height:.9;">2×1</div><div style="font-weight:800; text-transform:uppercase; letter-spacing:.05em; font-size:12px;">'+t('hero.overlayVenues')+'</div></div></div>'}),
             el('a',{href:'#how', class:'inline-flex items-center gap-2 font-extrabold uppercase cursor-pointer', style:'margin-top:20px; color:var(--ink); font-size:13px; letter-spacing:.08em; min-height:44px;', onclick:function(e){ e.preventDefault(); var h=document.getElementById('how'); if(h){ var top=Math.max(0, h.getBoundingClientRect().top+window.scrollY-24); window.scrollTo({top:top,behavior:'smooth'}); } }}, (es?'Cómo funciona':'How it works'), el('span',{style:'font-size:16px;'},'↓'))
           )
         ),
@@ -6220,7 +6221,7 @@ function PartnerPortal() {
     ['profile', esP?'Perfil':'Profile', 0]];
   const sidebar = el('aside',{class:'md:w-[270px] md:shrink-0 md:min-h-screen md:sticky md:top-0', style:'background:var(--ink);color:#F4EFE6;display:flex;flex-direction:column;'},
     el('div',{class:'p-5', style:'border-bottom:2px solid rgba(255,255,255,.08);'},
-      el('div',{html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:26px;width:auto;display:block;">'}),
+      el('div',{html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:26px;width:auto;display:block;">'}),
       el('div',{class:'kick', style:'color:#cabfae;font-size:12px;margin-top:8px;'}, esP?'Panel para locales':'Partner portal')
     ),
     el('nav',{class:'p-3 flex md:flex-col gap-1.5 overflow-x-auto', style:'flex:1;'},
@@ -10713,7 +10714,7 @@ function Admin() {
  el('header',{class:'border-b-2 border-slate2-50 bg-ink-950/95 backdrop-blur-md sticky top-0 z-30'},
  el('div',{class:'mx-auto max-w-6xl px-4 h-[56px] flex items-center justify-between'},
  el('div',{class:'flex items-center gap-3'},
- el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:22px;width:auto;display:block">'}),
+ el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:22px;width:auto;display:block">'}),
  el('span',{class:'kick bg-mv-500 text-white px-2 py-1', style:'font-size:11px;'},'ADMIN')
  ),
  el('div',{class:'flex items-center gap-3'},
@@ -10819,7 +10820,7 @@ function Terms() {
 function QrHeader() {
  return el('header',{class:'border-b border-slate2-50/8'},
  el('div',{class:'mx-auto max-w-5xl px-4 h-[56px] flex items-center justify-between'},
- el('a',{class:'inline-flex items-center cursor-pointer', onclick:()=>go('landing'), html:'<img src="menuverso-wordmark.svg" alt="menuverso" style="height:22px;width:auto;display:block">'}),
+ el('a',{class:'inline-flex items-center cursor-pointer', onclick:()=>go('landing'), html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:22px;width:auto;display:block">'}),
  el('button',{class:'inline-flex items-center gap-1.5 rounded-[4px] border-2 border-mv-500/55 text-mv-500 font-extrabold px-3 py-1.5 text-xs cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, MV_LANG === 'es' ? 'EN' : 'ES')
  )
  );
