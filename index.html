@@ -2936,7 +2936,7 @@ function Landing() {
           el('div',{class:'mt-12 md:mt-16 grid gap-6 md:gap-8 md:grid-cols-3'},
             ...[['1','how.step1.title','how.step1.body',null,null],['2','how.step2.title','how.step2.body',['Selecciona una promoción','Pick a promotion'],['En el perfil del restaurante selecciona la promoción que más te apetezca.','In the restaurant profile, pick the promotion you like most.']],['3','how.step3.title','how.step3.body',null,['Una vez en el restaurante, muestra tu pantalla y desliza para confirmar. Una vez confirmado, es hora de disfrutar.','Once at the restaurant, show your screen and slide to confirm. Once confirmed, it is time to enjoy.']]].map(function(step){
               var __es=(typeof MV_LANG!=='undefined'&&MV_LANG==='es');
-              var mkNode=function(mo,key){ return mo ? el('span',{}, el('span',{class:'md:hidden'}, __es?mo[0]:mo[1]), el('span',{class:'hidden md:inline'}, t(key))) : t(key); };
+              var mkNode=function(mo,key){ return mo ? (__es?mo[0]:mo[1]) : t(key); };
               return el('div',{class:'relative bg-ink-900 p-8 pt-9', style:'box-shadow:8px 8px 0 rgba(22,17,15,0.22);'},
                 el('div',{class:'disp text-mv-500 text-6xl md:text-7xl leading-none'}, step[0]),
                 el('h3',{class:'mt-3 text-xl md:text-2xl font-extrabold text-slate2-50 leading-tight'}, mkNode(step[3], step[1])),
@@ -3057,11 +3057,10 @@ function Landing() {
               el('div',{class:'h-1.5 w-16 bg-mv-500'}),
               el('h2',{class:'disp text-4xl md:text-6xl text-slate2-50 mt-5 leading-[0.9]'},
                 es ? 'UNA SUSCRIPCIÓN,' : 'ONE MEMBERSHIP,', el('br'),
-                el('span',{class:'text-mv-500'}, el('span',{class:'md:hidden'}, es?'CIENTOS DE LOCALES':'HUNDREDS OF VENUES'), el('span',{class:'hidden md:inline'}, es ? 'MIL OFERTAS' : 'A THOUSAND DEALS'))
+                el('span',{class:'text-mv-500'}, es?'CIENTOS DE LOCALES':'HUNDREDS OF VENUES')
               ),
               el('p',{class:'mt-4 text-base text-slate2-300 max-w-md'},
-                el('span',{class:'md:hidden'}, es ? 'Un universo gastronómico en una sola app.' : 'A whole food universe in a single app.'),
-                el('span',{class:'hidden md:inline'}, es ? 'Una sola cuota. Todas las ofertas 2x1 de la ciudad, cada vez que sales a comer.' : 'One flat fee. Every 2-for-1 deal in the city, every time you eat out.')),
+                es ? 'Un universo gastronómico en una sola app.' : 'A whole food universe in a single app.'),
               el('div',{class:'mt-8 grid sm:grid-cols-2 gap-4'}, cardMonthly, cardAnnual),
               el('ul',{class:'mt-6 space-y-2 text-sm text-slate2-200'},
                 ...(es?['Cancela cuando quieras','Acceso a todas las ofertas','Se amortiza en una sola visita']
@@ -3087,24 +3086,8 @@ function Landing() {
  // page-reload. The publishable key is a public anon key, safe to ship
  // client-side as long as the table's RLS allows anonymous inserts and
  // restricts reads (which Supabase does by default for `anon`).
- el('section',{class:'md:hidden', style:'background:#F6F1E6;'}, el('div',{class:'px-5 py-14'}, el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, t('waitlist.eyebrow')), el('h2',{class:'disp', style:'font-size:clamp(30px,10vw,46px); line-height:.95; margin-top:16px; color:var(--ink);'}, t('waitlist.title')), el('p',{style:'font-size:16px; line-height:1.5; margin-top:14px; font-weight:500; color:#3B322D;'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'}, el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'1 mes gratis':'1 month free'), WaitlistForm({compact:true})))),
-            el('section',{class:'relative overflow-hidden bg-ink-950 hidden md:block'},
- el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #F4291A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
- el('div',{class:'relative mx-auto max-w-3xl px-4 py-12 md:py-16 text-center'},
- el('span',{class:'inline-flex items-center gap-2 rounded-[4px] bg-mv-500/10 ring-1 ring-mv-500/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'},
- el('span',{class:'h-1.5 w-1.5 rounded-full bg-mv-500 animate-pulse'}),
- t('waitlist.eyebrow')
- ),
- el('h2',{class:'mt-5 font-serif-display text-4xl md:text-5xl font-extrabold leading-[1.05] text-slate2-50'},
- t('waitlist.title')
- ),
- el('p',{class:'mt-4 text-base text-slate2-300 max-w-xl mx-auto'}, el('span',{class:'md:hidden'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('span',{class:'hidden md:inline'}, t('waitlist.body'))),
- // Form, controlled rendering via paint() so success / error states
- // swap inline without touching the rest of the page.
-      WaitlistForm()
- )
- ),
- el('footer',{class:'border-t border-slate2-50/5 mt-4'},
+ el('section',{style:'background:#F6F1E6;'}, el('div',{class:'px-5 py-14 md:py-20 max-w-xl mx-auto'}, el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, t('waitlist.eyebrow')), el('h2',{class:'disp', style:'font-size:clamp(30px,10vw,46px); line-height:.95; margin-top:16px; color:var(--ink);'}, t('waitlist.title')), el('p',{style:'font-size:16px; line-height:1.5; margin-top:14px; font-weight:500; color:#3B322D;'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'}, el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'1 mes gratis':'1 month free'), WaitlistForm({compact:true})))),
+            el('footer',{class:'border-t border-slate2-50/5 mt-4'},
  el('div',{class:'mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-slate2-400'},
  el('span',{class:'flex items-center gap-2'},
  el('span',{class:'font-bold text-slate2-50 lowercase'},'menuverso')
@@ -5731,20 +5714,20 @@ function PartnerLeadForm(){
  if (btn) { btn.disabled = false; }
  toast(t('lead.success'));
  }},
- el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-[#6B5F57] md:text-slate2-400 mb-2'}, t('lead.label')),
+ el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-[#6B5F57] mb-2'}, t('lead.label')),
  el('div',{class:'space-y-2'},
  el('input',{ name:'venue', type:'text', required: true, placeholder: t('lead.venue'),
- class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] px-5 py-3.5 text-base text-[#16110F] placeholder:text-[#9b8f86] outline-none focus:border-[#F4291A] transition'}),
  el('input',{ name:'contact', type:'text', required: true, placeholder: t('lead.contact'),
- class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] px-5 py-3.5 text-base text-[#16110F] placeholder:text-[#9b8f86] outline-none focus:border-[#F4291A] transition'}),
  el('input',{ name:'phone', type:'tel', required: true, inputmode:'tel', pattern:'[+()0-9 .\u2011-]{9,}', placeholder: t('lead.phone'),
- class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] px-5 py-3.5 text-base text-[#16110F] placeholder:text-[#9b8f86] outline-none focus:border-[#F4291A] transition'}),
  el('div',{class:'flex flex-col sm:flex-row gap-2'},
  el('input',{ name:'email', type:'email', required: true, placeholder: t('lead.placeholder'),
- class:'flex-1 rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'flex-1 rounded-[4px] bg-white border-2 border-[#16110F] px-5 py-3.5 text-base text-[#16110F] placeholder:text-[#9b8f86] outline-none focus:border-[#F4291A] transition'}),
  el('button',{ type:'submit', class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition shrink-0'}, t('lead.submit'))
  ),
- el('label',{class:'flex items-start gap-2 text-xs text-[#6B5F57] md:text-slate2-400 mt-1 cursor-pointer'},
+ el('label',{class:'flex items-start gap-2 text-xs text-[#6B5F57] mt-1 cursor-pointer'},
  el('input',{ name:'consent', type:'checkbox', required:true, class:'mt-0.5 shrink-0', style:'accent-color:#F4291A;'}),
  el('span',{}, (typeof aT==='function'?aT('He leído y acepto la ','I have read and accept the '):'I accept the '),
  el('a',{href:'#privacidad', class:'underline text-mv-500', onclick:(e)=>{ e.preventDefault(); go('privacy'); }}, (typeof aT==='function'?aT('Política de privacidad','Privacy policy'):'Privacy policy')),
@@ -5980,8 +5963,8 @@ function PartnerLanding() {
       (function(){
         var es = (typeof MV_LANG!=='undefined' && MV_LANG==='es');
         return el('div',{},
-        el('section',{class:'md:hidden relative', style:'background:#F6F1E6;'},
-          el('div',{class:'px-5 pt-8'},
+        el('section',{class:'relative', style:'background:#F6F1E6;'},
+          el('div',{class:'px-5 pt-8 md:max-w-3xl md:mx-auto'},
             el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; margin-top:20px; color:var(--ink);'}, es?'Llega a nuevos clientes,':'Reach new customers,'),
             el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; color:var(--red);'}, es?'consigue más ingresos,':'earn more,'),
             el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; color:var(--ink);'}, es?'más visibilidad.':'more visibility.'),
@@ -6003,7 +5986,7 @@ function PartnerLanding() {
             )
           )
         ),
-          el('div',{class:'hidden md:block'},
+          el('div',{class:'hidden'},
  el('section',{class:'mx-auto max-w-6xl px-4 py-14 md:py-20'},
  el('div',{class:'text-center max-w-3xl mx-auto'},
  el('div',{class:'inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.28em] text-mv-500 font-bold'},
@@ -6048,12 +6031,9 @@ function PartnerLanding() {
 
  // ====== Contact form, relocated here from the old hero ======
  el('section',{class:'mx-auto max-w-3xl px-4 pb-20 md:pb-24'},
- el('div',{class:'rounded-[4px] bg-[#FCF8F0] border-2 border-[#16110F] shadow-[8px_8px_0_#F4291A] md:bg-ink-900/60 md:border md:border-mv-500/15 md:shadow-none p-8 md:p-10'},
- el('h2',{class:'font-serif-display text-3xl md:text-4xl font-extrabold leading-tight text-center text-[#16110F] md:text-inherit'},
- el('span',{class:'md:hidden'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Ponte en contacto':'Get in touch'),
- el('span',{class:'hidden md:inline'}, 'Get in touch, ', el('span',{class:'italic text-mv-500'},'list your restaurant.'))
- ),
- el('p',{class:'mt-3 text-center text-[#4a423c] md:text-slate2-300'},'Send us your details and we will get back to you.'),
+ el('div',{class:'rounded-[4px] bg-[#FCF8F0] border-2 border-[#16110F] shadow-[8px_8px_0_#F4291A] p-8 md:p-10'},
+ el('h2',{class:'font-serif-display text-3xl md:text-4xl font-extrabold leading-tight text-center text-[#16110F]'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Ponte en contacto':'Get in touch'),
+ el('p',{class:'mt-3 text-center text-[#4a423c]'},'Send us your details and we will get back to you.'),
  el('div',{class:'mt-6 flex justify-center'}, leadCapture)
  )
  ),
@@ -11142,7 +11122,7 @@ window.MV_TR_ES = {
  "Choose a restaurant": "Elige restaurante",
  "Find restaurants near you on the map or in list view.": "Encuentra restaurantes cerca de ti en el mapa o en lista.",
  "Pick a deal": "Elige una oferta",
- "Browse standing 2×1s and same-day flash deals. Pick the one you want.": "Explora 2×1 fijos y ofertas flash del día. Elige el que quieras.",
+ "Browse standing 2×1s and same-day flash deals. Pick the one you want.": "Explora promos y ofertas flash del día. Elige el que quieras.",
  "Slide to redeem": "Desliza para confirmar",
  "Tell your server, slide to confirm. Staff sees it live. Order as normal.": "Avisa al camarero, desliza para confirmar. El equipo lo ve en vivo. Pide como siempre.",
  "Your Next Meal is": "Tu próxima comida es",
