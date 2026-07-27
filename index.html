@@ -1929,8 +1929,8 @@ window.MV_T = {
  'hero.line2': 'Ahorra en el resto.',
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
- 'hero.subhead.tail': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas 2x1. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
- 'hero.ctaJoin': 'Únete, desde 3,99 €/mes',
+ 'hero.subhead.tail': 'Descubre los secretos mejor guardados de la ciudad con ofertas exclusivas. Desde cócteles en azotea al atardecer y rincones escondidos hasta café de especialidad y bocados gourmet. Disfruta de experiencias gastronómicas sin fin, todo en una app.',
+ 'hero.ctaJoin': 'Únete a la lista · 1 mes gratis',
  'hero.ctaApp': 'Abrir la app →',
  'hero.ctaHow': 'Cómo funciona',
  'lang.switchLabel': 'EN' ,
@@ -2081,7 +2081,7 @@ window.MV_T = {
  'hero.overlayVenues': 'in hundreds of venues',
  // ----- Pre-launch waiting-list signup -----
  'waitlist.eyebrow': 'Launching soon · limited seats',
- 'waitlist.title': 'Join the waiting list',
+ 'waitlist.title': 'Join the waitlist',
  'waitlist.body': 'Leave us your email and get a special discount for the first 100 to join.',
  'waitlist.placeholder': 'you@email.com',
  'waitlist.cta': 'Join the list',
@@ -2096,8 +2096,8 @@ window.MV_T = {
  'hero.line2': 'Save the Rest.',
  'hero.subhead.lead': '',
  'hero.subhead.brand': '',
- 'hero.subhead.tail': 'Discover the city\u0027s best-kept secrets with exclusive 2-for-1 deals. From sunset rooftop cocktails and hidden gems to specialty coffee and gourmet bites. Indulge in endless gastronomic experiences, all in one app.',
- 'hero.ctaJoin': 'Join, from €3.99/mo',
+ 'hero.subhead.tail': 'Discover the city\u0027s best-kept secrets with exclusive deals. From sunset rooftop cocktails and hidden gems to specialty coffee and gourmet bites. Indulge in endless gastronomic experiences, all in one app.',
+ 'hero.ctaJoin': 'Join the waitlist · 1 month free',
  'hero.ctaApp': 'Open the app →',
  'hero.ctaHow': 'See How It Works',
  'lang.switchLabel': 'ES' ,
@@ -2830,7 +2830,7 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  state = 'error'; errorMsg = t('waitlist.error.invalid'); paint(); return;
  }
  // GDPR (Art. 6.1.a): explicit consent is a HARD requirement — never submit
- // to the waiting list without the box ticked. Do not remove this gate.
+ // to the waitlist without the box ticked. Do not remove this gate.
  if (!consent) {
  state = 'error'; errorMsg = esW ? 'Debes aceptar recibir novedades para unirte a la lista.' : 'You must agree to receive updates to join the list.'; paint(); return;
  }
@@ -2919,7 +2919,7 @@ function Landing() {
             el('a',{href:'#how', class:'inline-flex items-center gap-2 font-extrabold uppercase cursor-pointer', style:'margin-top:20px; color:var(--ink); font-size:13px; letter-spacing:.08em; min-height:44px;', onclick:function(e){ e.preventDefault(); var h=document.getElementById('how'); if(h){ var top=Math.max(0, h.getBoundingClientRect().top+window.scrollY-24); window.scrollTo({top:top,behavior:'smooth'}); } }}, (es?'Cómo funciona':'How it works'), el('span',{style:'font-size:16px;'},'↓'))
           )
         ),
-        el('div',{class:'hidden md:block'},  el('div',{html:`<section style="position:relative; padding:0;"><div class="hero-grid"><div class="hero-left" style="position:relative;"><div class="kick" style="display:inline-block; background:var(--red); color:#fff; padding:9px 16px; transform:rotate(-2deg);">● ${t('hero.eyebrow')}</div><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; margin:26px 0 0; color:var(--ink);">${t('hero.line1')}</h1><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; color:var(--red); margin:16px 0 0;">${t('hero.line2')}</h1><div style="width:330px; max-width:80%; height:16px; background:var(--red); transform:skewX(-22deg); margin:24px 0 0 6px;"></div><p style="font-size:20px; line-height:1.5; max-width:520px; margin:30px 0 0; font-weight:500; color:var(--ink);">${t('hero.subhead.tail')}</p><div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap;"><a href="#" onclick="go('signup');return false;" style="background:var(--red); color:#fff; padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; box-shadow:6px 6px 0 var(--ink);">${t('hero.ctaJoin')}</a><a href="#how" style="border:3px solid var(--ink); padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--ink);">${t('hero.ctaHow')}</a></div></div><div style="position:relative; background:#16110F; overflow:hidden; min-height:560px;"><video src="hero-loop.mp4" autoplay muted loop playsinline preload="none" poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(20,17,15,.45));"></div></div></div></section>`}),)
+        el('div',{class:'hidden md:block'},  el('div',{html:`<section style="position:relative; padding:0;"><div class="hero-grid"><div class="hero-left" style="position:relative;"><div class="kick" style="display:inline-block; background:var(--red); color:#fff; padding:9px 16px; transform:rotate(-2deg);">● ${t('hero.eyebrow')}</div><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; margin:26px 0 0; color:var(--ink);">${t('hero.line1')}</h1><h1 class="disp hero-disp" style="font-size:clamp(32px,4.6vw,66px); line-height:.92; color:var(--red); margin:16px 0 0;">${t('hero.line2')}</h1><div style="width:330px; max-width:80%; height:16px; background:var(--red); transform:skewX(-22deg); margin:24px 0 0 6px;"></div><p style="font-size:20px; line-height:1.5; max-width:520px; margin:30px 0 0; font-weight:500; color:var(--ink);">${t('hero.subhead.tail')}</p><div style="display:flex; gap:16px; margin-top:34px; flex-wrap:wrap;"><a href="#" onclick="var w=document.getElementById('lista');if(w){w.scrollIntoView({behavior:'smooth',block:'start'});}return false;" style="background:var(--red); color:#fff; padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; box-shadow:6px 6px 0 var(--ink);">${t('hero.ctaJoin')}</a><a href="#how" style="border:3px solid var(--ink); padding:18px 30px; font-weight:900; text-transform:uppercase; letter-spacing:.03em; font-size:16px; color:var(--ink);">${t('hero.ctaHow')}</a></div></div><div style="position:relative; background:#16110F; overflow:hidden; min-height:560px;"><video src="hero-loop.mp4" autoplay muted loop playsinline preload="none" poster="hero-loop-poster.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05);"></video><div style="position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(20,17,15,.45));"></div></div></div></section>`}),)
       );
     })(),
  // ====== Consumer 'How it works', three-phone storyboard ======
@@ -3086,7 +3086,7 @@ function Landing() {
  // page-reload. The publishable key is a public anon key, safe to ship
  // client-side as long as the table's RLS allows anonymous inserts and
  // restricts reads (which Supabase does by default for `anon`).
- el('section',{style:'background:#F6F1E6;'}, el('div',{class:'px-5 py-14 md:py-20 max-w-xl mx-auto'}, el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, t('waitlist.eyebrow')), el('h2',{class:'disp', style:'font-size:clamp(30px,10vw,46px); line-height:.95; margin-top:16px; color:var(--ink);'}, t('waitlist.title')), el('p',{style:'font-size:16px; line-height:1.5; margin-top:14px; font-weight:500; color:#3B322D;'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'}, el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'1 mes gratis':'1 month free'), WaitlistForm({compact:true})))),
+ el('section',{id:'lista', style:'background:#F6F1E6;'}, el('div',{class:'px-5 py-14 md:py-20 max-w-xl mx-auto'}, el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, t('waitlist.eyebrow')), el('h2',{class:'disp', style:'font-size:clamp(30px,10vw,46px); line-height:.95; margin-top:16px; color:var(--ink);'}, t('waitlist.title')), el('p',{style:'font-size:16px; line-height:1.5; margin-top:14px; font-weight:500; color:#3B322D;'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'}, el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'1 mes gratis':'1 month free'), WaitlistForm({compact:true})))),
             el('footer',{class:'border-t border-slate2-50/5 mt-4'},
  el('div',{class:'mx-auto max-w-6xl px-4 py-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-slate2-400'},
  el('span',{class:'flex items-center gap-2'},
@@ -10749,14 +10749,14 @@ function Privacy() {
  ['¿Cómo darte de baja?', 'En cualquier momento, escribiendo a info@menuverso.com con el asunto "Baja lista de espera", o clicando el enlace de baja incluido en cualquier email que recibas de nosotros.']
  ] : [
  ['Who is responsible for your data?', 'Patricia Adrover Gallego, based in Barcelona, Spain. Contact: info@menuverso.com'],
- ['What data do we collect?', "Only your email address, provided voluntarily when joining Menuverso's waiting list."],
+ ['What data do we collect?', "Only your email address, provided voluntarily when joining Menuverso's waitlist."],
  ['Why do we collect it?', "To send you information about Menuverso's launch, project updates, and early access offers. We will not use your email for any other purpose without your consent."],
  ['What is the legal basis?', 'Your explicit consent (Art. 6.1.a GDPR), given by ticking the subscription box and confirming your email address via double opt-in.'],
  ['Where do we store your data?', 'Your email is stored securely in Supabase (EU region – Frankfurt, Germany), under a GDPR-compliant data processing agreement.'],
- ['How long do we keep your data?', 'Until you unsubscribe or request deletion. If Menuverso does not launch within 2 years of your signup, we will delete all waiting list data.'],
+ ['How long do we keep your data?', 'Until you unsubscribe or request deletion. If Menuverso does not launch within 2 years of your signup, we will delete all waitlist data.'],
  ['Do we share your data?', 'We do not sell or share your data with third parties. Supabase acts as our data processor under a GDPR-compliant data processing agreement.'],
  ['What are your rights?', "Under the GDPR and Spain's LOPDGDD, you have the right to: access your data, rectify it if incorrect, request its deletion, restrict or object to its processing, and request portability. To exercise any of these rights, write to info@menuverso.com. We will respond within 30 days. You may also lodge a complaint with Spain's data protection authority at aepd.es."],
- ['How to unsubscribe?', 'At any time, by writing to info@menuverso.com with the subject "Unsubscribe waiting list", or by clicking the unsubscribe link included in any email you receive from us.']
+ ['How to unsubscribe?', 'At any time, by writing to info@menuverso.com with the subject "Unsubscribe waitlist", or by clicking the unsubscribe link included in any email you receive from us.']
  ];
  return el('div',{class:'min-h-screen bg-ink-950 text-slate2-50'}, ConceptBanner(), MarketingHeader(),
  el('article',{class:'mx-auto max-w-3xl px-4 py-12'},
