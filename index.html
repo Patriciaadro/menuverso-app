@@ -2879,8 +2879,8 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  : (__cmp ? "I agree to receive launch updates." : "I agree to receive updates about Menuverso's launch and early access offers. I can unsubscribe at any time."))
  ),
  el('p',{class:(__cmp?'mt-1.5 text-[11px] leading-snug text-[#6b5f57]':'mt-1.5 text-[11px] text-slate2-500 leading-snug')},
- esW ? (__cmp ? 'Sin spam. Solo el aviso de lanzamiento. · ' : 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. ')
- : (__cmp ? 'No spam. Just the launch notice. · ' : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. '),
+ esW ? (__cmp ? '' : 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. ')
+ : (__cmp ? '' : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. '),
  el('a',{class:'underline text-mv-500 hover:text-mv-600 cursor-pointer', onclick:(e)=>{ e.preventDefault(); go('privacy'); }},
  esW ? (__cmp ? 'Política de privacidad' : 'Lee nuestra Política de Privacidad.') : (__cmp ? 'Privacy policy' : 'Read our Privacy Policy.'))
  )
@@ -2911,7 +2911,7 @@ function Landing() {
             el('div',{class:'disp', style:'font-size:clamp(44px,12vw,60px); line-height:.9; color:var(--red);'}, es?'Disfruta.':'Enjoy.'),
             el('div',{class:'disp', style:'font-size:clamp(44px,12vw,60px); line-height:.9; color:var(--ink);'}, es?'Ahorra.':'Save.'),
             el('div',{style:'width:240px; max-width:70%; height:14px; background:var(--ink); transform:skewX(-22deg); margin:18px 0 0 6px;'}),
-            el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'Tu ciudad está llena de sitios deliciosos por descubrir. Encuéntralos con menuverso y accede a promociones exclusivas como 2 por 1, postres gratis, descuentos directos.':'Your city is full of delicious places to discover. Find them with menuverso and unlock exclusive perks like 2-for-1, free desserts and direct discounts.'),
+            el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'¿Te gusta probar sitios nuevos? Únete al mejor Gastro Club de Barcelona y descubre los mejores restaurantes, cafés y bares con promociones exclusivas para miembros. ¡Hecho para paladares inquietos! Apúntate a la lista de espera y prueba un mes gratis.':'Love trying new places? Join the best Gastro Club in Barcelona and discover the finest restaurants, cafés and bars with exclusive member perks. Made for curious palates! Join the waitlist and try one month free.'),
             el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'},
               el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, es?'1 mes gratis':'1 month free'),
               WaitlistForm({compact:true})
@@ -2934,11 +2934,13 @@ function Landing() {
             el('h2',{class:'disp text-white text-5xl md:text-7xl mt-6'}, t('how.heading'))
           ),
           el('div',{class:'mt-12 md:mt-16 grid gap-6 md:gap-8 md:grid-cols-3'},
-            ...[['1','how.step1.title','how.step1.body'],['2','how.step2.title','how.step2.body'],['3','how.step3.title','how.step3.body']].map(function(step){
+            ...[['1','how.step1.title','how.step1.body',null,null],['2','how.step2.title','how.step2.body',['Selecciona una promoción','Pick a promotion'],['En el perfil del restaurante selecciona la promoción que más te apetezca.','In the restaurant profile, pick the promotion you like most.']],['3','how.step3.title','how.step3.body',null,['Una vez en el restaurante, muestra tu pantalla y desliza para confirmar. Una vez confirmado, es hora de disfrutar.','Once at the restaurant, show your screen and slide to confirm. Once confirmed, it is time to enjoy.']]].map(function(step){
+              var __es=(typeof MV_LANG!=='undefined'&&MV_LANG==='es');
+              var mkNode=function(mo,key){ return mo ? el('span',{}, el('span',{class:'md:hidden'}, __es?mo[0]:mo[1]), el('span',{class:'hidden md:inline'}, t(key))) : t(key); };
               return el('div',{class:'relative bg-ink-900 p-8 pt-9', style:'box-shadow:8px 8px 0 rgba(22,17,15,0.22);'},
                 el('div',{class:'disp text-mv-500 text-6xl md:text-7xl leading-none'}, step[0]),
-                el('h3',{class:'mt-3 text-xl md:text-2xl font-extrabold text-slate2-50 leading-tight'}, t(step[1])),
-                el('p',{class:'mt-3 text-[15px] text-slate2-300 leading-relaxed'}, t(step[2]))
+                el('h3',{class:'mt-3 text-xl md:text-2xl font-extrabold text-slate2-50 leading-tight'}, mkNode(step[3], step[1])),
+                el('p',{class:'mt-3 text-[15px] text-slate2-300 leading-relaxed'}, mkNode(step[4], step[2]))
               );
             })
           )
@@ -3055,11 +3057,11 @@ function Landing() {
               el('div',{class:'h-1.5 w-16 bg-mv-500'}),
               el('h2',{class:'disp text-4xl md:text-6xl text-slate2-50 mt-5 leading-[0.9]'},
                 es ? 'UNA SUSCRIPCIÓN,' : 'ONE MEMBERSHIP,', el('br'),
-                el('span',{class:'text-mv-500'}, es ? 'MIL OFERTAS' : 'A THOUSAND DEALS')
+                el('span',{class:'text-mv-500'}, el('span',{class:'md:hidden'}, es?'CIENTOS DE LOCALES':'HUNDREDS OF VENUES'), el('span',{class:'hidden md:inline'}, es ? 'MIL OFERTAS' : 'A THOUSAND DEALS'))
               ),
               el('p',{class:'mt-4 text-base text-slate2-300 max-w-md'},
-                es ? 'Una sola cuota. Todas las ofertas 2x1 de la ciudad, cada vez que sales a comer.'
-                   : 'One flat fee. Every 2-for-1 deal in the city, every time you eat out.'),
+                el('span',{class:'md:hidden'}, es ? 'Un universo gastronómico en una sola app.' : 'A whole food universe in a single app.'),
+                el('span',{class:'hidden md:inline'}, es ? 'Una sola cuota. Todas las ofertas 2x1 de la ciudad, cada vez que sales a comer.' : 'One flat fee. Every 2-for-1 deal in the city, every time you eat out.')),
               el('div',{class:'mt-8 grid sm:grid-cols-2 gap-4'}, cardMonthly, cardAnnual),
               el('ul',{class:'mt-6 space-y-2 text-sm text-slate2-200'},
                 ...(es?['Cancela cuando quieras','Acceso a todas las ofertas','Se amortiza en una sola visita']
@@ -3085,7 +3087,8 @@ function Landing() {
  // page-reload. The publishable key is a public anon key, safe to ship
  // client-side as long as the table's RLS allows anonymous inserts and
  // restricts reads (which Supabase does by default for `anon`).
- el('section',{class:'relative overflow-hidden bg-ink-950'},
+ el('section',{class:'md:hidden', style:'background:#F6F1E6;'}, el('div',{class:'px-5 py-14'}, el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, t('waitlist.eyebrow')), el('h2',{class:'disp', style:'font-size:clamp(30px,10vw,46px); line-height:.95; margin-top:16px; color:var(--ink);'}, t('waitlist.title')), el('p',{style:'font-size:16px; line-height:1.5; margin-top:14px; font-weight:500; color:#3B322D;'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('div',{class:'mt-6', style:'background:#FCF8F0; border:2px solid #16110F; box-shadow:8px 8px 0 #F4291A; padding:16px 16px 18px;'}, el('div',{class:'inline-block font-extrabold uppercase', style:'background:#F2B100; color:var(--ink); padding:5px 12px; font-size:12px; letter-spacing:.03em; transform:rotate(-1.5deg);'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'1 mes gratis':'1 month free'), WaitlistForm({compact:true})))),
+            el('section',{class:'relative overflow-hidden bg-ink-950 hidden md:block'},
  el('div',{class:'absolute inset-0 opacity-25', style:'background-image: radial-gradient(circle at 80% 30%, #F4291A 0, transparent 45%), radial-gradient(circle at 10% 80%, #FB7185 0, transparent 40%);'}),
  el('div',{class:'relative mx-auto max-w-3xl px-4 py-12 md:py-16 text-center'},
  el('span',{class:'inline-flex items-center gap-2 rounded-[4px] bg-mv-500/10 ring-1 ring-mv-500/30 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-mv-500'},
@@ -3095,7 +3098,7 @@ function Landing() {
  el('h2',{class:'mt-5 font-serif-display text-4xl md:text-5xl font-extrabold leading-[1.05] text-slate2-50'},
  t('waitlist.title')
  ),
- el('p',{class:'mt-4 text-base text-slate2-300 max-w-xl mx-auto'}, t('waitlist.body')),
+ el('p',{class:'mt-4 text-base text-slate2-300 max-w-xl mx-auto'}, el('span',{class:'md:hidden'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Déjanos tu correo y pruébalos un mes gratis.':'Leave us your email and try it free for a month.'), el('span',{class:'hidden md:inline'}, t('waitlist.body'))),
  // Form, controlled rendering via paint() so success / error states
  // swap inline without touching the rest of the page.
       WaitlistForm()
@@ -5728,20 +5731,20 @@ function PartnerLeadForm(){
  if (btn) { btn.disabled = false; }
  toast(t('lead.success'));
  }},
- el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-slate2-400 mb-2'}, t('lead.label')),
+ el('label',{class:'block text-[11px] uppercase tracking-[0.22em] font-bold text-[#6B5F57] md:text-slate2-400 mb-2'}, t('lead.label')),
  el('div',{class:'space-y-2'},
  el('input',{ name:'venue', type:'text', required: true, placeholder: t('lead.venue'),
- class:'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('input',{ name:'contact', type:'text', required: true, placeholder: t('lead.contact'),
- class:'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('input',{ name:'phone', type:'tel', required: true, inputmode:'tel', pattern:'[+()0-9 .\u2011-]{9,}', placeholder: t('lead.phone'),
- class:'w-full rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'w-full rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('div',{class:'flex flex-col sm:flex-row gap-2'},
  el('input',{ name:'email', type:'email', required: true, placeholder: t('lead.placeholder'),
- class:'flex-1 rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/15 px-5 py-3.5 text-base text-slate2-50 placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
+ class:'flex-1 rounded-[4px] bg-white border-2 border-[#16110F] md:bg-slate2-50/[0.04] md:border md:border-slate2-50/15 px-5 py-3.5 text-base text-[#16110F] md:text-slate2-50 placeholder:text-[#9b8f86] md:placeholder:text-slate2-500 outline-none focus:border-mv-500/60 focus:bg-slate2-50/[0.06] transition'}),
  el('button',{ type:'submit', class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition shrink-0'}, t('lead.submit'))
  ),
- el('label',{class:'flex items-start gap-2 text-xs text-slate2-400 mt-1 cursor-pointer'},
+ el('label',{class:'flex items-start gap-2 text-xs text-[#6B5F57] md:text-slate2-400 mt-1 cursor-pointer'},
  el('input',{ name:'consent', type:'checkbox', required:true, class:'mt-0.5 shrink-0', style:'accent-color:#F4291A;'}),
  el('span',{}, (typeof aT==='function'?aT('He leído y acepto la ','I have read and accept the '):'I accept the '),
  el('a',{href:'#privacidad', class:'underline text-mv-500', onclick:(e)=>{ e.preventDefault(); go('privacy'); }}, (typeof aT==='function'?aT('Política de privacidad','Privacy policy'):'Privacy policy')),
@@ -5979,18 +5982,18 @@ function PartnerLanding() {
         return el('div',{},
         el('section',{class:'md:hidden relative', style:'background:#F6F1E6;'},
           el('div',{class:'px-5 pt-8'},
-            el('div',{class:'inline-block font-extrabold text-white uppercase', style:'background:var(--red); padding:8px 14px; font-size:12px; letter-spacing:.02em; transform:rotate(-2deg);'}, '● ' + t('partner.hero.eyebrow')),
             el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; margin-top:20px; color:var(--ink);'}, es?'Llega a nuevos clientes,':'Reach new customers,'),
             el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; color:var(--red);'}, es?'consigue más ingresos,':'earn more,'),
             el('div',{class:'disp', style:'font-size:clamp(32px,9vw,50px); line-height:.94; color:var(--ink);'}, es?'más visibilidad.':'more visibility.'),
             el('div',{style:'width:240px; max-width:70%; height:14px; background:var(--ink); transform:skewX(-22deg); margin:18px 0 0 6px;'}),
-            el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'Hazte conocer: llega a nuevos clientes de una forma fácil y sencilla y sin coste.':'Get discovered: reach new customers easily and simply, at no cost.'),
+            el('p',{style:'font-size:16px; line-height:1.5; margin-top:20px; font-weight:500; color:#3B322D;'}, es?'Haz que te conozcan: llega a nuevos clientes de una forma fácil, sencilla y sin coste.':'Get discovered: reach new customers in an easy, simple and cost-free way.'),
             el('a',{class:'inline-flex items-center underline cursor-pointer', style:'margin-top:12px; color:#6B5F57; font-size:14px; min-height:44px;', onclick:function(){ go('partner-signin'); }}, es?'¿Ya eres partner? Inicia sesión →':'Already a partner? Sign in →'),
             el('div',{class:'w-full overflow-hidden aspect-[4/3] mt-6', style:'background:#E7DFD2;', html:'<img src="hero-partner-barista.jpg" alt="'+(es?'Barista sirviendo un café a un cliente':'Barista serving a coffee to a customer')+'" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block" onerror="this.style.display=&quot;none&quot;">'}),
-            el('div',{class:'mt-7 pb-9', style:'display:flex; flex-direction:column; gap:16px;'},
-              el('div',{class:'flex items-baseline gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:42px; line-height:.9;'},'01'), el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:19px;'}, es?'Cero costes':'Zero cost')),
-              el('div',{class:'flex items-baseline gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:42px; line-height:.9;'},'02'), el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:19px;'}, es?'Nuevos clientes':'New customers')),
-              el('div',{class:'flex items-baseline gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:42px; line-height:.9;'},'03'), el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:19px;'}, es?'A tu manera':'On your terms'))
+            el('div',{class:'mt-7 pb-9', style:'display:flex; flex-direction:column; gap:22px;'},
+              el('div',{class:'flex items-start gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:38px; line-height:.9;'},'01'), el('div',{}, el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:18px;'}, es?'Cero costes':'Zero cost'), el('p',{style:'color:#3B322D; font-size:14px; line-height:1.5; margin-top:3px;'}, es?'No cobramos nada por ser parte de menuverso. Sin cuota de alta, sin suscripción mensual, sin comisión.':'We charge nothing to be part of menuverso. No sign-up fee, no monthly subscription, no commission.'))),
+              el('div',{class:'flex items-start gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:38px; line-height:.9;'},'02'), el('div',{}, el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:18px;'}, es?'Nuevos clientes':'New customers'), el('p',{style:'color:#3B322D; font-size:14px; line-height:1.5; margin-top:3px;'}, es?'Haz que conozcan tu local, tu comida y tu servicio, para que vuelvan y se conviertan en clientes habituales.':'Get your venue, food and service discovered, so guests come back and become regulars.'))),
+              el('div',{class:'flex items-start gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:38px; line-height:.9;'},'03'), el('div',{}, el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:18px;'}, es?'Fácil de usar e implementar':'Easy to use and set up'), el('p',{style:'color:#3B322D; font-size:14px; line-height:1.5; margin-top:3px;'}, es?'Con menuverso no necesitas añadir complejidad ni programas. Te lo ponemos fácil para que te enfoques en tu cliente y en dar el mejor servicio.':'With menuverso you do not need extra complexity or software. We keep it simple so you can focus on your guests and great service.'))),
+              el('div',{class:'flex items-start gap-4'}, el('div',{class:'disp shrink-0', style:'color:#F4291A; font-size:38px; line-height:.9;'},'04'), el('div',{}, el('div',{class:'font-extrabold', style:'color:var(--ink); font-size:18px;'}, es?'A tu manera':'On your terms'), el('p',{style:'color:#3B322D; font-size:14px; line-height:1.5; margin-top:3px;'}, es?'Tú eliges las promociones que quieres ofrecer (por ejemplo, dos platos principales al precio de uno, bebida gratis con la compra de un postre…) y con qué frecuencia se pueden canjear.':'You choose the promotions you want to offer (for example, two mains for the price of one, a free drink with a dessert…) and how often they can be redeemed.')))
             )
           ),
           el('button',{class:'w-full cursor-pointer border-0 text-left', style:'background:var(--red); color:#F6F1E6; padding:20px 20px; min-height:44px;', onclick:function(){ var f=document.getElementById('partner-contact'); if(f){ f.scrollIntoView({behavior:'smooth',block:'center'}); var i=f.querySelector('input'); if(i) setTimeout(function(){i.focus();},400); } }},
@@ -6045,11 +6048,12 @@ function PartnerLanding() {
 
  // ====== Contact form, relocated here from the old hero ======
  el('section',{class:'mx-auto max-w-3xl px-4 pb-20 md:pb-24'},
- el('div',{class:'rounded-[4px] bg-ink-900/60 border border-mv-500/15 p-8 md:p-10'},
- el('h2',{class:'font-serif-display text-3xl md:text-4xl font-extrabold leading-tight text-center'},
- 'Get in touch, ', el('span',{class:'italic text-mv-500'},'list your restaurant.')
+ el('div',{class:'rounded-[4px] bg-[#FCF8F0] border-2 border-[#16110F] shadow-[8px_8px_0_#F4291A] md:bg-ink-900/60 md:border md:border-mv-500/15 md:shadow-none p-8 md:p-10'},
+ el('h2',{class:'font-serif-display text-3xl md:text-4xl font-extrabold leading-tight text-center text-[#16110F] md:text-inherit'},
+ el('span',{class:'md:hidden'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Ponte en contacto':'Get in touch'),
+ el('span',{class:'hidden md:inline'}, 'Get in touch, ', el('span',{class:'italic text-mv-500'},'list your restaurant.'))
  ),
- el('p',{class:'mt-3 text-center text-slate2-300'},'Send us your details and we will get back to you.'),
+ el('p',{class:'mt-3 text-center text-[#4a423c] md:text-slate2-300'},'Send us your details and we will get back to you.'),
  el('div',{class:'mt-6 flex justify-center'}, leadCapture)
  )
  ),
