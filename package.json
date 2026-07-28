@@ -11,5 +11,8 @@
   },
   "devDependencies": {
     "jsdom": "^24.1.0"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
   }
 }

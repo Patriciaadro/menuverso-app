@@ -74,7 +74,7 @@ const STRICT_EMAIL = /^[a-z0-9][a-z0-9._%+\-]*@[a-z0-9.\-]+\.[a-z]{2,24}$/;
 function extractEmails(html) {
   const found = new Set();
   // mailto: links (most reliable)
-  for (const m of html.matchAll(/mailto:([^"'?>\s]+)/gi)) found.add(decodeURIComponent(m[1]));
+  for (const m of html.matchAll(/mailto:([^"'?>\s]+)/gi)) try { found.add(decodeURIComponent(m[1])); } catch(e) { found.add(m[1]); }
   // raw text matches
   for (const m of html.matchAll(EMAIL_RE)) found.add(m[0]);
   // De-obfuscate ONLY clearly-bracketed patterns: "info [at] x [dot] com" / "(at)".

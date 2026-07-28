@@ -5,3 +5,10 @@ menuverso_enriched.tsv
 Claude/
 node_modules/
 package-lock.json
+
+# --- Working/scratch artifacts generated during sessions (not app code) ---
+.~lock.*            # LibreOffice/Excel temp lock files
+email_campaign/     # restaurant email crawl: data, scripts, xlsx/csv outputs
+*.xlsx
+*.docx
+Menuverso_Email_Database_Plan.md
