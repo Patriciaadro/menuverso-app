@@ -3444,7 +3444,7 @@ function Checkout() {
  el('div',{style:'margin-top:12px;background:var(--red);border:3px solid var(--ink);border-radius:4px;box-shadow:8px 8px 0 var(--ink);overflow:hidden;'},
  el('div',{style:'padding:clamp(22px,6vw,38px) clamp(18px,5vw,40px);'},
  el('div',{class:'script', style:'font-size:clamp(30px,8vw,40px);color:#fff;'}, 'menuverso'),
- el('div',{class:'disp', style:'font-size:clamp(34px,9vw,60px);color:var(--ink);margin-top:12px;line-height:.96;'}, esC?'Una suscripción.':'One membership.', el('br'), esC?'Mil ofertas.':'A thousand deals.'),
+ el('div',{class:'disp', style:'font-size:clamp(34px,9vw,60px);color:var(--ink);margin-top:12px;line-height:.96;'}, esC?'Una suscripción.':'One membership.', el('br'), esC?'Cientos de locales.':'Hundreds of venues.'),
  el('p',{style:'font-size:clamp(15px,4vw,19px);font-weight:600;color:#fff;margin:12px 0 22px;'}, esC?'Desbloquea todos los 2×1 de la ciudad. Úsala una vez y ya se ha pagado sola.':'Unlock every 2×1 in the city. Use it once and it has paid for itself.'),
  el('div',{class:'grid gap-3', style:'grid-template-columns:1fr 1fr;'}, priceCard('monthly'), priceCard('annual')),
  el('button',{style:'margin-top:18px;width:100%;background:#F2B100;color:#16110F;border:none;font-family:Anton,sans-serif;font-size:clamp(17px,5vw,24px);padding:16px;border-radius:4px;cursor:pointer;box-shadow:5px 5px 0 var(--ink);', onclick:subscribe}, esC?'EMPEZAR →':'START →'),
@@ -10844,7 +10844,7 @@ function Confirmar() {
  el('div',{class:'mx-auto h-16 w-16 grid place-items-center text-3xl font-extrabold border-2 '+ring}, kind === 'ok' ? '✓' : kind === 'wait' ? '…' : '!'),
  el('h1',{class:'disp mt-5 text-4xl text-slate2-50'}, title),
  el('p',{class:'mt-3 text-slate2-300'}, msg),
- extra || null
+ extra || ''
  );
  }
  show('wait', es?'Confirmando…':'Confirming…', es?'Un momento, validando tu enlace.':'One moment, validating your link.');
@@ -12237,6 +12237,17 @@ if (state.session) {
  else if (seg === 'confirmar' || seg === 'confirm') { state.route = 'confirmar'; }
  if (state.route === 'privacy') document.documentElement.setAttribute('lang', MV_LANG);
  } catch(e){}
+})();
+(function(){
+  function mvValMsg(el){ var es=(typeof MV_LANG!=='undefined'&&MV_LANG==='es'), v=el.validity;
+    if(v.valueMissing) return es?'Rellena este campo.':'Please fill out this field.';
+    if(v.typeMismatch) return el.type==='email'?(es?'Introduce un correo válido.':'Please enter a valid email address.'):(es?'El formato no es válido.':'Please match the requested format.');
+    if(v.patternMismatch) return es?'El formato no es válido.':'Please match the requested format.';
+    if(v.tooShort) return es?('Usa al menos '+el.minLength+' caracteres.'):('Please use at least '+el.minLength+' characters.');
+    return ''; }
+  document.addEventListener('invalid', function(e){ if(e.target&&e.target.setCustomValidity) e.target.setCustomValidity(mvValMsg(e.target)); }, true);
+  document.addEventListener('input', function(e){ if(e.target&&e.target.setCustomValidity) e.target.setCustomValidity(''); }, true);
+  document.addEventListener('change', function(e){ if(e.target&&e.target.setCustomValidity) e.target.setCustomValidity(''); }, true);
 })();
 render();
 // Wire browser Back/Forward to the SPA router: seed the first history entry with
