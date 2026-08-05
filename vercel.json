@@ -10,6 +10,6 @@
     { "source": "/confirmar", "destination": "/index.html" }
   ],
   "redirects": [
-    { "source": "/deck", "destination": "/deck-en.pdf", "permanent": false }
+    { "source": "/deck", "destination": "/Menuverso-Deck-EN.pdf", "permanent": false }
   ]
 }
