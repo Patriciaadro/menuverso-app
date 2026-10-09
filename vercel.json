@@ -11,6 +11,6 @@
   ],
   "redirects": [
     { "source": "/deck", "destination": "/Menuverso-Deck-EN-09102026.pdf", "permanent": false },
-    { "source": "/pitch", "destination": "/Menuverso-Pitch-EN-01102026-v3.pdf", "permanent": false }
+    { "source": "/pitch", "destination": "/Menuverso-Pitch-EN-09102026.pdf", "permanent": false }
   ]
 }
