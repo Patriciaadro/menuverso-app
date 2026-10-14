@@ -8,7 +8,7 @@
     { "source": "/partners", "destination": "/index.html" },
     { "source": "/alta", "destination": "/index.html" },
     { "source": "/confirmar", "destination": "/index.html" },
-    { "source": "/gx", "destination": "/gx.html" }
+    { "source": "/gx", "destination": "/gx2.html" }
   ],
   "redirects": [
     { "source": "/deck", "destination": "/Menuverso-Deck-EN-09102026-v2.pdf", "permanent": false },
