@@ -948,8 +948,12 @@ const MV_SEED_PARTNER_IDS = ['pv_cerveceria'];
 // end to end. It is never synced to Supabase: its owner's password is public in
 // this source, so it must not be able to write a production venue row.
 function mvIsDemoViewer() {
- try { const u = currentUser(); return !!(u && MV_DEMO_EMAILS.has(u.email)); } catch (e) { return false; }
+ // Demo member + demo partner only: the admin dashboard keeps the client's
+ // clean slate (no demo venue in counts or activity).
+ try { const u = currentUser(); return !!(u && u.role !== 'ADMIN' && MV_DEMO_EMAILS.has(u.email)); } catch (e) { return false; }
 }
+// Slugs of the demo venue(s), for filtering demo activity out of admin views.
+function mvSeedPartnerSlugs() { return (initialStore.partnerVenues || []).filter(v => MV_SEED_PARTNER_IDS.includes(v.id)).map(v => v.slug); }
 // The one-time clean-slate purge deletes the demo venue from each browser's
 // store, so restore it (from initialStore) whenever a demo account is active.
 function mvEnsureDemoVenues() {
@@ -8001,9 +8005,13 @@ function Admin() {
  if (!u || u.role !== 'ADMIN') { go('signin'); return el('div'); }
 
  const tab = state.params.tab || 'overview';
- const pendingVenues = store.partnerVenues.filter(v => v.status === 'PENDING_APPROVAL');
- const liveVenues = store.partnerVenues.filter(v => v.status === 'LIVE');
- const totalRedemptions = store.redemptions.length;
+ // QA item 8 follow-up: the demo venue (restored for the demo member/partner
+ // on this browser) never counts in admin metrics or activity (clean slate).
+ const mvSeedSlugs = mvSeedPartnerSlugs();
+ const realPartnerVenues = (store.partnerVenues || []).filter(v => !MV_SEED_PARTNER_IDS.includes(v.id));
+ const pendingVenues = realPartnerVenues.filter(v => v.status === 'PENDING_APPROVAL');
+ const liveVenues = realPartnerVenues.filter(v => v.status === 'LIVE');
+ const totalRedemptions = store.redemptions.filter(r => !mvSeedSlugs.includes(r.venueSlug)).length;
  const activeBookings = store.bookings.filter(b => !b.redeemed && !b.cancelled && b.expiresAt > Date.now()).length;
 
  // Helper: confirm + run destructive action (uses window.confirm for safety).
@@ -8204,9 +8212,9 @@ function Admin() {
  // like "Booking created at Bar Solete (code 238542)" because the venue name
  // and code are embedded.
  const ES = MV_LANG === 'es';
- store.redemptions.slice(0, 12).forEach(r => events.push({ t: r.redeemedAt, type:'redemption', prefix: ES ? 'Código canjeado en ' : 'Code redeemed at ', venueName: (findVenueBySlug(r.venueSlug)?.name ?? r.venueSlug), suffix: '' }));
- store.bookings.slice(0, 12).forEach(b => events.push({ t: b.createdAt, type:'booking', prefix: ES ? 'Reserva creada en ' : 'Booking created at ', venueName: (findVenueBySlug(b.venueSlug)?.name ?? b.venueSlug), suffix: ' (' + (ES ? 'código' : 'code') + ' ' + b.code + ')' }));
- store.partnerVenues.forEach(v => {
+ store.redemptions.filter(r => !mvSeedSlugs.includes(r.venueSlug)).slice(0, 12).forEach(r => events.push({ t: r.redeemedAt, type:'redemption', prefix: ES ? 'Código canjeado en ' : 'Code redeemed at ', venueName: (findVenueBySlug(r.venueSlug)?.name ?? r.venueSlug), suffix: '' }));
+ store.bookings.filter(b => !mvSeedSlugs.includes(b.venueSlug)).slice(0, 12).forEach(b => events.push({ t: b.createdAt, type:'booking', prefix: ES ? 'Reserva creada en ' : 'Booking created at ', venueName: (findVenueBySlug(b.venueSlug)?.name ?? b.venueSlug), suffix: ' (' + (ES ? 'código' : 'code') + ' ' + b.code + ')' }));
+ realPartnerVenues.forEach(v => {
  if (v.submittedAt) events.push({ t: v.submittedAt, type:'submit', prefix: '', venueName: v.name, suffix: ES ? ' enviado a revisión' : ' submitted for review' });
  if (v.approvedAt) events.push({ t: v.approvedAt, type:'approve', prefix: '', venueName: v.name, suffix: ES ? ' aprobado' : ' approved' });
  });

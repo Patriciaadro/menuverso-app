@@ -91,7 +91,15 @@ const visible = w => w.eval(`getAllVenues().some(v => v.slug === '${SLUG}')`);
   const adminW = boot({ userId: 'u_demo_admin' });
   await sleep(250); adminW.eval(`saveStore()`); await sleep(1600);
   check('Admin save: demo venue NOT pushed to Supabase', !adminW.__posts.some(p => p.url.includes('/rest/v1/venues') && p.body && p.body.id === 'pv_cerveceria'));
-  check('Admin list still hides the demo venue (client clean-slate)', true);
+  // Same browser: Maria restored the demo venue, then the admin signs in.
+  // The admin dashboard must keep the clean slate (no demo venue in counts/activity).
+  const shared = boot({ userId: 'u_demo_member' });
+  await sleep(250);
+  shared.eval(`store.redemptions.push({ memberId:'u_demo_member', venueSlug:'${SLUG}', redeemedAt: Date.now(), method:'SLIDE_CONFIRM' }); saveStore(); setSession('u_demo_admin'); go('admin');`);
+  await sleep(200);
+  const adminTxt = [...shared.document.body.children].filter(e => e.tagName !== 'SCRIPT').map(e => e.textContent).join(' ');
+  check('Admin (same browser as Maria): demo venue not restored for admin', shared.eval(`mvIsDemoViewer()`) === false);
+  check('Admin overview: no Cervecería in counts or activity', !/Cervecer/i.test(adminTxt), adminTxt.slice(0, 200));
 
   for (const x of [mariaW, ownerW, adminW, w]) check('No runtime errors', x.__e.length === 0, x.__e.join(' | '));
   console.log(out.join('\n'));
