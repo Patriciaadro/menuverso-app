@@ -1,0 +1,47 @@
+# Files that live in the repo but must never be served from www.menuverso.com.
+# Everything not listed here is deployed as before (index.html, app.css, /api,
+# /lib, hero media, wordmark, gx2.html, deck PDFs, legacy restaurant pages).
+
+# Internal docs, notes and planning
+*.md
+*.xlsx
+*.docx
+.agents/
+email_campaign/
+
+# Data pipeline: scripts, dumps, backups, logs
+*.py
+*.tsv
+*.log
+*.bak
+restaurants.json
+restaurants_BACKUP_*.json
+thefork_batch_enriched.json
+thefork_batch_ready.json
+thefork_festival_barcelona.json
+scraped_batch_*.json
+schema.json
+IMAGE_NAMING_CONVENTION.json
+index.html.pre-xibeca.bak
+
+# Database migrations and build tooling
+supabase/
+scripts/
+tailwind.config.js
+tailwind.input.css
+.env
+.env.*
+
+# Test and audit harnesses (run locally with npm test)
+*-check.js
+audit.js
+api-audit.js
+diagnostic.js
+run-tests.js
+behavioral.js
+deep-portals.js
+verify-savings.js
+
+# Internal dashboards of the old restaurant database
+admin.html
+dashboard.html

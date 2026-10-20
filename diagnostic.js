@@ -34,10 +34,11 @@ const fire = (el, type) => el.dispatchEvent(new el.ownerDocument.defaultView.Eve
 // ============================================================
 (function () {
   const w = boot('u_demo_admin');
-  // create one partner venue directly (as the admin "Add venue" handler does)
+  // create one partner venue directly (as the admin "Add venue" handler does).
+  // lat/lng are set because a LIVE venue without coordinates cannot be saved (QA item 9).
   w.eval(`(function(){
     store.partnerVenues=[{id:"pv_t",ownerId:null,name:"Test Bar",slug:"test-bar",barrio:"Eixample",cuisine:"Drinks",priceTier:2,
-      address:"",postcode:"",phone:"",website:"",instagram:"",description:"",hours:"",
+      address:"",postcode:"",phone:"",website:"",instagram:"",description:"",hours:"",lat:41.39,lng:2.16,
       photos:[],foodPhotos:[],venuePhotos:[],menuPhotos:[],dealTerms:"",dealSlots:[],
       deals:[{id:"d1",title:"2×1 cocktails",description:"",active:true,savingsEur:7,cooldownDays:30}],
       rating:4.5,reviews:0,status:"LIVE",liveDeal:{dealSlots:[]},offerVersion:1}];
@@ -248,7 +249,7 @@ async function sectionH() {
   check('H: compressImage is globally overridable (stub installed)', stubbed === true, 'got ' + stubbed);
   w.eval(`(function(){
     store.partnerVenues=[{id:"pv_u",ownerId:null,name:"Upload Bar",slug:"upload-bar",barrio:"Eixample",cuisine:"Drinks",priceTier:2,
-      address:"",postcode:"",phone:"",website:"",instagram:"",description:"",hours:"",
+      address:"",postcode:"",phone:"",website:"",instagram:"",description:"",hours:"",lat:41.39,lng:2.16,
       photos:[],foodPhotos:[],venuePhotos:[],menuPhotos:[],dealTerms:"",dealSlots:[],
       deals:[{id:"d1",title:"2×1",description:"",active:true,savingsEur:10,cooldownDays:30}],
       rating:4.5,reviews:0,status:"LIVE",liveDeal:{dealSlots:[]},offerVersion:1}];

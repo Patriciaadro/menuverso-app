@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /api/
+Disallow: /supabase/
 Disallow: /*.py$
+Disallow: /*.tsv$
+Disallow: /*.bak$
 
-Sitemap: https://patriciaadro.github.io/menuverso-app/sitemap.xml
+Sitemap: https://www.menuverso.com/sitemap.xml
