@@ -8,6 +8,8 @@
     { "source": "/partners", "destination": "/index.html" },
     { "source": "/alta", "destination": "/index.html" },
     { "source": "/confirmar", "destination": "/index.html" },
+    { "source": "/terminos", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" },
     { "source": "/gx", "destination": "/gx2.html" }
   ],
   "redirects": [

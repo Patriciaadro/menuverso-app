@@ -1549,6 +1549,15 @@ const state = {
 const $ = s => document.querySelector(s);
 function el(tag, attrs={}, ...children) {
  const e = document.createElement(tag);
+ // QA item 18: an internal link with a real href keeps its SPA onclick. A plain
+ // click stays in the app (no reload); Cmd/Ctrl/Shift/Alt-click is left to the
+ // browser (open in a new tab). Crawlers and keyboard users get a real link.
+ if (tag === 'a' && attrs && typeof attrs.href === 'string' && /^[\/#]/.test(attrs.href) && !attrs.target && typeof attrs.onclick === 'function') {
+ e.addEventListener('click', function(ev){
+ if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) { ev.stopImmediatePropagation(); return; }
+ ev.preventDefault();
+ });
+ }
  for (const k in attrs) {
  if (k === 'class') e.className = attrs[k];
  else if (k === 'html') e.innerHTML = attrs[k];
@@ -1613,7 +1622,21 @@ function mvDrop(opts = {}) {
  document.body.appendChild(overlay);
  return overlay;
 }
+// QA item 14: the mobile menu closes on every route change.
+function mvCloseMobileMenu() {
+ const mm = document.getElementById('mv-mmenu'); if (mm) mm.classList.add('hidden');
+ document.querySelectorAll('[aria-controls="mv-mmenu"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+}
+// ...and on a tap outside it, or Escape.
+try {
+ document.addEventListener('click', function(e){
+ const mm = document.getElementById('mv-mmenu');
+ if (mm && !mm.classList.contains('hidden') && e.target && e.target.closest && !e.target.closest('#mv-mmenu,[aria-controls="mv-mmenu"]')) mvCloseMobileMenu();
+ });
+ document.addEventListener('keydown', function(e){ if (e.key === 'Escape') mvCloseMobileMenu(); });
+} catch (e) {}
 function go(route, params={}, _fromPop) {
+ mvCloseMobileMenu();
  state.route = route; state.params = params;
  // Record in-app navigation in browser history so Back/Forward work. When this
  // call originates from a popstate (Back/Forward), don't push a new entry.
@@ -2682,27 +2705,29 @@ function MarketingHeader() {
  doScroll();
  }
  };
- const closeMenu = () => document.getElementById('mv-mmenu')?.classList.add('hidden');
+ const closeMenu = () => mvCloseMobileMenu();
  const mItem = (label, fn) => el('button',{class:'block w-full text-left px-5 py-3.5 text-sm font-bold text-slate2-200 hover:bg-slate2-50/5 hover:text-slate2-50 cursor-pointer bg-transparent border-0 transition', onclick:()=>{ closeMenu(); fn(); }}, label);
  return el('header',{class:'sticky top-0 z-30 bg-ink-950/85 backdrop-blur border-b border-slate2-50/5'},
  el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-2 md:gap-4'},
- el('a',{class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go('landing')},
+ el('a',{href:'/', class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go('landing')},
  el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:24px;width:auto;display:block">'})
  ),
  el('nav',{class:'flex items-center gap-2 md:gap-4 text-sm text-slate2-300'},
- el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('how')}, t('nav.howItWorks')),
- el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
- el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('precios')}, t('nav.pricing')),
+ el('a',{href:'/#how', class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('how')}, t('nav.howItWorks')),
+ el('a',{href:'/para-locales', class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
+ el('a',{href:'/#precios', class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>navTo('precios')}, t('nav.pricing')),
  el('button',{class:'inline-flex items-center gap-1.5 rounded-[4px] border-2 border-mv-500/55 text-mv-500 font-extrabold px-3.5 py-1.5 text-sm cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, el('span',{class:'inline-flex shrink-0', style:'width:14px;height:14px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}), el('span',{class:'tracking-wider'}, t('lang.switchLabel'))),
  u
  ? el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white font-bold px-3.5 md:px-4 py-1.5 text-sm cursor-pointer shadow-mv-500/20 whitespace-nowrap shrink-0', onclick:()=>{ if (u.role==='ADMIN') go('admin'); else if (u.role==='PARTNER_OWNER') go('partner-portal',{tab:'overview'}); else go('app'); }}, 'Open App →')
  : el('button',{class:'hidden md:inline-flex rounded-[4px] border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')}, t('nav.signIn')),
- el('button',{class:'md:hidden inline-flex items-center justify-center rounded-[4px] border border-slate2-50/15 text-slate2-50 hover:bg-slate2-50/10 cursor-pointer bg-transparent transition', style:'width:38px;height:38px', title:'Menu', onclick:()=>document.getElementById('mv-mmenu')?.classList.toggle('hidden')},
+ el('button',{class:'md:hidden inline-flex items-center justify-center rounded-[4px] border border-slate2-50/15 text-slate2-50 hover:bg-slate2-50/10 cursor-pointer bg-transparent transition', style:'width:38px;height:38px', title:'Menu', 'aria-label':'Menu', 'aria-controls':'mv-mmenu', 'aria-expanded':'false', onclick:(ev)=>{ const mm = document.getElementById('mv-mmenu'); if (!mm) return; const open = mm.classList.toggle('hidden') === false; ev.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false'); }},
  el('span',{class:'inline-flex', style:'width:18px;height:18px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:100%;height:100%"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>'})
  )
  )
  ),
- el('div',{id:'mv-mmenu', class:'md:hidden hidden border-t border-slate2-50/5 bg-ink-950/95 backdrop-blur'},
+ // QA item 14: opaque, full-width panel overlaying the page (the 95% cream
+ // let the hero paragraph show through under the last item).
+ el('div',{id:'mv-mmenu', class:'md:hidden hidden border-t border-b-2 border-slate2-50/15', style:'position:absolute;left:0;right:0;top:100%;z-index:40;background:#FAF6EE;box-shadow:0 14px 28px rgba(26,22,19,.14);'},
  mItem(t('nav.home'), ()=>go('landing')),
  mItem(t('nav.pricing'), ()=>navTo('precios')),
  mItem(t('nav.howItWorks'), ()=>navTo('how')),
@@ -2820,7 +2845,7 @@ function AppTopBar({ showNav }) {
  // navigating between marketing and auth/checkout pages doesn't shift chrome.
  return el('header',{class:'sticky top-0 z-30 bg-ink-950/85 backdrop-blur border-b border-slate2-50/5'},
  el('div',{class:'mx-auto max-w-6xl px-4 md:px-6 py-3 flex items-center justify-between gap-4'},
- el('a',{class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go(u ? (u.role==='ADMIN'?'admin':u.role==='PARTNER_OWNER'?'partner-portal':'app') : 'landing')},
+ el('a',{href:'/', class:'flex items-center gap-2 cursor-pointer shrink-0', onclick:()=>go(u ? (u.role==='ADMIN'?'admin':u.role==='PARTNER_OWNER'?'partner-portal':'app') : 'landing')},
  el('span',{class:'inline-flex items-center',html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:24px;width:auto;display:block">'})
  ),
  showNav ? el('nav',{class:'flex items-center gap-1'},
@@ -2854,7 +2879,7 @@ function AppTopBar({ showNav }) {
  el('button',{class:'rounded-[4px] border border-slate2-50/15 text-slate2-300 hover:text-slate2-50 hover:border-slate2-50/30 font-bold px-3 py-1.5 text-xs cursor-pointer bg-transparent transition', title:'Sign out', onclick:logout}, t('nav.signOut'))
  // Same <nav> structure + gap-5 as MarketingHeader so chrome stays pixel-stable.
  ) : el('nav',{class:'flex items-center gap-5 text-sm text-slate2-300'},
- el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>{
+ el('a',{href:'/#how', class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>{
  if (state.route !== 'landing') {
  go('landing');
  setTimeout(()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'}), 120);
@@ -2863,7 +2888,7 @@ function AppTopBar({ showNav }) {
  }
  }}, t('nav.howItWorks')),
  // 'Features' nav entry removed, section it scrolled to was deleted.
- el('a',{class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
+ el('a',{href:'/para-locales', class:'hidden md:inline hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')}, t('nav.forRestaurants')),
  // Language switcher, small EN/ES toggle. Sits before Sign in / Join.
  el('button',{class:'inline-flex items-center gap-1.5 rounded-[4px] border-2 border-mv-500/55 text-mv-500 font-extrabold px-3.5 py-1.5 text-sm cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, el('span',{class:'inline-flex shrink-0', style:'width:14px;height:14px', html:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>'}),el('span',{class:'tracking-wider'}, t('lang.switchLabel'))),
  el('button',{class:'rounded-[4px] border border-slate2-50/15 text-slate2-50 font-bold px-4 py-1.5 text-sm cursor-pointer hover:bg-slate2-50/10 bg-transparent transition', onclick:()=>go('signin')},
@@ -3190,7 +3215,7 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  el('p',{class:(__cmp?'mt-1.5 text-[11px] leading-snug text-[#6b5f57]':'mt-1.5 text-[11px] text-slate2-500 leading-snug')},
  esW ? (__cmp ? '' : 'Al registrarte, tu dirección de email se almacenará y utilizará únicamente para enviarte novedades de Menuverso. Nunca venderemos ni compartiremos tus datos. ')
  : (__cmp ? '' : 'By signing up, your email address will be stored and used solely to send you Menuverso updates. We will never sell or share your data. '),
- el('a',{class:'underline text-mv-500 hover:text-mv-600 cursor-pointer', onclick:(e)=>{ e.preventDefault(); go('privacy'); }},
+ el('a',{href:'/privacidad', class:'underline text-mv-500 hover:text-mv-600 cursor-pointer', onclick:(e)=>{ e.preventDefault(); go('privacy'); }},
  esW ? (__cmp ? 'Política de privacidad' : 'Lee nuestra Política de Privacidad.') : (__cmp ? 'Privacy policy' : 'Read our Privacy Policy.'))
  )
  )
@@ -3402,10 +3427,10 @@ function Landing() {
  el('span',{class:'font-bold text-slate2-50 lowercase'},'menuverso')
  ),
  el('nav',{class:'flex items-center gap-5'},
- el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
- el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('terms')},'Terms'),
+ el('a',{href:'/privacidad', class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
+ el('a',{href:'/terminos', class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('terms')},'Terms'),
  el('a',{class:'hover:text-slate2-50 cursor-pointer', href:'mailto:info@menuverso.com'},'Contact'),
- el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')},'For Restaurants')
+ el('a',{href:'/para-locales', class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('partner-landing')},'For Restaurants')
  )
  ),
  el('div',{class:'border-t border-slate2-50/5'},
@@ -6427,9 +6452,9 @@ function PartnerLanding() {
  el('span',{class:'font-bold text-slate2-50'}, el('span',{class:'lowercase'},'menuverso'),' for restaurants')
  ),
  el('nav',{class:'flex items-center gap-5'},
- el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('landing')},'For diners'),
- el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
- el('a',{class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('terms')},'Terms'),
+ el('a',{href:'/', class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('landing')},'For diners'),
+ el('a',{href:'/privacidad', class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('privacy')},'Privacy'),
+ el('a',{href:'/terminos', class:'hover:text-slate2-50 cursor-pointer', onclick:()=>go('terms')},'Terms'),
  el('a',{class:'hover:text-slate2-50 cursor-pointer', href:'mailto:info@menuverso.com'},'Contact')
  )
  ),
@@ -6684,7 +6709,7 @@ function PartnerSignin() {
  // Compact partner-branded header, NO marketing nav. This is a business surface.
  el('header',{class:'border-b border-slate2-50/5 bg-ink-900/80'},
  el('div',{class:'mx-auto max-w-6xl px-4 py-3 flex items-center justify-between'},
- el('a',{class:'flex items-center gap-2 cursor-pointer', onclick:()=>go('partner-landing')},
+ el('a',{href:'/para-locales', class:'flex items-center gap-2 cursor-pointer', onclick:()=>go('partner-landing')},
  el('div',{},
  el('div',{class:'font-bold text-sm lowercase text-mv-500'},'menuverso'),
  el('div',{class:'text-[10px] uppercase tracking-widest text-mv-500 font-extrabold'},'Partner Portal')
@@ -11163,7 +11188,7 @@ function Terms() {
 function QrHeader() {
  return el('header',{class:'border-b border-slate2-50/8'},
  el('div',{class:'mx-auto max-w-5xl px-4 h-[56px] flex items-center justify-between'},
- el('a',{class:'inline-flex items-center cursor-pointer', onclick:()=>go('landing'), html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:22px;width:auto;display:block">'}),
+ el('a',{href:'/', class:'inline-flex items-center cursor-pointer', onclick:()=>go('landing'), html:'<img src="menuverso-wordmark-red.png" alt="menuverso" style="height:22px;width:auto;display:block">'}),
  el('button',{class:'inline-flex items-center gap-1.5 rounded-[4px] border-2 border-mv-500/55 text-mv-500 font-extrabold px-3 py-1.5 text-xs cursor-pointer hover:bg-mv-500 hover:text-white hover:border-mv-500 bg-mv-500/5 transition', title:'Switch language / Cambiar idioma', onclick:()=>setLang(MV_LANG === 'es' ? 'en' : 'es')}, MV_LANG === 'es' ? 'EN' : 'ES')
  )
  );
@@ -12687,6 +12712,7 @@ if (state.session) {
  else if (seg === 'para-locales' || seg === 'locales' || seg === 'partners') { state.route = 'partner-landing'; }
  else if (seg === 'alta') { state.route = 'alta'; }
  else if (seg === 'confirmar' || seg === 'confirm') { state.route = 'confirmar'; }
+ else if (seg === 'terminos' || seg === 'términos' || seg === 'terms') { state.route = 'terms'; }
  if (state.route === 'privacy') document.documentElement.setAttribute('lang', MV_LANG);
  } catch(e){}
 })();
@@ -12724,6 +12750,16 @@ setTimeout(function(){
 }, 80);
 // QA item 8: a demo session restored on boot needs the demo venue back too.
 try { if (mvEnsureDemoVenues()) render(); } catch (e) {}
+// QA item 18: /#how and /#precios (now real hrefs) scroll to their section.
+setTimeout(function(){
+ try {
+ var id = (location.hash || '').replace(/^#/, '');
+ if (state.route === 'landing' && (id === 'how' || id === 'precios')) {
+ var tg = document.getElementById(id);
+ if (tg) window.scrollTo({ top: Math.max(0, tg.getBoundingClientRect().top + window.scrollY - 24), behavior: 'smooth' });
+ }
+ } catch (e) {}
+}, 250);
 </script>
 </body>
 </html>
