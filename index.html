@@ -4157,11 +4157,12 @@ function AppMap() {
  minZoom: 11
  }).setView([41.3851, 2.1734], 13);
 
- // Warm-toned Voyager tiles, replaces the previous pitch-black dark_all map.
- // Cream sand water + faint roads make the map feel like a paper city guide.
- window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
- attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
- subdomains: 'abcd',
+ // OpenStreetMap standard tiles. CARTO's rastertiles/voyager now requires an
+ // API key and silently serves "API KEY REQUIRED" placeholder tiles (HTTP 200,
+ // so nothing shows in the console). OSM needs no key; to restore the Voyager
+ // look later, register a CARTO/MapTiler/Stadia key and use their keyed URL.
+ window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+ attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
  maxZoom: 19
  }).addTo(map);
 
