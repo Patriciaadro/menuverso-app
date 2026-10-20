@@ -2531,6 +2531,26 @@ function localizeCuisine(s) {
  return TR[key] || key;
  }).join(' · ');
 }
+// QA item 11: the green confirmation said "2×1 APLICADO" for every deal, also
+// "Café gratis". Say 2×1 only for 2×1 deals; otherwise "Oferta aplicada".
+function mvAppliedLabel(dealTitle, es) {
+ return /2\s*[x×]\s*1/i.test(String(dealTitle || '')) ? (es ? '2×1 aplicado' : '2×1 applied') : (es ? 'Oferta aplicada' : 'Offer applied');
+}
+// QA item 12: slot labels come from DEFAULT_SLOTS in English ("Weekday Lunch ·
+// 13:00-15:30") and are also the matching key stored on bookings, so translate
+// only at display time: the label part, keeping the times.
+var MV_SLOT_ES = { 'Weekday Lunch':'Comida entre semana', 'Early Dinner':'Cena temprana', 'Weekend Brunch':'Brunch de fin de semana',
+ 'Lunch':'Comida', 'Dinner':'Cena', 'Brunch':'Brunch', 'Breakfast':'Desayuno', 'Late Night':'Noche', 'All Day':'Todo el día', 'All day':'Todo el día',
+ 'Weekday Dinner':'Cena entre semana', 'Weekend Lunch':'Comida de fin de semana', 'Weekend Dinner':'Cena de fin de semana', 'Happy Hour':'Happy hour', 'Slot':'Turno' };
+function localizeSlot(s) {
+ if (!s) return '';
+ if (MV_LANG !== 'es') return s;
+ var TR = window.MV_TR_ES || {};
+ var parts = String(s).split(' · ');
+ var key = parts[0].trim();
+ parts[0] = MV_SLOT_ES[key] || TR[key] || key;
+ return parts.join(' · ');
+}
 // Localize a single barrio name too (some are Spanish already, others aren't).
 function localizeBarrio(s) {
  if (!s) return '';
@@ -3568,7 +3588,7 @@ function Signin() {
  el('form',{class:'mt-6 space-y-3', onSubmit: async (e)=>{
  e.preventDefault();
  const btn = e.target.querySelector('button[type=submit]');
- btn.disabled = true; btn.textContent = 'Signing in…';
+ btn.disabled = true; btn.textContent = (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Entrando…' : 'Signing in…';
  const fd = new FormData(e.target);
  try {
  const u = await loginUser({ email: fd.get('email'), password: fd.get('password') });
@@ -3586,7 +3606,7 @@ function Signin() {
  go('app');
  } catch (err) {
  toast(err.message, 'err');
- btn.disabled = false; btn.textContent = 'Sign in';
+ btn.disabled = false; btn.textContent = (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Iniciar sesión' : 'Sign in';
  }
  }},
  InputField('Email','email','email','you@example.com', true, 'email'),
@@ -3699,7 +3719,7 @@ function Checkout() {
  el('div',{class:'mt-8'},
  el('div',{class:'mx-auto h-16 w-16 rounded-[4px] bg-accent-emer/15 grid place-items-center text-accent-emer text-3xl border-2 border-accent-emer font-extrabold'},'✓'),
  el('h1',{class:'mt-4 text-2xl font-extrabold'},'You\'re already subscribed.'),
- el('p',{class:'mt-2 text-slate2-400 text-sm'},'Renews ', new Date(currentSub().renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB')),
+ el('p',{class:'mt-2 text-slate2-400 text-sm'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Se renueva el ' : 'Renews ', new Date(currentSub().renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB')),
  el('button',{class:'mt-8 rounded-[4px] bg-slate2-50 text-ink-900 px-6 py-3 font-bold cursor-pointer', onclick:()=>go('app')},'Open the app →')
  )
  ), { narrow: true });
@@ -4719,7 +4739,7 @@ function BookingHistoryRow(b, u) {
  el('span',{class:'shrink-0 rounded-[4px] border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest ' + badgeCls}, badge)
  ),
  el('div',{class:'mt-0.5 text-xs text-slate2-400'},
- when, ' · ', b.slot,
+ when, ' · ', localizeSlot(b.slot),
  b.redeemed ? el('span',{}, ' · ', el('span',{class:'text-accent-emer font-bold'}, ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Ahorrado €':'Saved €') + redemptionSavingsEur(b))) : null
  ),
  cancelHint && el('div',{class:'mt-1 text-[11px] text-slate2-500 italic'}, cancelHint),
@@ -4778,9 +4798,11 @@ function AppOnboardingPrefs() {
  const inner = el('div',{class:'p-6 max-w-xl mx-auto'},
  el('div',{class:'text-center'},
  el('div',{class:'inline-flex items-center gap-2 rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-3 py-1 text-xs font-bold text-mv-400'},
- el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}),'Welcome, ', u.firstName || 'friend'
+ el('span',{class:'h-2 w-2 rounded-full bg-mv-500 animate-pulse'}), (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Te damos la bienvenida, ' : 'Welcome, ', u.firstName || ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'foodie' : 'friend')
  ),
- el('h1',{class:'mt-4 text-3xl md:text-4xl font-extrabold leading-tight'},'Help us ', el('span',{class:'text-mv-500'},'tailor your feed')),
+ // QA item 13: the headline is two text nodes, so autoTranslate produced
+ // "Help us personalizar tu feed". Translate the whole line here.
+ el('h1',{class:'mt-4 text-3xl md:text-4xl font-extrabold leading-tight'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Ayúdanos a ' : 'Help us ', el('span',{class:'text-mv-500'}, (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'personalizar tu feed' : 'tailor your feed')),
  el('p',{class:'mt-3 text-sm text-slate2-300'},'Three quick taps. We use your picks to surface the right restaurants first, never to share with anyone.'),
  // Tiny tile motif under the intro, gives the screen a brand moment.
  el('div',{class:'mt-5'}, ILLUS.tileStrip('h-2 w-32 mx-auto text-mv-500/30'))
@@ -4809,10 +4831,10 @@ function AppOnboardingPrefs() {
  el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition disabled:opacity-50',
  disabled: picks.cuisines.length === 0,
  onclick:()=>{
- if (picks.cuisines.length === 0) { toast('Pick at least one cuisine.', 'err'); return; }
+ if (picks.cuisines.length === 0) { toast((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Elige al menos una cocina.' : 'Pick at least one cuisine.', 'err'); return; }
  setPrefs(u, { cuisines: picks.cuisines, barrios: picks.barrios, dietary: picks.dietary });
  window.__mvPrefsDraft = null;
- toast('Your feed is ready', '');
+ toast((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Tu feed está listo' : 'Your feed is ready', '');
  go(mvPostOnboardingRoute());
  }},'Continue →')
  )
@@ -4867,6 +4889,8 @@ function AppProfile() {
  if (myReds.length >= 3) tier = { label:'Regular', color:'text-accent-amber', bg:'bg-accent-amber/15', emoji:'', next: 10 };
  if (myReds.length >= 10) tier = { label:'Connoisseur', color:'text-accent-emer', bg:'bg-accent-emer/15', emoji:'', next: 25 };
  if (myReds.length >= 25) tier = { label:'Legend', color:'text-accent-pink', bg:'bg-accent-pink/15', emoji:'', next: null };
+ // QA item 13: tier names in Spanish.
+ if ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')) tier.label = ({ 'New':'Nuevo', 'Explorer':'Explorador', 'Regular':'Habitual', 'Connoisseur':'Entendido', 'Legend':'Leyenda' })[tier.label] || tier.label;
  const toNext = tier.next ? (tier.next - myReds.length) : 0;
  const tierPct = tier.next ? Math.min(100, (myReds.length / tier.next) * 100) : 100;
 
@@ -4898,7 +4922,7 @@ function AppProfile() {
  el('div',{class:'mt-2 flex items-center gap-2 flex-wrap text-xs'},
  el('span',{class:'inline-flex items-center rounded-[4px] ' + tier.bg + ' px-2.5 py-1 font-bold uppercase tracking-wider ' + tier.color}, tier.label),
  el('span',{class:'text-slate2-400'},'·'),
- el('span',{class:'text-slate2-400'},'Member since ' + memberSinceLabel)
+ el('span',{class:'text-slate2-400'}, ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Miembro desde ' : 'Member since ') + memberSinceLabel)
  )
  )
  )
@@ -5009,8 +5033,8 @@ function AppProfile() {
  el('div',{class:'px-5 mt-5'},
  el('div',{class:'rounded-[4px] bg-slate2-50/[0.04] border border-slate2-50/10 p-5'},
  el('div',{class:'flex items-center justify-between gap-2'},
- el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'}, prefCuisines.length > 0 ? 'Your taste' : 'Tell us your taste'),
- el('button',{class:'text-[10px] underline text-slate2-400 hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>{ delete u.prefsSkipped; delete u.prefs; saveStore(); go('onboarding-prefs'); }}, prefCuisines.length > 0 ? 'edit' : 'set up →')
+ el('div',{class:'text-[10px] uppercase tracking-widest text-slate2-400 font-bold'}, prefCuisines.length > 0 ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Tus gustos' : 'Your taste') : ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Cuéntanos tus gustos' : 'Tell us your taste')),
+ el('button',{class:'text-[10px] underline text-slate2-400 hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>{ delete u.prefsSkipped; delete u.prefs; saveStore(); go('onboarding-prefs'); }}, prefCuisines.length > 0 ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'editar' : 'edit') : ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'configurar →' : 'set up →'))
  ),
  prefCuisines.length > 0
  ? el('div',{class:'mt-3 flex flex-wrap gap-2'},
@@ -5060,7 +5084,7 @@ function AppProfile() {
  ? el('div',{class:'mt-3 flex items-center justify-between gap-3 flex-wrap'},
  el('div',{},
  el('div',{class:'font-bold text-sm'}, (function(){ const bp = sub.billingPeriod || 'annual'; const esP = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es'); return (esP?'Activo · ':'Active · ') + (bp==='annual' ? (esP?'3,99 €/mes · anual':'€3.99/mo · annual') : (esP?'6,99 €/mes · mensual':'€6.99/mo · monthly')); })()),
- el('div',{class:'text-xs text-slate2-400'}, sub.cancelAtPeriodEnd ? 'Ends ' : 'Renews ', new Date(sub.renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB'))
+ el('div',{class:'text-xs text-slate2-400'}, sub.cancelAtPeriodEnd ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Termina el ' : 'Ends ') : ((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Se renueva el ' : 'Renews '), new Date(sub.renewsAt).toLocaleDateString((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'es-ES':'en-GB'))
  ),
  el('span',{class:'rounded-[4px] bg-accent-emer/15 text-accent-emer px-2.5 py-0.5 text-xs font-extrabold'},'ACTIVE')
  )
@@ -5835,7 +5859,7 @@ function Booking() {
  const note = el('textarea',{rows:'2', placeholder:(es?'Cuéntale al resto de foodies… (opcional)':'Tell other foodies… (optional)'), style:'width:100%;max-width:340px;margin:0 auto;display:block;border:3px solid #16110F;border-radius:4px;padding:10px 12px;font-family:Archivo,sans-serif;font-size:14px;resize:none;background:#F4EFE6;color:#16110F;', onInput:(e)=>{ noteVal = e.target.value; }});
  const gticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:10px;padding:clamp(20px,5vw,32px) clamp(24px,7vw,56px);margin:18px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
  el('div',{class:'disp', style:'font-size:clamp(68px,18vw,120px);color:#1F9D63;line-height:.8;'}, '✓'),
- el('div',{class:'disp', style:'font-size:clamp(30px,8vw,48px);color:#16110F;margin-top:4px;'}, es?'2×1 aplicado':'2×1 applied'),
+ el('div',{class:'disp', style:'font-size:clamp(30px,8vw,48px);color:#16110F;margin-top:4px;'}, mvAppliedLabel(dealTitle, es)),
  el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:14px;margin-top:6px;'}, dealTitle + ' · ' + (v?.name||''))
  );
  const gbelow = el('div',{style:'position:relative;color:#0b3d27;animation:mv-in .6s .2s both;text-align:center;'},
@@ -5876,7 +5900,7 @@ function Booking() {
  el('div',{class:'kick', style:'color:var(--red);font-size:13px;margin-top:12px;text-align:center;'}, esR?'Canjeando en':'Redeeming at'),
  el('h1',{class:'vname', style:'font-size:clamp(32px,8vw,52px);color:var(--ink);text-align:center;margin-top:4px;'}, v?.name ?? '?'),
  curDeal ? el('div',{class:'disp', style:'font-size:clamp(20px,5vw,28px);color:var(--red);text-align:center;margin-top:8px;'}, curDeal.title) : null,
- el('div',{style:'text-align:center;font-weight:700;color:#7A7164;font-size:14px;margin-top:4px;'}, b.slot),
+ el('div',{style:'text-align:center;font-weight:700;color:#7A7164;font-size:14px;margin-top:4px;'}, localizeSlot(b.slot)),
 
  // Steps callout (Xibeca) — no verification-screen mention (removed in [j]).
  el('div',{style:'margin-top:22px;background:#fff;border:3px solid var(--ink);border-radius:4px;box-shadow:5px 5px 0 var(--ink);padding:18px 20px;'},
@@ -6679,7 +6703,7 @@ function PartnerSignin() {
  el('form',{class:'mt-6 space-y-3', ref: f => setTimeout(()=>f?.querySelector('input')?.focus(), 50), onSubmit: async (e)=>{
  e.preventDefault();
  const btn = e.target.querySelector('button[type=submit]');
- btn.disabled = true; btn.textContent = 'Signing in…';
+ btn.disabled = true; btn.textContent = (typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Entrando…' : 'Signing in…';
  const fd = new FormData(e.target);
  try {
  const u = await loginUser({ email: fd.get('email'), password: fd.get('password') });
@@ -7196,7 +7220,7 @@ function PortalOverview() {
  el('span',{style:'width:44px;height:44px;background:'+(i%2?'var(--ink)':'var(--red)')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:4px;font-family:Anton;'}, initials(r.memberId)),
  el('div',{style:'flex:1;min-width:0;'},
  el('div',{style:'font-weight:800;font-size:16px;'}, memberName(r.memberId) + (esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealTitle)),
- el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot ? r.slot + ' · ' : '') + ago(r.at))
+ el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot ? localizeSlot(r.slot) + ' · ' : '') + ago(r.at))
  ),
  el('span',{class:'disp', style:'font-size:24px;color:var(--ink);'}, '+€'+AVG)
  ))
@@ -7263,12 +7287,12 @@ function PortalRedeem() {
  function todays() {
  const start = new Date(); start.setHours(0,0,0,0); const cut = start.getTime();
  const rows = [];
- store.bookings.filter(b => b.venueSlug===venueSlug && b.redeemed && b.redeemedAt>=cut && !b.cancelled).forEach(b => rows.push({ id:'b:'+b.id, at:b.redeemedAt, memberId:b.memberId, slot:b.slot }));
- (store.redemptions||[]).filter(r => r.venueSlug===venueSlug && r.redeemedAt>=cut).forEach((r,i) => rows.push({ id:'r:'+r.redeemedAt+':'+i, at:r.redeemedAt, memberId:r.memberId, slot:null }));
+ store.bookings.filter(b => b.venueSlug===venueSlug && b.redeemed && b.redeemedAt>=cut && !b.cancelled).forEach(b => rows.push({ id:'b:'+b.id, at:b.redeemedAt, memberId:b.memberId, slot:b.slot, dealId:b.dealId||null }));
+ (store.redemptions||[]).filter(r => r.venueSlug===venueSlug && r.redeemedAt>=cut).forEach((r,i) => rows.push({ id:'r:'+r.redeemedAt+':'+i, at:r.redeemedAt, memberId:r.memberId, slot:null, dealId:r.dealId||null }));
  // Remote (other-device) redemptions pulled from Supabase via /api/redemptions.
  ((window.__remoteRedemptions && window.__remoteRedemptions[venueSlug]) || []).forEach(rr => {
  const at = new Date(rr.redeemed_at || rr.redeemedAt || 0).getTime();
- if (at >= cut) rows.push({ id:'sb:'+(rr.id||at), at: at, memberId: rr.member_id||rr.memberId||null, memberName: rr.member_name||rr.memberName||null, slot:null });
+ if (at >= cut) rows.push({ id:'sb:'+(rr.id||at), at: at, memberId: rr.member_id||rr.memberId||null, memberName: rr.member_name||rr.memberName||null, slot:null, dealId: rr.deal_id||null, dealTitle: rr.deal_title||null });
  });
  const seen = new Set(); const out = [];
  for (const row of rows) { const k = (row.memberId||row.memberName||'?')+':'+Math.floor(row.at/60000); if (seen.has(k)) continue; seen.add(k); out.push(row); }
@@ -7281,13 +7305,16 @@ function PortalRedeem() {
  const dealTitle = ((typeof getVenueDeals === 'function' && getVenueDeals(pv)[0]) ? getVenueDeals(pv)[0].title : null) || '2×1';
  const ago = (t) => { const mn = Math.floor((Date.now()-t)/60000); if (mn<1) return esP?'ahora':'now'; if (mn<60) return (esP?'hace ':'')+mn+' min'+(esP?'':' ago'); const h=Math.floor(mn/60); return (esP?'hace ':'')+h+' h'+(esP?'':' ago'); };
 
+ // QA item 11: the deal that was actually redeemed (not just the venue's first).
+ const dealOf = (r) => r.dealTitle || (((typeof getVenueDeals === 'function') ? getVenueDeals(pv) : []).find(d => d && d.id === r.dealId) || {}).title || dealTitle;
  function acknowledge(r) {
  window.__portalAck.add(r.id);
  const who = nameOf(r);
+ const rDeal = dealOf(r);
  const ticket = el('div',{style:'position:relative;background:#F4EFE6;border:5px solid #16110F;border-radius:10px;padding:clamp(22px,6vw,36px) clamp(26px,8vw,60px);margin:22px 0;text-align:center;animation:mv-slam .6s cubic-bezier(.2,.8,.3,1) both;box-shadow:12px 12px 0 #16110F;max-width:90vw;'},
  el('div',{class:'disp', style:'font-size:clamp(80px,22vw,130px);color:#1F9D63;line-height:.8;'}, '✓'),
- el('div',{class:'disp', style:'font-size:clamp(36px,9vw,54px);color:#16110F;margin-top:6px;'}, esP?'2×1 aplicado':'2×1 applied'),
- el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:8px;'}, dealTitle + ' · ' + who + (r.slot?(' · '+r.slot):''))
+ el('div',{class:'disp', style:'font-size:clamp(36px,9vw,54px);color:#16110F;margin-top:6px;'}, mvAppliedLabel(rDeal, esP)),
+ el('div',{style:'font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#574F47;font-size:16px;margin-top:8px;'}, rDeal + ' · ' + who + (r.slot?(' · '+localizeSlot(r.slot)):''))
  );
  const below = el('div',{style:'position:relative;color:#0b3d27;animation:mv-in .6s .2s both;'},
  el('div',{style:'font-weight:900;text-transform:uppercase;letter-spacing:.05em;font-size:18px;'}, esP?'Descuento aplicado a la cuenta':'Discount applied to the bill'),
@@ -7319,8 +7346,8 @@ function PortalRedeem() {
  return el('div',{style:'background:#fff;border:3px solid var(--ink);border-radius:4px;padding:16px 18px;box-shadow:4px 4px 0 var(--ink);', class:'flex items-center gap-4'},
  el('span',{style:'width:46px;height:46px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-family:Anton;font-size:18px;border-radius:4px;flex:0 0 auto;'}, initialsOf(r)),
  el('div',{style:'flex:1;min-width:0;'},
- el('div',{style:'font-weight:800;font-size:16px;'}, nameOf(r)+(esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealTitle)),
- el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot?r.slot+' · ':'')+ago(r.at))
+ el('div',{style:'font-weight:800;font-size:16px;'}, nameOf(r)+(esP?' canjeó ':' redeemed '), el('span',{style:'color:var(--red);'}, dealOf(r))),
+ el('div',{style:'font-weight:600;color:#7A7164;font-size:14px;'}, (r.slot?localizeSlot(r.slot)+' · ':'')+ago(r.at))
  ),
  acked
  ? el('span',{style:'flex:0 0 auto;font-weight:800;color:#1F9D63;font-size:14px;'}, '✓ '+(esP?'Reconocido':'Acknowledged'))
@@ -11321,6 +11348,16 @@ const ROUTES = {
 // in markup is enough, as long as it's in this map. Add a translation =
 // add one line here.
 window.MV_TR_ES = {
+ // QA item 13 (20 Oct 2026): strings the QA pass found in English with MV_LANG='es'.
+ "Pick at least one cuisine.": "Elige al menos una cocina.",
+ "Your feed is ready": "Tu feed está listo",
+ "Signing in…": "Entrando…",
+ "Tell us your taste": "Cuéntanos tus gustos",
+ "Your taste": "Tus gustos",
+ "set up →": "configurar →",
+ "New": "Nuevo", "Explorer": "Explorador", "Regular": "Habitual", "Connoisseur": "Entendido", "Legend": "Leyenda",
+ "Weekday Lunch": "Comida entre semana", "Early Dinner": "Cena temprana", "Weekend Brunch": "Brunch de fin de semana",
+ "Offer applied": "Oferta aplicada",
  // ===== Admin i18n batch (ES) =====
  "unknown owner": "propietario desconocido",
  "No address yet": "Sin dirección todavía",
