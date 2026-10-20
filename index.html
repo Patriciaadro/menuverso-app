@@ -1239,6 +1239,8 @@ function toMemberShape(pv) {
  reviews: pv.reviews ?? 0,
  lat: pv.lat ?? 41.3851,
  lng: pv.lng ?? 2.1734,
+ // QA item 9: the map must not pin a coordinate-less venue at the fallback.
+ hasCoords: mvHasCoords(pv),
  // 2026-05-28 (Pass B): expose the deals array so discover/profile can
  // render up to 2 deal pills + descriptions per venue.
  deals: Array.isArray(pv.deals) ? pv.deals.filter(d => d && d.active && d.title).slice(0, 2) : [],
@@ -1263,6 +1265,56 @@ function toMemberShape(pv) {
 // are merged on top of the hardcoded VENUES so admin can rename/recuisine/
 // reshelf placeholder venues without touching source code. The shape of an
 // override is a partial object, only the fields the admin actually changed.
+// ── QA item 9: coordinates ───────────────────────────────────────────────────
+// A venue only goes LIVE with real coordinates: toMemberShape() falls back to
+// Plaça Catalunya, so a LIVE venue without lat/lng was pinned there.
+function mvHasCoords(pv) {
+ if (!pv || pv.lat === '' || pv.lat == null || pv.lng === '' || pv.lng == null) return false;
+ const lat = Number(pv.lat), lng = Number(pv.lng);
+ return isFinite(lat) && isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
+}
+// Address → {lat,lng} via OpenStreetMap Nominatim (free, no key). Usage policy:
+// at most 1 request per second, so calls are spaced. Returns null on any miss.
+var _mvGeoLast = 0;
+async function mvGeocode(address, postcode) {
+ const parts = [address, postcode].map(s => String(s || '').trim()).filter(Boolean);
+ if (!parts.length) return null;
+ const joined = parts.join(', ');
+ const q = /barcelona|madrid/i.test(joined) ? joined : joined + ', Barcelona';
+ const wait = 1100 - (Date.now() - _mvGeoLast);
+ if (wait > 0) await new Promise(r => setTimeout(r, wait));
+ _mvGeoLast = Date.now();
+ try {
+ const r = await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=es&accept-language=es&q=' + encodeURIComponent(q));
+ if (!r.ok) return null;
+ const rows = await r.json();
+ const hit = Array.isArray(rows) ? rows[0] : null;
+ const lat = hit ? Number(hit.lat) : NaN, lng = hit ? Number(hit.lon) : NaN;
+ return (isFinite(lat) && isFinite(lng)) ? { lat, lng } : null;
+ } catch (e) { return null; }
+}
+// Normalise numeric strings; geocode from the address when still missing.
+async function mvEnsureCoords(pv) {
+ if (mvHasCoords(pv)) { pv.lat = Number(pv.lat); pv.lng = Number(pv.lng); return true; }
+ const c = await mvGeocode(pv && pv.address, pv && pv.postcode);
+ if (c) { pv.lat = c.lat; pv.lng = c.lng; pv.geocodedFrom = mvGeoKey(pv); return true; }
+ return false;
+}
+function mvGeoKey(pv) { return (String((pv && pv.address) || '').trim() + '|' + String((pv && pv.postcode) || '').trim()).toLowerCase(); }
+// Re-geocode when the address changed since the last geocode (partner saves).
+async function mvRefreshCoordsIfAddressChanged(pv) {
+ if (!pv || !String(pv.address || '').trim()) return false;
+ if (mvHasCoords(pv) && pv.geocodedFrom === mvGeoKey(pv)) return false;
+ if (mvHasCoords(pv) && pv.geocodedFrom === undefined) { pv.geocodedFrom = mvGeoKey(pv); return false; }
+ const c = await mvGeocode(pv.address, pv.postcode);
+ if (!c) return false;
+ pv.lat = c.lat; pv.lng = c.lng; pv.geocodedFrom = mvGeoKey(pv);
+ return true;
+}
+function mvNoCoordsToast(pv) {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ toast((es ? 'No se puede publicar «' : 'Can\'t go live: "') + ((pv && pv.name) || '') + (es ? '» sin ubicación. Añade la dirección (o lat/lng) en Editar.' : '" has no location. Add the address (or lat/lng) in Edit.'), 'err');
+}
 function getAllVenues() {
  // G3: REMOVED venues never surface to members. PAUSED also stays out of
  // Discover/Map; they resolve through findVenueBySlug only (for saved
@@ -4323,6 +4375,7 @@ function AppMap() {
  }
  paintList(vs);
  vs.forEach(v => {
+ if (v.hasCoords === false) return; // QA item 9: never pin at the fallback centre
  const m = window.L.marker([v.lat, v.lng], { icon: makePinIcon(v), riseOnHover: true });
  m.bindPopup(popupHtml(v), { closeButton: true, autoPanPadding: [32, 32] });
  m.on('click', () => setActive(v.slug, false));
@@ -4332,8 +4385,9 @@ function AppMap() {
  // Auto-fit to whatever's visible. Extra padding keeps the BARCELONA label
  // and corner pins from crowding. maxZoom 14 keeps a wider view so individual
  // pins don't dominate.
- if (vs.length > 0) {
- const bounds = window.L.featureGroup(vs.map(v => window.L.marker([v.lat, v.lng]))).getBounds();
+ const pinned = vs.filter(v => v.hasCoords !== false);
+ if (pinned.length > 0) {
+ const bounds = window.L.featureGroup(pinned.map(v => window.L.marker([v.lat, v.lng]))).getBounds();
  map.fitBounds(bounds, { padding: [80, 80], maxZoom: 14, animate: true });
  }
  }
@@ -6982,8 +7036,10 @@ function PartnerOnboarding() {
  : el('button',{class:'rounded-[4px] bg-transparent text-slate2-400 px-2 py-2.5 text-sm font-bold cursor-pointer underline', onclick:()=>go('landing')}, '← Save & exit'),
  step < 5
  ? el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick:next}, 'Next →')
- : el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 hover:bg-accent-emer/90 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+ : el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 hover:bg-accent-emer/90 px-6 py-2.5 text-sm font-extrabold cursor-pointer', onclick: async ()=>{
  if (!validateStep(5)) { paint(); toast('Please accept the partner terms to continue', 'err'); return; }
+ // QA item 9: geocode now so the admin can approve in one click (best-effort).
+ try { await mvEnsureCoords(pv); } catch (e) {}
  pv.status = 'PENDING_APPROVAL';
  pv.submittedAt = Date.now();
  saveStore();
@@ -7786,13 +7842,15 @@ function PortalProfile() {
  // ---- Save ----
  wrap.append(el('div',{class:'flex items-center justify-between gap-3 sticky bottom-0 bg-ink-900/90 backdrop-blur p-3 rounded-[4px] border border-slate2-50/10'},
  el('span',{class:'text-xs text-slate2-400'}, aT('Estado: ','Status: '), el('span',{class:'font-bold text-slate2-50'}, venueStatusMeta(pv.status).label)),
- el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 px-6 py-2 text-sm font-extrabold cursor-pointer', onclick:()=>{
+ el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 px-6 py-2 text-sm font-extrabold cursor-pointer', onclick: async ()=>{
  // B-3: lock the slug once the venue has been approved at least once.
  // Renaming the venue after approval would orphan every existing booking,
  // redemption, saved entry, and review that references the slug.
  if (!pv.approvedAt) {
  pv.slug = slugify(pv.name) || pv.slug;
  }
+ // QA item 9: keep coordinates in step with the address.
+ await mvRefreshCoordsIfAddressChanged(pv);
  saveStore(); toast('Profile saved'); paint();
  }},'Save changes')
  ));
@@ -8049,7 +8107,10 @@ function Admin() {
  )
  ),
  el('div',{class:'flex gap-2 shrink-0 flex-wrap'},
- el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick:()=>{
+ el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-4 py-1.5 text-sm font-extrabold cursor-pointer', onclick: async (ev)=>{
+ // QA item 9: no LIVE without coordinates (geocodes the address if needed).
+ if (ev && ev.currentTarget) ev.currentTarget.disabled = true;
+ if (!(await mvEnsureCoords(pv))) { mvNoCoordsToast(pv); render(); return; }
  pv.status = 'LIVE'; pv.approvedAt = Date.now();
  // Sprint G1: stamp the 30-day commitment clock on first
  // LIVE approval. Subsequent re-approvals (after a removal
@@ -8723,9 +8784,13 @@ function Admin() {
  onclick:()=>{
  const targets = store.partnerVenues.filter(v => selectedPartners.has(v.slug) && v.status === 'PAUSED');
  if (targets.length === 0) { toast('No PAUSED venues in selection'); return; }
- confirmDo(aT('¿Reanudar ','Resume ') + targets.length + ' ' + aT(targets.length===1?'local':'locales', targets.length===1?'venue':'venues') + '?', () => {
- targets.forEach(v => { v.status = 'LIVE'; });
- saveStore(); toast('Resumed ' + targets.length); selectedPartners.clear(); render();
+ confirmDo(aT('¿Reanudar ','Resume ') + targets.length + ' ' + aT(targets.length===1?'local':'locales', targets.length===1?'venue':'venues') + '?', async () => {
+ // QA item 9: only venues with coordinates go LIVE.
+ let resumed = 0; const blocked = [];
+ for (const v of targets) { if (await mvEnsureCoords(v)) { v.status = 'LIVE'; resumed++; } else blocked.push(v.name); }
+ saveStore();
+ toast(aT('Reanudados ','Resumed ') + resumed + (blocked.length ? aT(' · sin ubicación: ',' · no location: ') + blocked.join(', ') : ''), blocked.length ? 'err' : '');
+ selectedPartners.clear(); render();
  });
  }}, 'Resume ' + selectedPartners.size),
  el('button',{class:'rounded-[4px] bg-mv-500/30 text-mv-400 border border-mv-500/50 px-3 py-1 text-xs font-bold cursor-pointer',
@@ -8842,7 +8907,8 @@ function Admin() {
  )
  ),
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
- pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-3 py-1 text-xs font-extrabold cursor-pointer', onclick:()=>{
+ pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-3 py-1 text-xs font-extrabold cursor-pointer', onclick: async ()=>{
+ if (!(await mvEnsureCoords(pv))) { mvNoCoordsToast(pv); return; } // QA item 9
  pv.status='LIVE'; pv.approvedAt=Date.now(); saveStore(); toast(aT('Aprobado','Approved')); render();
  }}, aT('Aprobar','Approve')),
  pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-[4px] bg-slate2-50/10 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
@@ -8852,7 +8918,8 @@ function Admin() {
  pv.status === 'LIVE' && el('button',{class:'rounded-[4px] bg-amber-500/15 text-amber-700 border border-amber-600/30 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-amber-500/25', onclick:()=>{
  pv.status='PAUSED'; saveStore(); toast(aT('Pausado','Paused')); render();
  }}, aT('Pausar','Pause')),
- pv.status === 'PAUSED' && el('button',{class:'rounded-[4px] bg-accent-emer/20 text-accent-emer border border-accent-emer/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick:()=>{
+ pv.status === 'PAUSED' && el('button',{class:'rounded-[4px] bg-accent-emer/20 text-accent-emer border border-accent-emer/40 px-3 py-1 text-xs font-bold cursor-pointer', onclick: async ()=>{
+ if (!(await mvEnsureCoords(pv))) { mvNoCoordsToast(pv); return; } // QA item 9
  pv.status='LIVE'; saveStore(); toast(aT('Reanudado','Resumed')); render();
  }}, '▶ ' + aT('Reanudar','Resume')),
  (pv.status === 'LIVE' || pv.status === 'PAUSED') && el('button',{class:'rounded-[4px] bg-mv-500/10 text-mv-600 border border-mv-500/40 px-3 py-1 text-xs font-bold cursor-pointer hover:bg-mv-500/20', onclick:()=>{
@@ -9839,7 +9906,7 @@ function Admin() {
  save.type = 'button';
  save.className = 'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-5 py-2 text-xs font-extrabold cursor-pointer  shadow-mv-500/20';
  save.textContent = 'Save changes';
- save.onclick = () => {
+ save.onclick = async () => {
  // H1: required-field guard. Empty/whitespace-only Name, Cuisine,
  // or Barrio aborts the save with a toast.
  for (const rk of REQUIRED_FIELDS) {
@@ -9848,6 +9915,21 @@ function Admin() {
  toast(rk.charAt(0).toUpperCase() + rk.slice(1) + ' is required', 'err');
  return;
  }
+ }
+ // QA item 9: geocode a partner venue whose address changed (unless the
+ // admin typed lat/lng) or that has no coordinates, and never keep a LIVE
+ // venue without coordinates (members would see it pinned at the fallback).
+ if (!isSeed) {
+ const addrChanged = String(draft.address || '') !== String(current.address || '') || String(draft.postcode || '') !== String(current.postcode || '');
+ const coordsTyped = draft.lat !== (current.lat ?? '') || draft.lng !== (current.lng ?? '');
+ if ((addrChanged && !coordsTyped) || !mvHasCoords(draft)) {
+ save.disabled = true;
+ const c = await mvGeocode(draft.address, draft.postcode);
+ save.disabled = false;
+ if (c) { draft.lat = c.lat; draft.lng = c.lng; draft.geocodedFrom = mvGeoKey(draft); }
+ }
+ if (venue.status === 'LIVE' && !mvHasCoords(draft)) { mvNoCoordsToast(draft); return; }
+ if (mvHasCoords(draft)) { draft.lat = Number(draft.lat); draft.lng = Number(draft.lng); }
  }
  // 2026-05-28 (Patricia): clean up the deals[] before diffing. Strip
  // deals with no title (admin clicked Add but never filled it in),
