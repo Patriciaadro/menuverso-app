@@ -551,10 +551,26 @@ function persistStore() {
  }
  try { localStorage.setItem(VENUE_CACHE_KEY, JSON.stringify(heavy)); }
  catch (e) {
- try { localStorage.setItem(VENUE_CACHE_KEY, JSON.stringify(mvStripInlineImages(heavy))); }
+ try { localStorage.setItem(VENUE_CACHE_KEY, JSON.stringify(mvStripVenueCache(heavy))); }
  catch (e2) { try { localStorage.removeItem(VENUE_CACHE_KEY); } catch (e3) {} }
  }
  return coreOk;
+}
+// Strip inline images for the cache AND tag every venue / seed override that
+// lost photos with _mvPhotosStripped. A tagged object is a partial copy: the
+// venue sync refuses to push it (pushing it would overwrite the real row in
+// Supabase and erase its photos). The boot pull replaces tagged objects with
+// the full Supabase rows, which carry no tag.
+function mvStripVenueCache(heavy) {
+ const hasInline = x => JSON.stringify(x || null).indexOf('data:image/') !== -1;
+ const out = mvStripInlineImages(heavy);
+ if (Array.isArray(heavy.partnerVenues) && Array.isArray(out.partnerVenues)) {
+ heavy.partnerVenues.forEach((v, i) => { if (out.partnerVenues[i] && hasInline(v)) out.partnerVenues[i]._mvPhotosStripped = true; });
+ }
+ if (heavy.seedOverrides && out.seedOverrides) {
+ Object.keys(heavy.seedOverrides).forEach(slug => { if (out.seedOverrides[slug] && hasInline(heavy.seedOverrides[slug])) out.seedOverrides[slug]._mvPhotosStripped = true; });
+ }
+ return out;
 }
 function saveStore() {
  persistStore();
@@ -591,9 +607,25 @@ const MV_SUPABASE_HEADERS = {
  'Content-Type': 'application/json'
 };
 
+// ── Venue push guard ─────────────────────────────────────────────────────────
+// A device may only push venues AFTER it has pulled the current rows from
+// Supabase this session. Until then store.partnerVenues comes from the local
+// cache, which on production is saved photo-less (the photos exceed the
+// localStorage quota). Pushing that copy upserts data = {no photos} and erases
+// the real photos for every venue (admin) or the partner's own venue. Pushes
+// requested before the pull are deferred, then sent once it lands.
+var _mvVenuePullOk = false;
+var _mvVenueSyncDeferred = false;
+function mvVenuePushAllowed(obj) {
+ if (!_mvVenuePullOk) { _mvVenueSyncDeferred = true; return false; }
+ // Partial copy from the stripped cache that the pull did not replace: never push.
+ if (obj && obj._mvPhotosStripped) return false;
+ return true;
+}
 // Upsert a single venue into the venues table. Fire-and-forget.
 function syncVenueToSupabase(pv) {
  if (!pv || !pv.id) return;
+ if (!mvVenuePushAllowed(pv)) return;
  const payload = { id: pv.id, data: pv, updated_at: new Date().toISOString() };
  fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
  method: 'POST',
@@ -608,6 +640,7 @@ function syncVenueToSupabase(pv) {
 // the partial override patch + a _seedOverride flag for safe identification.
 function syncSeedOverrideToSupabase(slug, override) {
  if (!slug || !override) return;
+ if (!mvVenuePushAllowed(override)) return;
  const rowId = 'seed_' + slug;
  const payload = {
  id: rowId,
@@ -658,6 +691,9 @@ function fetchVenuesFromSupabaseAndMerge() {
  if (!r.ok) throw new Error('fetch venues HTTP ' + r.status);
  return r.json();
  }).then(function(rows){
+ // A valid answer (even an empty list) means this device now holds the
+ // current Supabase state: venue pushes are safe from here on.
+ if (Array.isArray(rows)) _mvVenuePullOk = true;
  if (!Array.isArray(rows) || rows.length === 0) return 0;
  if (!store.partnerVenues) store.partnerVenues = [];
  var changed = 0;
@@ -699,8 +735,25 @@ function fetchVenuesFromSupabaseAndMerge() {
  try { render(); } catch (e) {}
  }
  return changed;
- }).catch(function(e){ console.warn('venue fetch failed', e && e.message); return 0; });
+ }).then(function(changed){
+ // Pushes asked for before the pull landed go out now, built from the
+ // fresh rows (scheduleVenueSync reads store at fire time).
+ if (_mvVenuePullOk && _mvVenueSyncDeferred) {
+ _mvVenueSyncDeferred = false;
+ if (typeof scheduleVenueSync === 'function') scheduleVenueSync();
+ }
+ return changed;
+ }).catch(function(e){
+ console.warn('venue fetch failed', e && e.message);
+ // Pushes stay blocked until a pull succeeds; retry with backoff.
+ if (!_mvVenuePullOk && _mvVenuePullRetry < MV_VENUE_PULL_BACKOFF.length) {
+ setTimeout(fetchVenuesFromSupabaseAndMerge, MV_VENUE_PULL_BACKOFF[_mvVenuePullRetry++]);
+ }
+ return 0;
+ });
 }
+var MV_VENUE_PULL_BACKOFF = [3000, 10000, 30000, 60000];
+var _mvVenuePullRetry = 0;
 
 // ============================================================================
 // Cross-device redemption sync (member confirm → partner live feed).
