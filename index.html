@@ -586,18 +586,89 @@ function mvVenuePushAllowed(obj) {
  if (obj && obj._mvPhotosStripped) return false;
  return true;
 }
-// Upsert a single venue into the venues table. Fire-and-forget.
+// ── Venue write lockdown (QA item 7) ─────────────────────────────────────────
+// Every venue write goes through /api/venue-upsert (service role, server-side
+// checks). Admin devices send the admin key (typed once in the dashboard,
+// never shipped in the page); partners send the edit key the server issued for
+// their venue. Until the function is configured (404 / 5xx) the legacy direct
+// write is used, which the lockdown SQL then refuses: so the rollout order is
+// deploy, set ADMIN_WRITE_SECRET, unlock admin, then run the SQL.
+const MV_ADMIN_KEY_LS = 'mv_admin_write_key';
+const MV_VENUE_KEYS_LS = 'mv_venue_edit_keys';
+function mvAdminKey() { try { return localStorage.getItem(MV_ADMIN_KEY_LS) || ''; } catch (e) { return ''; } }
+function mvSetAdminKey(k) { try { if (k) localStorage.setItem(MV_ADMIN_KEY_LS, k); else localStorage.removeItem(MV_ADMIN_KEY_LS); } catch (e) {} }
+function mvVenueKeys() { try { const o = JSON.parse(localStorage.getItem(MV_VENUE_KEYS_LS) || '{}'); return (o && typeof o === 'object') ? o : {}; } catch (e) { return {}; } }
+function mvSetVenueKey(id, key) { const o = mvVenueKeys(); o[id] = key; try { localStorage.setItem(MV_VENUE_KEYS_LS, JSON.stringify(o)); } catch (e) {} }
+function mvLegacyVenueUpsert(id, data) {
+ return fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
+ method: 'POST',
+ headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+ body: JSON.stringify({ id: id, data: data, updated_at: new Date().toISOString() })
+ }).then(function(r){ return r.ok; }).catch(function(){ return false; });
+}
+var _mvAdminKeyWarned = false;
+function mvVenueWrite(id, data) {
+ const u = (typeof currentUser === 'function') ? currentUser() : null;
+ const isAdmin = !!(u && u.role === 'ADMIN');
+ const headers = { 'Content-Type': 'application/json' };
+ if (isAdmin && mvAdminKey()) headers['x-mv-admin-key'] = mvAdminKey();
+ return fetch('/api/venue-upsert', { method: 'POST', headers: headers, body: JSON.stringify({ id: id, data: data, editKey: mvVenueKeys()[id] || null }) })
+ .then(function(r){
+ if (r.ok) return r.json().catch(function(){ return {}; }).then(function(j){ if (j && j.editKey) mvSetVenueKey(id, j.editKey); return true; });
+ // Not deployed / not configured yet: keep the legacy path during rollout.
+ if (r.status === 404 || r.status >= 500) return mvLegacyVenueUpsert(id, data);
+ if (r.status === 413) { try { toast((typeof MV_LANG !== 'undefined' && MV_LANG === 'es') ? 'Las fotos de este local pesan demasiado para guardarlas. Quita alguna.' : 'This venue\'s photos are too large to save. Remove some.', 'err'); } catch (e) {} return false; }
+ if (isAdmin && !_mvAdminKeyWarned) { _mvAdminKeyWarned = true; try { toast((typeof MV_LANG !== 'undefined' && MV_LANG === 'es') ? 'Desbloquea la escritura de administrador para guardar en todos los dispositivos.' : 'Unlock admin writes to save across devices.', 'err'); } catch (e) {} }
+ console.warn('venue write refused', id, r.status);
+ return false;
+ })
+ .catch(function(){ return mvLegacyVenueUpsert(id, data); });
+}
+// Admin dashboard card: unlock admin writes on this device (validated against
+// /api/venues-all before it's stored), or lock them again.
+function mvAdminUnlockCard() {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ if (mvAdminKey()) {
+ return el('div',{class:'flex items-center justify-between gap-3 rounded-[4px] border border-accent-emer/40 bg-accent-emer/10 px-4 py-2 text-xs font-bold text-slate2-300'},
+ el('span',{}, es ? 'Escritura de administrador desbloqueada en este dispositivo' : 'Admin writes unlocked on this device'),
+ el('button',{class:'underline cursor-pointer bg-transparent border-0 text-slate2-400', onclick:()=>{ mvSetAdminKey(''); render(); }}, es ? 'Bloquear' : 'Lock'));
+ }
+ const inp = el('input',{type:'password', autocomplete:'off', placeholder: es ? 'Clave de administrador' : 'Admin key', class:'flex-1 min-w-0 rounded-[4px] border-2 border-slate2-50/20 bg-white px-3 py-2 text-sm'});
+ const btn = el('button',{class:'rounded-[4px] bg-mv-500 text-white px-4 py-2 text-sm font-extrabold cursor-pointer disabled:opacity-50', onclick: async ()=>{
+ const k = inp.value.trim(); if (!k) return;
+ btn.disabled = true;
+ try {
+ const r = await fetch('/api/venues-all', { headers: { 'x-mv-admin-key': k } });
+ if (r.ok) { mvSetAdminKey(k); _mvAdminKeyWarned = false; toast(es ? 'Escritura desbloqueada' : 'Admin writes unlocked'); fetchVenuesFromSupabaseAndMerge(); render(); return; }
+ toast(r.status === 401 ? (es ? 'Clave incorrecta' : 'Wrong key') : (es ? 'Aún no está configurado (ADMIN_WRITE_SECRET en Vercel).' : 'Not configured yet (ADMIN_WRITE_SECRET in Vercel).'), 'err');
+ } catch (e) { toast(es ? 'Sin conexión' : 'Offline', 'err'); }
+ btn.disabled = false;
+ }}, es ? 'Desbloquear' : 'Unlock');
+ return el('div',{class:'rounded-[4px] border-2 border-mv-500/40 bg-mv-500/5 p-4'},
+ el('div',{class:'text-sm font-extrabold text-slate2-50'}, es ? 'Desbloquea la escritura de administrador' : 'Unlock admin writes'),
+ el('p',{class:'mt-1 text-xs text-slate2-400'}, es ? 'Los cambios en locales se guardan a través del servidor. Introduce la clave (ADMIN_WRITE_SECRET) una vez en este dispositivo.' : 'Venue changes save through the server. Enter the key (ADMIN_WRITE_SECRET) once on this device.'),
+ el('div',{class:'mt-3 flex gap-2'}, inp, btn));
+}
+// Admin: issue a partner's edit link for a venue and copy it.
+async function mvIssueVenueEditLink(pv) {
+ const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
+ const k = mvAdminKey();
+ if (!k) { toast(es ? 'Desbloquea primero la escritura de administrador (Resumen).' : 'Unlock admin writes first (Overview).', 'err'); return; }
+ try {
+ const r = await fetch('/api/venue-key', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-mv-admin-key': k }, body: JSON.stringify({ venueId: pv.id }) });
+ const j = await r.json().catch(() => ({}));
+ if (!r.ok || !j.link) { toast(es ? 'No se pudo generar el enlace.' : 'Could not create the link.', 'err'); return; }
+ try { await navigator.clipboard.writeText(j.link); toast(es ? 'Enlace copiado. Envíaselo al local por WhatsApp o email.' : 'Link copied. Send it to the venue.'); }
+ catch (e) { window.prompt(es ? 'Copia este enlace y envíaselo al local:' : 'Copy this link and send it to the venue:', j.link); }
+ } catch (e) { toast(es ? 'Sin conexión' : 'Offline', 'err'); }
+}
+// Upsert a single venue. Fire-and-forget.
 function syncVenueToSupabase(pv) {
  if (!pv || !pv.id) return;
  // QA item 8: the demo venue is local-only (its owner's password is public).
  if (MV_SEED_PARTNER_IDS.includes(pv.id)) return;
  if (!mvVenuePushAllowed(pv)) return;
- const payload = { id: pv.id, data: pv, updated_at: new Date().toISOString() };
- fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
- method: 'POST',
- headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
- body: JSON.stringify(payload)
- }).catch(function(e){ console.warn('venue sync failed', e && e.message); });
+ mvVenueWrite(pv.id, pv);
 }
 
 // 2026-05-28 (Patricia): admin edits to the seed catalog (rename / re-cuisine
@@ -607,17 +678,7 @@ function syncVenueToSupabase(pv) {
 function syncSeedOverrideToSupabase(slug, override) {
  if (!slug || !override) return;
  if (!mvVenuePushAllowed(override)) return;
- const rowId = 'seed_' + slug;
- const payload = {
- id: rowId,
- data: Object.assign({ _seedOverride: true, slug: slug }, override),
- updated_at: new Date().toISOString()
- };
- fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
- method: 'POST',
- headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
- body: JSON.stringify(payload)
- }).catch(function(e){ console.warn('seed override sync failed', e && e.message); });
+ mvVenueWrite('seed_' + slug, Object.assign({ _seedOverride: true, slug: slug }, override));
 }
 
 // Debounced sync. Only the signed-in partner's venue (or, for admins,
@@ -650,10 +711,19 @@ function scheduleVenueSync() {
 // Supabase row wins for any matching id (it is the cross-device source
 // of truth). Local-only venues that aren't in Supabase are left alone.
 // Writes to localStorage directly so we don't trigger a sync loop.
+// QA item 7: after the lockdown the publishable key reads LIVE rows only; an
+// unlocked admin device reads every row (approval queue) via /api/venues-all.
+function mvFetchVenueRows() {
+ const anon = function(){ return fetch(MV_SUPABASE_URL + '/rest/v1/venues?select=id,data,updated_at', { headers: MV_SUPABASE_HEADERS }); };
+ let k = '';
+ try { const u = currentUser(); if (u && u.role === 'ADMIN') k = mvAdminKey(); } catch (e) {}
+ if (!k) return anon();
+ return fetch('/api/venues-all', { headers: { 'x-mv-admin-key': k } })
+ .then(function(r){ return r.ok ? r : anon(); })
+ .catch(function(){ return anon(); });
+}
 function fetchVenuesFromSupabaseAndMerge() {
- return fetch(MV_SUPABASE_URL + '/rest/v1/venues?select=id,data,updated_at', {
- headers: MV_SUPABASE_HEADERS
- }).then(function(r){
+ return mvFetchVenueRows().then(function(r){
  if (!r.ok) throw new Error('fetch venues HTTP ' + r.status);
  return r.json();
  }).then(function(rows){
@@ -694,6 +764,17 @@ function fetchVenuesFromSupabaseAndMerge() {
  store.partnerVenues.push(row.data);
  }
  changed++;
+ });
+ // QA item 7: a venue LIVE in this device's cache but absent from the pull is
+ // no longer public (paused, removed or deleted; the public key only reads
+ // LIVE rows): drop it, except this partner's own venue and the demo venue.
+ var pulledIds = new Set(rows.map(function(x){ return x && x.id; }));
+ var me = null; try { me = currentUser(); } catch (e) {}
+ store.partnerVenues = store.partnerVenues.filter(function(v){
+ if (!v || v.status !== 'LIVE' || pulledIds.has(v.id)) return true;
+ if (MV_SEED_PARTNER_IDS.includes(v.id)) return true;
+ if (me && v.ownerId === me.id) return true;
+ changed++; return false;
  });
  // Persist without saveStore() to avoid re-triggering scheduleVenueSync.
  persistStore();
@@ -8061,16 +8142,9 @@ function Admin() {
  // 2026-05-28 (Pass B step 5): tombstone the row in Supabase so the
  // deletion sticks cross-device. anon can't DELETE, so we set the data's
  // status to DELETED_BY_ADMIN; fetchVenuesFromSupabaseAndMerge skips those.
- if (typeof MV_SUPABASE_URL !== 'undefined') {
- fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
- method: 'POST',
- headers: Object.assign({}, MV_SUPABASE_HEADERS, { 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
- body: JSON.stringify({
- id: venueId,
- data: { id: venueId, status: 'DELETED_BY_ADMIN', deleted_at: new Date().toISOString() },
- updated_at: new Date().toISOString()
- })
- }).catch(function(e){ console.warn('venue delete sync failed', e && e.message); });
+ if (typeof mvVenueWrite === 'function') {
+ // QA item 7: through the server (admin key), like every venue write.
+ mvVenueWrite(venueId, { id: venueId, status: 'DELETED_BY_ADMIN', deleted_at: new Date().toISOString() });
  }
  }
 
@@ -8116,6 +8190,8 @@ function Admin() {
  // ===== Tab: Overview =====
  function AdminOverview() {
  return el('div',{class:'space-y-8'},
+ // QA item 7: venue writes need the admin key on this device.
+ mvAdminUnlockCard(),
  // ===== Triage cockpit: what needs the admin right now =====
  (function(){
  const now = Date.now();
@@ -8975,6 +9051,8 @@ function Admin() {
  )
  ),
  el('div',{class:'flex gap-2 flex-wrap shrink-0'},
+ // QA item 7: owners of venues created before the lockdown need an edit link.
+ !MV_SEED_PARTNER_IDS.includes(pv.id) && el('button',{class:'rounded-[4px] bg-slate2-50/5 border border-slate2-50/15 px-3 py-1 text-xs font-bold cursor-pointer', title: aT('Enlace para que el local edite su ficha desde su dispositivo','Link for the venue to edit its listing from its device'), onclick:()=>mvIssueVenueEditLink(pv)}, aT('Enlace de edición','Edit link')),
  pv.status === 'PENDING_APPROVAL' && el('button',{class:'rounded-[4px] bg-accent-emer text-ink-900 px-3 py-1 text-xs font-extrabold cursor-pointer', onclick: async ()=>{
  if (!(await mvEnsureCoords(pv))) { mvNoCoordsToast(pv); return; } // QA item 9
  pv.status='LIVE'; pv.approvedAt=Date.now(); saveStore(); toast(aT('Aprobado','Approved')); render();
@@ -12743,6 +12821,19 @@ setTimeout(function(){
 }, 80);
 // QA item 8: a demo session restored on boot needs the demo venue back too.
 try { if (mvEnsureDemoVenues()) render(); } catch (e) {}
+// QA item 7: edit-key link from the admin: /para-locales?vk=<venueId>.<key>
+try {
+ var mvVk = new URLSearchParams(location.search).get('vk');
+ if (mvVk) {
+ var mvDot = mvVk.indexOf('.');
+ var mvVid = mvDot > 0 ? mvVk.slice(0, mvDot) : '', mvKey = mvDot > 0 ? mvVk.slice(mvDot + 1) : '';
+ if (/^pv_[A-Za-z0-9_-]{1,100}$/.test(mvVid) && mvKey) {
+ mvSetVenueKey(mvVid, mvKey);
+ setTimeout(function(){ try { toast((typeof MV_LANG !== 'undefined' && MV_LANG === 'es') ? 'Listo: tus cambios en el local se guardarán desde este dispositivo.' : 'Done: your venue edits will save from this device.'); } catch (e) {} }, 300);
+ }
+ history.replaceState(history.state, '', location.pathname);
+ }
+} catch (e) {}
 // QA item 18: /#how and /#precios (now real hrefs) scroll to their section.
 setTimeout(function(){
  try {
