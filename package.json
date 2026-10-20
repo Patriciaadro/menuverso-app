@@ -8,7 +8,8 @@
     "test:diagnostic": "node diagnostic.js index.html",
     "test:audit": "node audit.js index.html",
     "test:api": "node api-audit.js api",
-    "build:css": "tailwindcss -c tailwind.config.js -i tailwind.input.css -o app.css --minify && node scripts/stamp-css.js"
+    "build:css": "tailwindcss -c tailwind.config.js -i tailwind.input.css -o app.css --minify && node scripts/stamp-css.js",
+    "test:css": "node css-check.js"
   },
   "devDependencies": {
     "jsdom": "^24.1.0",
