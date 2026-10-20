@@ -493,11 +493,71 @@ function loadStore() {
  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
  return JSON.parse(JSON.stringify(initialStore));
  }
+ // Venue data lives under its own key (see persistStore). A legacy blob that
+ // still carries partnerVenues/seedOverrides inline wins — it is the only
+ // copy until the first save splits it out.
+ try {
+ const heavy = JSON.parse(localStorage.getItem(VENUE_CACHE_KEY) || 'null');
+ if (heavy && typeof heavy === 'object') {
+ MV_HEAVY_STORE_KEYS.forEach(k => { if (parsed[k] === undefined && heavy[k] !== undefined) parsed[k] = heavy[k]; });
+ }
+ } catch (e) {}
+ // Cache dropped (quota) and no legacy copy: start from the seed; the boot
+ // pull from Supabase re-hydrates the real venues.
+ MV_HEAVY_STORE_KEYS.forEach(k => { if (parsed[k] === undefined && initialStore[k] !== undefined) parsed[k] = JSON.parse(JSON.stringify(initialStore[k])); });
  return parsed;
  } catch { return JSON.parse(JSON.stringify(initialStore)); }
 }
+
+// ── Store persistence, split in two ──────────────────────────────────────────
+// partnerVenues carries photos as base64 data URLs; pulled from Supabase it
+// reached ~5.2 MB, so JSON.stringify(store) blew the ~5 MB localStorage quota
+// and EVERY saveStore() threw QuotaExceededError (swallowed as a console.warn).
+// Result: nothing a member did persisted — prefs, redemptions, bookings,
+// saved venues — once the venue pull had loaded.
+// Fix: member/core data goes under STORE_KEY (a few KB, always fits); venue
+// data goes under VENUE_CACHE_KEY as a best-effort cache. If the cache will
+// not fit, retry without inline images, then drop it — Supabase is the source
+// of truth for venues and the boot pull restores full photos.
+const VENUE_CACHE_KEY = STORE_KEY + '_venues';
+const MV_HEAVY_STORE_KEYS = ['partnerVenues', 'seedOverrides'];
+// Deep copy with inline data:image URLs removed (array entries dropped,
+// string fields deleted, {url:'data:...'} photo objects dropped).
+function mvStripInlineImages(v) {
+ const isData = s => typeof s === 'string' && s.slice(0, 11) === 'data:image/';
+ if (Array.isArray(v)) {
+ return v.filter(x => !isData(x) && !(x && typeof x === 'object' && isData(x.url))).map(mvStripInlineImages);
+ }
+ if (v && typeof v === 'object') {
+ const o = {};
+ Object.keys(v).forEach(k => { if (!isData(v[k])) o[k] = mvStripInlineImages(v[k]); });
+ return o;
+ }
+ return v;
+}
+let _mvStoreSaveErrorLogged = false;
+function persistStore() {
+ const core = {}, heavy = {};
+ Object.keys(store).forEach(k => { (MV_HEAVY_STORE_KEYS.includes(k) ? heavy : core)[k] = store[k]; });
+ const coreJson = JSON.stringify(core);
+ let coreOk = false;
+ try { localStorage.setItem(STORE_KEY, coreJson); coreOk = true; }
+ catch (e) {
+ // Member data always wins over the venue cache: free the cache, retry.
+ try { localStorage.removeItem(VENUE_CACHE_KEY); localStorage.setItem(STORE_KEY, coreJson); coreOk = true; }
+ catch (e2) {
+ if (!_mvStoreSaveErrorLogged) { _mvStoreSaveErrorLogged = true; console.error('Menuverso: could not save member data on this device', e2 && e2.name); }
+ }
+ }
+ try { localStorage.setItem(VENUE_CACHE_KEY, JSON.stringify(heavy)); }
+ catch (e) {
+ try { localStorage.setItem(VENUE_CACHE_KEY, JSON.stringify(mvStripInlineImages(heavy))); }
+ catch (e2) { try { localStorage.removeItem(VENUE_CACHE_KEY); } catch (e3) {} }
+ }
+ return coreOk;
+}
 function saveStore() {
- try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { console.warn('localStorage full', e); }
+ persistStore();
  // Phase 2: cross-device venue sync. Only fires when a partner or admin
  // is signed in — members making local-only changes (saved list, prefs)
  // never push venue data to Supabase.
@@ -633,8 +693,8 @@ function fetchVenuesFromSupabaseAndMerge() {
  }
  changed++;
  });
- // Write directly to localStorage to avoid re-triggering scheduleVenueSync.
- try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {}
+ // Persist without saveStore() to avoid re-triggering scheduleVenueSync.
+ persistStore();
  if (changed && typeof render === 'function') {
  try { render(); } catch (e) {}
  }
@@ -815,7 +875,7 @@ if (MV_HIDE_SEED_VENUES) {
  store.bookings = [];
  store.saved = {};
  localStorage.setItem('mv_seed_purged_v1', '1');
- try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {}
+ persistStore();
  }
  } catch (e) {}
 }
@@ -10682,7 +10742,7 @@ function Admin() {
  el('p',{class:'mt-1 text-xs text-red-200/80'},'Wipes localStorage and reloads the page with the original seed. Use during demos when state has drifted.'),
  el('button',{class:'mt-3 rounded-[4px] bg-red-500/30 border border-red-500/50 text-red-100 px-4 py-1.5 text-xs font-extrabold cursor-pointer', onclick:()=>{
  confirmDo('Wipe ALL demo data and reload? This cannot be undone.', ()=>{
- try { localStorage.removeItem(STORE_KEY); localStorage.removeItem(SESSION_KEY); } catch (_) {}
+ try { localStorage.removeItem(STORE_KEY); localStorage.removeItem(VENUE_CACHE_KEY); localStorage.removeItem(SESSION_KEY); } catch (_) {}
  location.reload();
  });
  }},'Wipe & reload')
