@@ -4447,7 +4447,14 @@ function AppOnboardingPrefs() {
  const barrioOptions = ['Eixample','Gràcia','El Born','El Raval','Barceloneta','Sant Antoni','Poblenou','Sarrià','Gòtic'];
  const dietaryOptions = ['Vegetarian','Vegan','Gluten-free','Halal','Pescatarian'];
 
- const picks = { cuisines:[], barrios:[], dietary:[] };
+ // The selections must survive re-render: every chip tap calls render(),
+ // which re-runs this component, so a local const would reset to empty on
+ // each tap (no chip ever stayed selected, Continue never enabled). Keep
+ // the draft on window, scoped to the current user, until saved/skipped.
+ if (!window.__mvPrefsDraft || window.__mvPrefsDraft.userId !== u.id) {
+ window.__mvPrefsDraft = { userId: u.id, cuisines:[], barrios:[], dietary:[] };
+ }
+ const picks = window.__mvPrefsDraft;
 
  function chip(label, group, isPicked) {
  return el('button',{
@@ -4494,13 +4501,14 @@ function AppOnboardingPrefs() {
  ),
  el('div',{class:'mt-10 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3'},
  el('button',{class:'text-sm text-slate2-400 underline hover:text-slate2-50 cursor-pointer bg-transparent border-0', onclick:()=>{
- u.prefsSkipped = true; saveStore(); go(hasSub() ? 'app' : 'checkout');
+ u.prefsSkipped = true; window.__mvPrefsDraft = null; saveStore(); go(hasSub() ? 'app' : 'checkout');
  }},'Skip for now'),
  el('button',{class:'rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3.5 font-extrabold cursor-pointer  shadow-mv-500/30 transition disabled:opacity-50',
  disabled: picks.cuisines.length === 0,
  onclick:()=>{
  if (picks.cuisines.length === 0) { toast('Pick at least one cuisine.', 'err'); return; }
- setPrefs(u, picks);
+ setPrefs(u, { cuisines: picks.cuisines, barrios: picks.barrios, dietary: picks.dietary });
+ window.__mvPrefsDraft = null;
  toast('Your feed is ready', '');
  go(hasSub() ? 'app' : 'checkout');
  }},'Continue →')
