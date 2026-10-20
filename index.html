@@ -11374,9 +11374,9 @@ function Confirmar() {
  const box = el('div',{class:'w-full max-w-md text-center'});
  function show(kind, title, msg, extra) {
  box.innerHTML = '';
- const ring = kind === 'ok' ? 'border-accent-emer text-accent-emer' : kind === 'wait' ? 'border-slate2-50/20 text-slate2-400' : 'border-mv-500 text-mv-500';
+ const ring = kind === 'ok' ? 'border-accent-emer text-accent-emer' : (kind === 'wait' || kind === 'info') ? 'border-slate2-50/20 text-slate2-400' : 'border-mv-500 text-mv-500';
  box.append(
- el('div',{class:'mx-auto h-16 w-16 grid place-items-center text-3xl font-extrabold border-2 '+ring}, kind === 'ok' ? '✓' : kind === 'wait' ? '…' : '!'),
+ el('div',{class:'mx-auto h-16 w-16 grid place-items-center text-3xl font-extrabold border-2 '+ring}, kind === 'ok' ? '✓' : kind === 'wait' ? '…' : kind === 'info' ? '✉' : '!'),
  el('h1',{class:'disp mt-5 text-4xl text-slate2-50'}, title),
  el('p',{class:'mt-3 text-slate2-300'}, msg),
  extra || ''
@@ -11389,7 +11389,13 @@ function Confirmar() {
  // QA item 6: links sent by Supabase Auth (sign-up confirmation, password
  // reset) land here with Supabase's own params, not our ?token=.
  if (!token && mvIsSupabaseAuthReturn()) { await mvHandleSupabaseAuthReturn(show, box, es); return; }
- if (!token) { show('err', es?'Enlace no válido':'Invalid link', es?'Falta el token de confirmación.':'The confirmation token is missing.'); return; }
+ // Opened directly (no code in the URL): this page is only reached from the
+ // confirmation email, so explain that instead of showing an error.
+ if (!token) {
+ show('info', es?'Revisa tu email':'Check your email', es?'Esta página se abre desde el enlace de confirmación que te enviamos por email. Si no lo encuentras, mira en spam.':'This page opens from the confirmation link we emailed you. If you can\'t find it, check your spam folder.',
+ el('button',{class:'mt-6 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3 font-extrabold cursor-pointer', onclick:()=>go('landing')}, es?'Ir al inicio →':'Go to the home page →'));
+ return;
+ }
  const r = await fetch('/api/confirm?token=' + encodeURIComponent(token));
  if (r.ok) {
  const data = await r.json().catch(()=>({}));
