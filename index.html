@@ -18,7 +18,6 @@
 <!-- Google site verification, preserved from Patricia's GitHub-UI commit 296825fa. -->
 <meta name="google-site-verification" content="cYchz6UQMhzWZLxp5EVhtVwLoPLBBm_3YFjzvvGpuTY">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%8D%BD%EF%B8%8F%3C/text%3E%3C/svg%3E">
-<script src="https://cdn.tailwindcss.com"></script>
 <!-- Fraunces, editorial serif for headlines, paired with Inter sans for everything else. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,43 +32,6 @@
      redemption feed (instant push). Everything else uses plain REST. Loaded
      defer + feature-detected; if it fails to load the feed falls back to polling. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script>
-tailwind.config = {
- theme: {
- extend: {
- colors: {
- // === NOMOLESTEN v4, white paper, near-black text, red brand ===
- // Same token NAMES as warm v3 (kept to avoid thousands of class
- // renames), but the hex values now point to Nomolesten's palette:
- // red NM #F4291A · red dark #C81C10 · near-black #1D1D1B ·
- // Tailwind grays · star yellow #FBBC04.
- //
- // Revert options (cd to project root, copy backup over the live file):
- // to warm v3 (pastel): cp Menuverso-demo.nomolesten-pre.bak.html Menuverso-demo.html
- // to warm-dark v2: cp Menuverso-demo.warm2.bak.html Menuverso-demo.html
- // to gentle warm v1: cp Menuverso-demo.warm1.bak.html Menuverso-demo.html
- // to cool slate v0: cp Menuverso-demo.cool.bak.html Menuverso-demo.html
- // ================================================================
- // Page surfaces. ink-950 stays pure white; the warmer cream tones
- // become Tailwind grays (subtle tonal breaks instead of cream paper).
- ink: { 950:'#FAF6EE', 900:'#FFFFFF', 800:'#EFE8D9', 700:'#1A1613' },
- // Text / ink-on-paper, near-black tones. Lower number = darker (max contrast).
- // Headlines: slate2-50 (#1D1D1B). Body: slate2-300. Muted: slate2-500.
- slate2:{ 50:'#1A1613', 100:'#241F1B', 200:'#3D3631', 300:'#574F47', 400:'#6E655A', 500:'#8A8073' },
- // Cream, replaced by Tailwind grays for badges/dividers/low-key CTAs.
- cream: { 100:'#F6F1E6', 200:'#ECE5D6', 300:'#D9CDB6', 400:'#C2B49A' },
- // Star yellow swapped to Nomolesten's exact value; pink/emerald kept
- // (universal "like" / "success" semantics).
- accent:{ amber:'#F2B100', pink:'#FF5C8A', emer:'#1F9D63' },
- // Primary brand red: #F4291A (final pick after iterating terracotta).
- // 400 = lighter for hover/light surfaces; 600/700 = darker for active +
- // error variant.
- mv: { 400:'#FF6A4F', 500:'#F4291A', 600:'#C81C10', 700:'#991610' }
- }
- }
- }
-};
-</script>
 <style>
  /* Always reserve scrollbar space so the layout never shifts between routes.
  Three-layer defense: scrollbar-gutter (modern), overflow-y:scroll (legacy),
@@ -359,6 +321,8 @@ tailwind.config = {
  }
  .mv-ticker:hover .mv-ticker-track { animation-play-state: paused; }
 </style>
+<!-- Tailwind, compiled (npm run build:css). Keep last in <head>. -->
+<link rel="stylesheet" href="/app.css?v=00247728e2">
 </head>
 <body>
 <div id="root"></div>
