@@ -1995,7 +1995,7 @@ async function registerUser({ firstName, lastName, email, password, role='MEMBER
  {
  const auth = (role === 'MEMBER' && !MV_DEMO_EMAILS.has(email)) ? mvAuth() : null;
  if (auth) {
- const { error } = await auth.auth.signUp({ email, password, options: { data: { first_name: firstName?.trim() || null, last_name: lastName?.trim() || null }, emailRedirectTo: (location.origin + '/confirmar') } });
+ const { error } = await auth.auth.signUp({ email, password, options: { data: { first_name: firstName?.trim() || null, last_name: lastName?.trim() || null }, emailRedirectTo: (location.origin + '/confirmar?type=signup') } });
  if (error) throw new Error(error.message || 'Could not create your account.');
  return { pendingConfirmation: true, email };
  }
@@ -2036,6 +2036,14 @@ async function loginUser({ email, password }) {
  if (error) {
  const m = (error.message || '').toLowerCase();
  if (m.includes('confirm')) throw new Error((typeof MV_LANG!=='undefined'&&MV_LANG==='es') ? 'Confirma tu email primero — revisa tu bandeja de entrada.' : 'Confirm your email first — check your inbox.');
+ // Accounts created on this device before Supabase Auth was switched on
+ // only exist locally; keep them working here instead of locking them out.
+ const local = store.users.find(x => x.email === email && x.passwordHash !== 'supabase-auth');
+ if (local && await checkPassword(local.passwordHash, password)) {
+ setSession(local.id);
+ syncMemberRedemptions();
+ return local;
+ }
  throw new Error('Email or password is wrong.');
  }
  const au = data && data.user;
@@ -3499,12 +3507,12 @@ function Signin() {
  const a = (typeof mvAuth==='function') ? mvAuth() : null;
  const em = ((ev.target.closest('form') && ev.target.closest('form').querySelector('input[name=email],input[type=email]')) || {}).value || '';
  if (a && em.trim()) {
- try { await a.auth.resetPasswordForEmail(em.trim().toLowerCase(), { redirectTo: location.origin + '/confirmar' }); toast(esS?'Te enviamos un enlace para restablecer tu contraseña.':'We sent you a password reset link.'); }
+ try { const rr = await a.auth.resetPasswordForEmail(em.trim().toLowerCase(), { redirectTo: location.origin + '/confirmar?type=recovery' }); if (rr && rr.error) throw rr.error; toast(esS?'Te enviamos un enlace para restablecer tu contraseña.':'We sent you a password reset link.'); }
  catch (e) { toast(esS?'No se pudo enviar el enlace. Inténtalo de nuevo.':'Could not send the link. Try again.', 'err'); }
  } else if (a && !em.trim()) {
  toast(esS?'Escribe tu email primero.':'Enter your email first.', 'err');
  } else {
- toast('In production this sends a reset link by email.');
+ toast(esS?'Escríbenos a info@menuverso.com y te ayudamos a recuperarla.':'Email info@menuverso.com and we will help you reset it.');
  }
  }},'Forgot password?')
  ),
@@ -11035,6 +11043,78 @@ function Alta() {
  );
 }
 
+// ── Supabase Auth email links (QA item 6) ────────────────────────────────────
+// Sign-up confirmation and password-reset emails sent by Supabase Auth redirect
+// to /confirmar?type=signup|recovery with either ?code= (PKCE) or a
+// #access_token=… fragment (implicit), or #error=… when the link is expired.
+// Without this, every new member would land on "Enlace no válido" after
+// confirming, and password reset would have no form to set the new password.
+function mvIsSupabaseAuthReturn() {
+ const qs = new URLSearchParams(location.search);
+ const hs = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+ return !!(qs.get('code') || qs.get('type') || qs.get('error') || qs.get('error_code') ||
+ hs.get('access_token') || hs.get('type') || hs.get('error') || hs.get('error_code'));
+}
+async function mvHandleSupabaseAuthReturn(show, box, es) {
+ const qs = new URLSearchParams(location.search);
+ const hs = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+ const type = (qs.get('type') || hs.get('type') || '').toLowerCase();
+ const err = hs.get('error_code') || hs.get('error') || qs.get('error_code') || qs.get('error');
+ const code = qs.get('code');
+ const access = hs.get('access_token'), refresh = hs.get('refresh_token');
+ // Tokens must not linger in the address bar or history.
+ try { history.replaceState(history.state, '', location.pathname); } catch (e) {}
+ const signInBtn = el('button',{class:'mt-6 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3 font-extrabold cursor-pointer', onclick:()=>go('signin')}, es?'Iniciar sesión →':'Sign in →');
+ if (err) {
+ const expired = /expired|otp/i.test(err);
+ show('err', expired ? (es?'Enlace caducado':'Link expired') : (es?'Enlace no válido':'Invalid link'),
+ type === 'recovery'
+ ? (es?'Pide un enlace nuevo desde «¿Olvidaste tu contraseña?».':'Request a new link from "Forgot password?".')
+ : (es?'Este enlace ya no es válido. Inicia sesión o regístrate de nuevo para recibir otro.':'This link is no longer valid. Sign in or sign up again to get a new one.'),
+ signInBtn);
+ return;
+ }
+ const a = (typeof mvAuth === 'function') ? mvAuth() : null;
+ if (!a) { show('err', es?'No pudimos confirmar':'Could not confirm', es?'Inténtalo de nuevo en un momento.':'Please try again in a moment.'); return; }
+ let session = null;
+ try {
+ if (code) { const r = await a.auth.exchangeCodeForSession(code); session = r && r.data && r.data.session; }
+ else if (access) { const r = await a.auth.setSession({ access_token: access, refresh_token: refresh || '' }); session = r && r.data && r.data.session; }
+ } catch (e) { session = null; }
+ if (type === 'recovery') {
+ if (!session) {
+ show('err', es?'Enlace no válido':'Invalid link', es?'Abre el enlace en el mismo navegador donde lo pediste, o pide uno nuevo.':'Open the link in the same browser you requested it from, or request a new one.', signInBtn);
+ return;
+ }
+ const pw1 = el('input',{type:'password', autocomplete:'new-password', minlength:'8', required:true, placeholder: es?'Nueva contraseña (mín. 8)':'New password (min. 8)', class:'w-full mt-6 px-4 py-3 border-2 border-slate2-50/20 bg-transparent text-slate2-50 rounded-[4px]'});
+ const pw2 = el('input',{type:'password', autocomplete:'new-password', minlength:'8', required:true, placeholder: es?'Repítela':'Repeat it', class:'w-full mt-3 px-4 py-3 border-2 border-slate2-50/20 bg-transparent text-slate2-50 rounded-[4px]'});
+ const submit = el('button',{type:'submit', class:'w-full mt-4 rounded-[4px] bg-mv-500 hover:bg-mv-600 text-white px-7 py-3 font-extrabold cursor-pointer disabled:opacity-50'}, es?'Guardar contraseña':'Save password');
+ const form = el('form',{onsubmit: async (ev) => {
+ ev.preventDefault();
+ if (pw1.value.length < 8) { toast(es?'Mínimo 8 caracteres.':'At least 8 characters.', 'err'); return; }
+ if (pw1.value !== pw2.value) { toast(es?'Las contraseñas no coinciden.':'Passwords do not match.', 'err'); return; }
+ submit.disabled = true;
+ const r = await a.auth.updateUser({ password: pw1.value }).catch(e => ({ error: e }));
+ if (r && r.error) { submit.disabled = false; toast(es?'No se pudo guardar. Pide un enlace nuevo.':'Could not save it. Request a new link.', 'err'); return; }
+ // Keep a pre-existing on-device account in step with the new password.
+ try {
+ const em = session.user && session.user.email && session.user.email.toLowerCase();
+ const lu = em && store.users.find(x => x.email === em);
+ if (lu && lu.passwordHash !== 'supabase-auth') { lu.passwordHash = await hashPassword(pw1.value); saveStore(); }
+ } catch (e) {}
+ try { await a.auth.signOut({ scope: 'local' }); } catch (e) {}
+ show('ok', es?'Contraseña actualizada':'Password updated', es?'Ya puedes entrar con tu nueva contraseña.':'You can sign in with your new password.', signInBtn);
+ }}, pw1, pw2, submit);
+ show('wait', es?'Nueva contraseña':'New password', es?'Elige una contraseña nueva para tu cuenta.':'Choose a new password for your account.', form);
+ return;
+ }
+ // Sign-up / email confirmation. Supabase has already confirmed the address
+ // before redirecting here, so even if this browser can't open the session
+ // (link opened on another device), the account is active.
+ try { if (session) await a.auth.signOut({ scope: 'local' }); } catch (e) {}
+ show('ok', es?'¡Cuenta confirmada! 🎉':'Account confirmed! 🎉', es?'Tu cuenta de Menuverso está activada. Ya puedes entrar y empezar a canjear.':'Your Menuverso account is active. Sign in and start redeeming.', signInBtn);
+}
+
 function Confirmar() {
  const es = (typeof MV_LANG !== 'undefined' && MV_LANG === 'es');
  const box = el('div',{class:'w-full max-w-md text-center'});
@@ -11052,6 +11132,9 @@ function Confirmar() {
  (async () => {
  try {
  const token = new URLSearchParams(location.search).get('token') || '';
+ // QA item 6: links sent by Supabase Auth (sign-up confirmation, password
+ // reset) land here with Supabase's own params, not our ?token=.
+ if (!token && mvIsSupabaseAuthReturn()) { await mvHandleSupabaseAuthReturn(show, box, es); return; }
  if (!token) { show('err', es?'Enlace no válido':'Invalid link', es?'Falta el token de confirmación.':'The confirmation token is missing.'); return; }
  const r = await fetch('/api/confirm?token=' + encodeURIComponent(token));
  if (r.ok) {
