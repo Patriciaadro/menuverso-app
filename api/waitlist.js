@@ -44,17 +44,21 @@ module.exports = async function handler(req, res) {
     }, opts));
 
     // Upsert the signup (merge on email so re-signup just refreshes consent).
-    await sb('launch_waitlist?on_conflict=email', {
+    // QA item 15: the result must be checked. Answering 200 after a failed
+    // insert made the client believe the signup was saved; 502 lets it fall
+    // back to its direct insert so the lead is never lost.
+    const up = await sb('launch_waitlist?on_conflict=email', {
       method: 'POST',
       headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
       body: JSON.stringify({ email, consented_at: new Date().toISOString(), consent_version: CONSENT_VERSION, ip_address: ip, double_opt_in_confirmed: false })
     });
+    if (!up.ok) { res.status(502).json({ error: 'insert_failed' }); return; }
 
     // One-time confirmation token (store only its hash; raw goes in the email).
     const token = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 48 * 3600 * 1000).toISOString();
-    await sb('waitlist_confirmations', {
+    const tk = await sb('waitlist_confirmations', {
       method: 'POST',
       headers: { apikey: SERVICE_KEY, Authorization: 'Bearer ' + SERVICE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ token_hash: tokenHash, email, expires_at: expiresAt })
@@ -63,7 +67,9 @@ module.exports = async function handler(req, res) {
     // Send the confirmation email (best-effort — signup already persisted).
     const link = CONFIRM_BASE + '?token=' + token;
     let emailed = false;
-    if (RESEND_API_KEY) {
+    // Only email a link whose token was actually stored (otherwise /confirmar
+    // would reject it as invalid).
+    if (RESEND_API_KEY && tk.ok) {
       try {
         const er = await fetch('https://api.resend.com/emails', {
           method: 'POST',

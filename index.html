@@ -3131,6 +3131,8 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  let errorMsg = '';
  let lastEmail = '';
  let lastConsent = false; // GDPR consent checkbox state, preserved across re-paints
+ // QA item 15: true only when /api/waitlist actually sent the double opt-in email.
+ let lastEmailed = false;
  const CONSENT_VERSION = 'v1-june-2026'; // bump when the privacy policy materially changes
  function paint() {
  wrap.innerHTML = '';
@@ -3139,7 +3141,9 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  el('div', __cmp ? {style:'background:#F2B100;color:#16110F;padding:16px 16px;'} : {class:'rounded-[4px] bg-mv-500/10 border border-mv-500/30 px-5 py-4 text-center'},
  (__cmp ? el('span',{}) : el('div',{class:'text-2xl mb-1 text-accent-emer'},'✓')),
  el('div',{class:(__cmp?'font-extrabold':'font-bold text-slate2-50')}, (__cmp ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'✓ Ya estás en la lista':"✓ You're on the list") : t('waitlist.success.title'))),
- el('div',{class:(__cmp?'mt-1 text-sm':'mt-1 text-sm text-slate2-300')}, (__cmp ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Revisa tu correo: te hemos enviado la confirmación.':'Check your inbox: we sent you the confirmation.') : t('waitlist.success.body')))
+ el('div',{class:(__cmp?'mt-1 text-sm':'mt-1 text-sm text-slate2-300')}, (lastEmailed
+ ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Revisa tu correo y confirma tu suscripción con el enlace que te hemos enviado.':'Check your inbox and confirm with the link we sent you.')
+ : (__cmp ? ((typeof MV_LANG!=='undefined'&&MV_LANG==='es')?'Te avisaremos en cuanto abramos.':'We will let you know the moment we open.') : t('waitlist.success.body'))))
  )
  );
  return;
@@ -3174,6 +3178,23 @@ function WaitlistForm(opts){ opts=opts||{}; var __cmp=!!opts.compact;
  const consentRow = { email, consented_at: new Date().toISOString(), consent_version: CONSENT_VERSION, double_opt_in_confirmed: false };
  // Local audit-trail safety net, never lose a consent record even if the POST fails.
  try { const ls = JSON.parse(localStorage.getItem('mv_waitlist_consent') || '[]'); ls.push(consentRow); localStorage.setItem('mv_waitlist_consent', JSON.stringify(ls)); } catch (e) {}
+ // QA item 15: /api/waitlist upserts the row server-side, stores a hashed
+ // token and emails the double opt-in link (Resend). The direct insert
+ // below only runs when that function isn't available (env vars missing,
+ // 5xx, network), so a signup is never lost; then no email is promised.
+ lastEmailed = false;
+ try {
+ const ar = await fetch('/api/waitlist', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ email, consent: true }) });
+ if (ar.ok) {
+ const aj = await ar.json().catch(() => ({}));
+ lastEmailed = !!(aj && aj.emailed);
+ state = 'done'; paint(); return;
+ }
+ if (ar.status === 400) {
+ const aj = await ar.json().catch(() => ({}));
+ state = 'error'; errorMsg = (aj && aj.error === 'consent_required') ? (esW ? 'Debes aceptar recibir novedades para unirte a la lista.' : 'You must agree to receive updates to join the list.') : t('waitlist.error.invalid'); paint(); return;
+ }
+ } catch (e) { /* fall back to the direct insert */ }
  try {
  let r = await supaInsert(consentRow);
  let txt = (r.ok || r.status === 201) ? '' : await r.text().catch(() => '');
