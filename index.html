@@ -711,14 +711,90 @@ function fetchVenuesFromSupabaseAndMerge() {
 // within a few seconds. Both calls are best-effort: if the API isn't wired yet
 // the app falls back to the local-only demo behaviour with no errors.
 // ============================================================================
+// Pushes are queued in a localStorage outbox and removed only on success, so
+// a redemption made offline or while /api is down is resent on the next boot
+// instead of being lost (was fire-and-forget). Each row carries a clientId
+// (uuid); /api/redeem uses it as the row id with ignore-duplicates, so a
+// resend after a timed-out-but-successful request can't create a second row.
+const MV_REDEEM_OUTBOX_KEY = 'mv_redeem_outbox_v1';
+function mvUuid() {
+ try { if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID(); } catch (e) {}
+ return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){ var r = Math.random()*16|0; return (c === 'x' ? r : (r&3|8)).toString(16); });
+}
+function mvReadOutbox() {
+ try { var q = JSON.parse(localStorage.getItem(MV_REDEEM_OUTBOX_KEY) || '[]'); return Array.isArray(q) ? q : []; } catch (e) { return []; }
+}
+function mvWriteOutbox(q) {
+ try { if (q.length) localStorage.setItem(MV_REDEEM_OUTBOX_KEY, JSON.stringify(q)); else localStorage.removeItem(MV_REDEEM_OUTBOX_KEY); } catch (e) {}
+}
+var _mvOutboxFlushing = null;
+function flushRedemptionOutbox() {
+ if (_mvOutboxFlushing) return _mvOutboxFlushing;
+ var queue = mvReadOutbox();
+ if (!queue.length) return Promise.resolve(0);
+ _mvOutboxFlushing = queue.reduce(function(p, row){
+ return p.then(function(sent){
+ return fetch('/api/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(row) })
+ .then(function(r){
+ // 2xx: stored. 400/413/422: the row itself is invalid and will never
+ // succeed, drop it. Anything else (404 function missing mid-deploy, 429,
+ // 5xx, network) is transient: keep it for the next boot.
+ if (r.ok || r.status === 400 || r.status === 413 || r.status === 422) {
+ mvWriteOutbox(mvReadOutbox().filter(function(x){ return x.clientId !== row.clientId; }));
+ return sent + (r.ok ? 1 : 0);
+ }
+ return sent;
+ })
+ .catch(function(){ return sent; });
+ });
+ }, Promise.resolve(0)).then(function(n){ _mvOutboxFlushing = null; return n; });
+ return _mvOutboxFlushing;
+}
 function pushRedemptionToSupabase(row) {
  try {
- fetch('/api/redeem', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify(row)
- }).catch(function(){ /* best-effort */ });
- } catch (e) { /* best-effort */ }
+ var item = Object.assign({ clientId: mvUuid() }, row);
+ var q = mvReadOutbox(); q.push(item);
+ mvWriteOutbox(q.slice(-200));
+ flushRedemptionOutbox();
+ } catch (e) { /* never block the redemption UI */ }
+}
+// Cross-device read path (QA item 5): pull this member's redemptions and merge
+// them into store.redemptions. Profile, Reservas and memberSavingsEur() already
+// read store.redemptions, so no UI change is needed. A remote row matches a
+// local one when it's the same venue within 60 s (the local row and the push
+// take separate Date.now() calls, so they can straddle a minute boundary).
+function mergeMemberRedemptions(u, rows) {
+ if (!u || !Array.isArray(rows)) return 0;
+ if (!Array.isArray(store.redemptions)) store.redemptions = [];
+ var mine = store.redemptions.filter(function(r){ return r.memberId === u.id; });
+ var added = 0;
+ rows.forEach(function(row){
+ var at = new Date(row && row.redeemed_at).getTime();
+ var slug = row && row.venue_slug;
+ if (!slug || !isFinite(at)) return;
+ var dup = mine.some(function(r){ return r.venueSlug === slug && Math.abs((r.redeemedAt || 0) - at) < 60000; });
+ if (dup) return;
+ var rec = { memberId: u.id, venueSlug: slug, dealId: row.deal_id || null, redeemedAt: at, method: 'SYNCED', remoteId: row.id || null };
+ store.redemptions.push(rec); mine.push(rec); added++;
+ });
+ if (added) store.redemptions.sort(function(a, b){ return (b.redeemedAt || 0) - (a.redeemedAt || 0); });
+ return added;
+}
+function syncMemberRedemptions() {
+ var u = (typeof currentUser === 'function') ? currentUser() : null;
+ if (!u || u.role !== 'MEMBER') return Promise.resolve(0);
+ // Send anything queued first so this device's own visits are in the result.
+ return flushRedemptionOutbox().then(function(){
+ return fetch('/api/member-redemptions?member=' + encodeURIComponent(u.id));
+ }).then(function(r){ return r.ok ? r.json() : null; })
+ .then(function(rows){
+ // The session may have changed while the request was in flight.
+ var still = currentUser();
+ if (!rows || !still || still.id !== u.id) return 0;
+ var added = mergeMemberRedemptions(still, rows);
+ if (added) { saveStore(); if (typeof render === 'function') { try { render(); } catch (e) {} } }
+ return added;
+ }).catch(function(){ return 0; });
 }
 // Lazy Supabase client, ONLY for Realtime Broadcast on the partner feed. Uses
 // the publishable (anon) key — Broadcast channels don't expose table data, so
@@ -1922,6 +1998,7 @@ async function loginUser({ email, password }) {
  saveStore();
  }
  setSession(u.id);
+ syncMemberRedemptions();
  return u;
  }
  }
@@ -1930,6 +2007,8 @@ async function loginUser({ email, password }) {
  const ok = await checkPassword(u.passwordHash, password);
  if (!ok) throw new Error('Email or password is wrong.');
  setSession(u.id);
+ // Pull visits made on this member's other devices (QA item 5).
+ syncMemberRedemptions();
  return u;
 }
 function logout() {
@@ -5617,7 +5696,7 @@ function Booking() {
  store.redemptions.unshift({ memberId: u.id, venueSlug: b.venueSlug, dealId: b.dealId || state.pendingDealId || null, redeemedAt: Date.now(), method: 'SLIDE_CONFIRM' });
  saveStore();
  // Push to Supabase so the partner's live feed sees it cross-device.
- if (typeof pushRedemptionToSupabase === 'function') pushRedemptionToSupabase({ venueSlug: b.venueSlug, memberId: u.id, memberName: (typeof fullName==='function'?fullName(u):''), dealTitle, redeemedAt: Date.now() });
+ if (typeof pushRedemptionToSupabase === 'function') pushRedemptionToSupabase({ venueSlug: b.venueSlug, memberId: u.id, memberName: (typeof fullName==='function'?fullName(u):''), dealId: b.dealId || state.pendingDealId || null, dealTitle, redeemedAt: Date.now() });
  // Chain the green "aplicado + rating" screen.
  showGreenConfirm();
  }
@@ -12334,6 +12413,11 @@ installIdleTimeout();
 if (typeof fetchVenuesFromSupabaseAndMerge === 'function') {
  setTimeout(function(){ fetchVenuesFromSupabaseAndMerge(); }, 50);
 }
+// QA item 5: resend redemptions queued while offline/API down, and pull this
+// member's visits from other devices when a session is already live.
+setTimeout(function(){
+ if (state && state.session) syncMemberRedemptions(); else flushRedemptionOutbox();
+}, 80);
 </script>
 </body>
 </html>

@@ -21,6 +21,9 @@ create table if not exists public.redemptions (
   venue_slug      text        not null,
   member_id       text,
   member_name     text,
+  -- deal id, so savings resolve to the right deal on the member's other
+  -- devices (redemptionSavingsEur falls back to the venue's FIRST deal).
+  deal_id         text,
   deal_title      text,
   redeemed_at     timestamptz not null default now(),
   -- read by /api/redemptions (partner feed); the QA brief's minimal schema
@@ -28,6 +31,8 @@ create table if not exists public.redemptions (
   acknowledged_at timestamptz,
   created_at      timestamptz not null default now()
 );
+-- In case the table was created earlier from the June migration (no deal_id).
+alter table public.redemptions add column if not exists deal_id text;
 -- Partner feed: "today's redemptions for this venue".
 create index if not exists redemptions_venue_time_idx
   on public.redemptions (venue_slug, redeemed_at desc);
