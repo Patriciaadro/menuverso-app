@@ -625,6 +625,8 @@ function mvVenuePushAllowed(obj) {
 // Upsert a single venue into the venues table. Fire-and-forget.
 function syncVenueToSupabase(pv) {
  if (!pv || !pv.id) return;
+ // QA item 8: the demo venue is local-only (its owner's password is public).
+ if (MV_SEED_PARTNER_IDS.includes(pv.id)) return;
  if (!mvVenuePushAllowed(pv)) return;
  const payload = { id: pv.id, data: pv, updated_at: new Date().toISOString() };
  fetch(MV_SUPABASE_URL + '/rest/v1/venues?on_conflict=id', {
@@ -890,6 +892,8 @@ function setSession(userId) {
  const s = { userId, expiresAt: Date.now() + 30*86400000 };
  localStorage.setItem(SESSION_KEY, JSON.stringify(s));
  state.session = s;
+ // QA item 8: demo accounts get the demo venue back (purged on first boot).
+ if (typeof mvEnsureDemoVenues === 'function') { try { mvEnsureDemoVenues(); } catch (e) {} }
  // E-4: kick off the idle clock fresh on every sign-in.
  if (typeof resetIdleTimer === 'function') resetIdleTimer();
 }
@@ -974,6 +978,28 @@ const store = loadStore();
 // Declared here (before the boot purge below + getAllVenues) to avoid a TDZ error.
 const MV_HIDE_SEED_VENUES = true;
 const MV_SEED_PARTNER_IDS = ['pv_cerveceria'];
+// QA item 8: the seeded demo venue (pv_cerveceria, owned by owner@cerveceria.test)
+// stays invisible to real members (client clean-slate 23/06), but the demo
+// accounts (MV_DEMO_EMAILS) see it, so the maria <-> owner two-account test works
+// end to end. It is never synced to Supabase: its owner's password is public in
+// this source, so it must not be able to write a production venue row.
+function mvIsDemoViewer() {
+ try { const u = currentUser(); return !!(u && MV_DEMO_EMAILS.has(u.email)); } catch (e) { return false; }
+}
+// The one-time clean-slate purge deletes the demo venue from each browser's
+// store, so restore it (from initialStore) whenever a demo account is active.
+function mvEnsureDemoVenues() {
+ if (!mvIsDemoViewer()) return false;
+ if (!Array.isArray(store.partnerVenues)) store.partnerVenues = [];
+ let added = false;
+ MV_SEED_PARTNER_IDS.forEach(id => {
+ if (store.partnerVenues.some(v => v.id === id)) return;
+ const seed = (initialStore.partnerVenues || []).find(v => v.id === id);
+ if (seed) { store.partnerVenues.push(JSON.parse(JSON.stringify(seed))); added = true; }
+ });
+ if (added) persistStore();
+ return added;
+}
 // Defensive: ensure new fields exist on stores loaded from earlier versions.
 if (!store.partnerVenues) store.partnerVenues = JSON.parse(JSON.stringify(initialStore.partnerVenues));
 // Hostile-audit hardening: these collections are accessed unguarded as
@@ -1242,7 +1268,7 @@ function getAllVenues() {
  // Discover/Map; they resolve through findVenueBySlug only (for saved
  // venues + direct links).
  const partnerLive = (store.partnerVenues || [])
- .filter(pv => pv.status === 'LIVE' && !(MV_HIDE_SEED_VENUES && MV_SEED_PARTNER_IDS.includes(pv.id)))
+ .filter(pv => pv.status === 'LIVE' && !(MV_HIDE_SEED_VENUES && MV_SEED_PARTNER_IDS.includes(pv.id) && !mvIsDemoViewer()))
  .map(toMemberShape);
  const overrides = store.seedOverrides || {};
  // 2026-05-28 (Patricia): seed venues admin-marked with _hidden:true are
@@ -12554,6 +12580,8 @@ if (typeof fetchVenuesFromSupabaseAndMerge === 'function') {
 setTimeout(function(){
  if (state && state.session) syncMemberRedemptions(); else flushRedemptionOutbox();
 }, 80);
+// QA item 8: a demo session restored on boot needs the demo venue back too.
+try { if (mvEnsureDemoVenues()) render(); } catch (e) {}
 </script>
 </body>
 </html>
